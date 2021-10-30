@@ -949,7 +949,7 @@ class CirqBoard:
             if len(path_qubits) == 0 and len(path_qubits2) == 0:
                 m.move_type = enums.MoveType.SPLIT_JUMP
             elif len(path_qubits) == 0:
-                self.add_entangled(squbit, tqubit, tqubit2)
+                self.add_entangled(squbit, tqubit, tqubit2, *path_qubits2)
                 # (0, 1): No qubit in one arm, one qubit in the other. 0 ancilla needed.
                 if len(path_qubits2) == 1:
                     self.circuit.append(
@@ -966,7 +966,7 @@ class CirqBoard:
                     self._clear_path_ancilla(path_qubits2, path2)
                 return 1
             elif len(path_qubits2) == 0:
-                self.add_entangled(squbit, tqubit, tqubit2)
+                self.add_entangled(squbit, tqubit, tqubit2, *path_qubits)
                 # (1, 0): No qubit in one arm, one qubit in the other. 0 ancilla needed.
                 if len(path_qubits) == 1:
                     self.circuit.append(
@@ -981,7 +981,7 @@ class CirqBoard:
                     self._clear_path_ancilla(path_qubits, path1)
                 return 1
             elif len(path_qubits) == 1:
-                self.add_entangled(squbit, tqubit, tqubit2)
+                self.add_entangled(squbit, tqubit, tqubit2, *path_qubits, *path_qubits2)
                 # (1, 1): One qubit in one arm, one qubit in the other.
                 if len(path_qubits2) == 1:
                     # If both arms share the same qubit in path. 0 ancilla needed.
@@ -1019,7 +1019,7 @@ class CirqBoard:
                 return 1
             # (2+, 1): one qubit in one arm, multiple qubits in the other. 2 ancillas needed.
             elif len(path_qubits2) == 1:
-                self.add_entangled(squbit, tqubit, tqubit2)
+                self.add_entangled(squbit, tqubit, tqubit2, *path_qubits, *path_qubits2)
                 path1 = self._create_path_ancilla(path_qubits)
                 ancilla = self.new_ancilla()
                 self.circuit.append(cirq.X(path_qubits2[0]))
@@ -1033,7 +1033,7 @@ class CirqBoard:
                 return 1
             # (2+, 2+): multiple qubits in both arms. 3 ancillas needed.
             else:
-                self.add_entangled(squbit, tqubit, tqubit2)
+                self.add_entangled(squbit, tqubit, tqubit2, *path_qubits, *path_qubits2)
                 path1 = self._create_path_ancilla(path_qubits)
                 path2 = self._create_path_ancilla(path_qubits2)
                 ancilla = self.new_ancilla()
@@ -1060,7 +1060,7 @@ class CirqBoard:
             if len(path_qubits) == 0 and len(path_qubits2) == 0:
                 m.move_type = enums.MoveType.MERGE_JUMP
             elif len(path_qubits) == 0:
-                self.add_entangled(squbit, squbit2, tqubit)
+                self.add_entangled(squbit, squbit2, tqubit, *path_qubits2)
                 # (0, 1): No qubit in one arm, one qubit in the other. 0 ancilla needed.
                 if len(path_qubits2) == 1:
                     self.circuit.append(
@@ -1077,7 +1077,7 @@ class CirqBoard:
                     self._clear_path_ancilla(path_qubits2, path2)
                 return 1
             elif len(path_qubits2) == 0:
-                self.add_entangled(squbit, squbit2, tqubit)
+                self.add_entangled(squbit, squbit2, tqubit, *path_qubits)
                 # (1, 0): No qubit in one arm, one qubit in the other. 0 ancilla needed.
                 if len(path_qubits) == 1:
                     self.circuit.append(
@@ -1092,7 +1092,7 @@ class CirqBoard:
                     self._clear_path_ancilla(path_qubits, path1)
                 return 1
             elif len(path_qubits) == 1:
-                self.add_entangled(squbit, squbit2, tqubit)
+                self.add_entangled(squbit, squbit2, tqubit, *path_qubits, *path_qubits2)
                 # (1, 1): One qubit in one arm, one qubit in the other.
                 if len(path_qubits2) == 1:
                     # If both arms share the same qubit in path. 0 ancilla needed.
@@ -1130,7 +1130,7 @@ class CirqBoard:
                 return 1
             # (2+, 1): one qubit in one arm, multiple qubits in the other. 2 ancillas needed.
             elif len(path_qubits2) == 1:
-                self.add_entangled(squbit, squbit2, tqubit)
+                self.add_entangled(squbit, squbit2, tqubit, *path_qubits, *path_qubits2)
                 path1 = self._create_path_ancilla(path_qubits)
                 ancilla = self.new_ancilla()
                 self.circuit.append(cirq.X(path_qubits2[0]))
@@ -1144,7 +1144,7 @@ class CirqBoard:
                 return 1
             # (2+, 2+): multiple qubits in both arms. 3 ancillas needed.
             else:
-                self.add_entangled(squbit, squbit2, tqubit)
+                self.add_entangled(squbit, squbit2, tqubit, *path_qubits, *path_qubits2)
                 path1 = self._create_path_ancilla(path_qubits)
                 path2 = self._create_path_ancilla(path_qubits2)
                 ancilla = self.new_ancilla()
@@ -1168,13 +1168,6 @@ class CirqBoard:
             m.move_type == enums.MoveType.SLIDE
             or m.move_type == enums.MoveType.PAWN_TWO_STEP
         ):
-            for p in path_qubits:
-                if p not in self.entangled_squares and nth_bit_of(
-                    qubit_to_bit(p), self.state
-                ):
-                    # Classical piece in the way
-                    return 0
-
             # For excluded case, measure target
             if m.move_variant == enums.MoveVariant.EXCLUDED:
                 # Note that a measurement of 1 means that the move was
@@ -1194,7 +1187,7 @@ class CirqBoard:
                         path_qubits[0], m.measurement, invert=True
                     )
                 else:
-                    self.add_entangled(squbit, tqubit)
+                    self.add_entangled(squbit, tqubit, *path_qubits)
                     capture_ancilla = self.new_ancilla()
                     self.circuit.append(
                         qm.controlled_operation(
@@ -1254,7 +1247,9 @@ class CirqBoard:
         ):
             if (
                 squbit not in self.entangled_squares
+                and nth_bit_of(sbit, self.state)
                 and tqubit not in self.entangled_squares
+                and not nth_bit_of(tbit, self.state)
             ):
                 # Classical version
                 self.state = set_nth_bit(sbit, self.state, False)
@@ -1276,9 +1271,10 @@ class CirqBoard:
                 if is_there:
                     return 0
 
-            # Only convert source qubit to ancilla if target
-            # is empty
-            unhook = tqubit not in self.entangled_squares
+            # Only convert source qubit to ancilla if target is empty
+            unhook = tqubit not in self.entangled_squares and not nth_bit_of(
+                tbit, self.state
+            )
             self.add_entangled(squbit, tqubit)
 
             # Execute jump
