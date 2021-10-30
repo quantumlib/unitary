@@ -136,6 +136,20 @@ def test_classical_jump_move(board):
     assert_samples_in(b, [u.squares_to_bitboard(["b1", "c1"])])
 
 
+def test_jump_to_full_square():
+    """Tests a jump to a classically-occupied square.
+
+    This is normally illegal but this kind of situation could happen in the presence
+    of noisy occupancy data.
+    """
+    b = simulator(u.squares_to_bitboard(["d4", "f5"]))
+    m = move.Move(
+        "d4", "f5", move_type=enums.MoveType.JUMP, move_variant=enums.MoveVariant.BASIC
+    )
+    assert b.do_move(m)
+    assert_samples_in(b, [u.squares_to_bitboard(["d4", "f5"])])
+
+
 def test_path_qubits():
     """Source and target should be in the same line, otherwise ValueError should be returned."""
     b = qb.CirqBoard(u.squares_to_bitboard(["a1", "b3", "c4", "d5", "e6", "f7"]))
@@ -506,6 +520,20 @@ def test_superposition_slide_move2():
         assert_prob_about(board_probs, possibility, 0.25)
 
 
+def test_slide_classically_blocked():
+    """Tests a slide through a classically-occupied square.
+
+    This is normally illegal but this kind of situation could happen in the presence
+    of noisy occupancy data.
+    """
+    b = simulator(u.squares_to_bitboard(["a5", "e5"]))
+    m = move.Move(
+        "a5", "h5", move_type=enums.MoveType.SLIDE, move_variant=enums.MoveVariant.BASIC
+    )
+    assert b.do_move(m)
+    assert_samples_in(b, [u.squares_to_bitboard(["a5", "e5"])])
+
+
 def test_slide_with_two_path_qubits_coherence():
     """Tests that a path ancilla does not mess up split/merge coherence.
 
@@ -540,6 +568,24 @@ def test_split_slide_merge_slide_coherence():
         "c5e5^d3:MERGE_JUMP:BASIC",
     )
     assert_samples_in(b, [u.squares_to_bitboard(["b4", "d3"])])
+
+
+def test_split_slide_classically_blocked():
+    """Tests split slide through a classically-occupied square.
+
+    This is normally illegal but this kind of situation could happen in the presence
+    of noisy occupancy data.
+    """
+    b = simulator(u.squares_to_bitboard(["d6", "b4"]))
+    m = move.Move(
+        "d6",
+        "a3",
+        target2="c7",
+        move_type=enums.MoveType.SPLIT_SLIDE,
+        move_variant=enums.MoveVariant.BASIC,
+    )
+    assert b.do_move(m)
+    assert_samples_in(b, [u.squares_to_bitboard(["c7", "b4"])])
 
 
 def test_split_slide_zero_one():
