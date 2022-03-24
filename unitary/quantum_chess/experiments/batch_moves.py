@@ -55,14 +55,7 @@ def main_loop(args):
     if args.processor_name:
         processor_name = args.processor_name
     else:
-        # Execute on a quantum processor if it is available.
-        available_processors = utils.get_available_processors(
-            utils.QUANTUM_PROCESSORS.keys()
-        )
-        if available_processors:
-            processor_name = available_processors[0]
-        else:
-            processor_name = "Syc54-noiseless"
+        processor_name = "Syc54-noiseless"
     print(f"Using processor {processor_name}")
     board = create_board(processor_name=processor_name, noise_mitigation=0.1)
     b = ab.AsciiBoard(board=board)
