@@ -29,13 +29,13 @@ def _parse_requirements(path: pathlib.Path):
 
 
 install_requires = _parse_requirements(pathlib.Path('requirements.txt'))
-extras_require_dir = [
-    'quantum_chess',
-]
-extras_require = {
-    r: _parse_requirements(pathlib.Path(f'recirq/{r}/extra-requirements.txt'))
-    for r in extras_require_dir
-}
+#extras_require_dir = [
+#    'quantum_chess',
+#]
+#extras_require = {
+#    r: _parse_requirements(pathlib.Path(f'recirq/{r}/extra-requirements.txt'))
+#    for r in extras_require_dir
+#}
 
 # TODO(gh-231): remove and require users to install via extras_require.
 install_requires = functools.reduce(operator.add, extras_require.values(), install_requires)
@@ -47,7 +47,7 @@ setup(name='recirq',
       author_email='cirq@googlegroups.com',
       python_requires='>=3.6.0',
       install_requires=install_requires,
-      extras_require=extras_require,
+#      extras_require=extras_require,
       license='Apache 2',
       description="",
       long_description=open('README.md', encoding='utf-8').read(),
