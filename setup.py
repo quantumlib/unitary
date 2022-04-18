@@ -19,7 +19,7 @@ import operator
 from setuptools import find_packages, setup
 
 __version__ = ''
-exec(open('recirq/_version.py').read())
+exec(open('unitary/_version.py').read())
 assert __version__, 'Version string cannot be empty'
 
 
@@ -29,12 +29,12 @@ def _parse_requirements(path: pathlib.Path):
 
 
 install_requires = _parse_requirements(pathlib.Path('requirements.txt'))
-extras_require = [
-    'otoc', 'qaoa', 'optimize', 'hfvqe', 'fermi_hubbard', 'qml_lfe'
+extras_require_dir = [
+    'quantum_chess',
 ]
 extras_require = {
     r: _parse_requirements(pathlib.Path(f'recirq/{r}/extra-requirements.txt'))
-    for r in extras_require
+    for r in extras_require_dir
 }
 
 # TODO(gh-231): remove and require users to install via extras_require.
@@ -42,7 +42,7 @@ install_requires = functools.reduce(operator.add, extras_require.values(), insta
 
 setup(name='recirq',
       version=__version__,
-      url='http://github.com/quantumlib/recirq',
+      url='http://github.com/quantumlib/unitary',
       author='Quantum AI team and collaborators',
       author_email='cirq@googlegroups.com',
       python_requires='>=3.6.0',
@@ -52,10 +52,6 @@ setup(name='recirq',
       description="",
       long_description=open('README.md', encoding='utf-8').read(),
       packages=find_packages(),
-      package_data={'recirq': [
-          # https://github.com/quantumlib/ReCirq/issues/101
-          'hfvqe/molecular_data/hydrogen_chains/*/*/*',
-          # Needed for ftbbl docs
-          'otoc/loschmidt/tilted_square_lattice/*',
+      package_data={'unitary': [
       ]},
       )

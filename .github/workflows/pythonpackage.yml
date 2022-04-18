@@ -15,9 +15,9 @@
 name: Python package
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   pytest:
@@ -27,7 +27,6 @@ jobs:
       matrix:
         cirq-version:
           - 'current'
-          - 'previous'
           - 'next'
       fail-fast: false
     steps:
