@@ -2,34 +2,6 @@ toc:
 - title: "Research using Cirq"
   path: /cirq/experiments
 
-- heading: "Guide"
-- title: "Data collection idioms"
-  path: /cirq/experiments/guide/data_collection_idioms
-- title: "Best practices"
-  path: /cirq/experiments/guide/best_practices
-- title: "Data collection"
-  path: /cirq/experiments/guide/data_collection
-- title: "Data analysis"
-  path: /cirq/experiments/guide/data_analysis
-
-- heading: "QAOA"
-- title: "Overview"
-  path: /cirq/experiments/qaoa
-- title: "Example problems"
-  path: /cirq/experiments/qaoa/example_problems
-- title: "Tasks"
-  path: /cirq/experiments/qaoa/tasks
-- title: "Precomputed analysis"
-  path: /cirq/experiments/qaoa/precomputed_analysis
-- title: "Landscape analysis"
-  path: /cirq/experiments/qaoa/landscape_analysis
-- title: "Optimization analysis"
-  path: /cirq/experiments/qaoa/optimization_analysis
-- title: "Hardware grid circuits"
-  path: /cirq/experiments/qaoa/hardware_grid_circuits
-- title: "Routing with tket"
-  path: /cirq/experiments/qaoa/routing_with_tket
-
 - heading: "Quantum Chess"
 - title: "Overview"
   path: /cirq/experiments/quantum_chess
@@ -39,32 +11,3 @@ toc:
   path: /cirq/experiments/quantum_chess/quantum_chess_rest_api
 - title: "Quantum Chess client"
   path: /cirq/experiments/quantum_chess/quantum_chess_client
-
-- heading: "Hartree-Fock VQE"
-- title: "Overview"
-  path: /cirq/experiments/hfvqe
-- title: "Quickstart"
-  path: /cirq/experiments/hfvqe/quickstart
-- title: "Molecular data"
-  path: /cirq/experiments/hfvqe/molecular_data
-
-- heading: "Fermi-Hubbard"
-- title: "Overview"
-  path: /cirq/experiments/fermi_hubbard
-- title: "Experiment example"
-  path: /cirq/experiments/fermi_hubbard/experiment_example
-- title: "Spin-charge separation results"
-  path: /cirq/experiments/fermi_hubbard/publication_results
-
-- heading: "Quantum scrambling"
-- title: "Overview"
-  path: /cirq/experiments/otoc
-- title: "Experiment example"
-  path: /cirq/experiments/otoc/otoc_example
-
-
-- heading: "Toric Code"
-- title: "Overview"
-  path: /cirq/experiments/toric_code
-- title: "Ground State"
-  path: /cirq/experiments/toric_code/toric_code_ground_state
