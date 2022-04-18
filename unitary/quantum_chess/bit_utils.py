@@ -18,7 +18,7 @@ from typing import List
 
 import cirq
 
-import recirq.quantum_chess.move as move
+import unitary.quantum_chess.move as move
 
 
 def nth_bit_of(n: int, bit_board: int) -> bool:

@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from recirq.quantum_chess import constants
-from recirq.quantum_chess.move import Move
-import recirq.quantum_chess.enums as enums
+from unitary.quantum_chess import constants
+from unitary.quantum_chess.move import Move
+import unitary.quantum_chess.enums as enums
 
 
 def test_equality():

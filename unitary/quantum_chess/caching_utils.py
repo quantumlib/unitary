@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Tuple
-import recirq.quantum_chess.enums as enums
-import recirq.quantum_chess.move as move
+import unitary.quantum_chess.enums as enums
+import unitary.quantum_chess.move as move
 
 
 @dataclass(frozen=True, eq=True)

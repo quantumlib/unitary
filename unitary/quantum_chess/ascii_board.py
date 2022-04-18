@@ -1,11 +1,11 @@
 import math
 from typing import Optional, Sequence
 
-import recirq.quantum_chess.bit_utils as bu
-import recirq.quantum_chess.constants as c
-import recirq.quantum_chess.enums as enums
-import recirq.quantum_chess.quantum_board as qb
-from recirq.quantum_chess.move import to_rank, to_square, x_of, y_of, Move
+import unitary.quantum_chess.bit_utils as bu
+import unitary.quantum_chess.constants as c
+import unitary.quantum_chess.enums as enums
+import unitary.quantum_chess.quantum_board as qb
+from unitary.quantum_chess.move import to_rank, to_square, x_of, y_of, Move
 
 
 class AsciiBoard:

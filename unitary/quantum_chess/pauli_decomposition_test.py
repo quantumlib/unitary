@@ -16,7 +16,7 @@ import cirq
 import numpy as np
 import re
 
-from recirq.quantum_chess.pauli_decomposition import pauli_decomposition
+from unitary.quantum_chess.pauli_decomposition import pauli_decomposition
 
 
 def test_pauli_decomposition_wrong_inputs():

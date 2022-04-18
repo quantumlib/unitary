@@ -18,20 +18,20 @@ import cirq
 import numpy as np
 import pytest
 
-import recirq.engine_utils as utils
-import recirq.quantum_chess.bit_utils as u
-import recirq.quantum_chess.enums as enums
-import recirq.quantum_chess.move as move
-import recirq.quantum_chess.quantum_board as qb
-from recirq.quantum_chess.test_utils import (
+import unitary.engine_utils as utils
+import unitary.quantum_chess.bit_utils as u
+import unitary.quantum_chess.enums as enums
+import unitary.quantum_chess.move as move
+import unitary.quantum_chess.quantum_board as qb
+from unitary.quantum_chess.test_utils import (
     assert_sample_distribution,
     assert_samples_in,
     assert_this_or_that,
     assert_prob_about,
     assert_fifty_fifty,
 )
-from recirq.quantum_chess.bit_utils import bit_to_qubit, square_to_bit, nth_bit_of
-from recirq.quantum_chess.caching_utils import CacheKey
+from unitary.quantum_chess.bit_utils import bit_to_qubit, square_to_bit, nth_bit_of
+from unitary.quantum_chess.caching_utils import CacheKey
 
 # The number of samples needed to avoid caching previous repetitions.
 # Choosing this to be above the sample size of is_classical(), which is 1000, will avoid caching.

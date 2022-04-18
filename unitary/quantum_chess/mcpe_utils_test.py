@@ -2,7 +2,7 @@ import pytest
 import cirq
 import numpy as np
 
-import recirq.quantum_chess.mcpe_utils as mcpe
+import unitary.quantum_chess.mcpe_utils as mcpe
 
 
 def test_manhattan_distance():

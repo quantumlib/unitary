@@ -14,7 +14,7 @@
 import numpy as np
 import cirq
 
-import recirq.quantum_chess.quantum_moves as qm
+import unitary.quantum_chess.quantum_moves as qm
 
 
 def test_merge():

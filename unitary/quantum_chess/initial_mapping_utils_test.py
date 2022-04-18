@@ -17,7 +17,7 @@ from collections import deque
 import cirq
 import cirq_google as cg
 
-import recirq.quantum_chess.initial_mapping_utils as imu
+import unitary.quantum_chess.initial_mapping_utils as imu
 
 a0 = cirq.NamedQubit("a0")
 a1 = cirq.NamedQubit("a1")

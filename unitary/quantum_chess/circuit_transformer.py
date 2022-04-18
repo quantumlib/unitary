@@ -17,9 +17,9 @@ from typing import Dict, Iterable, List, Optional, Set
 import cirq
 import cirq_google as cg
 
-import recirq.quantum_chess.controlled_iswap as controlled_iswap
-import recirq.quantum_chess.initial_mapping_utils as imu
-import recirq.quantum_chess.swap_updater as su
+import unitary.quantum_chess.controlled_iswap as controlled_iswap
+import unitary.quantum_chess.initial_mapping_utils as imu
+import unitary.quantum_chess.swap_updater as su
 
 ADJACENCY = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 

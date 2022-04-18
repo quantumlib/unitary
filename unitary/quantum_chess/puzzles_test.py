@@ -13,9 +13,9 @@
 # limitations under the License.
 import pytest
 
-import recirq.quantum_chess.bit_utils as u
-import recirq.quantum_chess.quantum_board_test as quantum_board_test
-import recirq.quantum_chess.test_utils as test_utils
+import unitary.quantum_chess.bit_utils as u
+import unitary.quantum_chess.quantum_board_test as quantum_board_test
+import unitary.quantum_chess.test_utils as test_utils
 
 ALL_CIRQ_BOARDS = quantum_board_test.ALL_CIRQ_BOARDS
 BIG_CIRQ_BOARDS = quantum_board_test.BIG_CIRQ_BOARDS

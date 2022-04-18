@@ -18,7 +18,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import cirq
 import pandas
 
-from recirq.quantum_chess.bit_utils import (
+from unitary.quantum_chess.bit_utils import (
     bit_to_qubit,
     nth_bit_of,
     num_ones,
@@ -28,15 +28,15 @@ from recirq.quantum_chess.bit_utils import (
     xy_to_bit,
     bit_ones,
 )
-from recirq.quantum_chess.caching_utils import (
+from unitary.quantum_chess.caching_utils import (
     CacheKey,
     ProbabilityHistory,
     cache_key_from_move,
 )
-import recirq.quantum_chess.circuit_transformer as ct
-import recirq.quantum_chess.enums as enums
-import recirq.quantum_chess.move as move
-import recirq.quantum_chess.quantum_moves as qm
+import unitary.quantum_chess.circuit_transformer as ct
+import unitary.quantum_chess.enums as enums
+import unitary.quantum_chess.move as move
+import unitary.quantum_chess.quantum_moves as qm
 
 # This is a constant used to check if a board is in a classical state. It indicates that every
 # space is represented by a 1. The XOR of the empty squares and full squares bitboards will yield

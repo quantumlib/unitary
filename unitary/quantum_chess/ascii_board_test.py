@@ -1,7 +1,7 @@
-import recirq.quantum_chess.ascii_board as ab
-import recirq.quantum_chess.constants as c
-import recirq.quantum_chess.move as m
-from recirq.quantum_chess.enums import MoveType, MoveVariant
+import unitary.quantum_chess.ascii_board as ab
+import unitary.quantum_chess.constants as c
+import unitary.quantum_chess.move as m
+from unitary.quantum_chess.enums import MoveType, MoveVariant
 
 
 def test_squares():

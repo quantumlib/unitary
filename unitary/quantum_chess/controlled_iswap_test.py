@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import cirq
-import recirq.quantum_chess.controlled_iswap as controlled_iswap
+import unitary.quantum_chess.controlled_iswap as controlled_iswap
 
 
 def test_controlled_iswap():

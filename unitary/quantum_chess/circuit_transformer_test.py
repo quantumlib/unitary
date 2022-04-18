@@ -15,8 +15,8 @@ import pytest
 import cirq
 import cirq_google as cg
 
-import recirq.quantum_chess.circuit_transformer as ct
-import recirq.quantum_chess.quantum_moves as qm
+import unitary.quantum_chess.circuit_transformer as ct
+import unitary.quantum_chess.quantum_moves as qm
 
 a1 = cirq.NamedQubit("a1")
 a2 = cirq.NamedQubit("a2")

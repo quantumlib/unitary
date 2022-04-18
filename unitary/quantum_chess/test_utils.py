@@ -14,7 +14,7 @@
 from collections import defaultdict
 from scipy.stats import chisquare
 
-import recirq.quantum_chess.bit_utils as u
+import unitary.quantum_chess.bit_utils as u
 
 
 def print_samples(samples):

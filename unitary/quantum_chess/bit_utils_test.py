@@ -13,7 +13,7 @@
 # limitations under the License.
 import cirq
 
-import recirq.quantum_chess.bit_utils as u
+import unitary.quantum_chess.bit_utils as u
 
 
 def test_nth_bit_of():

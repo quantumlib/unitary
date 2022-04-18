@@ -16,7 +16,7 @@
 import cirq
 import cirq_google as cg
 
-import recirq.quantum_chess.readout_tester as readout_tester
+import unitary.quantum_chess.readout_tester as readout_tester
 
 
 def test_readout_tester():

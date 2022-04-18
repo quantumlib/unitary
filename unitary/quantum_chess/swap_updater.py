@@ -22,7 +22,7 @@ from typing import Callable, Dict, Generator, Iterable, List, Optional, Tuple
 
 import cirq
 
-import recirq.quantum_chess.mcpe_utils as mcpe
+import unitary.quantum_chess.mcpe_utils as mcpe
 from cirq_google.optimizers.convert_to_sqrt_iswap import swap_to_sqrt_iswap
 
 
