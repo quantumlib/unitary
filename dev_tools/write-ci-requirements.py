@@ -12,7 +12,7 @@ CIRQ_VERSIONS = {
     'current': '==0.14.0',
     'next': '>=0.15.0.dev',
 }
-"""Give names to relative Cirq versions so CI can have consistent names while versions 
+"""Give names to relative Cirq versions so CI can have consistent names while versions
 get incremented."""
 
 
@@ -74,19 +74,7 @@ def main(*, out_fn: str = 'ci-requirements.txt', relative_cirq_version: str = 'c
     core_reqs = _parse_requirements(REPO_DIR / 'requirements.txt')
     core_reqs = _set_cirq_version(core_reqs, relative_cirq_version)
 
-    #extras_require = [
-    #    'quantum_chess',
-    #]
-    #extras_require = {
-    #    r: _parse_requirements(pathlib.Path(REPO_DIR / f'recirq/{r}/extra-requirements.txt'))
-    #    for r in extras_require
-    #}
-
     lines = ['# Core requirements'] + core_reqs
-    #if all_extras:
-        #for name, reqs in extras_require.items():
-        #    lines += ['', f'# {name}']
-        #   lines += reqs
     lines += ['']
 
     out = '\n'.join(lines)

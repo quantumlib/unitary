@@ -38,5 +38,4 @@ from unitary.engine_utils import (
 
 from unitary.documentation_utils import (
     display_markdown_docstring,
-    fetch_guide_data_collection_data,
 )

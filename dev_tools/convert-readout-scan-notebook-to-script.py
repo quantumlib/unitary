@@ -59,7 +59,8 @@ def save_tasks_py(nb):
     tasks_py.cells = [cell for cell in tasks_py.cells
                       if not cell.source.startswith(shouldnt_start_with)
                       and not cell.source.startswith('#@title')
-                      and not any(l.strip().startswith('!') for l in cell.source.splitlines())]
+                      and not any(line.strip().startswith('!')
+                                  for line in cell.source.splitlines())]
 
     exporter = PythonExporter()
     exporter.raw_template = TEMPLATE

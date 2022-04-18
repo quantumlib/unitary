@@ -13,8 +13,6 @@
 # limitations under the License.
 
 import pathlib
-import functools
-import operator
 
 from setuptools import find_packages, setup
 
