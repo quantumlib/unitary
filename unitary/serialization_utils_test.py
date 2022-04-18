@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import recirq
+import unitary
 
 import abc
 import inspect
@@ -29,7 +29,7 @@ import cirq
 
 def test_bits_roundtrip():
     bitstring = np.asarray([0, 1, 0, 1, 1, 1, 1, 0, 0, 1])
-    b = recirq.BitArray(bitstring)
+    b = unitary.BitArray(bitstring)
 
     buffer = io.StringIO()
     cirq.to_json(b, buffer)
@@ -37,7 +37,7 @@ def test_bits_roundtrip():
     buffer.seek(0)
     text = buffer.read()
     assert text == """{
-  "cirq_type": "recirq.BitArray",
+  "cirq_type": "unitary.BitArray",
   "shape": [
     10
   ],
@@ -45,36 +45,36 @@ def test_bits_roundtrip():
 }"""
 
     buffer.seek(0)
-    b2 = recirq.read_json(buffer)
+    b2 = unitary.read_json(buffer)
     assert b == b2
 
 
 def test_bits_roundtrip_big():
     bits = np.random.choice([0, 1], size=(30_000, 53))
-    b = recirq.BitArray(bits)
+    b = unitary.BitArray(bits)
     buffer = io.StringIO()
     cirq.to_json(b, buffer)
     buffer.seek(0)
-    b2 = recirq.read_json(buffer)
+    b2 = unitary.read_json(buffer)
     assert b == b2
 
     bits = np.random.choice([0, 1], size=(3000, 11, 53))
-    b = recirq.BitArray(bits)
+    b = unitary.BitArray(bits)
     buffer = io.StringIO()
     cirq.to_json(b, buffer)
     buffer.seek(0)
-    b2 = recirq.read_json(buffer)
+    b2 = unitary.read_json(buffer)
     assert b == b2
 
 
 def test_bitstrings_roundtrip_big():
     bitstrings = np.random.choice([0, 1], size=(30_000, 53))
-    ba = recirq.BitArray(bitstrings)
+    ba = unitary.BitArray(bitstrings)
 
     buffer = io.StringIO()
     cirq.to_json(ba, buffer)
     buffer.seek(0)
-    ba2 = recirq.read_json(buffer)
+    ba2 = unitary.read_json(buffer)
     assert ba == ba2
 
 
@@ -83,20 +83,20 @@ def test_numpy_roundtrip(tmpdir):
     im = np.random.uniform(0, 1, 100)
     a = re + 1.j * im
     a = np.reshape(a, (10, 10))
-    ba = recirq.NumpyArray(a)
+    ba = unitary.NumpyArray(a)
 
     fn = f'{tmpdir}/hello.json'
     cirq.to_json(ba, fn)
-    ba2 = recirq.read_json(fn)
+    ba2 = unitary.read_json(fn)
 
     assert ba == ba2
 
 
 def test_str_and_repr():
     bits = np.array([0, 1, 0, 1])
-    assert str(recirq.BitArray(bits)) == 'recirq.BitArray([0 1 0 1])'
-    assert repr(recirq.BitArray(bits)) == 'recirq.BitArray(array([0, 1, 0, 1]))'
+    assert str(unitary.BitArray(bits)) == 'unitary.BitArray([0 1 0 1])'
+    assert repr(unitary.BitArray(bits)) == 'unitary.BitArray(array([0, 1, 0, 1]))'
 
     nums = np.array([1, 2, 3, 4])
-    assert str(recirq.NumpyArray(nums)) == 'recirq.NumpyArray([1 2 3 4])'
-    assert repr(recirq.NumpyArray(nums)) == 'recirq.NumpyArray(array([1, 2, 3, 4]))'
+    assert str(unitary.NumpyArray(nums)) == 'unitary.NumpyArray([1 2 3 4])'
+    assert repr(unitary.NumpyArray(nums)) == 'unitary.NumpyArray(array([1, 2, 3, 4]))'

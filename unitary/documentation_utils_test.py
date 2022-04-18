@@ -13,12 +13,12 @@
 # limitations under the License.
 import os
 
-import recirq
-from recirq.readout_scan.tasks import ReadoutScanTask
+import unitary
+from unitary.readout_scan.tasks import ReadoutScanTask
 
 
 def test_display_markdown_docstring():
-    md = recirq.display_markdown_docstring(ReadoutScanTask)
+    md = unitary.display_markdown_docstring(ReadoutScanTask)
     assert md.data == """### ReadoutScanTask
 Scan over Ry(theta) angles from -pi/2 to 3pi/2 tracing out a sinusoid
 which is primarily affected by readout error.
@@ -36,5 +36,5 @@ which is primarily affected by readout error.
 
 
 def test_fetch_guide_data_collection_data(tmpdir):
-    recirq.fetch_guide_data_collection_data(base_dir=tmpdir)
+    unitary.fetch_guide_data_collection_data(base_dir=tmpdir)
     assert os.path.exists(f'{tmpdir}/2020-02-tutorial')

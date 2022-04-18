@@ -19,8 +19,8 @@ import pytest
 
 import cirq
 import cirq_google
-import recirq
-from recirq.engine_utils import _get_program_id
+import unitary
+from unitary.engine_utils import _get_program_id
 
 
 def test_get_program_id():
@@ -68,7 +68,7 @@ def test_zeros_sampler_one_big_measure():
     circuit = cirq.Circuit(cirq.H.on_each(*qubits),
                            cirq.measure(*qubits, key='asdf'))
 
-    sampler = recirq.ZerosSampler()
+    sampler = unitary.ZerosSampler()
     result = sampler.run(circuit, repetitions=155)
     assert len(result.measurements) == 1
     bitstrings = result.measurements['asdf']
@@ -79,7 +79,7 @@ def test_zeros_sampler_many_measure():
     qubits = cirq.LineQubit.range(6)
     circuit = cirq.Circuit(cirq.H.on_each(*qubits),
                            cirq.measure_each(*qubits, key_func=str))
-    sampler = recirq.ZerosSampler()
+    sampler = unitary.ZerosSampler()
     result = sampler.run(circuit, repetitions=155)
     assert len(result.measurements) == 6
     for k, v in result.measurements.items():
@@ -87,24 +87,24 @@ def test_zeros_sampler_many_measure():
 
 
 def test_device_obj():
-    assert recirq.get_device_obj_by_name('Sycamore23') == cirq_google.Sycamore23
+    assert unitary.get_device_obj_by_name('Sycamore23') == cirq_google.Sycamore23
 
 
 def test_processor_id():
-    assert recirq.get_processor_id_by_device_name('Sycamore23') == 'rainbow'
-    assert recirq.get_processor_id_by_device_name('Syc23-simulator') is None
+    assert unitary.get_processor_id_by_device_name('Sycamore23') == 'rainbow'
+    assert unitary.get_processor_id_by_device_name('Syc23-simulator') is None
 
 
 def test_sampler_by_name():
     if 'GOOGLE_CLOUD_PROJECT' in os.environ:
-        assert isinstance(recirq.get_sampler_by_name('Sycamore23'),
-                          recirq.EngineSampler)
-    assert isinstance(recirq.get_sampler_by_name('Syc23-simulator'),
+        assert isinstance(unitary.get_sampler_by_name('Sycamore23'),
+                          unitary.EngineSampler)
+    assert isinstance(unitary.get_sampler_by_name('Syc23-simulator'),
                       cirq.DensityMatrixSimulator)
-    assert isinstance(recirq.get_sampler_by_name('Syc23-noiseless'),
+    assert isinstance(unitary.get_sampler_by_name('Syc23-noiseless'),
                       cirq.Simulator)
-    assert isinstance(recirq.get_sampler_by_name('Syc23-zeros'),
-                      recirq.ZerosSampler)
-    assert isinstance(recirq.get_sampler_by_name('Syc23-zeros',
+    assert isinstance(unitary.get_sampler_by_name('Syc23-zeros'),
+                      unitary.ZerosSampler)
+    assert isinstance(unitary.get_sampler_by_name('Syc23-zeros',
                                                  gateset='sqrt-iswap'),
-                      recirq.ZerosSampler)
+                      unitary.ZerosSampler)

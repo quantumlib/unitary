@@ -2,7 +2,7 @@
 Benchmarking tool for logical-to-hardware circuit transformations.
 
 To run this:
-  python recirq/quantum_chess/experiments/circuit_transform_benchmark.py \
+  python unitary/quantum_chess/experiments/circuit_transform_benchmark.py \
       file1.qasm [file2.qasm [...]]
 
 This script takes 1 or more positional arguments which are the paths to qasm
@@ -22,8 +22,8 @@ See 'circuits' in this directory, which contains the circuit files used for
 evaluation of https://ieeexplore.ieee.org/abstract/document/8976109.
 
 For example, to run the benchmark on all the circuits in that directory:
-  python recirq/quantum_chess/experiments/circuit_transform_benchmark.py \
-      recirq/quantum_chess/experiments/circuits/*
+  python unitary/quantum_chess/experiments/circuit_transform_benchmark.py \
+      unitary/quantum_chess/experiments/circuits/*
 NOTE however that the current dynamic look-ahead transformer implementation
 contains a bug and will never terminate on some of the circuits in that
 directory (https://github.com/quantumlib/ReCirq/issues/163).
@@ -35,7 +35,7 @@ import cProfile
 import pstats
 import sys
 
-import recirq.quantum_chess.circuit_transformer as ct
+import unitary.quantum_chess.circuit_transformer as ct
 from cirq.contrib.qasm_import import circuit_from_qasm
 from typing import List
 from timeit import default_timer as timer

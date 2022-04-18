@@ -64,9 +64,9 @@ class Registry:
         self._mapping = dict()
 
     def register(self, cirq_type: str, cls):
-        if not cirq_type.startswith('recirq.'):
-            raise ValueError("Please only use recirq.Registry for objects "
-                             "in the recirq namespace.")
+        if not cirq_type.startswith('unitary.'):
+            raise ValueError("Please only use unitary.Registry for objects "
+                             "in the unitary namespace.")
 
         self._mapping[cirq_type] = cls
 
@@ -93,7 +93,7 @@ class NumpyArray:
         np.save(buffer, self.a, allow_pickle=False)
         buffer.seek(0)
         d = {
-            'cirq_type': 'recirq.' + self.__class__.__name__,
+            'cirq_type': 'unitary.' + self.__class__.__name__,
             'npy': buffer.read().hex(),
         }
         buffer.close()
@@ -109,10 +109,10 @@ class NumpyArray:
         return cls(a)
 
     def __str__(self):
-        return f'recirq.NumpyArray({self.a})'
+        return f'unitary.NumpyArray({self.a})'
 
     def __repr__(self):
-        return f'recirq.NumpyArray({repr(self.a)})'
+        return f'unitary.NumpyArray({repr(self.a)})'
 
     def __eq__(self, other):
         return np.array_equal(self.a, other.a)
@@ -134,7 +134,7 @@ class BitArray:
         packed_bits = np.packbits(self.bits)
         assert packed_bits.dtype == np.uint8, packed_bits.dtype
         return {
-            'cirq_type': 'recirq.' + self.__class__.__name__,
+            'cirq_type': 'unitary.' + self.__class__.__name__,
             'shape': self.bits.shape,
             'packedbits': packed_bits.tobytes().hex(),
         }
@@ -149,10 +149,10 @@ class BitArray:
         return cls(bits)
 
     def __str__(self):
-        return f'recirq.BitArray({self.bits})'
+        return f'unitary.BitArray({self.bits})'
 
     def __repr__(self):
-        return f'recirq.BitArray({repr(self.bits)})'
+        return f'unitary.BitArray({repr(self.bits)})'
 
     def __eq__(self, other):
         return np.array_equal(self.bits, other.bits)
@@ -214,15 +214,15 @@ def json_serializable_dataclass(_cls: Optional[Type] = None,
     return wrap(_cls)
 
 
-def _recirq_class_resolver(cirq_type: str) -> Union[None, Type]:
-    from recirq import BitArray, NumpyArray
+def _unitary_class_resolver(cirq_type: str) -> Union[None, Type]:
+    from unitary import BitArray, NumpyArray
     return {
-        'recirq.BitArray': BitArray,
-        'recirq.NumpyArray': NumpyArray,
+        'unitary.BitArray': BitArray,
+        'unitary.NumpyArray': NumpyArray,
     }.get(cirq_type)
 
 
-DEFAULT_RESOLVERS = [_recirq_class_resolver, Registry.get] \
+DEFAULT_RESOLVERS = [_unitary_class_resolver, Registry.get] \
                     + protocols.DEFAULT_RESOLVERS
 
 
@@ -231,7 +231,7 @@ def read_json(file_or_fn=None, *, json_text=None, resolvers=None):
 
     This differs from cirq.read_json by its default argument for
     `resolvers`. Use this function if your JSON document contains
-    recirq objects.
+    unitary objects.
     """
     if resolvers is None:
         resolvers = DEFAULT_RESOLVERS

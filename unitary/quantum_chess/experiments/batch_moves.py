@@ -3,12 +3,12 @@ Runs a series of moves on a quantum chess board then displays the
 result.
 
 Run with:
-  python -m recirq.quantum_chess.experiments.batch_moves \
+  python -m unitary.quantum_chess.experiments.batch_moves \
       FILENAME --processor_name=PROCESSOR_NAME \
       --position=FEN
 
 FILENAME is a filename with moves in the move format described
-by recirq.quantum_chess.move (see also interactive_board for
+by unitary.quantum_chess.move (see also interactive_board for
 examples).
 
 PROCESSOR_NAME is a processor name from engine_utils.py. If empty, it will find
@@ -21,11 +21,11 @@ Default is the normal classical chess starting position.
 import argparse
 from typing import List
 
-import recirq.engine_utils as utils
-import recirq.quantum_chess.ascii_board as ab
-import recirq.quantum_chess.enums as enums
-import recirq.quantum_chess.move as m
-import recirq.quantum_chess.quantum_board as qb
+import unitary.engine_utils as utils
+import unitary.quantum_chess.ascii_board as ab
+import unitary.quantum_chess.enums as enums
+import unitary.quantum_chess.move as m
+import unitary.quantum_chess.quantum_board as qb
 
 
 def create_board(processor_name: str, *, noise_mitigation: float):

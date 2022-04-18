@@ -3,7 +3,7 @@ Interactive ascii-based quantum chess game.
 
 Run with:
 
-python python -m recirq.quantum_chess.experiments.interactive_board \
+python python -m unitary.quantum_chess.experiments.interactive_board \
     --position <FEN>
 
 The FEN argument denotes the starting position using FEN
@@ -39,8 +39,8 @@ The interactive board uses a simulator with an unconstrained device.
 import argparse
 import sys
 
-import recirq.quantum_chess.ascii_board as ab
-import recirq.quantum_chess.move as m
+import unitary.quantum_chess.ascii_board as ab
+import unitary.quantum_chess.move as m
 
 
 def main_loop(args):

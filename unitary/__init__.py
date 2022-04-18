@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from recirq import optimize
+from unitary import optimize
 
-from recirq.serialization_utils import (
+from unitary.serialization_utils import (
     exists,
     save,
     load,
@@ -29,7 +29,7 @@ from recirq.serialization_utils import (
     json_serializable_dataclass,
 )
 
-from recirq.engine_utils import (
+from unitary.engine_utils import (
     EngineSampler,
     ZerosSampler,
     get_device_obj_by_name,
@@ -38,7 +38,7 @@ from recirq.engine_utils import (
     execute_in_queue,
 )
 
-from recirq.documentation_utils import (
+from unitary.documentation_utils import (
     display_markdown_docstring,
     fetch_guide_data_collection_data,
 )
