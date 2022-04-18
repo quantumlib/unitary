@@ -17,7 +17,7 @@ import os
 
 import pytest
 
-from recirq.cirqflow.run_utils import get_unique_run_id
+from unitary.cirqflow.run_utils import get_unique_run_id
 
 
 def test_get_unique_run_id(tmpdir):
