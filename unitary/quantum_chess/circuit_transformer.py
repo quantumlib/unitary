@@ -24,6 +24,7 @@ import unitary.quantum_chess.swap_updater as su
 ADJACENCY = [(0, 1), (0, -1), (1, 0), (-1, 0)]
 SQRT_ISWAP_GATESET = cirq.SqrtIswapTargetGateset()
 
+
 class DeviceMappingError(Exception):
     """Raised when a circuit cannot be mapped onto a device.
 
@@ -436,4 +437,6 @@ def decompose_into_sqrt_iswap(
         deep=True,
         tags_to_ignore=context.tags_to_ignore,
     )
-    return cirq.optimize_for_target_gateset(converted_iswap_circuit, gateset=SQRT_ISWAP_GATESET)
+    return cirq.optimize_for_target_gateset(
+        converted_iswap_circuit, gateset=SQRT_ISWAP_GATESET
+    )
