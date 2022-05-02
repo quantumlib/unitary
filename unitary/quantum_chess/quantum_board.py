@@ -16,7 +16,6 @@ from collections import defaultdict
 from typing import Dict, List, Optional, Sequence, Tuple
 
 import cirq
-import pandas
 
 from unitary.quantum_chess.bit_utils import (
     bit_to_qubit,
@@ -98,7 +97,7 @@ class CirqBoard:
             enums.ErrorMitigation
         ] = enums.ErrorMitigation.Nothing,
         noise_mitigation: Optional[float] = 0.0,
-        transformer: Optional[ct.CircuitTransformer] = None,
+        transformer: Optional[cirq.TRANSFORMER] = None,
         reset_starting_states=False,
     ):
         self.device = device
@@ -230,29 +229,6 @@ class CirqBoard:
             sample_size = 100
         return sample_size
 
-    def _calculate_bitboards_from_measurements(self, data: pandas.DataFrame):
-        """Calculates bitboards given sample results and stores them in the DataFrame.
-
-        The bitboard masked with 0x00000000FFFFFFFF is stored in a new column 'bb_low'
-        and the bitboard masked with 0xFFFFFFFF00000000 in 'bb_high'. It must be split
-        in this way because the vectorized operations only work with double floats which
-        have 53 bits of precision.
-        """
-        # Construct expressions for vectorized evaluation of the board position.
-        # For example, if there are entangled pieces on a1 and e1 and a non-entangled
-        # piece on c1 then bitboard_exprs[0] is "a1 * 1.0 + e1 * 32.0 + 4.0"
-        bitboard_exprs = ["", ""]
-        classical_state = self.state
-        for qubit in self.entangled_squares:
-            if "anc" not in qubit.name:
-                bit = qubit_to_bit(qubit)
-                bitboard_exprs[bit // 32] += f"{qubit.name} * {1 << bit}.0 +"
-                classical_state &= ~(1 << bit)
-        bitboard_exprs[0] += str(classical_state & 0x00000000FFFFFFFF) + ".0"
-        bitboard_exprs[1] += str(classical_state & 0xFFFFFFFF00000000) + ".0"
-        # Store evaluated position in bb_low and bb_high columns
-        data.eval("bb_low = {}\nbb_high = {}".format(*bitboard_exprs), inplace=True)
-
     def sample_with_ancilla(
         self,
         num_samples: int,
@@ -293,9 +269,9 @@ class CirqBoard:
             # Translate circuit to grid qubits and sqrtISWAP gates
             if self.device is not None:
                 # Decompose 3-qubit operations
-                ct.SycamoreDecomposer().optimize_circuit(measure_circuit)
+                measure_circuit = ct.decompose_into_sqrt_iswap(measure_circuit)
                 # Create NamedQubit to GridQubit mapping and transform
-                measure_circuit = self.transformer.transform(measure_circuit)
+                measure_circuit = self.transformer(measure_circuit)
 
                 # For debug, ensure that the circuit correctly validates
                 try:
@@ -310,24 +286,34 @@ class CirqBoard:
             rtn = []
             noise_buffer = {}
             data = results.data
+            for rep in range(num_reps):
+                new_sample = self.state
+                new_ancilla = {}
 
-            # Discard any results that disagree with our pre-defined
-            # post-selection criteria
-            if self.post_selection:
-                data.query(
-                    "&".join(
-                        f"{qubit.name} == {val}"
-                        for qubit, val in self.post_selection.items()
-                    ),
-                    inplace=True,
-                )
-                post_count = num_reps - len(data)
+                # Go through the results and discard any results
+                # that disagree with our pre-defined post-selection criteria
+                post_selected = True
+                for qubit in self.post_selection.keys():
+                    key = qubit.name
+                    if key in data.columns:
+                        result = data.at[rep, key]
+                        if result != self.post_selection[qubit]:
+                            post_selected = False
+                            break
+                if not post_selected:
+                    post_count += 1
+                    continue
 
-            self._calculate_bitboards_from_measurements(data)
-            ancilla_dict = data.filter(like="anc").to_dict("index")
-
-            for rep in data.index:
-                new_sample = int(data.at[rep, "bb_low"]) | int(data.at[rep, "bb_high"])
+                # Translate qubit results into a 64-bit chess board
+                for qubit in qubits:
+                    key = qubit.name
+                    result = data.at[rep, key]
+                    # Ancilla bits should not be part of the chess board
+                    if "anc" not in key:
+                        bit = qubit_to_bit(qubit)
+                        new_sample = set_nth_bit(bit, new_sample, result)
+                    else:
+                        new_ancilla[key] = result
 
                 # Perform Error Mitigation
                 if self.error_mitigation != enums.ErrorMitigation.Nothing:
@@ -356,7 +342,7 @@ class CirqBoard:
                 # This sample has passed noise and error mitigation
                 # Record it as a proper sample
                 rtn.append(new_sample)
-                ancilla.append(ancilla_dict[rep])
+                ancilla.append(new_ancilla)
                 if len(rtn) >= num_samples:
                     break
         else:
