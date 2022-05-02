@@ -272,7 +272,6 @@ class ConnectivityHeuristicCircuitTransformer:
                 if len(op.qubits) == 1:
                     sq.add(op.qubits[0])
                 else:
-                    print(op)
                     q1, q2 = op.qubits
                     if q1 not in g:
                         g[q1] = []
@@ -430,13 +429,14 @@ def decompose_into_sqrt_iswap(
     and control-X gates with multiple controls (TOFFOLI gates).:w
     """
     if context is None:
-        context = cirq.TransformerContext()
+        context = cirq.TransformerContext(deep=True)
     converted_iswap_circuit = cirq.map_operations_and_unroll(
         circuit.unfreeze(False),
         transform_controlled_iswap,
-        deep=True,
+        deep=context.deep,
         tags_to_ignore=context.tags_to_ignore,
     )
     return cirq.optimize_for_target_gateset(
-        converted_iswap_circuit, gateset=SQRT_ISWAP_GATESET
+        converted_iswap_circuit, gateset=SQRT_ISWAP_GATESET,
+        context=context
     )
