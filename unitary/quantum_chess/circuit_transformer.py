@@ -437,6 +437,5 @@ def decompose_into_sqrt_iswap(
         tags_to_ignore=context.tags_to_ignore,
     )
     return cirq.optimize_for_target_gateset(
-        converted_iswap_circuit, gateset=SQRT_ISWAP_GATESET,
-        context=context
+        converted_iswap_circuit, gateset=SQRT_ISWAP_GATESET, context=context
     )
