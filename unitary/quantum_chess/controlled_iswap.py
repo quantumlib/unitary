@@ -16,7 +16,7 @@ from typing import Sequence, Union, Optional
 import cirq
 import cirq_google as cg
 import numpy as np
-from cirq.optimizers.two_qubit_to_fsim import (
+from cirq.transformers.analytical_decompositions.two_qubit_to_fsim import (
     _decompose_xx_yy_into_two_fsims_ignoring_single_qubit_ops,
     _fix_single_qubit_gates_around_kak_interaction,
 )
@@ -116,9 +116,9 @@ def controlled_iswap(
     )
 
     converted_ops = cirq.Circuit(convert_op(op) for op in circuit.all_operations())
-    cirq.MergeSingleQubitGates().optimize_circuit(converted_ops)
-    cirq.DropNegligible().optimize_circuit(converted_ops)
-    return cirq.Circuit(simplify_op(op) for op in converted_ops.all_operations())
+    merged_ops = cirq.merge_k_qubit_unitaries(converted_ops, k=1)
+    cleaned_ops = cirq.drop_negligible_operations(merged_ops)
+    return cirq.Circuit(simplify_op(op) for op in cleaned_ops.all_operations())
 
 
 def controlled_sqrt_iswap(a: cirq.Qid, b: cirq.Qid, c: cirq.Qid):
