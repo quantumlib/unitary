@@ -1,11 +1,7 @@
 Unitary
 ======
 
-The Unitary library's API intends to provide common operations that enable a programmer to add behavior to their game mechanic, or game objects, based on the core principles of Quantum Information Science (QIS):
-Superposition
-Entanglement
-Interference
-Measurement
+The Unitary library's API intends to provide common operations that enable a programmer to add behavior to their game mechanic, or game objects, based on the core principles of Quantum Information Science (QIS): Superposition, Entanglement, Interference, and Measurement.
 
 While the library can be used for other purposes, the Unitary library is designed for game developers. The library is an extension of Google's Cirq library, which enables people to specify circuits for quantum computing.
 
