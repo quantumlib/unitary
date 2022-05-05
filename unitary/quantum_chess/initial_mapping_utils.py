@@ -28,7 +28,6 @@ def build_physical_qubits_graph(
     Args:
       device: The device from which to build a physical qubits graph.
     """
-    g = defaultdict(list)
     graph = device.metadata.nx_graph
     return {q: list(graph.neighbors(q)) for q in graph}
 
