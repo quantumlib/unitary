@@ -29,8 +29,9 @@ def build_physical_qubits_graph(
       device: The device from which to build a physical qubits graph.
     """
     g = defaultdict(list)
-    for q in device.qubit_set():
-        g[q] = [n for n in q.neighbors() if n in device.qubit_set()]
+    qubits = device.metadata.qubit_set
+    for q in qubits:
+        g[q] = [n for n in q.neighbors() if n in qubits]
     return g
 
 
