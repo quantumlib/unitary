@@ -28,11 +28,8 @@ def build_physical_qubits_graph(
     Args:
       device: The device from which to build a physical qubits graph.
     """
-    g = defaultdict(list)
-    qubits = device.metadata.qubit_set
-    for q in qubits:
-        g[q] = [n for n in q.neighbors() if n in qubits]
-    return g
+    graph = device.metadata.nx_graph
+    return {q: list(graph.neighbors(q)) for q in graph}
 
 
 def get_least_connected_qubit(
