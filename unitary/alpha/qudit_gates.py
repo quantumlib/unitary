@@ -32,3 +32,59 @@ class QuditPlusGate(cirq.Gate):
 
     def _circuit_diagram_info_(self, args):
         return f"[+{self.addend}]"
+
+
+class QuditSwapPowGate(cirq.Gate):
+    def __init__(self, dimension: int, exponent: int = 1):
+        self.dimension = dimension
+        self.exponent = exponent
+
+    def _qid_shape_(self):
+        return (self.dimension, self.dimension)
+
+    def _unitary_(self):
+        size = self.dimension * self.dimension
+        arr = np.zeros((size, size), dtype=np.complex64)
+        for x in range(self.dimension):
+            for y in range(self.dimension):
+                g = np.exp(1j * np.pi * self.exponent / 2)
+                coeff = -1j * g * np.sin(np.pi * self.exponent / 2)
+                diag = g * np.cos(np.pi * self.exponent / 2)
+                arr[x * self.dimension + y, y * self.dimension + x] = coeff
+                arr[x * self.dimension + y, x * self.dimension + y] = diag
+        return arr
+
+    def _circuit_diagram_info_(self, args):
+        if not args.use_unicode_characters:
+            return protocols.CircuitDiagramInfo(
+                wire_symbols=("Swap", "Swap"), exponent=self._diagram_exponent(args)
+            )
+        return protocols.CircuitDiagramInfo(
+            wire_symbols=("×", "×"), exponent=self._diagram_exponent(args)
+        )
+
+
+class QuditISwapPowGate(cirq.Gate):
+    def __init__(self, dimension: int, exponent: int = 1):
+        self.dimension = dimension
+        self.exponent = exponent
+
+    def _qid_shape_(self):
+        return (self.dimension, self.dimension)
+
+    def _unitary_(self):
+        size = self.dimension * self.dimension
+        arr = np.zeros((size, size), dtype=np.complex64)
+        for x in range(self.dimension):
+            for y in range(self.dimension):
+                coeff = 1j * np.sin(np.pi * self.exponent / 2)
+                diag = np.cos(np.pi * self.exponent / 2)
+                arr[x * self.dimension + y, y * self.dimension + x] = coeff
+                arr[x * self.dimension + y, x * self.dimension + y] = diag
+
+        return arr
+
+    def _circuit_diagram_info_(self, args):
+        return protocols.CircuitDiagramInfo(
+            wire_symbols=("iSwap", "iSwap"), exponent=self._diagram_exponent(args)
+        )
