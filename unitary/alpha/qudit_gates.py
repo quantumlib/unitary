@@ -56,10 +56,10 @@ class QuditSwapPowGate(cirq.Gate):
 
     def _circuit_diagram_info_(self, args):
         if not args.use_unicode_characters:
-            return protocols.CircuitDiagramInfo(
+            return cirq.CircuitDiagramInfo(
                 wire_symbols=("Swap", "Swap"), exponent=self._diagram_exponent(args)
             )
-        return protocols.CircuitDiagramInfo(
+        return cirq.CircuitDiagramInfo(
             wire_symbols=("×", "×"), exponent=self._diagram_exponent(args)
         )
 
@@ -85,6 +85,6 @@ class QuditISwapPowGate(cirq.Gate):
         return arr
 
     def _circuit_diagram_info_(self, args):
-        return protocols.CircuitDiagramInfo(
+        return cirq.CircuitDiagramInfo(
             wire_symbols=("iSwap", "iSwap"), exponent=self._diagram_exponent(args)
         )
