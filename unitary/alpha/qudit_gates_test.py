@@ -35,6 +35,22 @@ def test_plus_one(num_gates: int):
     results = sim.run(c, repetitions=1000)
     assert np.all(results.measurements["m"] == num_gates % 3)
 
+@pytest.mark.parametrize("gate", [
+    qudit_gates.QuditPlusGate(3, addend=1),
+    qudit_gates.QuditPlusGate(3, addend=2),
+    qudit_gates.QuditPlusGate(3, addend=3),
+    qudit_gates.QuditPlusGate(4, addend=1),
+    qudit_gates.QuditPlusGate(4, addend=2),
+    qudit_gates.QuditPlusGate(4, addend=3),
+    qudit_gates.QuditSwapPowGate(3),
+    qudit_gates.QuditISwapPowGate(3),
+    qudit_gates.QuditSwapPowGate(3, exponent=0.5),
+    qudit_gates.QuditISwapPowGate(3, exponent=0.5),
+])
+def test_gates_are_unitary(gate: cirq.Gate):
+   m = cirq.unitary(gate)
+   print(np.round(m, decimals=2))
+   assert np.allclose(np.eye(len(m)), m.dot(m.T.conj()))
 
 @pytest.mark.parametrize(
     "q0, q1", [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]

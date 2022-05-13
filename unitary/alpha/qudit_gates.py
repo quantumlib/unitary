@@ -47,6 +47,9 @@ class QuditSwapPowGate(cirq.Gate):
         arr = np.zeros((size, size), dtype=np.complex64)
         for x in range(self.dimension):
             for y in range(self.dimension):
+                if x==y:
+                  arr[x * self.dimension + y][x * self.dimension + y]=1
+                  continue
                 g = np.exp(1j * np.pi * self.exponent / 2)
                 coeff = -1j * g * np.sin(np.pi * self.exponent / 2)
                 diag = g * np.cos(np.pi * self.exponent / 2)
@@ -77,6 +80,9 @@ class QuditISwapPowGate(cirq.Gate):
         arr = np.zeros((size, size), dtype=np.complex64)
         for x in range(self.dimension):
             for y in range(self.dimension):
+                if x==y:
+                  arr[x * self.dimension + y][x * self.dimension + y]=1
+                  continue
                 coeff = 1j * np.sin(np.pi * self.exponent / 2)
                 diag = np.cos(np.pi * self.exponent / 2)
                 arr[x * self.dimension + y, y * self.dimension + x] = coeff
