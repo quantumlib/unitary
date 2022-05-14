@@ -63,6 +63,21 @@ class QuantumEffect(abc.ABC):
 
 
 class QuantumIf:
+    """A `QuantumIf` effect allows quantum conditional effects.
+
+    For conditional effects in a quantum world, a quantum if
+    can be used, which produces a controlled operation.
+    By using this in conjunction with a quantum object in
+    superposition, this can produce an entangled state.
+
+    Example usage:
+
+    QuantumIf(qubit).equals(state).then(effect)(on_qubits)
+
+    Multiple qubits can be set as the control by inputting
+    a list of qubits.  However, the number of states (conditions)
+    must equal the number of control qubits.
+    """
     def effect(self, *objects) -> Iterator[cirq.Operation]:
         pass
 
@@ -79,12 +94,18 @@ class QuantumThen(QuantumEffect):
     def equals(
         self, *conditions: Union[enum.Enum, int, Sequence[Union[enum.Enum, int]]]
     ) -> "QuantumThen":
+        """Allows a quantum if condition for qubits to equal certain states.
+
+        Adding an equals after a quantum if can produce an anti-control
+        instead of a control if the condition is set to zero.
+        """
+        #TODO: add qutrit support
+        if isinstance(conditions, (enum.Enum, int)):
+            conditions = [conditions]
         if len(conditions) != len(self.control_objects):
             raise ValueError(
                 f"Not able to equate {len(self.control_objects)} qubits with {len(conditions)} conditions"
             )
-        if isinstance(conditions, (enum.Enum, int)):
-            conditions = [conditions]
         self.condition = [_to_int(cond) for cond in conditions]
         return self
 
@@ -93,6 +114,8 @@ class QuantumThen(QuantumEffect):
         return self
 
     def effect(self, *objects):
+        """A Quantum if/then produces a controlled operation."""
+        # For anti-controls, add an X before the controlled operation
         for idx, cond in enumerate(self.condition):
             if cond == 0 and self.control_objects[idx].num_states == 2:
                 yield cirq.X(self.control_objects[idx].qubit)
@@ -100,5 +123,10 @@ class QuantumThen(QuantumEffect):
         for op in self.then_effect.effect(*objects):
             yield op.controlled_by(*[q.qubit for q in self.control_objects])
 
+        # For anti-controls, add an X after the controlled operation
+        # to revert its state back to what it was.
+        for idx, cond in enumerate(self.condition):
+            if cond == 0 and self.control_objects[idx].num_states == 2:
+                yield cirq.X(self.control_objects[idx].qubit)
 
 quantum_if = QuantumIf()
