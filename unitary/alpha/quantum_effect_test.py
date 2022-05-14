@@ -46,6 +46,7 @@ def test_anti_control():
     expected_circuit.append(cirq.X(Q0))
     expected_circuit.append(cirq.X(Q0))
     expected_circuit.append(cirq.CNOT(Q0, Q1))
+    expected_circuit.append(cirq.X(Q0))
     assert board.circuit == expected_circuit
 
 

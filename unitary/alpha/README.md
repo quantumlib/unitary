@@ -136,8 +136,6 @@ This will show a mix of FULL and EMPTY states, but both 'h3' and
 
 You can also do anti-controls, such as:
 
-(Note: this doesn't quite work for some reason yet)
-
 ```
 alpha.quantum_if(board['f3']).equals(Square.EMPTY).then(alpha.Flip())(board['f4'])
 print(chess_board.peek([board['f3'], board['f4']], count=100))
