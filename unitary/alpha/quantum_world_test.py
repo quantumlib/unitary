@@ -70,3 +70,84 @@ def test_two_qutrits():
     ]
     expected = "green (d=3): ────[+2]───\n\nyellow (d=3): ───[+1]───"
     assert str(board.circuit) == expected
+
+
+def test_pop():
+    light = alpha.QuantumObject("l1", Light.GREEN)
+    light2 = alpha.QuantumObject("l2", Light.RED)
+    light3 = alpha.QuantumObject("l3", Light.RED)
+    board = alpha.QuantumWorld([light, light2, light3])
+    alpha.Split()(light, light2, light3)
+    results = board.peek([light2, light3], count=200)
+    assert all(result[0] != result[1] for result in results)
+    assert not all(result[0] == 0 for result in results)
+    assert not all(result[0] == 1 for result in results)
+    popped = board.pop([light2])[0]
+    results = board.peek([light2, light3], count=200)
+    assert len(results) == 200
+    assert all(result[0] == popped for result in results)
+    assert all(result[1] != popped for result in results)
+
+
+def test_undo():
+    light = alpha.QuantumObject("l1", Light.GREEN)
+    board = alpha.QuantumWorld([light])
+    alpha.Flip()(light)
+    results = board.peek([light], count=200)
+    assert all(result[0] == Light.RED for result in results)
+    board.undo_last_effect()
+    results = board.peek([light], count=200)
+    assert all(result[0] == Light.GREEN for result in results)
+
+
+def test_undo_post_select():
+    light = alpha.QuantumObject("l1", Light.GREEN)
+    light2 = alpha.QuantumObject("l2", Light.RED)
+    light3 = alpha.QuantumObject("l3", Light.RED)
+    board = alpha.QuantumWorld([light, light2, light3])
+    alpha.Split()(light, light2, light3)
+
+    # After split, should be fifty-fifty
+    results = board.peek([light2, light3], count=200)
+    assert all(result[0] != result[1] for result in results)
+    assert not all(result[0] == Light.RED for result in results)
+    assert not all(result[0] == Light.GREEN for result in results)
+
+    # After pop, should be consistently one value
+    popped = board.pop([light2])[0]
+    results = board.peek([light2, light3], count=200)
+    assert len(results) == 200
+    assert all(result[0] == popped for result in results)
+    assert all(result[1] != popped for result in results)
+
+    # After undo, should be fifty-fifty
+    board.undo_last_effect()
+    results = board.peek([light2, light3], count=200)
+    assert len(results) == 200
+    assert all(result[0] != result[1] for result in results)
+    assert not all(result[0] == Light.RED for result in results)
+    assert not all(result[0] == Light.GREEN for result in results)
+
+
+def test_pop_not_enough_reps():
+    lights = [alpha.QuantumObject("l" + str(i), Light.RED) for i in range(20)]
+    board = alpha.QuantumWorld(lights)
+    alpha.Flip()(lights[0])
+    alpha.Split()(lights[0], lights[1], lights[2])
+    alpha.Split()(lights[2], lights[3], lights[4])
+    alpha.Split()(lights[4], lights[5], lights[6])
+    alpha.Split()(lights[6], lights[7], lights[8])
+    alpha.Split()(lights[8], lights[9], lights[10])
+    alpha.Split()(lights[10], lights[11], lights[12])
+    alpha.Split()(lights[12], lights[13], lights[14])
+    alpha.Split()(lights[14], lights[15], lights[16])
+
+    results = board.peek([lights[16]], count=200)
+    assert not all(result[0] == Light.GREEN for result in results)
+    board.pop([lights[16]])
+
+    # Force post select to a rare value
+    board.post_selection[lights[16]] = 1
+    results = board.peek([lights[16]], count=200)
+    assert len(results) == 200
+    assert all(result[0] == Light.GREEN for result in results)

@@ -21,7 +21,7 @@ import unitary.alpha as alpha
 def test_flip():
     board = alpha.QuantumWorld()
     piece = alpha.QuantumObject("t", 0)
-    board.add_piece(piece)
+    board.add_object(piece)
     alpha.Flip()(piece)
     assert board.circuit == cirq.Circuit(cirq.X(cirq.NamedQubit("t")))
 
@@ -29,7 +29,7 @@ def test_flip():
 def test_superposition():
     board = alpha.QuantumWorld()
     piece = alpha.QuantumObject("t", 0)
-    board.add_piece(piece)
+    board.add_object(piece)
     alpha.Superposition()(piece)
     assert board.circuit == cirq.Circuit(cirq.H(cirq.NamedQubit("t")))
 
@@ -39,9 +39,9 @@ def test_split():
     piece1 = alpha.QuantumObject("a", 1)
     piece2 = alpha.QuantumObject("b", 0)
     piece3 = alpha.QuantumObject("c", 0)
-    board.add_piece(piece1)
-    board.add_piece(piece2)
-    board.add_piece(piece3)
+    board.add_object(piece1)
+    board.add_object(piece2)
+    board.add_object(piece3)
     alpha.Split()(piece1, piece2, piece3)
     expected_circuit = cirq.Circuit()
     a = cirq.NamedQubit("a")
@@ -59,9 +59,9 @@ def test_phased_split():
     piece1 = alpha.QuantumObject("a", 1)
     piece2 = alpha.QuantumObject("b", 0)
     piece3 = alpha.QuantumObject("c", 0)
-    board.add_piece(piece1)
-    board.add_piece(piece2)
-    board.add_piece(piece3)
+    board.add_object(piece1)
+    board.add_object(piece2)
+    board.add_object(piece3)
     alpha.PhasedSplit()(piece1, piece2, piece3)
     expected_circuit = cirq.Circuit()
     a = cirq.NamedQubit("a")
