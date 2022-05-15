@@ -58,8 +58,7 @@ class QuantumEffect(abc.ABC):
         """Apply the Quantum Effect to the objects."""
         self._verify_objects(*objects)
         board = objects[0].board
-        for op in self.effect(*objects):
-            board.add(op)
+        board.add_effect(list(self.effect(*objects)))
 
 
 class QuantumIf:
@@ -78,6 +77,7 @@ class QuantumIf:
     a list of qubits.  However, the number of states (conditions)
     must equal the number of control qubits.
     """
+
     def effect(self, *objects) -> Iterator[cirq.Operation]:
         pass
 
@@ -99,7 +99,7 @@ class QuantumThen(QuantumEffect):
         Adding an equals after a quantum if can produce an anti-control
         instead of a control if the condition is set to zero.
         """
-        #TODO: add qutrit support
+        # TODO: add qutrit support
         if isinstance(conditions, (enum.Enum, int)):
             conditions = [conditions]
         if len(conditions) != len(self.control_objects):
@@ -128,5 +128,6 @@ class QuantumThen(QuantumEffect):
         for idx, cond in enumerate(self.condition):
             if cond == 0 and self.control_objects[idx].num_states == 2:
                 yield cirq.X(self.control_objects[idx].qubit)
+
 
 quantum_if = QuantumIf()
