@@ -34,6 +34,36 @@ def test_superposition():
     assert board.circuit == cirq.Circuit(cirq.H(cirq.NamedQubit("t")))
 
 
+def test_move():
+    board = alpha.QuantumWorld()
+    piece1 = alpha.QuantumObject("a", 1)
+    piece2 = alpha.QuantumObject("b", 0)
+    board.add_object(piece1)
+    board.add_object(piece2)
+    alpha.Move()(piece1, piece2)
+    expected_circuit = cirq.Circuit()
+    a = cirq.NamedQubit("a")
+    b = cirq.NamedQubit("b")
+    expected_circuit.append(cirq.X(a))
+    expected_circuit.append(cirq.SWAP(a, b))
+    assert board.circuit == expected_circuit
+
+
+def test_phased_move():
+    board = alpha.QuantumWorld()
+    piece1 = alpha.QuantumObject("a", 1)
+    piece2 = alpha.QuantumObject("b", 0)
+    board.add_object(piece1)
+    board.add_object(piece2)
+    alpha.PhasedMove()(piece1, piece2)
+    expected_circuit = cirq.Circuit()
+    a = cirq.NamedQubit("a")
+    b = cirq.NamedQubit("b")
+    expected_circuit.append(cirq.X(a))
+    expected_circuit.append(cirq.ISWAP(a, b))
+    assert board.circuit == expected_circuit
+
+
 def test_split():
     board = alpha.QuantumWorld()
     piece1 = alpha.QuantumObject("a", 1)

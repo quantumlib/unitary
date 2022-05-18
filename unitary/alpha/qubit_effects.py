@@ -43,6 +43,30 @@ class Superposition(QuantumEffect):
             yield cirq.H(q.qubit)
 
 
+class Move(QuantumEffect):
+    """Moves a qubit state into another quantum objects."""
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self):
+        return 2
+
+    def effect(self, *objects):
+        yield cirq.SWAP(objects[0].qubit, objects[1].qubit)
+
+
+class PhasedMove(QuantumEffect):
+    """Moves a qubit state into another quantum objects with phase change."""
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self):
+        return 2
+
+    def effect(self, *objects):
+        yield cirq.ISWAP(objects[0].qubit, objects[1].qubit)
+
+
 class Split(QuantumEffect):
     """Splits a qubit state into two different quantum objects."""
 
