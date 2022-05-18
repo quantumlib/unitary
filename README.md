@@ -30,8 +30,8 @@ upper right corner).
 You can then clone the repository into your development environment by
 using (substitute USER with your github username)
 
-git clone https://github.com/USER/unitary.git
-git remote add upstream https://github.com/quantumlib/unitary.git
+    git clone https://github.com/USER/unitary.git
+    git remote add upstream https://github.com/quantumlib/unitary.git
 
 This will clone your fork so that you can work on it, while marking the
 name 'upstream' as the original repository.
@@ -39,17 +39,17 @@ name 'upstream' as the original repository.
 You can then pull from the original and update your fork, for instance,
 by doing this:
 
-git pull upstream main
-git push origin main
+    git pull upstream main
+    git push origin main
 
 In order to push changes to unitary, create a branch in your fork:
 
-git checkout -b BRANCH_NAME
+    git checkout -b BRANCH_NAME
 
 Perform your changes, then commit (i.e. `git commit -a`) then push to your
 fork:
 
-git push origin BRANCH_NAME
+    git push origin BRANCH_NAME
 
 This will give you a link to create a PR (pull request).  Create this pull request
 and pick some reviewers.  Once approved, it will be merged into the original repository.
