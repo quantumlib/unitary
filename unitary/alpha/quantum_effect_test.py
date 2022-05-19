@@ -26,27 +26,41 @@ def test_quantum_if():
     board = alpha.QuantumWorld()
     piece = alpha.QuantumObject("q0", 1)
     piece2 = alpha.QuantumObject("q1", 0)
-    board.add_piece(piece)
-    board.add_piece(piece2)
+    board.add_object(piece)
+    board.add_object(piece2)
     alpha.quantum_if(piece).then(alpha.Flip())(piece2)
+
+    # Test that circuit is constructed as expected
     expected_circuit = cirq.Circuit()
     expected_circuit.append(cirq.X(Q0))
     expected_circuit.append(cirq.CNOT(Q0, Q1))
     assert board.circuit == expected_circuit
+
+    # Test that results are as expected
+    results = board.peek([piece, piece2], count=100)
+    assert (result[0]==1 for result in results)
+    assert (result[1]==1 for result in results)
 
 
 def test_anti_control():
     board = alpha.QuantumWorld()
-    piece = alpha.QuantumObject("q0", 1)
+    piece = alpha.QuantumObject("q0", 0)
     piece2 = alpha.QuantumObject("q1", 0)
-    board.add_piece(piece)
-    board.add_piece(piece2)
+    board.add_object(piece)
+    board.add_object(piece2)
     alpha.quantum_if(piece).equals(0).then(alpha.Flip())(piece2)
+
+    # Test that circuit is constructed as expected
     expected_circuit = cirq.Circuit()
     expected_circuit.append(cirq.X(Q0))
-    expected_circuit.append(cirq.X(Q0))
     expected_circuit.append(cirq.CNOT(Q0, Q1))
+    expected_circuit.append(cirq.X(Q0))
     assert board.circuit == expected_circuit
+
+    # Test that results are as expected
+    results = board.peek([piece, piece2], count=100)
+    assert (result[0]==0 for result in results)
+    assert (result[0]==1 for result in results)
 
 
 def test_no_board():
@@ -58,7 +72,7 @@ def test_no_board():
 def test_bad_length():
     board = alpha.QuantumWorld()
     piece = alpha.QuantumObject("q0", 1)
-    board.add_piece(piece)
+    board.add_object(piece)
     with pytest.raises(ValueError, match="Not able to equate"):
         alpha.quantum_if(piece).equals(0, 1)
 
@@ -69,6 +83,6 @@ def test_bad_length():
 def test_no_qutrits():
     board = alpha.QuantumWorld()
     piece = alpha.QuantumObject("q0", 2)
-    board.add_piece(piece)
+    board.add_object(piece)
     with pytest.raises(ValueError, match="Cannot apply effect to qids"):
         alpha.Flip()(piece)

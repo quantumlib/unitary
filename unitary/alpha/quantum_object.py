@@ -16,7 +16,8 @@ import enum
 
 import cirq
 
-from unitary.alpha.qudit_gates import QuditPlusGate
+from unitary.alpha.qubit_effects import Flip
+from unitary.alpha.qudit_effects import Cycle
 
 if TYPE_CHECKING:
     from unitary.alpha.quantum_world import QuantumWorld
@@ -52,13 +53,13 @@ class QuantumObject:
         else:
             self.qubit = cirq.NamedQid(name, dimension=self.num_states)
 
-    def initial_gate(self) -> Optional[cirq.Operation]:
+    def initial_effect(self) -> None:
         if self.num_states == 2:
             if self.initial_state == 1:
-                return cirq.X(self.qubit)
+                Flip()(self)
         else:
             if self.initial_state > 0:
-                return QuditPlusGate(self.num_states, self.initial_state)(self.qubit)
+                Cycle(self.num_states, self.initial_state)(self)
 
         return None
 
@@ -75,10 +76,10 @@ class QuantumObject:
         else:
             if self.num_states == 2:
                 if add_num == 1:
-                    self.board.add(cirq.X(self.qubit))
+                    Flip()(self)
             else:
                 if add_num > 0:
-                    self.board.add(QuditPlusGate(self.num_states, add_num)(self.qubit))
+                    Cycle(self.num_states, add_num)(self)
         return self
 
     def __neg__(self):
