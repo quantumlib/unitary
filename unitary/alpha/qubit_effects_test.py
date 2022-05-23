@@ -40,6 +40,8 @@ def test_move():
     piece2 = alpha.QuantumObject("b", 0)
     board.add_object(piece1)
     board.add_object(piece2)
+    results = board.peek([piece1, piece2], count =100)
+    assert all(result == [1,0] for result in results)    
     alpha.Move()(piece1, piece2)
     expected_circuit = cirq.Circuit()
     a = cirq.NamedQubit("a")
@@ -47,6 +49,8 @@ def test_move():
     expected_circuit.append(cirq.X(a))
     expected_circuit.append(cirq.SWAP(a, b))
     assert board.circuit == expected_circuit
+    results = board.peek([piece1, piece2], count =100)
+    assert all(result == [0,1] for result in results)    
 
 
 def test_phased_move():
@@ -55,6 +59,8 @@ def test_phased_move():
     piece2 = alpha.QuantumObject("b", 0)
     board.add_object(piece1)
     board.add_object(piece2)
+    results = board.peek([piece1, piece2], count =100)
+    assert all(result == [1,0] for result in results)    
     alpha.PhasedMove()(piece1, piece2)
     expected_circuit = cirq.Circuit()
     a = cirq.NamedQubit("a")
@@ -62,6 +68,8 @@ def test_phased_move():
     expected_circuit.append(cirq.X(a))
     expected_circuit.append(cirq.ISWAP(a, b))
     assert board.circuit == expected_circuit
+    results = board.peek([piece1, piece2], count =100)
+    assert all(result == [0,1] for result in results)    
 
 
 def test_split():
