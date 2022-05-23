@@ -71,6 +71,22 @@ class QuditPlusGate(cirq.Gate):
 
 
 class QuditControlledXGate(cirq.Gate):
+    """A Qudit controlled-X gate.
+
+    This gate takes the dimension of the qudit (e.g. 3 for qutrits)
+    as well as the control and destination gates to produce a
+    controlled-X 2-qudit gate.
+
+    Note that there are two parameters for this gate.  The first
+    is the control state, which determines when the X gate on the
+    second qudit is activated.  For instance, if this is set to 2,
+    then the X gate will be activated when the first qudit is
+    in the |2> state.
+
+    The state parameter specifies the destination state of the
+    second qudit.  For instance, if set to 1, it will perform a
+    X_01 gate when activated by the control.
+    """
     def __init__(self, dimension: int, control_state: int = 1, state: int = 1):
         self.dimension = dimension
         self.state = state
@@ -93,6 +109,19 @@ class QuditControlledXGate(cirq.Gate):
 
 
 class QuditSwapPowGate(cirq.Gate):
+    """Performs a swap gate between two qudits.
+
+    This is the equivalent of a SWAP gate for qubits.
+    This gate will swap the states of two qudits.
+
+    Args:
+        dimension: dimension of the qudits, for instance,
+          a dimension of 3 would be a qutrit.
+        exponent: The amount to swap qubits.  For instance,
+          an exponent of 1 would be a full swap and an
+          exponent of 0.5 would be a square root of swap gate.
+
+    """
     def __init__(self, dimension: int, exponent: int = 1):
         self.dimension = dimension
         self.exponent = exponent
@@ -126,6 +155,19 @@ class QuditSwapPowGate(cirq.Gate):
 
 
 class QuditISwapPowGate(cirq.Gate):
+    """Performs a swap gate between two qudits with a swap phase of i.
+
+    This is the equivalent of a ISWAP gate for qubits.
+    This gate will swap the states of two qudits with an
+    additional phase of i per swap.
+
+    Args:
+        dimension: dimension of the qudits, for instance,
+          a dimension of 3 would be a qutrit.
+        exponent: The amount to swap qubits.  For instance,
+          an exponent of 1 would be a full swap and an
+          exponent of 0.5 would be a square root of iswap gate.
+    """
     def __init__(self, dimension: int, exponent: int = 1):
         self.dimension = dimension
         self.exponent = exponent
