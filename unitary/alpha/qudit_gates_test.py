@@ -24,14 +24,14 @@ def test_qutrit_x(state: int):
     qutrit = cirq.NamedQid("a", dimension=3)
     sim = cirq.Simulator()
     c = cirq.Circuit(
-        qudit_gates.QuditXGate(3, state)(qutrit), cirq.measure(qutrit, key="m")
+        qudit_gates.QuditXGate(3, 0, state)(qutrit), cirq.measure(qutrit, key="m")
     )
     results = sim.run(c, repetitions=1000)
     assert np.all(results.measurements["m"] == state)
 
     c = cirq.Circuit(
-        qudit_gates.QuditXGate(3, state)(qutrit),
-        qudit_gates.QuditXGate(3, state)(qutrit),
+        qudit_gates.QuditXGate(3, 0, state)(qutrit),
+        qudit_gates.QuditXGate(3, 0, state)(qutrit),
         cirq.measure(qutrit, key="m"),
     )
     results = sim.run(c, repetitions=1000)
@@ -73,7 +73,7 @@ def test_control_x(control: int, dest: int):
 
     # Control is activated and flips 2nd qutrit
     c = cirq.Circuit(
-        qudit_gates.QuditXGate(3, control)(qutrit0),
+        qudit_gates.QuditXGate(3, 0, control)(qutrit0),
         qudit_gates.QuditControlledXGate(3, control, dest)(qutrit0, qutrit1),
         cirq.measure(qutrit0, key="m0"),
         cirq.measure(qutrit1, key="m1"),
@@ -84,8 +84,8 @@ def test_control_x(control: int, dest: int):
 
     # Control is activated and flips 2nd qutrit back to zero
     c = cirq.Circuit(
-        qudit_gates.QuditXGate(3, control)(qutrit0),
-        qudit_gates.QuditXGate(3, dest)(qutrit1),
+        qudit_gates.QuditXGate(3, 0, control)(qutrit0),
+        qudit_gates.QuditXGate(3, 0, dest)(qutrit1),
         qudit_gates.QuditControlledXGate(3, control, dest)(qutrit0, qutrit1),
         cirq.measure(qutrit0, key="m0"),
         cirq.measure(qutrit1, key="m1"),
@@ -97,7 +97,7 @@ def test_control_x(control: int, dest: int):
     # Control is excited to a non-controlling state and has no effect.
     non_active = 2 - control + 1
     c = cirq.Circuit(
-        qudit_gates.QuditXGate(3, non_active)(qutrit0),
+        qudit_gates.QuditXGate(3, 0, non_active)(qutrit0),
         qudit_gates.QuditControlledXGate(3, control, dest)(qutrit0, qutrit1),
         cirq.measure(qutrit0, key="m0"),
         cirq.measure(qutrit1, key="m1"),
@@ -125,7 +125,7 @@ def test_control_of_0_x(dest: int):
 
     # Control qutrit is in the zero state and flips 2nd qutrit back to zero
     c = cirq.Circuit(
-        qudit_gates.QuditXGate(3, dest)(qutrit1),
+        qudit_gates.QuditXGate(3, 0, dest)(qutrit1),
         qudit_gates.QuditControlledXGate(3, 0, dest)(qutrit0, qutrit1),
         cirq.measure(qutrit0, key="m0"),
         cirq.measure(qutrit1, key="m1"),
@@ -136,7 +136,7 @@ def test_control_of_0_x(dest: int):
 
     # Control qutrit is in the one state and has no effect
     c = cirq.Circuit(
-        qudit_gates.QuditXGate(3, 1)(qutrit0),
+        qudit_gates.QuditXGate(3, 0, 1)(qutrit0),
         qudit_gates.QuditControlledXGate(3, 0, dest)(qutrit0, qutrit1),
         cirq.measure(qutrit0, key="m0"),
         cirq.measure(qutrit1, key="m1"),
@@ -147,7 +147,7 @@ def test_control_of_0_x(dest: int):
 
     # Control qutrit is in the two state and has no effect
     c = cirq.Circuit(
-        qudit_gates.QuditXGate(3, 2)(qutrit0),
+        qudit_gates.QuditXGate(3, 0, 2)(qutrit0),
         qudit_gates.QuditControlledXGate(3, 0, dest)(qutrit0, qutrit1),
         cirq.measure(qutrit0, key="m0"),
         cirq.measure(qutrit1, key="m1"),
@@ -166,8 +166,8 @@ def test_control_of_0_x(dest: int):
         qudit_gates.QuditPlusGate(4, addend=1),
         qudit_gates.QuditPlusGate(4, addend=2),
         qudit_gates.QuditPlusGate(4, addend=3),
-        qudit_gates.QuditXGate(3, 1),
-        qudit_gates.QuditXGate(3, 2),
+        qudit_gates.QuditXGate(3, 0, 1),
+        qudit_gates.QuditXGate(3, 0, 2),
         qudit_gates.QuditControlledXGate(3),
         qudit_gates.QuditControlledXGate(3, 0, 2),
         qudit_gates.QuditSwapPowGate(3),

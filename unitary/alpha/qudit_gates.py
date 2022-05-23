@@ -17,28 +17,33 @@ import cirq
 
 
 class QuditXGate(cirq.Gate):
-    """Performs a X_0a gate.
+    """Performs a X_ab gate.
 
-    This swaps the |0〉state with the |a〉state,
-    where a is the 'state' paramter that is passed in.
+    This swaps the |a〉state with the |b〉state,
+    where a is the 'source_state' parameter and b is the
+    'destination_state' parameter that is passed in.
+    All other states are left alone.
 
     For example, QuditXGate(dimension=3, state=1)
     is a X_01 gate that leaves the |2〉 state alone.
     """
 
-    def __init__(self, dimension: int, state: int = 1):
+    def __init__(
+        self, dimension: int, source_state: int = 0, destination_state: int = 1
+    ):
         self.dimension = dimension
-        self.state = state
+        self.source_state = source_state
+        self.destination_state = destination_state
 
     def _qid_shape_(self):
         return (self.dimension,)
 
     def _unitary_(self):
         arr = np.zeros((self.dimension, self.dimension))
-        arr[0, self.state] = 1
-        arr[self.state, 0] = 1
+        arr[self.source_state, self.destination_state] = 1
+        arr[self.destination_state, self.source_state] = 1
         for i in range(self.dimension):
-            if i != 0 and i != self.state:
+            if i != self.source_state and i != self.destination_state:
                 arr[i, i] = 1
         return arr
 
@@ -87,6 +92,7 @@ class QuditControlledXGate(cirq.Gate):
     second qudit.  For instance, if set to 1, it will perform a
     X_01 gate when activated by the control.
     """
+
     def __init__(self, dimension: int, control_state: int = 1, state: int = 1):
         self.dimension = dimension
         self.state = state
@@ -122,6 +128,7 @@ class QuditSwapPowGate(cirq.Gate):
           exponent of 0.5 would be a square root of swap gate.
 
     """
+
     def __init__(self, dimension: int, exponent: int = 1):
         self.dimension = dimension
         self.exponent = exponent
@@ -168,6 +175,7 @@ class QuditISwapPowGate(cirq.Gate):
           an exponent of 1 would be a full swap and an
           exponent of 0.5 would be a square root of iswap gate.
     """
+
     def __init__(self, dimension: int, exponent: int = 1):
         self.dimension = dimension
         self.exponent = exponent
