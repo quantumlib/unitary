@@ -82,6 +82,10 @@ print('a3:')
 print(chess_board.peek([board['a3']]))
 ```
 
+Note that `peek()` with no arguments defaults to getting a sample
+of all the `QuantumObjects` within the `QuantumWorld`.  By passing
+no arguments, you can essentially get a sample of the whole board.
+
 Note: pop does not quite work yet (as it requires post-selection).
 
 ## Quantum Effects
@@ -122,6 +126,13 @@ and some are FULL.
 We can also do a quantum if statement that applies an effect
 only if a quantum object is a certain state.  This manifests
 in a "controlled" gate in the quantum world.
+
+Note that a quantum if only applies to quantum effects.  You
+cannot put classical effects or imperative code as a controlled
+effect of a quantum if.  (In general, classical code, such as
+assignments are usually irreversible and thusly incompatible
+with quantum unitary operations without special consideration,
+such as adding ancilla operations, i.e. Stinespring's dilation).
 
 For instance,
 
