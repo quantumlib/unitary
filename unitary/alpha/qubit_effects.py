@@ -45,6 +45,7 @@ class Superposition(QuantumEffect):
 
 class Move(QuantumEffect):
     """Moves a qubit state into another quantum objects."""
+
     def num_dimension(self) -> Optional[int]:
         return 2
 
@@ -57,6 +58,7 @@ class Move(QuantumEffect):
 
 class PhasedMove(QuantumEffect):
     """Moves a qubit state into another quantum objects with phase change."""
+
     def num_dimension(self) -> Optional[int]:
         return 2
 

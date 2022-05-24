@@ -112,11 +112,11 @@ class QuantumThen(QuantumEffect):
         self.condition = [_to_int(cond) for cond in conditions]
         return self
 
-    def then(self, effect: 'QuantumEffect'):
+    def then(self, effect: "QuantumEffect"):
         """Use `apply(effect)` instead."""
         return self.apply(effect)
 
-    def apply(self, effect: 'QuantumEffect'):
+    def apply(self, effect: "QuantumEffect"):
         """Applies a QuantumEffect conditionally to the specified qubits."""
         self.then_effect = effect
         return self
