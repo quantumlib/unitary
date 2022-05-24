@@ -127,7 +127,7 @@ For instance,
 
 
 ```
-alpha.quantum_if(board['h3']).then(alpha.Flip())(board['h4'])
+alpha.quantum_if(board['h3']).apply(alpha.Flip())(board['h4'])
 print(chess_board.peek([board['h3'], board['h4']], count=100))
 ```
 
@@ -137,6 +137,6 @@ This will show a mix of FULL and EMPTY states, but both 'h3' and
 You can also do anti-controls, such as:
 
 ```
-alpha.quantum_if(board['f3']).equals(Square.EMPTY).then(alpha.Flip())(board['f4'])
+alpha.quantum_if(board['f3']).equals(Square.EMPTY).apply(alpha.Flip())(board['f4'])
 print(chess_board.peek([board['f3'], board['f4']], count=100))
 ```

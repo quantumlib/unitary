@@ -71,7 +71,10 @@ class QuantumIf:
 
     Example usage:
 
-    QuantumIf(qubit).equals(state).then(effect)(on_qubits)
+    QuantumIf(qubit).equals(state).apply(effect)(on_qubits)
+
+    Note that the parameters to `apply` must be a quantum
+    effect.
 
     Multiple qubits can be set as the control by inputting
     a list of qubits.  However, the number of states (conditions)
@@ -109,7 +112,12 @@ class QuantumThen(QuantumEffect):
         self.condition = [_to_int(cond) for cond in conditions]
         return self
 
-    def then(self, effect):
+    def then(self, effect: 'QuantumEffect'):
+        """Use `apply(effect)` instead."""
+        return self.apply(effect)
+
+    def apply(self, effect: 'QuantumEffect'):
+        """Applies a QuantumEffect conditionally to the specified qubits."""
         self.then_effect = effect
         return self
 

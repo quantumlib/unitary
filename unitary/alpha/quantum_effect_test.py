@@ -28,7 +28,7 @@ def test_quantum_if():
     piece2 = alpha.QuantumObject("q1", 0)
     board.add_object(piece)
     board.add_object(piece2)
-    alpha.quantum_if(piece).then(alpha.Flip())(piece2)
+    alpha.quantum_if(piece).apply(alpha.Flip())(piece2)
 
     # Test that circuit is constructed as expected
     expected_circuit = cirq.Circuit()
@@ -48,7 +48,7 @@ def test_anti_control():
     piece2 = alpha.QuantumObject("q1", 0)
     board.add_object(piece)
     board.add_object(piece2)
-    alpha.quantum_if(piece).equals(0).then(alpha.Flip())(piece2)
+    alpha.quantum_if(piece).equals(0).apply(alpha.Flip())(piece2)
 
     # Test that circuit is constructed as expected
     expected_circuit = cirq.Circuit()
