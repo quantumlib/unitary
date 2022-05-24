@@ -26,6 +26,8 @@ from unitary.alpha.quantum_effect import (
 
 from unitary.alpha.qubit_effects import (
     Flip,
+    Move,
+    PhasedMove,
     PhasedSplit,
     Superposition,
     Split,
