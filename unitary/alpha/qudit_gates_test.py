@@ -39,7 +39,7 @@ def test_qutrit_x(state: int):
 
 
 @pytest.mark.parametrize("num_gates", [1, 2, 3, 4, 5, 6])
-def test_plus_one(num_gates: int):
+def test_qutrit_plus_one(num_gates: int):
     qutrit = cirq.NamedQid("a", dimension=3)
     c = cirq.Circuit()
     for i in range(num_gates):
@@ -48,9 +48,15 @@ def test_plus_one(num_gates: int):
     sim = cirq.Simulator()
     results = sim.run(c, repetitions=1000)
     assert np.all(results.measurements["m"] == num_gates % 3)
+
+
+@pytest.mark.parametrize("num_gates", [1, 2, 3, 4, 5, 6])
+def test_qutrit_plus_addend(num_gates: int):
+    qutrit = cirq.NamedQid("a", dimension=3)
     c = cirq.Circuit()
     c.append(qudit_gates.QuditPlusGate(3, addend=num_gates)(qutrit))
     c.append(cirq.measure(qutrit, key="m"))
+    sim = cirq.Simulator()
     results = sim.run(c, repetitions=1000)
     assert np.all(results.measurements["m"] == num_gates % 3)
 

@@ -48,7 +48,7 @@ class QuditXGate(cirq.Gate):
         return arr
 
     def _circuit_diagram_info_(self, args):
-        return f"X(0_{self.state})"
+        return f"X({self.source_state}_{self.destination_state})"
 
 
 class QuditPlusGate(cirq.Gate):
