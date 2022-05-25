@@ -127,9 +127,9 @@ We can also do a quantum if statement that applies an effect
 only if a quantum object is a certain state.  This manifests
 in a "controlled" gate in the quantum world.
 
-Note that a quantum if only applies to quantum effects.  You
+Note that a `quantum_if` only applies to quantum effects.  You
 cannot put classical effects or imperative code as a controlled
-effect of a quantum if.  (In general, classical code, such as
+effect of a `quantum_if()`.  (In general, classical code, such as
 assignments are usually irreversible and thusly incompatible
 with quantum unitary operations without special consideration,
 such as adding ancilla operations, i.e. Stinespring's dilation).
