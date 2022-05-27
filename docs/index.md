@@ -30,4 +30,4 @@ promoting quantum computing for gaming.
 All contributors will need to sign a Contributor License Agreement (CLA)
 and follow code review guidelines as well as a Code of Conduct.
 
-<img alt="Circuit" src="./images/g3618.png" style="max-width: 400px; margin-top: 2rem;">
+<img alt="Circuit" src="https://quantumai.google/cirq/experiments/images/g3618.png" style="max-width: 400px; margin-top: 2rem;">
