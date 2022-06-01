@@ -17,7 +17,7 @@ import enum
 import cirq
 
 from unitary.alpha.qubit_effects import Flip
-from unitary.alpha.qudit_effects import Cycle
+from unitary.alpha.qudit_effects import QuditCycle, QuditFlip
 
 if TYPE_CHECKING:
     from unitary.alpha.quantum_world import QuantumWorld
@@ -59,7 +59,7 @@ class QuantumObject:
                 Flip()(self)
         else:
             if self.initial_state > 0:
-                Cycle(self.num_states, self.initial_state)(self)
+                QuditFlip(self.num_states, 0, self.initial_state)(self)
 
         return None
 
@@ -79,7 +79,7 @@ class QuantumObject:
                     Flip()(self)
             else:
                 if add_num > 0:
-                    Cycle(self.num_states, add_num)(self)
+                    QuditCycle(self.num_states, add_num)(self)
         return self
 
     def __neg__(self):
