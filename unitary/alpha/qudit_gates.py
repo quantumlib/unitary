@@ -129,7 +129,7 @@ class QuditSwapPowGate(cirq.Gate):
 
     """
 
-    def __init__(self, dimension: int, exponent: int = 1):
+    def __init__(self, dimension: int, exponent: float = 1):
         self.dimension = dimension
         self.exponent = exponent
 
@@ -176,7 +176,7 @@ class QuditISwapPowGate(cirq.Gate):
           exponent of 0.5 would be a square root of iswap gate.
     """
 
-    def __init__(self, dimension: int, exponent: int = 1):
+    def __init__(self, dimension: int, exponent: float = 1):
         self.dimension = dimension
         self.exponent = exponent
 
