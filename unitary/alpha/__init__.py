@@ -33,6 +33,11 @@ from unitary.alpha.qubit_effects import (
     Split,
 )
 
+from unitary.alpha.qudit_effects import (
+    QuditCycle,
+    QuditFlip,
+)
+
 from unitary.alpha.quantum_object import (
     QuantumObject,
 )
