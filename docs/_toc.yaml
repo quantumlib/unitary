@@ -1,13 +1,9 @@
-toc:
-- title: "Research using Cirq"
-  path: /cirq/experiments
-
 - heading: "Quantum Chess"
 - title: "Overview"
-  path: /cirq/experiments/quantum_chess
+  path: /cirq/experiments/unitary/quantum_chess
 - title: "Concepts"
-  path: /cirq/experiments/quantum_chess/concepts
+  path: /cirq/experiments/unitary/quantum_chess/concepts
 - title: "Quantum Chess REST API"
-  path: /cirq/experiments/quantum_chess/quantum_chess_rest_api
+  path: /cirq/experiments/unitary/quantum_chess/quantum_chess_rest_api
 - title: "Quantum Chess client"
-  path: /cirq/experiments/quantum_chess/quantum_chess_client
+  path: /cirq/experiments/unitary/quantum_chess/quantum_chess_client
