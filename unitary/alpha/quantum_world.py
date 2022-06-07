@@ -30,6 +30,7 @@ class QuantumWorld:
 
         self.circuit = cirq.Circuit()
         self.effect_history = []
+        self.used_object_keys = set()
         self.sampler = sampler
         self.post_selection: Dict[QuantumObject, int] = {}
 
@@ -38,6 +39,15 @@ class QuantumWorld:
                 self.add_object(obj)
 
     def add_object(self, obj: QuantumObject):
+        """Adds a QuantumObject to the QuantumWorld.
+
+        Raises:
+            ValueError: if an object with the same name has
+               already been added to the world.
+        """
+        if obj.name in self.used_object_keys:
+            raise ValueError("QuantumObject {obj.name} already added to world.")
+        self.used_object_keys.add(obj.name)
         self.objects.append(obj)
         obj.board = self
         obj.initial_effect()
