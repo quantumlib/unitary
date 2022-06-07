@@ -15,12 +15,24 @@ from typing import Dict, List
 
 from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.alpha.qudit_effects import QuditFlip
-from unitary.examples.tictactoe.enums import TicTacSquare
+from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult
 from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
 
 
 _SQUARE_NAMES = "abcdefghi"
 _MARK_SYMBOLS = {TicTacSquare.EMPTY: ".", TicTacSquare.X: "X", TicTacSquare.O: "O"}
+
+# Possible ways to get three in a row (rows, columns, and diagonal) indices
+_POSSIBLE_WINS = [
+    (0, 1, 2),
+    (3, 4, 5),
+    (6, 7, 8),
+    (0, 3, 6),
+    (1, 4, 7),
+    (2, 5, 8),
+    (0, 4, 8),
+    (2, 4, 6),
+]
 
 
 def _histogram(results: List[List[TicTacSquare]]) -> List[Dict[TicTacSquare, int]]:
@@ -42,6 +54,32 @@ def _histogram(results: List[List[TicTacSquare]]) -> List[Dict[TicTacSquare, int
 def _result_to_str(result: List[TicTacSquare]) -> str:
     """Transforms a result list of measurements into a 9 letter string."""
     return "".join([_MARK_SYMBOLS[square] for square in result])
+
+
+def eval_board(result: List[TicTacSquare]) -> TicTacResult:
+    x_wins = False
+    o_wins = False
+    still_empty = False
+    for check in _POSSIBLE_WINS:
+        if all(result[check[idx]] == TicTacSquare.X for idx in range(3)):
+            x_wins = True
+        if all(result[check[idx]] == TicTacSquare.O for idx in range(3)):
+            o_wins = True
+        if any(result[check[idx]] == TicTacSquare.EMPTY for idx in range(3)):
+            still_empty = True
+    if x_wins:
+        if o_wins:
+            return TicTacResult.BOTH_WIN
+        else:
+            return TicTacResult.X_WINS
+    else:
+        if o_wins:
+            return TicTacResult.O_WINS
+        else:
+            if still_empty:
+                return TicTacResult.UNFINISHED
+            else:
+                return TicTacResult.DRAW
 
 
 class TicTacToe:
@@ -73,13 +111,36 @@ class TicTacToe:
         Sets all 9 squares to empty.
         """
         self.squares = {}
+        self.last_result = [TicTacSquare.EMPTY] * 9
         self.empty_squares = set()
         for name in _SQUARE_NAMES:
             self.empty_squares.add(name)
             self.squares[name] = QuantumObject(name, TicTacSquare.EMPTY)
         self.board = QuantumWorld(list(self.squares.values()))
 
-    def move(self, move: str, mark: TicTacSquare) -> None:
+    def result(self) -> TicTacResult:
+        """Returns the result of the TicTacToe game.
+
+        Returns EMPTY if no winnder has been decided, X if
+        three in a row.
+        """
+        return eval_board(self.last_result)
+
+    def measure(self) -> None:
+        """Measures all squares on the TicTacToe board.
+
+        Once the board is measured, a new board is created
+        that is initalized to the measured state.
+        This should happen when no more squares are empty.
+        """
+        self.last_result = self.board.pop()
+        for idx, name in enumerate(_SQUARE_NAMES):
+            if self.last_result[idx] == TicTacSquare.EMPTY:
+                self.empty_squares.add(name)
+            self.squares[name] = QuantumObject(name, self.last_result[idx])
+        self.board = QuantumWorld(list(self.squares.values()))
+
+    def move(self, move: str, mark: TicTacSquare) -> TicTacResult:
         """Make a move on the TicTacToe board.
 
         Args:
@@ -97,11 +158,14 @@ class TicTacToe:
             )
         if len(move) == 1:
             QuditFlip(3, 0, mark.value)(self.squares[move])
-            self.empty_squares.remove(move)
+            self.empty_squares.discard(move)
         else:
             TicTacSplit(mark)(self.squares[move[0]], self.squares[move[1]])
-            self.empty_squares.remove(move[0])
-            self.empty_squares.remove(move[1])
+            self.empty_squares.discard(move[0])
+            self.empty_squares.discard(move[1])
+        if not self.empty_squares:
+            self.measure()
+        return self.result()
 
     def sample(self, count: int = 1) -> List[str]:
         """Samples the quantum TicTacToe board.
