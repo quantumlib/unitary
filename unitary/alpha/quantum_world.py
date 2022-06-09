@@ -84,6 +84,13 @@ class QuantumWorld:
     def force_measurement(
         self, obj: QuantumObject, result: Union[enum.Enum, int]
     ) -> str:
+        """Measures a QuantumObject with a defined outcome.
+
+        This function will move the qubit to an ancilla and set
+        a post-selection criteria on it in order to force it
+        to be a particular result.  A new qubit set to the initial
+        state of the result.
+        """
         count = 0
         ancilla_name = f"ancilla_{obj.name}_{count}"
         while ancilla_name in self.used_object_keys:
