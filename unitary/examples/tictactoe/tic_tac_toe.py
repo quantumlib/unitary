@@ -167,8 +167,6 @@ class TicTacToe:
             QuditFlip(3, 0, mark.value)(self.squares[move])
             # This square is now no longer empty
             self.empty_squares.discard(move)
-            # This square now is a set by itself
-            self.square_to_set[move] = len(self.square_to_set)
         else:
             # Check if rules allow quantum moves
             if self.rules == TicTacRules.CLASSICAL:
