@@ -20,10 +20,14 @@ class TicTacSquare(enum.Enum):
     X = 1
     O = 2
 
-
 class TicTacResult(enum.Enum):
     UNFINISHED = 0
     X_WINS = 1
     O_WINS = 2
     DRAW = 3
     BOTH_WIN = 4
+
+class TicTacRules(enum.Enum):
+    CLASSICAL = 0
+    MINIMAL_QUANTUM = 1
+    FULLY_QUANTUM = 2
