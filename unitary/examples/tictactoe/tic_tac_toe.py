@@ -175,14 +175,14 @@ class TicTacToe:
                 )
                 return self.result()
 
-            # Then, check if both squares are non-empty. Splitting on top of
-            # two non-empty ones is only allowed at full quantumness
-            if (move[0] not in self.empty_squares) and \
-                 (move[1] not in self.empty_squares) and \
+            # Check if either square is non-empty. Splitting on top of
+            # non-empty squares is only allowed at full quantumness
+            if ((move[0] not in self.empty_squares) or \
+                 (move[1] not in self.empty_squares)) and \
                     (self.rules != TicTacRules.FULLY_QUANTUM):
                         raise ValueError(
                             f"You need to play at full quantumness to allow \
-                                splits on top of two non-empty squares"
+                                splits on top of non-empty squares"
                             )
                         return self.result()
 
