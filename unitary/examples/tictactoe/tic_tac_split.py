@@ -18,7 +18,7 @@ import numpy as np
 import cirq
 
 from unitary.alpha import QuantumEffect, QuantumObject
-from unitary.alpha.qudit_gates import QuditXGate, QuditSwapPowGate
+from unitary.alpha.qudit_gates import QuditXGate, QuditISwapPowGate
 from unitary.examples.tictactoe.enums import TicTacSquare
 
 
@@ -30,7 +30,7 @@ class QuditSplitGate(cirq.Gate):
     with either X or O.
 
     Args:
-        sqyare: use TicTacQuare.X to do a sqrtSWAP(01) and
+        square: use TicTacQuare.X to do a sqrtSWAP(01) and
             TicTacSquare.O to do a sqrtSWAP(02)
     """
 
@@ -83,4 +83,4 @@ class TicTacSplit(QuantumEffect):
 
     def effect(self, square1: QuantumObject, square2: QuantumObject):
         yield QuditXGate(3, 0, self.tic_tac_type.value)(square1.qubit)
-        yield QuditSplitGate(self.tic_tac_type)(square1.qubit, square2.qubit)
+        yield QuditISwapPowGate(3, 0.5)(square1.qubit, square2.qubit)

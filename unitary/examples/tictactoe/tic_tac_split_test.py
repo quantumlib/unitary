@@ -100,22 +100,71 @@ def test_tic_tac_split_entangled():
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.X)(a, b)
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.O)(b, c)
     results = board.peek(count=1000)
-    on_ab = [
+    # This sequence of moves, for just three squares, should produce:
+    # EEE -> XEE + EXE -> XEO + EXE -> XEO + XOE + EXE + EEX
+    # The checks below check whether each of these last four samples occurs
+    sample_1 = [
         tictactoe.TicTacSquare.X,
         tictactoe.TicTacSquare.O,
         tictactoe.TicTacSquare.EMPTY,
     ]
-    on_ac = [
+    sample_2 = [
         tictactoe.TicTacSquare.X,
         tictactoe.TicTacSquare.EMPTY,
         tictactoe.TicTacSquare.O,
     ]
-    on_b = [
+    sample_3 = [
         tictactoe.TicTacSquare.EMPTY,
         tictactoe.TicTacSquare.X,
         tictactoe.TicTacSquare.EMPTY,
     ]
-    assert any(r == on_ab for r in results)
-    assert any(r == on_ac for r in results)
-    assert any(r == on_b for r in results)
-    assert all(r == on_ab or r == on_ac or r == on_b for r in results)
+    sample_4 = [
+        tictactoe.TicTacSquare.EMPTY,
+        tictactoe.TicTacSquare.EMPTY,
+        tictactoe.TicTacSquare.X,
+    ]
+    assert any(r == sample_1 for r in results)
+    assert any(r == sample_2 for r in results)
+    assert any(r == sample_3 for r in results)
+    assert any(r == sample_4 for r in results)
+    assert all(r == sample_1 or r == sample_2 or \
+               r == sample_3 or r == sample_4 for r in results)
+
+
+def test_tic_tac_split_entangled_empty():
+    a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
+    b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
+    c = alpha.QuantumObject("c", tictactoe.TicTacSquare.EMPTY)
+    board = alpha.QuantumWorld([a, b, c])
+    tictactoe.TicTacSplit(tictactoe.TicTacSquare.X)(a, b)
+    tictactoe.TicTacSplit(tictactoe.TicTacSquare.O)(c, b)
+    results = board.peek(count=1000)
+    # This sequence of moves, for just three squares, should produce:
+    # EEE -> XEE + EXE -> XEO + EXO -> XEO + XOE + EXO + EOX
+    # The checks below check whether each of these last four samples occurs
+    sample_1 = [
+        tictactoe.TicTacSquare.X,
+        tictactoe.TicTacSquare.O,
+        tictactoe.TicTacSquare.EMPTY,
+    ]
+    sample_2 = [
+        tictactoe.TicTacSquare.X,
+        tictactoe.TicTacSquare.EMPTY,
+        tictactoe.TicTacSquare.O,
+    ]
+    sample_3 = [
+        tictactoe.TicTacSquare.EMPTY,
+        tictactoe.TicTacSquare.X,
+        tictactoe.TicTacSquare.O,
+    ]
+    sample_4 = [
+        tictactoe.TicTacSquare.EMPTY,
+        tictactoe.TicTacSquare.O,
+        tictactoe.TicTacSquare.X,
+    ]
+    assert any(r == sample_1 for r in results)
+    assert any(r == sample_2 for r in results)
+    assert any(r == sample_3 for r in results)
+    assert any(r == sample_4 for r in results)
+    assert all(r == sample_1 or r == sample_2 or \
+               r == sample_3 or r == sample_4 for r in results)
