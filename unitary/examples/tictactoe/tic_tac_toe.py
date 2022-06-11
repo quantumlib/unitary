@@ -162,7 +162,6 @@ class TicTacToe:
                 raise ValueError(
                     f"You cannot put your token on non-empty square {move}"
                 )
-                return self.result()
             # Flip the square to the correct value (mark.value)
             QuditFlip(3, 0, mark.value)(self.squares[move])
             # This square is now no longer empty
@@ -173,7 +172,6 @@ class TicTacToe:
                 raise ValueError(
                     f"Quantum moves are not allowed in a classical TicTacToe"
                 )
-                return self.result()
 
             # Check if either square is non-empty. Splitting on top of
             # non-empty squares is only allowed at full quantumness
@@ -184,15 +182,14 @@ class TicTacToe:
                             f"You need to play at full quantumness to allow \
                                 splits on top of non-empty squares"
                             )
-                        return self.result()
 
             # TicTacSplit first flips the first square before performing a split
             # If either of the two involved squares is empty, we want to do the
             # split on that square.
-            if move[0] in self.empty_squares:
-                TicTacSplit(mark)(self.squares[move[0]], self.squares[move[1]])
-            else:
+            if move[1] in self.empty_squares:
                 TicTacSplit(mark)(self.squares[move[1]], self.squares[move[0]])
+            else:
+                TicTacSplit(mark)(self.squares[move[0]], self.squares[move[1]])
 
             # The involved squares are now no longer empty
             self.empty_squares.discard(move[0])

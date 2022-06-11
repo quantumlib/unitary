@@ -121,6 +121,19 @@ def test_split():
     assert all(result == in_a or result == in_b for result in results)
 
 
+def test_rulesets():
+    # Try to make a quantum move with classical rules
+    board = tictactoe.TicTacToe(tictactoe.TicTacRules.CLASSICAL)
+    with pytest.raises(ValueError):
+        board.move("ab", tictactoe.TicTacSquare.X)
+
+    # Try to make a split move on non-empty squares at minimal quantum
+    board = tictactoe.TicTacToe(tictactoe.TicTacRules.MINIMAL_QUANTUM)
+    board.move("a", tictactoe.TicTacSquare.X)
+    with pytest.raises(ValueError):
+        board.move("ab", tictactoe.TicTacSquare.O)
+
+
 def test_print():
     board = tictactoe.TicTacToe()
     board.move("a", tictactoe.TicTacSquare.X)
