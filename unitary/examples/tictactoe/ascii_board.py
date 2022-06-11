@@ -17,39 +17,34 @@ from unitary.examples.tictactoe.tic_tac_toe import TicTacToe
 import argparse, textwrap
 
 help_str = '''\
-/*---------------------------*\\
-|      Quantum TicTacToe      |
-\\*---------------------------*/
+In classical TicTacToe, players alternate in putting their token (either an
+X or an O) on the squares of a 3x3 board. Each of the 3x3 squares of the board
+is labeled by its own letter as follows:
 
-Each of the 3x3 squares of the board is
-labeled by its own letter as follows:
+                                 |     |
+                              a  |  b  |  c
+                            _____|_____|_____
+                                 |     |
+                              d  |  e  |  f
+                            _____|_____|_____
+                                 |     |
+                              g  |  h  |  i
+                                 |     |
 
-             |     |
-          a  |  b  |  c
-        _____|_____|_____
-             |     |
-          d  |  e  |  f
-        _____|_____|_____
-             |     |
-          g  |  h  |  i
-             |     |
+When it's your turn, to put your token on an empty square just input the
+corresponding square's letter. That is, to put your token on the top-right
+square, input 'c'.
 
-To input a clasical move (i.e. put your
-token on a single square), just input the
-corresponding square's letter.
+In Quantum TicTacToe, you get access to so-called split moves, in which your
+token can be put on two squares simultaneously. To input a quantum move,
+enter the two letters of the involved squares. For example, a quantum move
+putting your token in the top left and bottom right squares has input 'ai'.
 
-To input a quantum move (i.e. superposing
-or entangling your token with other squares),
-enter the two letters of the involved squares.
-
-For example: ")
- * A regular move putting your token in the
-   middle has input 'e'
- * A quantum move putting your token in the
-   top left and bottom right has input 'ai'
-
-Choose different rulesets using the -r option
-Have fun playing Quantum TicTacToe!
+Split moves can be made without restrictions using the default, fully quantum,
+ruleset. If you'd like to allow split moves only on empty squares, choose the
+minimal quantum ruleset. If you'd like no quantum moves at all, choose the
+classical ruleset. Choose different rulesets can be done using the -r option,
+see below.
 '''
 
 def _flip_turn(turn: TicTacSquare):
@@ -88,12 +83,14 @@ if __name__ == "__main__":
                         choices=range(1, 4),
                         help=textwrap.dedent('''
                             Set the ruleset:
-                                1: No Quantum
+                                1: Classical
                                 2: Minimal Quantum
-                                3: Fully Quantum (Default)'''))
+                                    Allow split moves, but only on empty squares
+                                3: Fully Quantum (Default)
+                                    Allow split moves, no restrictions'''))
     args = parser.parse_args()
 
-    print("Starting a new game of Quantum TicTacToe with" \
+    print("Starting a new game of Quantum TicTacToe with " \
           "ruleset \'%s\'"%TicTacRules(args.rules-1))
     print("Change the ruleset using the -r option. Or use -h for more help.")
     print("Input \'q\' to exit.")
