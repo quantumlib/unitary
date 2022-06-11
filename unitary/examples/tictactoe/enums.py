@@ -28,6 +28,12 @@ class TicTacResult(enum.Enum):
     BOTH_WIN = 4
 
 class TicTacRules(enum.Enum):
+    """The different rulesets for Quantum TicTacToe
+
+    CLASSICAL       = No split moves, just classical TicTacToe.
+    MINIMAL_QUANTUM = Split moves allowed, only on two empty squares.
+    FULLY_QUANTUM   = Split moves allowed, no restrictions.
+    """
     CLASSICAL = 0
     MINIMAL_QUANTUM = 1
     FULLY_QUANTUM = 2
