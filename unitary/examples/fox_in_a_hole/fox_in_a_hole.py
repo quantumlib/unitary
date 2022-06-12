@@ -18,16 +18,20 @@ import abc
 import sys
 import enum
 import numpy as np
+import pytest
 
 from unitary import alpha
 
 class Game(abc.ABC):
-    """Abstract ancestor class for Fox-in-a-hole game."""
-    def __init__(self, hole_nr=5):
-        self.rng = np.random.default_rng()
+    """Abstract ancestor class for Fox-in-a-hole game.
 
-        self.history = []
-        self.history = []
+    Parameters:
+    * hole_nr: integer - Number of holes
+    * seed:    integer - Seed for random number generated (used for testing)
+    """
+    def __init__(self, hole_nr=5, seed = None):
+        self.rng = np.random.default_rng(seed = seed)
+
         self.history = []
 
         self.all_hole_names = [str(i) for i in range(hole_nr)]
@@ -36,25 +40,22 @@ class Game(abc.ABC):
 
         self.state = None
         self.initialize_state()
-        self.history_append_state()
 
     @abc.abstractmethod
     def initialize_state(self):
         """Initializes the actual state."""
 
     @abc.abstractmethod
-    def state_to_string(self):
+    def state_to_string(self) -> str:
         """Returns the string reprezentation of the state."""
 
     @abc.abstractmethod
-    def check_guess(self,guess):
+    def check_guess(self,guess) -> bool:
         """Checks if user's guess is right and returns it as a boolean value."""
-        return None
 
     @abc.abstractmethod
-    def take_random_move(self):
+    def take_random_move(self) -> str:
         """Applies a random move on the current state. Gives back the move in string format."""
-        return ""
 
     def history_append_state(self):
         """Append the current state into the history."""
@@ -72,6 +73,7 @@ class Game(abc.ABC):
         """Handles the main game-loop of the Fox-in-a-hole game."""
         max_step_nr = 10
         step_nr=0
+        self.history_append_state()
         while step_nr<max_step_nr:
             while True:
                 print("Where is the fox? (0-{} or q for quit)".format(self.hole_nr-1))
@@ -111,13 +113,15 @@ class ClassicalGame(Game):
         index = self.rng.integers(low=0, high=self.hole_nr)
         self.state[index] = 1.0
 
-    def state_to_string(self):
+    def state_to_string(self) -> str:
         return str(self.state)
 
-    def check_guess(self,guess):
+    def check_guess(self,guess) -> bool:
+        """Checks if user's guess is right and returns it as a boolean value."""
         return self.state[guess] == 1.0
 
-    def take_random_move(self):
+    def take_random_move(self) -> str:
+        """Applies a random move on the current state. Gives back the move in string format."""
         source = self.state.index(1.0)
         direction = self.rng.integers(low=0, high=2)*2-1
         if source==0 and direction==-1:
@@ -130,7 +134,7 @@ class ClassicalGame(Game):
             dir_str = 'left'
         else:
             dir_str = 'right'
-        move_str = "Moving {} from position {}.".format(dir_str,source)
+        move_str = f"Moving {dir_str} from position {source}."
         return move_str
 
 class Hole(enum.Enum):
@@ -145,23 +149,22 @@ class QuantumGame(Game):
     (QuantumWorld, [QuantumObject]) -> quantum world, list of holes
     """
 
-    def __init__(self, hole_nr=5, iswap=False):
+    def __init__(self, hole_nr=5, iswap=False, seed=None):
         self.iswap = iswap
-        super().__init__(hole_nr=hole_nr)
+        super().__init__(hole_nr=hole_nr,seed=seed)
 
     def initialize_state(self):
         index = self.rng.integers(low=0, high=self.hole_nr)
         holes = []
         for i in range(self.hole_nr):
             hole = alpha.QuantumObject(
-                "Hole-{}-{}".format(i,i),
+                f"Hole-{i}-{i}",
                 Hole.FOX if i==index else Hole.EMPTY)
             holes.append(hole)
         self.state = (alpha.QuantumWorld(holes), holes)
 
-    def get_probabilities(self):
+    def get_probabilities(self, count=100):
         """Gives back the probabilites for each hole."""
-        count=100
         probs = self.hole_nr * [0.0]
         peek_result = self.state[0].peek(objects=self.state[1],
                                          convert_to_enum=False,
@@ -176,8 +179,14 @@ class QuantumGame(Game):
     def state_to_string(self):
         return str(self.get_probabilities())
 
-    def check_guess(self,guess):
+    def check_guess(self,guess) -> bool:
+        """Checks if user's guess is right and returns it as a boolean value.
+
+        In the quantum version, quantum-measurement happens which might change the state.
+        """
         measurement = self.state[0].pop([self.state[1][guess]])[0]
+        # TODO: After Issue #21 is solved, there is no need for creating a new qobject
+        # after each measurement.
         new_hole = alpha.QuantumObject(
             "Hole-{}-{}".format(guess,len(self.state[0].objects)),
             measurement)
@@ -185,7 +194,8 @@ class QuantumGame(Game):
         self.state[1][guess] = new_hole
         return measurement == Hole.FOX
 
-    def take_random_move(self):
+    def take_random_move(self) -> str:
+        """Applies a random move on the current state. Gives back the move in string format."""
         probs = self.get_probabilities()
         non_empty_holes = []
         for i,prob in enumerate(probs):
@@ -211,8 +221,7 @@ class QuantumGame(Game):
                 dir_str = 'left'
             else:
                 dir_str = 'right'
-            move_str = "Moving ({}-based) {} from position {}.".format(
-                swap_str, dir_str, source)
+            move_str = f"Moving ({swap_str}-based) {dir_str} from position {source}."
         else: # Move left & right (split)
             if self.iswap:
                 alpha.PhasedSplit()(self.state[1][source],
@@ -224,10 +233,82 @@ class QuantumGame(Game):
                               self.state[1][source-1],
                               self.state[1][source+1])
                 swap_str = 'SWAP'
-            move_str = "Splitting ({}-based) from position {} to postions {} and {}.".format(
+            move_str = "Splitting ({}-based) from position {} to positions {} and {}.".format(
                 swap_str,source,source-1,source+1)
         return move_str
 
+def test_classical_game():
+    """Simple tests for ClassicalGame."""
+    test_game = ClassicalGame(seed=42)
+    assert test_game.hole_nr == 5
+    assert len(test_game.history) == 0
+    assert test_game.state == [1.0,0.0,0.0,0.0,0.0]
+    for i in range(5):
+        guess = test_game.check_guess(i)
+        assert guess == (i==0)
+        hist_len=len(test_game.history)
+        test_game.history_append_guess(i)
+        assert len(test_game.history) == hist_len+1
+    hist_len=len(test_game.history)
+    test_game.history_append_move("abc")
+    assert len(test_game.history) == hist_len+1
+    assert test_game.history[-1] == "abc"
+    hist_len=len(test_game.history)
+    test_game.history_append_state()
+    assert len(test_game.history) == hist_len+1
+
+    test_game = ClassicalGame(seed=42)
+    test_game.take_random_move()
+    assert test_game.state == [0.0,1.0,0.0,0.0,0.0]
+    test_game.take_random_move()
+    assert test_game.state == [0.0,0.0,1.0,0.0,0.0]
+    test_game.take_random_move()
+    assert test_game.state == [0.0,1.0,0.0,0.0,0.0]
+    for i in range(5):
+        guess = test_game.check_guess(i)
+        assert guess == (i==1)
+
+def test_quantum_game():
+    """Simple tests for QuantumGame."""
+    test_game = QuantumGame(seed=42)
+    assert test_game.hole_nr == 5
+    assert len(test_game.history) == 0
+    probs = test_game.get_probabilities()
+    assert probs == [1.0,0.0,0.0,0.0,0.0]
+    for i in range(5):
+        guess = test_game.check_guess(i)
+        assert guess == (i==0)
+        hist_len=len(test_game.history)
+        test_game.history_append_guess(i)
+        assert len(test_game.history) == hist_len+1
+    hist_len=len(test_game.history)
+    test_game.history_append_move("abc")
+    assert len(test_game.history) == hist_len+1
+    assert test_game.history[-1] == "abc"
+    hist_len=len(test_game.history)
+    test_game.history_append_state()
+    assert len(test_game.history) == hist_len+1
+
+    test_game = QuantumGame(seed=42)
+    probs = test_game.get_probabilities()
+    assert probs == [1.0,0.0,0.0,0.0,0.0]
+    test_game.take_random_move()
+    probs = test_game.get_probabilities()
+    assert probs == [0.0,1.0,0.0,0.0,0.0]
+    test_game.take_random_move()
+    probs = test_game.get_probabilities(100)
+    assert probs[0]>0.0
+    assert probs[1]==0.0
+    assert probs[2]>0.0
+    assert probs[3]==0.0
+    assert probs[4]==0.0
+    guess = test_game.check_guess(0)
+    probs = test_game.get_probabilities(100)
+    assert probs[1]==0.0
+    assert probs[3]==0.0
+    assert probs[4]==0.0
+    assert (guess and probs[0]==1.0 and probs[2]==0.0) or \
+           (not guess and probs[0]==0.0 and probs[2]==1.0)
 
 if __name__ == '__main__':
     if '-h' in sys.argv or '--help' in sys.argv:
