@@ -11,13 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, List, Optional, Sequence, Union
-import cirq
 import copy
 import enum
+from typing import Dict, List, Optional, Sequence, Union
+import cirq
 
 from unitary.alpha.quantum_object import QuantumObject
-from unitary.alpha.quantum_effect import QuantumEffect
 
 
 class QuantumWorld:
