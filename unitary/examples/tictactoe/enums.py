@@ -12,32 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import enum
 
-from unitary.alpha.quantum_world import (
-    QuantumWorld,
-)
 
-from unitary.alpha.quantum_effect import (
-    quantum_if,
-    QuantumEffect,
-    QuantumIf,
-    QuantumThen,
-)
+class TicTacSquare(enum.Enum):
+    EMPTY = 0
+    X = 1
+    O = 2
 
-from unitary.alpha.qubit_effects import (
-    Flip,
-    Move,
-    PhasedMove,
-    PhasedSplit,
-    Superposition,
-    Split,
-)
 
-from unitary.alpha.qudit_effects import (
-    QuditCycle,
-    QuditFlip,
-)
-
-from unitary.alpha.quantum_object import (
-    QuantumObject,
-)
+class TicTacResult(enum.Enum):
+    UNFINISHED = 0
+    X_WINS = 1
+    O_WINS = 2
+    DRAW = 3
+    BOTH_WIN = 4

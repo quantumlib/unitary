@@ -18,12 +18,16 @@ import enum
 
 import cirq
 
-from unitary.alpha.qudit_gates import QuditPlusGate
+from unitary.alpha.qudit_gates import QuditPlusGate, QuditXGate
 from unitary.alpha.quantum_effect import QuantumEffect
 
 
-class Cycle(QuantumEffect):
-    """Flips a qubit in |0> to |1> and vice versa."""
+class QuditCycle(QuantumEffect):
+    """Cycles a qubit from |0> to |1>, |1> to |2>, etc.
+
+    Essentially adds `addend` to the state, where `addend`
+    is the parameter supplied at creation.
+    """
 
     def __init__(self, dimenstion, num=1):
         self.dimension = dimenstion
@@ -32,3 +36,21 @@ class Cycle(QuantumEffect):
     def effect(self, *objects):
         for q in objects:
             yield QuditPlusGate(self.dimension, addend=self.addend)(q.qubit)
+
+
+class QuditFlip(QuantumEffect):
+    """Flips two states of a qubit, leaving all other states unchanged.
+
+    For instance, QuditFlip(3, 0, 1) is a qutrit effect
+    that flips |0> to |1>, |1> to |0> and leaves
+    |2> alone.  This is also sometimes referred to as the X_0_1 gate.
+    """
+
+    def __init__(self, dimenstion: int, state0: int, state1: int):
+        self.dimension = dimenstion
+        self.state0 = state0
+        self.state1 = state1
+
+    def effect(self, *objects):
+        for q in objects:
+            yield QuditXGate(self.dimension, self.state0, self.state1)(q.qubit)

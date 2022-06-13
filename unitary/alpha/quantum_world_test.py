@@ -13,6 +13,7 @@
 # limitations under the License.
 #
 import enum
+import pytest
 
 import unitary.alpha as alpha
 
@@ -26,6 +27,13 @@ class StopLight(enum.Enum):
     RED = 0
     YELLOW = 1
     GREEN = 2
+
+
+def test_duplicate_objects():
+    light = alpha.QuantumObject("test", Light.GREEN)
+    board = alpha.QuantumWorld([light])
+    with pytest.raises(ValueError, match="already added"):
+        board.add_object(alpha.QuantumObject("test", Light.RED))
 
 
 def test_one_qubit():
@@ -68,7 +76,7 @@ def test_two_qutrits():
         [StopLight.YELLOW, StopLight.GREEN],
         [StopLight.YELLOW, StopLight.GREEN],
     ]
-    expected = "green (d=3): ────[+2]───\n\nyellow (d=3): ───[+1]───"
+    expected = "green (d=3): ────X(0_2)───\n\nyellow (d=3): ───X(0_1)───"
     assert str(board.circuit) == expected
 
 
