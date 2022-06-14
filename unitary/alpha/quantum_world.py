@@ -32,6 +32,7 @@ class QuantumWorld:
         self.effect_history = []
         self.used_object_keys = set()
         self.sampler = sampler
+        self.ancilla_names = set()
         self.post_selection: Dict[QuantumObject, int] = {}
 
         if objects is not None:
@@ -80,12 +81,39 @@ class QuantumWorld:
             sample_size = 100
         return sample_size
 
+    def force_measurement(
+        self, obj: QuantumObject, result: Union[enum.Enum, int]
+    ) -> str:
+        """Measures a QuantumObject with a defined outcome.
+
+        This function will move the qubit to an ancilla and set
+        a post-selection criteria on it in order to force it
+        to be a particular result.  A new qubit set to the initial
+        state of the result.
+        """
+        count = 0
+        ancilla_name = f"ancilla_{obj.name}_{count}"
+        while ancilla_name in self.used_object_keys:
+            count += 1
+            ancilla_name = f"ancilla_{obj.name}_{count}"
+        new_obj = QuantumObject(ancilla_name, result)
+        self.add_object(new_obj)
+        self.ancilla_names.add(ancilla_name)
+        self.circuit = self.circuit.transform_qubits(
+            lambda q: q
+            if q != obj.qubit and q != new_obj.qubit
+            else (new_obj.qubit if q == obj.qubit else obj.qubit)
+        )
+        post_selection = result.value if isinstance(result, enum.Enum) else result
+        self.post_selection[new_obj] = post_selection
+
     def peek(
         self,
         objects: Optional[Sequence[QuantumObject]] = None,
         count: int = 1,
         convert_to_enum: bool = True,
         _existing_list: List[List[Union[enum.Enum, int]]] = None,
+        _num_reps: Optional[int] = None,
     ) -> List[List[Union[enum.Enum, int]]]:
         """Measures the state of the system 'non-destructively'.
 
@@ -97,6 +125,16 @@ class QuantumWorld:
            equal to the count parameter.  Each element will be a list
            of measurement results for each object.
         """
+        if _num_reps is None:
+            num_reps = self._suggest_num_reps(count)
+        else:
+            if _num_reps > 1e6:
+                raise RecursionError(
+                    f"Count {count} reached without sufficient results. "
+                    "Likely post-selection error"
+                )
+            num_reps = _num_reps
+
         measure_circuit = self.circuit.copy()
         if objects is None:
             objects = self.objects
@@ -104,10 +142,6 @@ class QuantumWorld:
         measure_circuit.append(
             [cirq.measure(p.qubit, key=p.qubit.name) for p in measure_set]
         )
-
-        num_reps = self._suggest_num_reps(count)
-        if _existing_list is not None:
-            num_reps *= 4
         results = self.sampler.run(measure_circuit, repetitions=num_reps)
 
         # Perform post-selection
@@ -121,13 +155,19 @@ class QuantumWorld:
                     break
             if post_selected:
                 rtn_list.append(
-                    [results.measurements[obj.name][rep] for obj in objects]
+                    [
+                        results.measurements[obj.name][rep]
+                        for obj in objects
+                        if obj.name not in self.ancilla_names
+                    ]
                 )
                 if len(rtn_list) == count:
                     break
         if len(rtn_list) < count:
             # We post-selected too much, get more reps
-            return self.peek(objects, count, convert_to_enum, rtn_list)
+            return self.peek(
+                objects, count, convert_to_enum, rtn_list, _num_reps=num_reps * 10
+            )
 
         if convert_to_enum:
             rtn_list = [
@@ -152,7 +192,6 @@ class QuantumWorld:
             objects = self.objects
         results = self.peek(objects, convert_to_enum=convert_to_enum)
         for idx, result in enumerate(results[0]):
-            post_selection = result.value if isinstance(result, enum.Enum) else result
-            self.post_selection[objects[idx]] = post_selection
+            self.force_measurement(objects[idx], result)
 
         return results[0]
