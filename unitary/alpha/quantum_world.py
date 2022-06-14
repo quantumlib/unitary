@@ -125,15 +125,15 @@ class QuantumWorld:
            equal to the count parameter.  Each element will be a list
            of measurement results for each object.
         """
-        if _num_reps is not None:
+        if _num_reps is None:
+            num_reps = self._suggest_num_reps(count)
+        else:
             if _num_reps > 1e6:
                 raise RecursionError(
                     f"Count {count} reached without sufficient results. "
                     "Likely post-selection error"
                 )
             num_reps = _num_reps
-        else:
-            num_reps = self._suggest_num_reps(count)
 
         measure_circuit = self.circuit.copy()
         if objects is None:
