@@ -38,11 +38,10 @@ def test_controlled_inv_iswap():
         cirq.unitary(result, dtype=np.complex128),
         cirq.unitary(
             cirq.Circuit(
-                (cirq.ISWAP(qubits[0], qubits[1]) ** -1).controlled_by(qubits[2]),
-                dtype=np.complex128
-
-            )
-        ),
+                (cirq.ISWAP(qubits[0],
+                            qubits[1])**-1).controlled_by(qubits[2]),
+                dtype=np.complex128,
+            )),
         atol=1e-8,
     )
 
@@ -54,10 +53,10 @@ def test_controlled_sqrt_iswap():
         cirq.unitary(result, dtype=np.complex128),
         cirq.unitary(
             cirq.Circuit(
-                (cirq.ISWAP(qubits[0], qubits[1]) ** 0.5).controlled_by(qubits[2]),
-                dtype=np.complex128
-            )
-        ),
+                (cirq.ISWAP(qubits[0],
+                            qubits[1])**0.5).controlled_by(qubits[2]),
+                dtype=np.complex128,
+            )),
         atol=1e-6,
     )
 
@@ -69,9 +68,9 @@ def test_controlled_inv_sqrt_iswap():
         cirq.unitary(result, dtype=np.complex128),
         cirq.unitary(
             cirq.Circuit(
-                (cirq.ISWAP(qubits[0], qubits[1]) ** -0.5).controlled_by(qubits[2]),
-                dtype=np.complex128
-            )
-        ),
+                (cirq.ISWAP(qubits[0],
+                            qubits[1])**-0.5).controlled_by(qubits[2]),
+                dtype=np.complex128,
+            )),
         atol=1e-6,
     )
