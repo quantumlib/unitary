@@ -77,23 +77,9 @@ def check_notebook(notebook_fn: str):
 
 
 NOTEBOOKS = [
-    'docs/otoc/otoc_example.ipynb',
-    'docs/guide/data_analysis.ipynb',
-    'docs/guide/data_collection.ipynb',
-    'docs/qaoa/example_problems.ipynb',
-    'docs/qaoa/precomputed_analysis.ipynb',
-    'docs/qaoa/hardware_grid_circuits.ipynb',
-    'docs/qaoa/optimization_analysis.ipynb',
-    'docs/qaoa/tasks.ipynb',
-    'docs/qaoa/landscape_analysis.ipynb',
-    'docs/qaoa/routing_with_tket.ipynb',
     'docs/quantum_chess/concepts.ipynb',
     # 'docs/quantum_chess/quantum_chess_rest_api.ipynb', # runs a server, never finishes.
     # 'docs/quantum_chess/quantum_chess_client.ipynb',   # uses the server, requires modification.
-    'docs/hfvqe/molecular_data.ipynb',
-    'docs/hfvqe/quickstart.ipynb',
-    'docs/fermi_hubbard/publication_results.ipynb',
-    'docs/fermi_hubbard/experiment_example.ipynb',
 ]
 
 

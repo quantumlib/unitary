@@ -29,11 +29,11 @@ def _parse_requirements(path: pathlib.Path):
 install_requires = _parse_requirements(pathlib.Path("requirements.txt"))
 
 setup(
-    name="recirq",
+    name="unitary",
     version=__version__,
     url="http://github.com/quantumlib/unitary",
     author="Quantum AI team and collaborators",
-    author_email="cirq@googlegroups.com",
+    author_email="quantum-chess-engineering@googlegroups.com",
     python_requires=">=3.6.0",
     install_requires=install_requires,
     license="Apache 2",
