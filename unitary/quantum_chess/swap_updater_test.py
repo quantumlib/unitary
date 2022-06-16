@@ -150,8 +150,11 @@ def test_decomposed_swaps():
 
     # Whatever the decomposed operations are, they'd better be equivalent to a
     # SWAP.
-    swap_unitary = cirq.unitary(cirq.Circuit(cirq.SWAP(Q[0], Q[1])))
-    generated_unitary = cirq.unitary(cirq.Circuit(generate_decomposed_swap(Q[0], Q[1])))
+    swap_unitary = cirq.unitary(cirq.Circuit(cirq.SWAP(Q[0], Q[1])),
+                                dtype=np.complex128)
+    generated_unitary = cirq.unitary(cirq.Circuit(
+        generate_decomposed_swap(Q[0], Q[1])),
+                                     dtype=np.complex128)
     cirq.testing.assert_allclose_up_to_global_phase(
         swap_unitary, generated_unitary, atol=1e-8
     )
