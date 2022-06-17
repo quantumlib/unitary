@@ -101,7 +101,7 @@ class TicTacToe:
     or more samples (measurements) of the board.
     """
 
-    def __init__(self, rules: TicTacRules = TicTacRules.FULLY_QUANTUM):
+    def __init__(self, rules: TicTacRules = TicTacRules.QUANTUM_V3):
         self.clear()
         self.rules = rules
 
@@ -177,19 +177,19 @@ class TicTacToe:
             # non-empty squares is only allowed at full quantumness
             if ((move[0] not in self.empty_squares) or \
                  (move[1] not in self.empty_squares)) and \
-                    (self.rules != TicTacRules.FULLY_QUANTUM):
+                    (self.rules == TicTacRules.QUANTUM_V1):
                         raise ValueError(
-                            f"You need to play at full quantumness to allow \
-                                splits on top of non-empty squares"
+                            f"This ruleset ({0}) does not allow splits on \
+                              top of non-empty squares".format(self.rules)
                             )
 
             # TicTacSplit first flips the first square before performing a split
             # If either of the two involved squares is empty, we want to do the
             # split on that square.
             if move[1] in self.empty_squares:
-                TicTacSplit(mark)(self.squares[move[1]], self.squares[move[0]])
+                TicTacSplit(mark, self.rules)(self.squares[move[1]], self.squares[move[0]])
             else:
-                TicTacSplit(mark)(self.squares[move[0]], self.squares[move[1]])
+                TicTacSplit(mark, self.rules)(self.squares[move[0]], self.squares[move[1]])
 
             # The involved squares are now no longer empty
             self.empty_squares.discard(move[0])

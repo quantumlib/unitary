@@ -128,7 +128,7 @@ def test_rulesets():
         board.move("ab", tictactoe.TicTacSquare.X)
 
     # Try to make a split move on non-empty squares at minimal quantum
-    board = tictactoe.TicTacToe(tictactoe.TicTacRules.MINIMAL_QUANTUM)
+    board = tictactoe.TicTacToe(tictactoe.TicTacRules.QUANTUM_V1)
     board.move("a", tictactoe.TicTacSquare.X)
     with pytest.raises(ValueError):
         board.move("ab", tictactoe.TicTacSquare.O)
