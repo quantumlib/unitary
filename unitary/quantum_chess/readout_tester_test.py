@@ -27,6 +27,6 @@ def test_readout_tester():
 
     for is_p11 in [True, False]:
         results = tester.test_qubits(is_p11)
-        assert len(results) == len(device.qubits)
+        assert len(results) == len(device.metadata.qubit_set)
         for q in device.qubits:
             assert results[q]
