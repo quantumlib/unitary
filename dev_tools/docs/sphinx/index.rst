@@ -1,4 +1,4 @@
-ReCirq
+Unitary
 ======
 
 .. raw:: html
@@ -7,47 +7,17 @@ ReCirq
         font-size: 130%;
         color: dimgrey;
         margin-top: -5px;
-    ">Research using Cirq</div>
+    ">Add quantum behavior to games without a PhD in physics.</div>
 
-Welcome to the documentation for ReCirq! This repository contains
-:ref:`documentation <data-collection-idioms>` for structuring experiment code by way of a
-`tutorial experiment <Readout-Data-Collection.ipynb>`_.
+The Unitary library enables software developers to add quantum behavior to their
+systems without mastering in the underlying math. We thought games would be a
+great place to start.
 
-You can also find documentation for experimental studies using the sidebar
-navigation.
+You can get familiar with the library in the unitary/alpha/README.md file, then
+start playing around with the games in the unitary/examples directory.
 
-
-.. raw:: html
-
-    <img alt="Circuit"  src="_static/g3618.png" style="max-width: 400px; margin-top: 2rem;">
-
-.. toctree::
-    :maxdepth: 1
-    :hidden:
-
-    data_collection_idioms
-    tutorials/data_collection
-    tutorials/data_analysis
-    best_practices
-
-.. toctree::
-    :maxdepth: 1
-    :caption: Readout Scan
-    :hidden:
-
-    readout_scan_tasks
-
-.. toctree::
-    :maxdepth: 1
-    :caption: QAOA
-    :hidden:
-
-    qaoa/example_problems
-    qaoa/tasks
-    qaoa/precomputed_analysis
-    qaoa/landscape_analysis
-    qaoa/optimization_analysis
-    qaoa/hardware_grid_circuits
-    qaoa/problem_generation_tasks
-    qaoa/angle_precomputation_tasks
-    qaoa/routing_with_tket
+This project grew out of the open-source version of Christopher Cantwell's
+quantum chess engine. We maintain the open source
+`quantum chess project <quantum_chess/index`_, but you can also play
+`the commercial version of the game <https://quantumchess.net>`_, or read
+`the paper <https://arxiv.org/abs/1906.05836>`_ that started everything.

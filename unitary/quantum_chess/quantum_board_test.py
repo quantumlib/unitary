@@ -39,7 +39,7 @@ CACHE_INVALIDATION_REPS = 1001
 
 
 def get_seed():
-    seed = os.environ.get("RECIRQ_CHESS_TEST_SEED")
+    seed = os.environ.get("UNITARY_CHESS_TEST_SEED")
     if seed:
         seed = int(seed)
     else:
