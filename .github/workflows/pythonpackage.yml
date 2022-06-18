@@ -52,7 +52,7 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest
-          # UNITRY_CHESS_TEST_SEED: make quantum_chess tests determnistic
+          # UNITARY_CHESS_TEST_SEED: make quantum_chess tests determnistic
           # UNITARY_IMPORT_FAILSAFE: skip tests on unsupported Cirq configurations
           UNITARY_CHESS_TEST_SEED=789 UNITARY_IMPORT_FAILSAFE=y pytest -v
   nbformat:
