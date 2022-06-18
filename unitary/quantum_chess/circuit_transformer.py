@@ -47,7 +47,7 @@ class ConnectivityHeuristicCircuitTransformer:
         self.device = device
         self.mapping = None
         self.starting_qubit = self.find_start_qubit(device.qubits)
-        self.qubit_list = device.qubits
+        self.qubit_list = device.metadata.qubit_set
 
     def qubits_within(
         self,
