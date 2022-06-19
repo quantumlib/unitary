@@ -18,7 +18,6 @@ import abc
 import sys
 import enum
 import numpy as np
-import pytest
 
 from unitary import alpha
 
@@ -236,79 +235,6 @@ class QuantumGame(Game):
             move_str = "Splitting ({}-based) from position {} to positions {} and {}.".format(
                 swap_str,source,source-1,source+1)
         return move_str
-
-def test_classical_game():
-    """Simple tests for ClassicalGame."""
-    test_game = ClassicalGame(seed=42)
-    assert test_game.hole_nr == 5
-    assert len(test_game.history) == 0
-    assert test_game.state == [1.0,0.0,0.0,0.0,0.0]
-    for i in range(5):
-        guess = test_game.check_guess(i)
-        assert guess == (i==0)
-        hist_len=len(test_game.history)
-        test_game.history_append_guess(i)
-        assert len(test_game.history) == hist_len+1
-    hist_len=len(test_game.history)
-    test_game.history_append_move("abc")
-    assert len(test_game.history) == hist_len+1
-    assert test_game.history[-1] == "abc"
-    hist_len=len(test_game.history)
-    test_game.history_append_state()
-    assert len(test_game.history) == hist_len+1
-
-    test_game = ClassicalGame(seed=42)
-    test_game.take_random_move()
-    assert test_game.state == [0.0,1.0,0.0,0.0,0.0]
-    test_game.take_random_move()
-    assert test_game.state == [0.0,0.0,1.0,0.0,0.0]
-    test_game.take_random_move()
-    assert test_game.state == [0.0,1.0,0.0,0.0,0.0]
-    for i in range(5):
-        guess = test_game.check_guess(i)
-        assert guess == (i==1)
-
-def test_quantum_game():
-    """Simple tests for QuantumGame."""
-    test_game = QuantumGame(seed=42)
-    assert test_game.hole_nr == 5
-    assert len(test_game.history) == 0
-    probs = test_game.get_probabilities()
-    assert probs == [1.0,0.0,0.0,0.0,0.0]
-    for i in range(5):
-        guess = test_game.check_guess(i)
-        assert guess == (i==0)
-        hist_len=len(test_game.history)
-        test_game.history_append_guess(i)
-        assert len(test_game.history) == hist_len+1
-    hist_len=len(test_game.history)
-    test_game.history_append_move("abc")
-    assert len(test_game.history) == hist_len+1
-    assert test_game.history[-1] == "abc"
-    hist_len=len(test_game.history)
-    test_game.history_append_state()
-    assert len(test_game.history) == hist_len+1
-
-    test_game = QuantumGame(seed=42)
-    probs = test_game.get_probabilities()
-    assert probs == [1.0,0.0,0.0,0.0,0.0]
-    test_game.take_random_move()
-    probs = test_game.get_probabilities()
-    assert probs == [0.0,1.0,0.0,0.0,0.0]
-    test_game.take_random_move()
-    probs = test_game.get_probabilities(100)
-    assert probs[0]>0.0
-    assert probs[1]==0.0
-    assert probs[2]>0.0
-    assert probs[3]==0.0
-    assert probs[4]==0.0
-    guess = test_game.check_guess(0)
-    probs = test_game.get_probabilities(100)
-    assert probs[1]==0.0
-    assert probs[3]==0.0
-    assert probs[4]==0.0
-    assert (guess and probs[0]==1.0 and probs[2]==0.0) or \
-           (not guess and probs[0]==0.0 and probs[2]==1.0)
 
 if __name__ == '__main__':
     if '-h' in sys.argv or '--help' in sys.argv:
