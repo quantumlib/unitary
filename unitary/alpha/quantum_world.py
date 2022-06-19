@@ -247,7 +247,8 @@ class QuantumWorld:
                                  objects : Optional[Sequence[QuantumObject]] = None,
                                  count: int = 100
     ) -> List[float]:
-        """Calculates the probabilities based on measurements (peeks) carried out.
+        """Calculates the total probabilities for all non-zero states
+        based on measurements (peeks) carried out.
 
         Parameters:
             objects:    List of QuantumObjects
@@ -255,7 +256,8 @@ class QuantumWorld:
 
         Returns:
             A list with one element for each object which contains
-            the probability for state!=0.
+            the probability for the event state!=0. Which is the same as
+            1.0-Probability(state==0).
         """
         full_probs = self.get_probabilities(objects=objects, count=count)
         binary_probs = []
