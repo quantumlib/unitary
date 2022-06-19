@@ -52,9 +52,9 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest
-          # RECIRQ_CHESS_TEST_SEED: make quantum_chess tests determnistic
-          # RECIRQ_IMPORT_FAILSAFE: skip tests on unsupported Cirq configurations
-          RECIRQ_CHESS_TEST_SEED=789 RECIRQ_IMPORT_FAILSAFE=y pytest -v
+          # UNITARY_CHESS_TEST_SEED: make quantum_chess tests determnistic
+          # UNITARY_IMPORT_FAILSAFE: skip tests on unsupported Cirq configurations
+          UNITARY_CHESS_TEST_SEED=789 UNITARY_IMPORT_FAILSAFE=y pytest -v
   nbformat:
     name: Notebook formatting
     runs-on: ubuntu-latest
