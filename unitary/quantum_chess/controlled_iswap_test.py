@@ -13,15 +13,16 @@
 # limitations under the License.
 import cirq
 import unitary.quantum_chess.controlled_iswap as controlled_iswap
+import numpy as np
 
 
 def test_controlled_iswap():
     qubits = cirq.LineQubit.range(3)
     result = controlled_iswap.controlled_iswap(qubits[0], qubits[1], qubits[2])
     cirq.testing.assert_allclose_up_to_global_phase(
-        cirq.unitary(result),
-        cirq.unitary(
-            cirq.Circuit(cirq.ISWAP(qubits[0], qubits[1]).controlled_by(qubits[2]))
+        result.unitary(dtype=np.complex128),
+        cirq.Circuit(cirq.ISWAP(qubits[0], qubits[1]).controlled_by(qubits[2])).unitary(
+            dtype=np.complex128
         ),
         atol=1e-8,
     )
@@ -33,12 +34,10 @@ def test_controlled_inv_iswap():
         qubits[0], qubits[1], qubits[2], inverse=True
     )
     cirq.testing.assert_allclose_up_to_global_phase(
-        cirq.unitary(result),
-        cirq.unitary(
-            cirq.Circuit(
-                (cirq.ISWAP(qubits[0], qubits[1]) ** -1).controlled_by(qubits[2])
-            )
-        ),
+        result.unitary(dtype=np.complex128),
+        cirq.Circuit(
+            (cirq.ISWAP(qubits[0], qubits[1]) ** -1).controlled_by(qubits[2]),
+        ).unitary(dtype=np.complex128),
         atol=1e-8,
     )
 
@@ -47,12 +46,10 @@ def test_controlled_sqrt_iswap():
     qubits = cirq.LineQubit.range(3)
     result = controlled_iswap.controlled_sqrt_iswap(qubits[0], qubits[1], qubits[2])
     cirq.testing.assert_allclose_up_to_global_phase(
-        cirq.unitary(result),
-        cirq.unitary(
-            cirq.Circuit(
-                (cirq.ISWAP(qubits[0], qubits[1]) ** 0.5).controlled_by(qubits[2])
-            )
-        ),
+        result.unitary(dtype=np.complex128),
+        cirq.Circuit(
+            (cirq.ISWAP(qubits[0], qubits[1]) ** 0.5).controlled_by(qubits[2]),
+        ).unitary(dtype=np.complex128),
         atol=1e-6,
     )
 
@@ -61,11 +58,9 @@ def test_controlled_inv_sqrt_iswap():
     qubits = cirq.LineQubit.range(3)
     result = controlled_iswap.controlled_inv_sqrt_iswap(qubits[0], qubits[1], qubits[2])
     cirq.testing.assert_allclose_up_to_global_phase(
-        cirq.unitary(result),
-        cirq.unitary(
-            cirq.Circuit(
-                (cirq.ISWAP(qubits[0], qubits[1]) ** -0.5).controlled_by(qubits[2])
-            )
-        ),
+        result.unitary(dtype=np.complex128),
+        cirq.Circuit(
+            (cirq.ISWAP(qubits[0], qubits[1]) ** -0.5).controlled_by(qubits[2]),
+        ).unitary(dtype=np.complex128),
         atol=1e-6,
     )

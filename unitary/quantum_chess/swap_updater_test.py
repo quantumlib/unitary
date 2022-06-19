@@ -4,6 +4,7 @@ import cirq_google as cg
 
 from unitary.quantum_chess.swap_updater import SwapUpdater, generate_decomposed_swap
 import unitary.quantum_chess.quantum_moves as qm
+import numpy as np
 
 # Logical qubits q0 - q5.
 q = list(cirq.NamedQubit(f"q{i}") for i in range(6))
@@ -150,8 +151,12 @@ def test_decomposed_swaps():
 
     # Whatever the decomposed operations are, they'd better be equivalent to a
     # SWAP.
-    swap_unitary = cirq.unitary(cirq.Circuit(cirq.SWAP(Q[0], Q[1])))
-    generated_unitary = cirq.unitary(cirq.Circuit(generate_decomposed_swap(Q[0], Q[1])))
+    swap_unitary = cirq.Circuit(cirq.SWAP(Q[0], Q[1])).unitary(dtype=np.complex128)
+
+    generated_unitary = cirq.Circuit(generate_decomposed_swap(Q[0], Q[1])).unitary(
+        dtype=np.complex128
+    )
+
     cirq.testing.assert_allclose_up_to_global_phase(
         swap_unitary, generated_unitary, atol=1e-8
     )

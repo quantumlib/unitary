@@ -14,6 +14,7 @@
 from typing import Sequence, Union, Optional
 
 import cirq
+from cirq import optimizers
 import cirq_google as cg
 import numpy as np
 from cirq.transformers.analytical_decompositions.two_qubit_to_fsim import (

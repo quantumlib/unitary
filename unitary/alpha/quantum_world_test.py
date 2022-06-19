@@ -13,6 +13,7 @@
 # limitations under the License.
 #
 import enum
+import pytest
 
 import unitary.alpha as alpha
 
@@ -26,6 +27,13 @@ class StopLight(enum.Enum):
     RED = 0
     YELLOW = 1
     GREEN = 2
+
+
+def test_duplicate_objects():
+    light = alpha.QuantumObject("test", Light.GREEN)
+    board = alpha.QuantumWorld([light])
+    with pytest.raises(ValueError, match="already added"):
+        board.add_object(alpha.QuantumObject("test", Light.RED))
 
 
 def test_one_qubit():
@@ -68,7 +76,7 @@ def test_two_qutrits():
         [StopLight.YELLOW, StopLight.GREEN],
         [StopLight.YELLOW, StopLight.GREEN],
     ]
-    expected = "green (d=3): ────[+2]───\n\nyellow (d=3): ───[+1]───"
+    expected = "green (d=3): ────X(0_2)───\n\nyellow (d=3): ───X(0_1)───"
     assert str(board.circuit) == expected
 
 
@@ -87,6 +95,17 @@ def test_pop():
     assert len(results) == 200
     assert all(result[0] == popped for result in results)
     assert all(result[1] != popped for result in results)
+
+
+def test_pop_and_reuse():
+    """Tests reusing a popped qubit."""
+    light = alpha.QuantumObject("l1", Light.GREEN)
+    board = alpha.QuantumWorld([light])
+    popped = board.pop([light])[0]
+    assert popped == Light.GREEN
+    alpha.Flip()(light)
+    popped = board.pop([light])[0]
+    assert popped == Light.RED
 
 
 def test_undo():
@@ -130,7 +149,11 @@ def test_undo_post_select():
 
 
 def test_pop_not_enough_reps():
-    lights = [alpha.QuantumObject("l" + str(i), Light.RED) for i in range(20)]
+    """Tests forcing a measurement of a rare outcome,
+    so that peek needs to be called recursively to get more
+    occurances.
+    """
+    lights = [alpha.QuantumObject("l" + str(i), Light.RED) for i in range(15)]
     board = alpha.QuantumWorld(lights)
     alpha.Flip()(lights[0])
     alpha.Split()(lights[0], lights[1], lights[2])
@@ -140,17 +163,39 @@ def test_pop_not_enough_reps():
     alpha.Split()(lights[8], lights[9], lights[10])
     alpha.Split()(lights[10], lights[11], lights[12])
     alpha.Split()(lights[12], lights[13], lights[14])
-    alpha.Split()(lights[14], lights[15], lights[16])
 
-    results = board.peek([lights[16]], count=200)
+    results = board.peek([lights[14]], count=20000)
+    assert any(result[0] == Light.GREEN for result in results)
     assert not all(result[0] == Light.GREEN for result in results)
-    board.pop([lights[16]])
+    board.force_measurement(lights[14], Light.GREEN)
 
-    # Force post select to a rare value
-    board.post_selection[lights[16]] = 1
-    results = board.peek([lights[16]], count=200)
+    results = board.peek([lights[14]], count=200)
     assert len(results) == 200
     assert all(result[0] == Light.GREEN for result in results)
+    results = board.peek(count=200)
+    assert all(len(result) == 15 for result in results)
+    assert all(result == [Light.RED] * 14 + [Light.GREEN] for result in results)
+
+
+def test_pop_qubits_twice():
+    """Tests popping qubits twice, so that 2 ancillas are created
+    for each qubit."""
+    lights = [alpha.QuantumObject("l" + str(i), Light.RED) for i in range(3)]
+    board = alpha.QuantumWorld(lights)
+    alpha.Flip()(lights[0])
+    alpha.Split()(lights[0], lights[1], lights[2])
+    result = board.pop()
+    green_on_1 = [Light.RED, Light.GREEN, Light.RED]
+    green_on_2 = [Light.RED, Light.RED, Light.GREEN]
+    assert (result == green_on_1) or (result == green_on_2)
+    alpha.Move()(lights[1], lights[2])
+    result2 = board.pop()
+    peek_results = board.peek(count=200)
+    if result == green_on_1:
+        assert result2 == green_on_2
+    else:
+        assert result2 == green_on_1
+    assert all(peek_result == result2 for peek_result in peek_results)
 
 
 def test_get_histogram_and_get_probabilities():
