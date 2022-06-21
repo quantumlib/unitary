@@ -44,7 +44,7 @@ class ReadoutTester:
     ):
         self.sampler = sampler
         self.device = device
-        self.qubits = device.qubits
+        self.qubits = device.metadata.qubit_set
         self.repetitions = repetitions
         self.threshold = threshold
 

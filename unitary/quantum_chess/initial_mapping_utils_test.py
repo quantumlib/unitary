@@ -29,116 +29,115 @@ a6 = cirq.NamedQubit("a6")
 a7 = cirq.NamedQubit("a7")
 
 grid_qubits = dict(
-    (f"{row}_{col}", cirq.GridQubit(row, col)) for row in range(2) for col in range(11)
+    (f"{row}_{col}", cirq.GridQubit(row, col)) for row in range(10) for col in range(7)
 )
 
 
 def test_build_physical_qubits_graph():
-    g = imu.build_physical_qubits_graph(cg.Foxtail)
+    g = imu.build_physical_qubits_graph(cg.Sycamore23)
     expected = {
-        grid_qubits["0_0"]: [grid_qubits["0_1"], grid_qubits["1_0"]],
-        grid_qubits["0_1"]: [
-            grid_qubits["0_0"],
-            grid_qubits["1_1"],
-            grid_qubits["0_2"],
+        grid_qubits["3_2"]: [grid_qubits["4_2"]],
+        grid_qubits["4_1"]: [
+            grid_qubits["4_2"],
+            grid_qubits["5_1"],
         ],
-        grid_qubits["0_2"]: [
-            grid_qubits["0_1"],
-            grid_qubits["1_2"],
-            grid_qubits["0_3"],
+        grid_qubits["4_2"]: [
+            grid_qubits["3_2"],
+            grid_qubits["4_3"],
+            grid_qubits["5_2"],
+            grid_qubits["4_1"],
         ],
-        grid_qubits["0_3"]: [
-            grid_qubits["0_2"],
-            grid_qubits["1_3"],
-            grid_qubits["0_4"],
+        grid_qubits["4_3"]: [
+            grid_qubits["4_2"],
+            grid_qubits["5_3"],
         ],
-        grid_qubits["0_4"]: [
-            grid_qubits["0_3"],
-            grid_qubits["1_4"],
-            grid_qubits["0_5"],
+        grid_qubits["5_0"]: [grid_qubits["5_1"]],
+        grid_qubits["5_1"]: [
+            grid_qubits["4_1"],
+            grid_qubits["5_2"],
+            grid_qubits["6_1"],
+            grid_qubits["5_0"],
         ],
-        grid_qubits["0_5"]: [
-            grid_qubits["0_4"],
-            grid_qubits["1_5"],
-            grid_qubits["0_6"],
+        grid_qubits["5_2"]: [
+            grid_qubits["4_2"],
+            grid_qubits["5_3"],
+            grid_qubits["6_2"],
+            grid_qubits["5_1"],
         ],
-        grid_qubits["0_6"]: [
-            grid_qubits["0_5"],
-            grid_qubits["1_6"],
-            grid_qubits["0_7"],
+        grid_qubits["5_3"]: [
+            grid_qubits["4_3"],
+            grid_qubits["5_4"],
+            grid_qubits["6_3"],
+            grid_qubits["5_2"],
         ],
-        grid_qubits["0_7"]: [
-            grid_qubits["0_6"],
-            grid_qubits["1_7"],
-            grid_qubits["0_8"],
+        grid_qubits["5_4"]: [
+            grid_qubits["5_3"],
+            grid_qubits["6_4"],
         ],
-        grid_qubits["0_8"]: [
-            grid_qubits["0_7"],
-            grid_qubits["1_8"],
-            grid_qubits["0_9"],
+        grid_qubits["6_1"]: [
+            grid_qubits["5_1"],
+            grid_qubits["6_2"],
         ],
-        grid_qubits["0_9"]: [
-            grid_qubits["0_8"],
-            grid_qubits["1_9"],
-            grid_qubits["0_10"],
+        grid_qubits["6_2"]: [
+            grid_qubits["5_2"],
+            grid_qubits["6_3"],
+            grid_qubits["7_2"],
+            grid_qubits["6_1"],
         ],
-        grid_qubits["0_10"]: [
-            grid_qubits["0_9"],
-            grid_qubits["1_10"],
+        grid_qubits["6_3"]: [
+            grid_qubits["5_3"],
+            grid_qubits["6_4"],
+            grid_qubits["7_3"],
+            grid_qubits["6_2"],
         ],
-        grid_qubits["1_0"]: [
-            grid_qubits["1_1"],
-            grid_qubits["0_0"],
+        grid_qubits["6_4"]: [
+            grid_qubits["5_4"],
+            grid_qubits["6_5"],
+            grid_qubits["7_4"],
+            grid_qubits["6_3"],
         ],
-        grid_qubits["1_1"]: [
-            grid_qubits["1_0"],
-            grid_qubits["0_1"],
-            grid_qubits["1_2"],
+        grid_qubits["6_5"]: [
+            grid_qubits["6_4"],
+            grid_qubits["7_5"],
         ],
-        grid_qubits["1_2"]: [
-            grid_qubits["1_1"],
-            grid_qubits["0_2"],
-            grid_qubits["1_3"],
+        grid_qubits["7_2"]: [
+            grid_qubits["6_2"],
+            grid_qubits["7_3"],
         ],
-        grid_qubits["1_3"]: [
-            grid_qubits["1_2"],
-            grid_qubits["0_3"],
-            grid_qubits["1_4"],
+        grid_qubits["7_3"]: [
+            grid_qubits["6_3"],
+            grid_qubits["7_4"],
+            grid_qubits["8_3"],
+            grid_qubits["7_2"],
         ],
-        grid_qubits["1_4"]: [
-            grid_qubits["1_3"],
-            grid_qubits["0_4"],
-            grid_qubits["1_5"],
+        grid_qubits["7_4"]: [
+            grid_qubits["6_4"],
+            grid_qubits["7_5"],
+            grid_qubits["8_4"],
+            grid_qubits["7_3"],
         ],
-        grid_qubits["1_5"]: [
-            grid_qubits["1_4"],
-            grid_qubits["0_5"],
-            grid_qubits["1_6"],
+        grid_qubits["7_5"]: [
+            grid_qubits["6_5"],
+            grid_qubits["7_6"],
+            grid_qubits["8_5"],
+            grid_qubits["7_4"],
         ],
-        grid_qubits["1_6"]: [
-            grid_qubits["1_5"],
-            grid_qubits["0_6"],
-            grid_qubits["1_7"],
+        grid_qubits["7_6"]: [grid_qubits["7_5"]],
+        grid_qubits["8_3"]: [
+            grid_qubits["7_3"],
+            grid_qubits["8_4"],
         ],
-        grid_qubits["1_7"]: [
-            grid_qubits["1_6"],
-            grid_qubits["0_7"],
-            grid_qubits["1_8"],
+        grid_qubits["8_4"]: [
+            grid_qubits["7_4"],
+            grid_qubits["8_5"],
+            grid_qubits["9_4"],
+            grid_qubits["8_3"],
         ],
-        grid_qubits["1_8"]: [
-            grid_qubits["1_7"],
-            grid_qubits["0_8"],
-            grid_qubits["1_9"],
+        grid_qubits["8_5"]: [
+            grid_qubits["7_5"],
+            grid_qubits["8_4"],
         ],
-        grid_qubits["1_9"]: [
-            grid_qubits["1_8"],
-            grid_qubits["0_9"],
-            grid_qubits["1_10"],
-        ],
-        grid_qubits["1_10"]: [
-            grid_qubits["1_9"],
-            grid_qubits["0_10"],
-        ],
+        grid_qubits["9_4"]: [grid_qubits["8_4"]],
     }
     assert len(g) == len(expected)
     for q in expected:
@@ -357,45 +356,69 @@ def test_find_reference_qubits():
 
 
 def test_find_candidate_qubits():
-    g = imu.build_physical_qubits_graph(cg.Foxtail)
-    # First level has free qubits.
+    g = imu.build_physical_qubits_graph(cg.Sycamore23)
+    # First level has a free qubit.
+    # The mapped variable contains "occupied" qubits.
     mapped = {
-        grid_qubits["0_5"],
+        grid_qubits["4_1"],
+        grid_qubits["4_3"],
+        grid_qubits["5_2"],
     }
-    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["0_5"])) == {
-        cirq.GridQubit(0, 4),
-        cirq.GridQubit(1, 5),
-        cirq.GridQubit(0, 6),
+    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["4_2"])) == {
+        cirq.GridQubit(3, 2),
     }
     # Second level has free qubits.
     mapped = {
-        grid_qubits["0_4"],
-        grid_qubits["0_5"],
-        grid_qubits["0_6"],
-        grid_qubits["1_5"],
+        grid_qubits["5_3"],
+        grid_qubits["4_1"],
     }
-    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["0_5"])) == {
-        cirq.GridQubit(0, 3),
-        cirq.GridQubit(1, 4),
-        cirq.GridQubit(1, 6),
-        cirq.GridQubit(0, 7),
+    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["4_3"])) == {
+        cirq.GridQubit(4, 2),
     }
     # Third level has free qubits.
     mapped = {
-        grid_qubits["0_3"],
-        grid_qubits["0_4"],
-        grid_qubits["0_5"],
-        grid_qubits["0_6"],
-        grid_qubits["0_7"],
-        grid_qubits["1_4"],
-        grid_qubits["1_5"],
-        grid_qubits["1_6"],
+        grid_qubits["4_1"],
+        grid_qubits["5_2"],
     }
-    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["0_5"])) == {
-        cirq.GridQubit(0, 2),
-        cirq.GridQubit(1, 3),
-        cirq.GridQubit(1, 7),
-        cirq.GridQubit(0, 8),
+    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["5_1"])) == {
+        cirq.GridQubit(5, 0),
+        cirq.GridQubit(6, 1),
+    }
+    # Fourth level has free qubits.
+    mapped = {
+        grid_qubits["5_4"],
+        grid_qubits["7_4"],
+    }
+    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["6_4"])) == {
+        cirq.GridQubit(6, 3),
+        cirq.GridQubit(6, 5),
+    }
+    # Fifth level has free qubits.
+    mapped = {
+        grid_qubits["7_4"],
+    }
+    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["7_3"])) == {
+        cirq.GridQubit(6, 3),
+        cirq.GridQubit(8, 3),
+        cirq.GridQubit(7, 2),
+    }
+    # Sixth level has free qubits.
+    mapped = {
+        grid_qubits["7_4"],
+        grid_qubits["9_4"],
+    }
+    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["8_4"])) == {
+        cirq.GridQubit(8, 3),
+        cirq.GridQubit(8, 5),
+    }
+    # Seventh level has free qubits.
+    mapped = {
+        grid_qubits["7_4"],
+        grid_qubits["8_5"],
+        grid_qubits["8_3"],
+    }
+    assert set(imu.find_candidate_qubits(mapped, g, grid_qubits["8_4"])) == {
+        cirq.GridQubit(9, 4),
     }
 
 
