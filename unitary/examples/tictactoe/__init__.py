@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult
+from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules
 from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
 from unitary.examples.tictactoe.tic_tac_toe import TicTacToe

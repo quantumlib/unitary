@@ -15,7 +15,7 @@ from typing import Dict, List
 
 from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.alpha.qudit_effects import QuditFlip
-from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult
+from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules
 from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
 
 
@@ -90,7 +90,6 @@ class TicTacToe:
     letters, where a two letter move indicates a "split" move.
     Letters are 'a' through 'i', in the following format:
 
-
        a | b | c
       -----------
        d | e | f
@@ -102,8 +101,9 @@ class TicTacToe:
     or more samples (measurements) of the board.
     """
 
-    def __init__(self):
+    def __init__(self, rules: TicTacRules = TicTacRules.QUANTUM_V3):
         self.clear()
+        self.rules = rules
 
     def clear(self) -> None:
         """Clears the TicTacToe board.
@@ -151,18 +151,51 @@ class TicTacToe:
             mark: Either TicTacSquare.X or TicTacSquare.O
         """
         if len(move) > 2 or len(move) == 0:
-            raise ValueError(f"Move {move} must be one or two letters.")
+            raise ValueError(f"Your move ({move}) must be one or two letters.")
         if not all(m in _SQUARE_NAMES for m in move):
             raise ValueError(
-                f"Move {move} must be one of these squares: {_SQUARE_NAMES}"
+                f"Your move ({move}) can only have these: {_SQUARE_NAMES}"
             )
         if len(move) == 1:
+            # Check if the square is empty
+            if move not in self.empty_squares:
+                raise ValueError(
+                    f"You cannot put your token on non-empty square {move}"
+                )
+            # Flip the square to the correct value (mark.value)
             QuditFlip(3, 0, mark.value)(self.squares[move])
+            # This square is now no longer empty
             self.empty_squares.discard(move)
         else:
-            TicTacSplit(mark)(self.squares[move[0]], self.squares[move[1]])
+            # Check if rules allow quantum moves
+            if self.rules == TicTacRules.CLASSICAL:
+                raise ValueError(
+                    f"Quantum moves are not allowed in a classical TicTacToe"
+                )
+
+            # Check if either square is non-empty. Splitting on top of
+            # non-empty squares is only allowed at full quantumness
+            if ((move[0] not in self.empty_squares) or \
+                 (move[1] not in self.empty_squares)) and \
+                    (self.rules == TicTacRules.QUANTUM_V1):
+                        raise ValueError(
+                            f"This ruleset ({0}) does not allow splits on \
+                              top of non-empty squares".format(self.rules)
+                            )
+
+            # TicTacSplit first flips the first square before performing a split
+            # If either of the two involved squares is empty, we want to do the
+            # split on that square.
+            if move[1] in self.empty_squares:
+                TicTacSplit(mark, self.rules)(self.squares[move[1]], self.squares[move[0]])
+            else:
+                TicTacSplit(mark, self.rules)(self.squares[move[0]], self.squares[move[1]])
+
+            # The involved squares are now no longer empty
             self.empty_squares.discard(move[0])
             self.empty_squares.discard(move[1])
+
+        # If the board is full, we project everything
         if not self.empty_squares:
             self.measure()
         return self.result()
