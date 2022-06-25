@@ -33,7 +33,7 @@ class QuantumObject:
     """
 
     def __init__(self, name: str, initial_state: Union[enum.Enum, int]):
-        self.board: Optional["QuantumWorld"] = None
+        self.world: Optional["QuantumWorld"] = None
         if isinstance(initial_state, int):
             self.initial_state = initial_state
             self.enum_type: Type[Union[int, enum.Enum]] = int
@@ -71,7 +71,7 @@ class QuantumObject:
         else:
             return NotImplemented
 
-        if self.board is None:
+        if self.world is None:
             self.initial_state = (self.initial_state + add_num) % self.num_states
         else:
             if self.num_states == 2:
