@@ -186,11 +186,11 @@ class QuantumGame(Game):
         measurement = self.state[0].pop([self.state[1][guess]])[0]
         # TODO: After Issue #21 is solved, there is no need for creating a new qobject
         # after each measurement.
-        new_hole = alpha.QuantumObject(
-            "Hole-{}-{}".format(guess,len(self.state[0].objects)),
-            measurement)
-        self.state[0].add_object(new_hole)
-        self.state[1][guess] = new_hole
+        # new_hole = alpha.QuantumObject(
+        #     "Hole-{}-{}".format(guess,len(self.state[0].objects)),
+        #     measurement)
+        # self.state[0].add_object(new_hole)
+        # self.state[1][guess] = new_hole
         return measurement == Hole.FOX
 
     def take_random_move(self) -> str:
@@ -237,6 +237,7 @@ class QuantumGame(Game):
         return move_str
 
 if __name__ == '__main__':
+    seed=None
     if '-h' in sys.argv or '--help' in sys.argv:
         print('Usage:')
         print('python3 fox_in_a_hole.py [-q] [-i] [-h]')
@@ -244,6 +245,8 @@ if __name__ == '__main__':
         print('-q: Use quantum version instead of classical version.')
         print('-i: Use iSWAP for moves in quantum version.')
         sys.exit(0)
+    if '-fixseed' in sys.argv:
+        seed=1
     if '-q' in sys.argv:
         use_iswap = '-i' in sys.argv
         game = QuantumGame(iswap=use_iswap)
