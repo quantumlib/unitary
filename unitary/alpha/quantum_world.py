@@ -11,13 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, List, Optional, Sequence, Union
-import cirq
 import copy
 import enum
+from typing import Dict, List, Optional, Sequence, Union
+import cirq
 
 from unitary.alpha.quantum_object import QuantumObject
-from unitary.alpha.quantum_effect import QuantumEffect
 
 
 class QuantumWorld:
@@ -195,3 +194,73 @@ class QuantumWorld:
             self.force_measurement(objects[idx], result)
 
         return results[0]
+
+    def get_histogram(self,
+                      objects: Optional[Sequence[QuantumObject]] = None,
+                      count: int = 100
+    ) -> List[Dict[int, int]]:
+        """Creates histogram based on measurements (peeks) carried out.
+
+        Parameters:
+            objects:    List of QuantumObjects
+            count:      Number of measurements
+
+        Returns:
+            A list with one element for each object. Each element contains a dictionary with
+            counts for each state of the given object.
+        """
+        if not objects:
+            objects = self.objects
+        peek_results = self.peek(objects=objects,
+                                 convert_to_enum=False,
+                                 count=count)
+        histogram = []
+        for obj in objects:
+            histogram.append({state: 0 for state in range(obj.num_states)})
+        for result in peek_results:
+            for idx in range(len(objects)):
+                histogram[idx][result[idx][0]] += 1
+        return histogram
+
+    def get_probabilities(self,
+                          objects : Optional[Sequence[QuantumObject]] = None,
+                          count: int = 100
+    ) -> List[Dict[int, float]]:
+        """Calculates the probabilities based on measurements (peeks) carried out.
+
+        Parameters:
+            objects:    List of QuantumObjects
+            count:      Number of measurements
+
+        Returns:
+            A list with one element for each object. Each element contains a dictionary with
+            the probability for each state of the given object.
+        """
+        histogram = self.get_histogram(objects=objects, count=count)
+        probabilities = []
+        for obj_hist in histogram:
+            probabilities.append(
+                {state: obj_hist[state]/count for state in range(len(obj_hist))} )
+        return probabilities
+
+    def get_binary_probabilities(self,
+                                 objects : Optional[Sequence[QuantumObject]] = None,
+                                 count: int = 100
+    ) -> List[float]:
+        """Calculates the total probabilities for all non-zero states
+        based on measurements (peeks) carried out.
+
+        Parameters:
+            objects:    List of QuantumObjects
+            count:      Number of measurements
+
+        Returns:
+            A list with one element for each object which contains
+            the probability for the event state!=0. Which is the same as
+            1.0-Probability(state==0).
+        """
+        full_probs = self.get_probabilities(objects=objects, count=count)
+        binary_probs = []
+        for one_probs in full_probs:
+            binary_probs.append(1-one_probs[0])
+        return binary_probs
