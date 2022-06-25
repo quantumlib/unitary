@@ -18,8 +18,8 @@ import numpy as np
 import cirq
 
 from unitary.alpha import QuantumEffect, QuantumObject
-from unitary.alpha.qudit_gates import QuditXGate, QuditSwapPowGate
-from unitary.examples.tictactoe.enums import TicTacSquare
+from unitary.alpha.qudit_gates import QuditXGate, QuditISwapPowGate
+from unitary.examples.tictactoe.enums import TicTacSquare, TicTacRules
 
 
 class QuditSplitGate(cirq.Gate):
@@ -30,7 +30,7 @@ class QuditSplitGate(cirq.Gate):
     with either X or O.
 
     Args:
-        sqyare: use TicTacQuare.X to do a sqrtSWAP(01) and
+        square: use TicTacQuare.X to do a sqrtSWAP(01) and
             TicTacSquare.O to do a sqrtSWAP(02)
     """
 
@@ -70,10 +70,14 @@ class QuditSplitGate(cirq.Gate):
 
 
 class TicTacSplit(QuantumEffect):
-    """Flips a qubit from |0> to |1> then splits to another square."""
-
-    def __init__(self, tic_tac_type: TicTacSquare):
-        self.tic_tac_type = tic_tac_type
+    """
+    Flips a qubit from |0> to |1> then splits to another square.
+    Depending on the ruleset, the split is done either using a standard
+    sqrt-ISWAP gate, or using the custom QuditSplitGate.
+    """
+    def __init__(self, tic_tac_type: TicTacSquare, rules: TicTacRules):
+        self.mark = tic_tac_type
+        self.rules = rules
 
     def num_dimension(self) -> Optional[int]:
         return 3
@@ -82,5 +86,9 @@ class TicTacSplit(QuantumEffect):
         return 2
 
     def effect(self, square1: QuantumObject, square2: QuantumObject):
-        yield QuditXGate(3, 0, self.tic_tac_type.value)(square1.qubit)
-        yield QuditSplitGate(self.tic_tac_type)(square1.qubit, square2.qubit)
+        yield QuditXGate(3, 0, self.mark.value)(square1.qubit)
+
+        if self.rules == TicTacRules.QUANTUM_V3:
+            yield QuditISwapPowGate(3, 0.5)(square1.qubit, square2.qubit)
+        else:
+            yield QuditSplitGate(self.mark)(square1.qubit, square2.qubit)
