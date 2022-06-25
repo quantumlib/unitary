@@ -54,7 +54,7 @@ def test_quantum_game():
     test_game = fh.QuantumGame(seed=42)
     assert test_game.hole_nr == 5
     assert len(test_game.history) == 0
-    probs = test_game.get_probabilities()
+    probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
     assert probs == [1.0,0.0,0.0,0.0,0.0]
     for i in range(5):
         guess = test_game.check_guess(i)
@@ -71,20 +71,20 @@ def test_quantum_game():
     assert len(test_game.history) == hist_len+1
 
     test_game = fh.QuantumGame(seed=42)
-    probs = test_game.get_probabilities()
+    probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
     assert probs == [1.0,0.0,0.0,0.0,0.0]
     test_game.take_random_move()
-    probs = test_game.get_probabilities()
+    probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
     assert probs == [0.0,1.0,0.0,0.0,0.0]
     test_game.take_random_move()
-    probs = test_game.get_probabilities(100)
+    probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
     assert probs[0]>0.0
     assert probs[1]==0.0
     assert probs[2]>0.0
     assert probs[3]==0.0
     assert probs[4]==0.0
     guess = test_game.check_guess(0)
-    probs = test_game.get_probabilities(100)
+    probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
     assert probs[1]==0.0
     assert probs[3]==0.0
     assert probs[4]==0.0
