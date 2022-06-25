@@ -172,13 +172,6 @@ class QuantumGame(Game):
         In the quantum version, quantum-measurement happens which might change the state.
         """
         measurement = self.state[0].pop([self.state[1][guess]])[0]
-        # TODO: After Issue #21 is solved, there is no need for creating a new qobject
-        # after each measurement.
-        new_hole = QuantumObject(
-            "Hole-{}-{}".format(guess,len(self.state[0].objects)),
-            measurement)
-        self.state[0].add_object(new_hole)
-        self.state[1][guess] = new_hole
         return measurement == Hole.FOX
 
     def take_random_move(self) -> str:
