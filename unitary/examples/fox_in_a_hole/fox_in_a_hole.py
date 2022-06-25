@@ -19,7 +19,8 @@ import sys
 import enum
 import numpy as np
 
-from unitary import alpha
+from unitary.alpha import QuantumObject, QuantumWorld, Move, PhasedMove, Split, PhasedSplit
+
 
 class Game(abc.ABC):
     """Abstract ancestor class for Fox-in-a-hole game.
@@ -156,27 +157,14 @@ class QuantumGame(Game):
         index = self.rng.integers(low=0, high=self.hole_nr)
         holes = []
         for i in range(self.hole_nr):
-            hole = alpha.QuantumObject(
+            hole = QuantumObject(
                 f"Hole-{i}-{i}",
                 Hole.FOX if i==index else Hole.EMPTY)
             holes.append(hole)
-        self.state = (alpha.QuantumWorld(holes), holes)
-
-    def get_probabilities(self, count=100):
-        """Gives back the probabilites for each hole."""
-        probs = self.hole_nr * [0.0]
-        peek_result = self.state[0].peek(objects=self.state[1],
-                                         convert_to_enum=False,
-                                         count=count)
-        for j in range(self.hole_nr):
-            for i in range(count):
-                probs[j]+=peek_result[i][j][0]
-        for j in range(self.hole_nr):
-            probs[j]=probs[j]/count
-        return probs
+        self.state = (QuantumWorld(holes), holes)
 
     def state_to_string(self):
-        return str(self.get_probabilities())
+        return str(self.state[0].get_binary_probabilities(objects=self.state[1]))
 
     def check_guess(self,guess) -> bool:
         """Checks if user's guess is right and returns it as a boolean value.
@@ -186,7 +174,7 @@ class QuantumGame(Game):
         measurement = self.state[0].pop([self.state[1][guess]])[0]
         # TODO: After Issue #21 is solved, there is no need for creating a new qobject
         # after each measurement.
-        new_hole = alpha.QuantumObject(
+        new_hole = QuantumObject(
             "Hole-{}-{}".format(guess,len(self.state[0].objects)),
             measurement)
         self.state[0].add_object(new_hole)
@@ -195,7 +183,7 @@ class QuantumGame(Game):
 
     def take_random_move(self) -> str:
         """Applies a random move on the current state. Gives back the move in string format."""
-        probs = self.get_probabilities()
+        probs = self.state[0].get_binary_probabilities(objects=self.state[1])
         non_empty_holes = []
         for i,prob in enumerate(probs):
             if prob>0:
@@ -211,10 +199,10 @@ class QuantumGame(Game):
         if direction in (-1,1): # Move left or right
             target = source+direction
             if self.iswap:
-                alpha.PhasedMove()(self.state[1][source], self.state[1][target])
+                PhasedMove()(self.state[1][source], self.state[1][target])
                 swap_str = 'iSWAP'
             else:
-                alpha.Move()(self.state[1][source], self.state[1][target])
+                Move()(self.state[1][source], self.state[1][target])
                 swap_str = 'SWAP'
             if direction==-1:
                 dir_str = 'left'
@@ -223,12 +211,12 @@ class QuantumGame(Game):
             move_str = f"Moving ({swap_str}-based) {dir_str} from position {source}."
         else: # Move left & right (split)
             if self.iswap:
-                alpha.PhasedSplit()(self.state[1][source],
+                PhasedSplit()(self.state[1][source],
                                     self.state[1][source-1],
                                     self.state[1][source+1])
                 swap_str = 'iSWAP'
             else:
-                alpha.Split()(self.state[1][source],
+                Split()(self.state[1][source],
                               self.state[1][source-1],
                               self.state[1][source+1])
                 swap_str = 'SWAP'
