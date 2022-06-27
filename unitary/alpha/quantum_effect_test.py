@@ -63,9 +63,9 @@ def test_anti_control():
     assert (result[0] == 1 for result in results)
 
 
-def test_no_board():
+def test_no_world():
     piece = alpha.QuantumObject("q0", 1)
-    with pytest.raises(ValueError, match="must be on a board"):
+    with pytest.raises(ValueError, match="must be added to a QuantumWorld"):
         alpha.Flip()(piece)
 
 

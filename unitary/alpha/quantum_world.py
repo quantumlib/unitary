@@ -49,7 +49,7 @@ class QuantumWorld:
             raise ValueError("QuantumObject {obj.name} already added to world.")
         self.used_object_keys.add(obj.name)
         self.objects.append(obj)
-        obj.board = self
+        obj.world = self
         obj.initial_effect()
 
     def add_effect(self, op_list: List[cirq.Operation]):

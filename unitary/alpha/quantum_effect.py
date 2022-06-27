@@ -51,14 +51,14 @@ class QuantumEffect(abc.ABC):
                 raise ValueError(
                     f"Cannot apply effect to qids of dimension {required_dimension}."
                 )
-            if q.board is None:
-                raise ValueError("Piece must be on a board to apply effects.")
+            if q.world is None:
+                raise ValueError("Object must be added to a QuantumWorld to apply effects.")
 
     def __call__(self, *objects):
         """Apply the Quantum Effect to the objects."""
         self._verify_objects(*objects)
-        board = objects[0].board
-        board.add_effect(list(self.effect(*objects)))
+        world = objects[0].world
+        world.add_effect(list(self.effect(*objects)))
 
 
 class QuantumIf:

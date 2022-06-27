@@ -32,7 +32,7 @@ def test_negation():
     assert board.peek() == [[1]]
 
 
-def test_add_board_after_state_change():
+def test_add_world_after_state_change():
     piece = alpha.QuantumObject("t", 0)
     piece += 1
     board = alpha.QuantumWorld(piece)
