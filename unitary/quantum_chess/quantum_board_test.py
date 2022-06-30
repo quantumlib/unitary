@@ -1156,7 +1156,7 @@ def test_pawn_capture_bits(board):
     ),
 )
 def test_illegal_castle(initial_board, source, target):
-    """Tests various combinations of illegal capture.
+    """Tests various combinations of obstructed castling.
 
     Args:
         initial_board: bitboard to set up
@@ -1169,7 +1169,7 @@ def test_illegal_castle(initial_board, source, target):
     else:
         move_type = move_type = enums.MoveType.QS_CASTLE
     m = move.Move(
-        source, target, move_type=move_type, move_variant=enums.MoveVariant.BASIC
+        source, target, move_type=move_type, move_variant=enums.MoveVariant.EXCLUDED
     )
     assert not b.do_move(m)
     assert_samples_in(b, [initial_board])
@@ -1232,13 +1232,29 @@ def test_unblocked_blackqueenside_castle(board):
 
 
 @pytest.mark.parametrize("board", BIG_CIRQ_BOARDS)
+def test_kingside_castle_rooks_swap(board):
+    b = board(u.squares_to_bitboard(["f4", "e1", "h1"]))
+    assert b.perform_moves(
+        "f4^f3f1:SPLIT_SLIDE:BASIC",
+        "e1g1:KS_CASTLE:BASIC",
+    )
+    assert_sample_distribution(
+        b,
+        {
+            u.squares_to_bitboard(["f3", "g1", "f1"]): 1 / 2,
+            u.squares_to_bitboard(["f1", "g1", "h1"]): 1 / 2,
+        },
+    )
+
+
+@pytest.mark.parametrize("board", BIG_CIRQ_BOARDS)
 def test_2block_ks_castle(board):
     """Kingside castling move blocked by 2 pieces in superposition."""
     b = board(u.squares_to_bitboard(["e8", "f6", "g6", "h8"]))
     did_it_move = b.perform_moves(
         "f6^f7f8:SPLIT_JUMP:BASIC",
         "g6^g7g8:SPLIT_JUMP:BASIC",
-        "e8g8:KS_CASTLE:BASIC",
+        "e8g8:KS_CASTLE:EXCLUDED",
     )
     if did_it_move:
         possibilities = [u.squares_to_bitboard(["g8", "f7", "g7", "f8"])]
@@ -1269,7 +1285,7 @@ def test_1block_ks_castle(board):
             "e1",
             "g1",
             move_type=enums.MoveType.KS_CASTLE,
-            move_variant=enums.MoveVariant.BASIC,
+            move_variant=enums.MoveVariant.EXCLUDED,
         )
     )
     if did_it_move:
