@@ -426,7 +426,7 @@ def test_a11(board):
     )
     did_it_move = b.perform_moves(
         "e3^c2f1:SPLIT_JUMP:BASIC",
-        "e1g1:KS_CASTLE:BASIC",
+        "e1g1:KS_CASTLE:EXCLUDED",
     )
     if did_it_move:
         possibilities = [
