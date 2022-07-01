@@ -198,59 +198,93 @@ def test_pop_qubits_twice():
     assert all(peek_result == result2 for peek_result in peek_results)
 
 
+def test_combine_overlapping_worlds():
+    l1 = alpha.QuantumObject("l1", Light.GREEN)
+    world1 = alpha.QuantumWorld([l1])
+    l2 = alpha.QuantumObject("l1", StopLight.YELLOW)
+    world2 = alpha.QuantumWorld([l2])
+    with pytest.raises(ValueError, match="overlapping"):
+        world1.combine_with(world2)
+    with pytest.raises(ValueError, match="overlapping"):
+        world2.combine_with(world1)
+
+
+def test_combine_worlds():
+    l1 = alpha.QuantumObject("l1", Light.GREEN)
+    l2 = alpha.QuantumObject("l2", Light.RED)
+    l3 = alpha.QuantumObject("l3", Light.RED)
+    world1 = alpha.QuantumWorld([l1, l2, l3])
+
+    # Split and pop to test post-selection after combining
+    alpha.Split()(l1, l2, l3)
+    result = world1.pop()
+
+    l4 = alpha.QuantumObject("stop_light", StopLight.YELLOW)
+    world2 = alpha.QuantumWorld([l4])
+    world2.combine_with(world1)
+
+    results = world2.peek(count=100)
+    expected = [StopLight.YELLOW] + result
+    print(results)
+    print(expected)
+    assert all(actual == expected for actual in results)
+
+
 def test_get_histogram_and_get_probabilities_one_binary_qobject():
     l1 = alpha.QuantumObject("l1", Light.GREEN)
     world = alpha.QuantumWorld([l1])
     histogram = world.get_histogram()
-    assert histogram == [{0:0,1:100}]
+    assert histogram == [{0: 0, 1: 100}]
     probs = world.get_probabilities()
-    assert probs == [{0:0.0,1:1.0}]
+    assert probs == [{0: 0.0, 1: 1.0}]
     bin_probs = world.get_binary_probabilities()
     assert bin_probs == [1.0]
     alpha.Flip()(l1)
     histogram = world.get_histogram()
-    assert histogram == [{0:100,1:0}]
+    assert histogram == [{0: 100, 1: 0}]
     probs = world.get_probabilities()
-    assert probs == [{0:1.0,1:0.0}]
+    assert probs == [{0: 1.0, 1: 0.0}]
     bin_probs = world.get_binary_probabilities()
     assert bin_probs == [0.0]
     alpha.Superposition()(l1)
     histogram = world.get_histogram()
-    assert len(histogram)==1
-    assert len(histogram[0])==2
-    assert histogram[0][0]>10
-    assert histogram[0][1]>10
+    assert len(histogram) == 1
+    assert len(histogram[0]) == 2
+    assert histogram[0][0] > 10
+    assert histogram[0][1] > 10
     probs = world.get_probabilities()
-    assert len(probs)==1
-    assert len(probs[0])==2
-    assert probs[0][0]>.1
-    assert probs[0][1]>.1
+    assert len(probs) == 1
+    assert len(probs[0]) == 2
+    assert probs[0][0] > 0.1
+    assert probs[0][1] > 0.1
     bin_probs = world.get_binary_probabilities()
     assert 0.1 <= bin_probs[0] <= 1.0
+
 
 def test_get_histogram_and_get_probabilities_one_trinary_qobject():
     l1 = alpha.QuantumObject("l1", StopLight.YELLOW)
     world = alpha.QuantumWorld([l1])
     histogram = world.get_histogram()
-    assert histogram == [{0:0,1:100,2:0}]
+    assert histogram == [{0: 0, 1: 100, 2: 0}]
     probs = world.get_probabilities()
-    assert probs == [{0:0.0,1:1.0,2:0.0}]
+    assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities()
     assert bin_probs == [1.0]
+
 
 def test_get_histogram_and_get_probabilities_two_qobjects():
     l1 = alpha.QuantumObject("l1", Light.GREEN)
     l2 = alpha.QuantumObject("l2", StopLight.YELLOW)
-    world = alpha.QuantumWorld([l1,l2])
+    world = alpha.QuantumWorld([l1, l2])
     histogram = world.get_histogram()
-    assert histogram == [{0:0,1:100},{0:0,1:100,2:0}]
+    assert histogram == [{0: 0, 1: 100}, {0: 0, 1: 100, 2: 0}]
     probs = world.get_probabilities()
-    assert probs == [{0:0.0,1:1.0},{0:0.0,1:1.0,2:0.0}]
+    assert probs == [{0: 0.0, 1: 1.0}, {0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities()
-    assert bin_probs == [1.0,1.0]
-    histogram = world.get_histogram(objects=[l2],count=1000)
-    assert histogram == [{0:0,1:1000,2:0}]
-    probs = world.get_probabilities(objects=[l2],count=1000)
-    assert probs == [{0:0.0,1:1.0,2:0.0}]
-    bin_probs = world.get_binary_probabilities(objects=[l2],count=1000)
+    assert bin_probs == [1.0, 1.0]
+    histogram = world.get_histogram(objects=[l2], count=1000)
+    assert histogram == [{0: 0, 1: 1000, 2: 0}]
+    probs = world.get_probabilities(objects=[l2], count=1000)
+    assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
+    bin_probs = world.get_binary_probabilities(objects=[l2], count=1000)
     assert bin_probs == [1.0]
