@@ -187,7 +187,7 @@ class ZerosSampler(work.Sampler):
             n_qubits = len(op.qubits)
             k = gate.key
             results = [
-                study.Result(
+                study.ResultDict(
                     params=p,
                     measurements={k: np.zeros(
                         (repetitions, n_qubits), dtype=int)})
