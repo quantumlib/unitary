@@ -174,7 +174,7 @@ class ZerosSampler(work.Sampler):
             for _, m, _ in meas:
                 assert len(m.qubits) == 1
             results = [
-                study.Result(
+                study.ResultDict(
                     params=p,
                     measurements={gate.key: np.zeros(
                         (repetitions, 1), dtype=int)
