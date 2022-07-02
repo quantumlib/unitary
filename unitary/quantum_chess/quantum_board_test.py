@@ -1408,6 +1408,38 @@ def test_classical_ep2(board):
     assert_samples_in(b, [u.squares_to_bitboard(["d3"])])
 
 
+def test_basic_ep_8_boards():
+    """Basic en passant with all possible basis states of the 3 qubits.
+
+    White: Pf2, Bf1, Ng1. Black: Pe4, Pg4, Ra3.
+    """
+    b = simulator(u.squares_to_bitboard(["a3", "f2", "f1", "g1", "e4", "g4"]))
+    assert b.perform_moves(
+        "a3^b3f3:SPLIT_SLIDE:BASIC",
+        "f2f4:SLIDE:BASIC",
+        "f3c3:SLIDE:BASIC",
+        "g1^f3h3:SPLIT_JUMP:BASIC",
+        "g4f3:PAWN_CAPTURE:CAPTURE",
+        "f1^d3a6:SPLIT_SLIDE:BASIC",
+        "e4d3:PAWN_CAPTURE:CAPTURE",
+        "f2f4:SLIDE:BASIC",
+        "e4f3:PAWN_EP:BASIC",
+    )
+    assert_sample_distribution(
+        b,
+        {
+            u.squares_to_bitboard(["b3", "a6", "h3", "g4", "f2", "e4"]): 1 / 8,
+            u.squares_to_bitboard(["c3", "a6", "h3", "g4", "f3"]): 1 / 8,
+            u.squares_to_bitboard(["c3", "a6", "f3", "f2", "e4"]): 1 / 8,
+            u.squares_to_bitboard(["b3", "a6", "f3", "f4", "e4"]): 1 / 8,
+            u.squares_to_bitboard(["b3", "d3", "h3", "g4", "f2"]): 1 / 8,
+            u.squares_to_bitboard(["c3", "d3", "h3", "g4", "f4"]): 1 / 8,
+            u.squares_to_bitboard(["c3", "d3", "f3", "f2"]): 1 / 8,
+            u.squares_to_bitboard(["b3", "d3", "f3", "f4"]): 1 / 8,
+        },
+    )
+
+
 # Seems to be problematic on real device
 def test_capture_ep():
     """Tests capture en passant.
@@ -1451,7 +1483,46 @@ def test_capture_ep2():
     assert_samples_in(b, possibilities)
 
 
-def test_blocked_ep():
+@pytest.mark.parametrize("measurement", [0, 1])
+def test_capture_ep_8_boards(measurement):
+    """Capture en passant with all possible basis states of the 3 qubits.
+
+    White: Pf2, Bf1, Ng1. Black: Pe4, Ra3.
+    """
+    b = simulator(u.squares_to_bitboard(["a3", "f2", "f1", "g1", "e4"]))
+    assert measurement == b.perform_moves(
+        "a3^b3f3:SPLIT_SLIDE:BASIC",
+        "f2f4:SLIDE:BASIC",
+        "f3c3:SLIDE:BASIC",
+        "f1^d3a6:SPLIT_SLIDE:BASIC",
+        "e4d3:PAWN_CAPTURE:CAPTURE",
+        "g1^f3h3:SPLIT_JUMP:BASIC",
+        "f2f4:SLIDE:BASIC",
+        f"e4f3.m{measurement}:PAWN_EP:CAPTURE",
+    )
+    if measurement:
+        assert_sample_distribution(
+            b,
+            {
+                u.squares_to_bitboard(["b3", "a6", "h3", "f2", "e4"]): 1 / 4,
+                u.squares_to_bitboard(["c3", "a6", "h3", "f3"]): 1 / 4,  # captured pawn
+                u.squares_to_bitboard(["b3", "a6", "f3", "f4"]): 1 / 4,  # captured N
+                u.squares_to_bitboard(["c3", "a6", "f3", "f2"]): 1 / 4,  # captured N
+            },
+        )
+    else:
+        assert_sample_distribution(
+            b,
+            {
+                u.squares_to_bitboard(["b3", "d3", "h3", "f2"]): 1 / 4,
+                u.squares_to_bitboard(["b3", "d3", "f3", "f4"]): 1 / 4,
+                u.squares_to_bitboard(["c3", "d3", "h3", "f4"]): 1 / 4,
+                u.squares_to_bitboard(["c3", "d3", "f3", "f2"]): 1 / 4,
+            },
+        )
+
+
+def test_excluded_ep():
     """Tests blocked en passant.
 
     Splits c4 to b6 and d6.  Moves a pawn through the piece on d6.
@@ -1472,6 +1543,45 @@ def test_blocked_ep():
             u.squares_to_bitboard(["c5", "d6", "d7"]),
         ]
     assert_samples_in(b, possibilities)
+
+
+@pytest.mark.parametrize("measurement", [0, 1])
+def test_excluded_ep_8_boards(measurement):
+    """Excluded en passant with all possible basis states of the 3 qubits.
+
+    White: Pf2, Bf1. Black: Pe4, Ra3, Ng1.
+    """
+    b = simulator(u.squares_to_bitboard(["a3", "f2", "f1", "g1", "e4"]))
+    assert measurement == b.perform_moves(
+        "a3^b3f3:SPLIT_SLIDE:BASIC",
+        "f2f4:SLIDE:BASIC",
+        "f3c3:SLIDE:BASIC",
+        "f1^d3a6:SPLIT_SLIDE:BASIC",
+        "e4d3:PAWN_CAPTURE:CAPTURE",
+        "g1^f3h3:SPLIT_JUMP:BASIC",
+        "f2f4:SLIDE:BASIC",
+        f"e4f3.m{measurement}:PAWN_EP:EXCLUDED",
+    )
+    if measurement:
+        assert_sample_distribution(
+            b,
+            {
+                u.squares_to_bitboard(["b3", "a6", "h3", "f2", "e4"]): 1 / 4,
+                u.squares_to_bitboard(["b3", "d3", "h3", "f2"]): 1 / 4,
+                u.squares_to_bitboard(["c3", "a6", "h3", "f3"]): 1 / 4,
+                u.squares_to_bitboard(["c3", "d3", "h3", "f4"]): 1 / 4,
+            },
+        )
+    else:
+        assert_sample_distribution(
+            b,
+            {
+                u.squares_to_bitboard(["b3", "a6", "f3", "f4", "e4"]): 1 / 4,
+                u.squares_to_bitboard(["b3", "d3", "f3", "f4"]): 1 / 4,
+                u.squares_to_bitboard(["c3", "a6", "f3", "f2", "e4"]): 1 / 4,
+                u.squares_to_bitboard(["c3", "d3", "f3", "f2"]): 1 / 4,
+            },
+        )
 
 
 def test_basic_ep():

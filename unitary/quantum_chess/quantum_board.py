@@ -854,61 +854,70 @@ class CirqBoard:
             else:
                 raise ValueError(f"Invalid en passant target {m.target}")
             epqubit = bit_to_qubit(epbit)
+            squbit_full = squbit not in self.entangled_squares and nth_bit_of(
+                sbit, self.state
+            )
+            tqubit_empty = tqubit not in self.entangled_squares and not nth_bit_of(
+                tbit, self.state
+            )
+            epqubit_full = epqubit not in self.entangled_squares and nth_bit_of(
+                epbit, self.state
+            )
 
             # For the classical version, set the bits appropriately
-            if (
-                epqubit not in self.entangled_squares
-                and squbit not in self.entangled_squares
-                and tqubit not in self.entangled_squares
-            ):
-                if (
-                    not nth_bit_of(epbit, self.state)
-                    or not nth_bit_of(sbit, self.state)
-                    or nth_bit_of(tbit, self.state)
-                ):
-                    raise ValueError("Invalid classical e.p. move")
-
+            if squbit_full and tqubit_empty and epqubit_full:
                 self.state = set_nth_bit(epbit, self.state, False)
                 self.state = set_nth_bit(sbit, self.state, False)
                 self.state = set_nth_bit(tbit, self.state, True)
                 return 1
 
-            # If any squares are quantum, it's a quantum move
-            self.add_entangled(squbit, tqubit, epqubit)
-
-            # Capture e.p. post-select on the source
-            if m.move_variant == enums.MoveVariant.CAPTURE:
-                is_there = self.post_select_on(squbit, m.measurement)
-                if not is_there:
-                    return 0
-                self.add_entangled(squbit)
-                # capture e.p. has a special circuit
+            # BASIC: target may be occupied by a pawn same color as the source
+            if m.move_variant == enums.MoveVariant.BASIC:
+                self.add_entangled(squbit, tqubit, epqubit)
                 self.circuit.append(
-                    qm.capture_ep(
+                    qm.en_passant_basic(
                         squbit,
                         tqubit,
                         epqubit,
                         self.new_ancilla(),
-                        self.new_ancilla(),
-                        self.new_ancilla(),
+                        squbit_full,
+                        tqubit_empty,
+                        epqubit_full,
                     )
                 )
                 return 1
 
-            # Blocked/excluded e.p. post-select on the target
-            if m.move_variant == enums.MoveVariant.EXCLUDED:
-                # Note that a measurement of 1 means that the move was
-                # successful so that the target square is empty
-                is_there = self.post_select_on(tqubit, m.measurement, invert=True)
-                if is_there:
+            # EXCLUDED: target may be occupied by a non-pawn same color as the source
+            elif m.move_variant == enums.MoveVariant.EXCLUDED:
+                target_there = self.post_select_on(tqubit, m.measurement, invert=True)
+                if target_there:
                     return 0
-                self.add_entangled(tqubit)
-            self.circuit.append(
-                qm.en_passant(
-                    squbit, tqubit, epqubit, self.new_ancilla(), self.new_ancilla()
+                self.add_entangled(squbit, tqubit, epqubit)
+                self.circuit.append(
+                    qm.en_passant_basic(
+                        squbit,
+                        tqubit,
+                        epqubit,
+                        self.new_ancilla(),
+                        squbit_full,
+                        True,
+                        epqubit_full,
+                    )
                 )
-            )
-            return 1
+                return 1
+
+            # CAPTURE: target may be occupied by a piece opposite color to the source
+            elif m.move_variant == enums.MoveVariant.CAPTURE:
+                source_there = self.post_select_on(squbit, m.measurement)
+                if not source_there:
+                    return 0
+                self.add_entangled(squbit, tqubit, epqubit)
+                self.circuit.append(
+                    qm.en_passant_capture(
+                        squbit, tqubit, epqubit, self.new_ancilla(), self.new_ancilla()
+                    )
+                )
+                return 1
 
         if m.move_type == enums.MoveType.PAWN_CAPTURE:
             # For pawn capture, first measure source.
