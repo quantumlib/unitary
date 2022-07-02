@@ -82,13 +82,16 @@ b (d=3): ───×X───
     )
 
 
-@pytest.mark.parametrize("mark, ruleset",
-    [(tictactoe.TicTacSquare.X, tictactoe.TicTacRules.QUANTUM_V2),
-    (tictactoe.TicTacSquare.X, tictactoe.TicTacRules.QUANTUM_V3),
-    (tictactoe.TicTacSquare.O, tictactoe.TicTacRules.QUANTUM_V2),
-    (tictactoe.TicTacSquare.O, tictactoe.TicTacRules.QUANTUM_V3)])
-def test_tic_tac_split(mark: tictactoe.TicTacSquare,
-                       ruleset: tictactoe.TicTacRules):
+@pytest.mark.parametrize(
+    "mark, ruleset",
+    [
+        (tictactoe.TicTacSquare.X, tictactoe.TicTacRules.QUANTUM_V2),
+        (tictactoe.TicTacSquare.X, tictactoe.TicTacRules.QUANTUM_V3),
+        (tictactoe.TicTacSquare.O, tictactoe.TicTacRules.QUANTUM_V2),
+        (tictactoe.TicTacSquare.O, tictactoe.TicTacRules.QUANTUM_V3),
+    ],
+)
+def test_tic_tac_split(mark: tictactoe.TicTacSquare, ruleset: tictactoe.TicTacRules):
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
     board = alpha.QuantumWorld([a, b])
@@ -100,6 +103,7 @@ def test_tic_tac_split(mark: tictactoe.TicTacSquare,
     assert any(r == on_b for r in results)
     assert all(r == on_a or r == on_b for r in results)
 
+
 def test_tic_tac_split_entangled_v2():
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
@@ -109,9 +113,9 @@ def test_tic_tac_split_entangled_v2():
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.X, ruleset)(a, b)
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.O, ruleset)(b, c)
     results = board.peek(count=1000)
-    on_ab = [ _X, _O, _E ]
-    on_ac = [ _X, _E, _O ]
-    on_b  = [ _E, _X, _E ]
+    on_ab = [_X, _O, _E]
+    on_ac = [_X, _E, _O]
+    on_b = [_E, _X, _E]
     assert any(r == on_ab for r in results)
     assert any(r == on_ac for r in results)
     assert any(r == on_b for r in results)
@@ -130,16 +134,18 @@ def test_tic_tac_split_entangled_v3():
     # This sequence of moves, for just three squares, should produce:
     # EEE -> XEE + EXE -> XEO + EXE -> XEO + XOE + EXE + EEX
     # The checks below check whether each of these last four samples occurs
-    sample_1 = [ _X, _O, _E ]
-    sample_2 = [ _X, _E, _O ]
-    sample_3 = [ _E, _X, _E ]
-    sample_4 = [ _E, _E, _X ]
+    sample_1 = [_X, _O, _E]
+    sample_2 = [_X, _E, _O]
+    sample_3 = [_E, _X, _E]
+    sample_4 = [_E, _E, _X]
     assert any(r == sample_1 for r in results)
     assert any(r == sample_2 for r in results)
     assert any(r == sample_3 for r in results)
     assert any(r == sample_4 for r in results)
-    assert all(r == sample_1 or r == sample_2 or \
-               r == sample_3 or r == sample_4 for r in results)
+    assert all(
+        r == sample_1 or r == sample_2 or r == sample_3 or r == sample_4
+        for r in results
+    )
 
 
 def test_tic_tac_split_entangled_v3_empty():
@@ -154,13 +160,15 @@ def test_tic_tac_split_entangled_v3_empty():
     # This sequence of moves, for just three squares, should produce:
     # EEE -> XEE + EXE -> XEO + EXO -> XEO + XOE + EXO + EOX
     # The checks below check whether each of these last four samples occurs
-    sample_1 = [ _X, _O, _E ]
-    sample_2 = [ _X, _E, _O ]
-    sample_3 = [ _E, _X, _O ]
-    sample_4 = [ _E, _O, _X ]
+    sample_1 = [_X, _O, _E]
+    sample_2 = [_X, _E, _O]
+    sample_3 = [_E, _X, _O]
+    sample_4 = [_E, _O, _X]
     assert any(r == sample_1 for r in results)
     assert any(r == sample_2 for r in results)
     assert any(r == sample_3 for r in results)
     assert any(r == sample_4 for r in results)
-    assert all(r == sample_1 or r == sample_2 or \
-               r == sample_3 or r == sample_4 for r in results)
+    assert all(
+        r == sample_1 or r == sample_2 or r == sample_3 or r == sample_4
+        for r in results
+    )

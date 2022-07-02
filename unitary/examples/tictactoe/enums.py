@@ -20,12 +20,14 @@ class TicTacSquare(enum.Enum):
     X = 1
     O = 2
 
+
 class TicTacResult(enum.Enum):
     UNFINISHED = 0
     X_WINS = 1
     O_WINS = 2
     DRAW = 3
     BOTH_WIN = 4
+
 
 class TicTacRules(enum.Enum):
     """The different rulesets for Quantum TicTacToe.
@@ -42,6 +44,7 @@ class TicTacRules(enum.Enum):
     QUANTUM_V2       = Split moves unrestricted, custom gate.
     QUANTUM_V3       = Split moves unrestircted, sqrt-ISWAP gate.
     """
+
     CLASSICAL = 0
     QUANTUM_V1 = 1
     QUANTUM_V2 = 2

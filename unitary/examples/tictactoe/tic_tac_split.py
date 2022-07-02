@@ -75,6 +75,7 @@ class TicTacSplit(QuantumEffect):
     Depending on the ruleset, the split is done either using a standard
     sqrt-ISWAP gate, or using the custom QuditSplitGate.
     """
+
     def __init__(self, tic_tac_type: TicTacSquare, rules: TicTacRules):
         self.mark = tic_tac_type
         self.rules = rules

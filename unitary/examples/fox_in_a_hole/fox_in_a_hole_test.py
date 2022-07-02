@@ -18,36 +18,38 @@ import pytest
 
 import unitary.examples.fox_in_a_hole.fox_in_a_hole as fh
 
+
 def test_classical_game():
     """Simple tests for ClassicalGame."""
     test_game = fh.ClassicalGame(seed=42)
     assert test_game.hole_nr == 5
     assert len(test_game.history) == 0
-    assert test_game.state == [1.0,0.0,0.0,0.0,0.0]
+    assert test_game.state == [1.0, 0.0, 0.0, 0.0, 0.0]
     for i in range(5):
         guess = test_game.check_guess(i)
-        assert guess == (i==0)
-        hist_len=len(test_game.history)
+        assert guess == (i == 0)
+        hist_len = len(test_game.history)
         test_game.history_append_guess(i)
-        assert len(test_game.history) == hist_len+1
-    hist_len=len(test_game.history)
+        assert len(test_game.history) == hist_len + 1
+    hist_len = len(test_game.history)
     test_game.history_append_move("abc")
-    assert len(test_game.history) == hist_len+1
+    assert len(test_game.history) == hist_len + 1
     assert test_game.history[-1] == "abc"
-    hist_len=len(test_game.history)
+    hist_len = len(test_game.history)
     test_game.history_append_state()
-    assert len(test_game.history) == hist_len+1
+    assert len(test_game.history) == hist_len + 1
 
     test_game = fh.ClassicalGame(seed=42)
     test_game.take_random_move()
-    assert test_game.state == [0.0,1.0,0.0,0.0,0.0]
+    assert test_game.state == [0.0, 1.0, 0.0, 0.0, 0.0]
     test_game.take_random_move()
-    assert test_game.state == [0.0,0.0,1.0,0.0,0.0]
+    assert test_game.state == [0.0, 0.0, 1.0, 0.0, 0.0]
     test_game.take_random_move()
-    assert test_game.state == [0.0,1.0,0.0,0.0,0.0]
+    assert test_game.state == [0.0, 1.0, 0.0, 0.0, 0.0]
     for i in range(5):
         guess = test_game.check_guess(i)
-        assert guess == (i==1)
+        assert guess == (i == 1)
+
 
 def test_quantum_game():
     """Simple tests for QuantumGame."""
@@ -55,38 +57,39 @@ def test_quantum_game():
     assert test_game.hole_nr == 5
     assert len(test_game.history) == 0
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
-    assert probs == [1.0,0.0,0.0,0.0,0.0]
+    assert probs == [1.0, 0.0, 0.0, 0.0, 0.0]
     for i in range(5):
         guess = test_game.check_guess(i)
-        assert guess == (i==0)
-        hist_len=len(test_game.history)
+        assert guess == (i == 0)
+        hist_len = len(test_game.history)
         test_game.history_append_guess(i)
-        assert len(test_game.history) == hist_len+1
-    hist_len=len(test_game.history)
+        assert len(test_game.history) == hist_len + 1
+    hist_len = len(test_game.history)
     test_game.history_append_move("abc")
-    assert len(test_game.history) == hist_len+1
+    assert len(test_game.history) == hist_len + 1
     assert test_game.history[-1] == "abc"
-    hist_len=len(test_game.history)
+    hist_len = len(test_game.history)
     test_game.history_append_state()
-    assert len(test_game.history) == hist_len+1
+    assert len(test_game.history) == hist_len + 1
 
     test_game = fh.QuantumGame(seed=42)
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
-    assert probs == [1.0,0.0,0.0,0.0,0.0]
+    assert probs == [1.0, 0.0, 0.0, 0.0, 0.0]
     test_game.take_random_move()
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
-    assert probs == [0.0,1.0,0.0,0.0,0.0]
+    assert probs == [0.0, 1.0, 0.0, 0.0, 0.0]
     test_game.take_random_move()
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
-    assert probs[0]>0.0
-    assert probs[1]==0.0
-    assert probs[2]>0.0
-    assert probs[3]==0.0
-    assert probs[4]==0.0
+    assert probs[0] > 0.0
+    assert probs[1] == 0.0
+    assert probs[2] > 0.0
+    assert probs[3] == 0.0
+    assert probs[4] == 0.0
     guess = test_game.check_guess(0)
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
-    assert probs[1]==0.0
-    assert probs[3]==0.0
-    assert probs[4]==0.0
-    assert (guess and probs[0]==1.0 and probs[2]==0.0) or \
-           (not guess and probs[0]==0.0 and probs[2]==1.0)
+    assert probs[1] == 0.0
+    assert probs[3] == 0.0
+    assert probs[4] == 0.0
+    assert (guess and probs[0] == 1.0 and probs[2] == 0.0) or (
+        not guess and probs[0] == 0.0 and probs[2] == 1.0
+    )
