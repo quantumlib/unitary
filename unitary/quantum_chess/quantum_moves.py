@@ -362,15 +362,34 @@ def merge_slide_one_multiple(
     yield cirq.X(path_qubit)
 
 
-def en_passant(squbit, tqubit, epqubit, path, c):
-    yield cirq.X(path).controlled_by(squbit, epqubit)
-    yield cirq.ISWAP(epqubit, c).controlled_by(path)
-    yield cirq.ISWAP(squbit, tqubit).controlled_by(path)
+def en_passant_basic(
+    squbit, tqubit, epqubit, ancilla, squbit_full, tqubit_empty, epqubit_full
+):
+    """En passant for BASIC and EXCLUDED variants.
+
+    The excluded circuit is just the special case tqubit_empty=True.
+    """
+    controls = []
+    if not squbit_full:
+        controls.append(squbit)
+    if not epqubit_full:
+        controls.append(epqubit)
+    if not tqubit_empty:
+        controls.append(tqubit)
+        yield cirq.X(tqubit)
+    yield cirq.X(ancilla).controlled_by(*controls)
+    if not tqubit_empty:
+        yield cirq.X(tqubit)
+    yield cirq.X(squbit).controlled_by(ancilla)
+    yield cirq.X(tqubit).controlled_by(ancilla)
+    yield cirq.X(epqubit).controlled_by(ancilla)
 
 
-def capture_ep(squbit, tqubit, epqubit, path, c, c2):
-    yield cirq.CNOT(epqubit, path)
-    yield cirq.CNOT(tqubit, path)
-    yield cirq.ISWAP(epqubit, c).controlled_by(path)
-    yield cirq.ISWAP(tqubit, c2).controlled_by(path)
-    yield cirq.ISWAP(squbit, tqubit).controlled_by(path)
+# TODO: Probably smaller circuits are possible when some qubits are not in superposition
+def en_passant_capture(squbit, tqubit, epqubit, ancilla_ep, ancilla_target):
+    yield cirq.X(tqubit)
+    yield cirq.ISWAP(epqubit, ancilla_ep).controlled_by(tqubit)
+    yield cirq.X(tqubit)
+    yield cirq.ISWAP(ancilla_target, tqubit)
+    yield cirq.ISWAP(tqubit, squbit).controlled_by(ancilla_target)
+    yield cirq.ISWAP(tqubit, squbit).controlled_by(ancilla_ep)
