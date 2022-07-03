@@ -54,7 +54,7 @@ def assert_sample_distribution(b, probability_map, p_significant=1e-6):
     assert len(samples) == 500
     counts = defaultdict(int)
     for sample in samples:
-        assert sample in probability_map
+        assert sample in probability_map, u.bitboard_to_squares(sample)
         counts[sample] += 1
     observed = []
     expected = []
@@ -62,7 +62,6 @@ def assert_sample_distribution(b, probability_map, p_significant=1e-6):
         observed.append(counts[position])
         expected.append(500 * probability)
     p = chisquare(observed, expected).pvalue
-    print(observed, expected, "p =", p)
     assert (
         p > p_significant
     ), f"Observed {observed} far from expected {expected} (p = {p})"
