@@ -195,9 +195,8 @@ class QuantumWorld:
 
         return results[0]
 
-    def get_histogram(self,
-                      objects: Optional[Sequence[QuantumObject]] = None,
-                      count: int = 100
+    def get_histogram(
+        self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
     ) -> List[Dict[int, int]]:
         """Creates histogram based on measurements (peeks) carried out.
 
@@ -211,9 +210,7 @@ class QuantumWorld:
         """
         if not objects:
             objects = self.objects
-        peek_results = self.peek(objects=objects,
-                                 convert_to_enum=False,
-                                 count=count)
+        peek_results = self.peek(objects=objects, convert_to_enum=False, count=count)
         histogram = []
         for obj in objects:
             histogram.append({state: 0 for state in range(obj.num_states)})
@@ -222,9 +219,8 @@ class QuantumWorld:
                 histogram[idx][result[idx][0]] += 1
         return histogram
 
-    def get_probabilities(self,
-                          objects : Optional[Sequence[QuantumObject]] = None,
-                          count: int = 100
+    def get_probabilities(
+        self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
     ) -> List[Dict[int, float]]:
         """Calculates the probabilities based on measurements (peeks) carried out.
 
@@ -240,12 +236,12 @@ class QuantumWorld:
         probabilities = []
         for obj_hist in histogram:
             probabilities.append(
-                {state: obj_hist[state]/count for state in range(len(obj_hist))} )
+                {state: obj_hist[state] / count for state in range(len(obj_hist))}
+            )
         return probabilities
 
-    def get_binary_probabilities(self,
-                                 objects : Optional[Sequence[QuantumObject]] = None,
-                                 count: int = 100
+    def get_binary_probabilities(
+        self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
     ) -> List[float]:
         """Calculates the total probabilities for all non-zero states
         based on measurements (peeks) carried out.
@@ -262,5 +258,5 @@ class QuantumWorld:
         full_probs = self.get_probabilities(objects=objects, count=count)
         binary_probs = []
         for one_probs in full_probs:
-            binary_probs.append(1-one_probs[0])
+            binary_probs.append(1 - one_probs[0])
         return binary_probs

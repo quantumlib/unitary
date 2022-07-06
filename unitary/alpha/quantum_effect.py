@@ -52,7 +52,9 @@ class QuantumEffect(abc.ABC):
                     f"Cannot apply effect to qids of dimension {required_dimension}."
                 )
             if q.world is None:
-                raise ValueError("Object must be added to a QuantumWorld to apply effects.")
+                raise ValueError(
+                    "Object must be added to a QuantumWorld to apply effects."
+                )
 
     def __call__(self, *objects):
         """Apply the Quantum Effect to the objects."""
