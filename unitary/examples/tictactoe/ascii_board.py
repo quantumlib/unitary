@@ -16,7 +16,7 @@ from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacR
 from unitary.examples.tictactoe.tic_tac_toe import TicTacToe
 import argparse, textwrap
 
-help_str = '''\
+help_str = """\
 In classical TicTacToe, players alternate in putting their token (either an
 X or an O) on the squares of a 3x3 board. Each of the 3x3 squares of the board
 is labeled by its own letter as follows:
@@ -45,7 +45,8 @@ ruleset. If you'd like to allow split moves only on empty squares, choose the
 minimal quantum ruleset. If you'd like no quantum moves at all, choose the
 classical ruleset. Choose different rulesets can be done using the -r option,
 see below.
-'''
+"""
+
 
 def _flip_turn(turn: TicTacSquare):
     return TicTacSquare.O if turn == TicTacSquare.X else TicTacSquare.X
@@ -77,23 +78,34 @@ class AsciiBoard:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=textwrap.dedent(help_str),
-                        formatter_class=argparse.RawTextHelpFormatter)
-    parser.add_argument('-r', dest='rules', default=3, type=int,
-                        choices=range(1, 4),
-                        help=textwrap.dedent('''
+    parser = argparse.ArgumentParser(
+        description=textwrap.dedent(help_str),
+        formatter_class=argparse.RawTextHelpFormatter,
+    )
+    parser.add_argument(
+        "-r",
+        dest="rules",
+        default=3,
+        type=int,
+        choices=range(1, 4),
+        help=textwrap.dedent(
+            """
                             Set the ruleset:
                                 1: Classical
                                 2: Minimal Quantum
                                     Allow split moves, but only on empty squares
                                 3: Fully Quantum (Default)
-                                    Allow split moves, no restrictions'''))
+                                    Allow split moves, no restrictions"""
+        ),
+    )
     args = parser.parse_args()
 
-    print("Starting a new game of Quantum TicTacToe with " \
-          "ruleset \'%s\'"%TicTacRules(args.rules-1))
+    print(
+        "Starting a new game of Quantum TicTacToe with "
+        "ruleset '%s'" % TicTacRules(args.rules - 1)
+    )
     print("Change the ruleset using the -r option. Or use -h for more help.")
-    print("Input \'q\' to exit.")
+    print("Input 'q' to exit.")
 
     # Start a new game with the chosen ruleset (defaults to FULLY_QUANTUM)
-    AsciiBoard(TicTacRules(args.rules-1)).play()
+    AsciiBoard(TicTacRules(args.rules - 1)).play()

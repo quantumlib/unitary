@@ -153,9 +153,7 @@ class TicTacToe:
         if len(move) > 2 or len(move) == 0:
             raise ValueError(f"Your move ({move}) must be one or two letters.")
         if not all(m in _SQUARE_NAMES for m in move):
-            raise ValueError(
-                f"Your move ({move}) can only have these: {_SQUARE_NAMES}"
-            )
+            raise ValueError(f"Your move ({move}) can only have these: {_SQUARE_NAMES}")
         if len(move) == 1:
             # Check if the square is empty
             if move not in self.empty_squares:
@@ -175,21 +173,28 @@ class TicTacToe:
 
             # Check if either square is non-empty. Splitting on top of
             # non-empty squares is only allowed at full quantumness
-            if ((move[0] not in self.empty_squares) or \
-                 (move[1] not in self.empty_squares)) and \
-                    (self.rules == TicTacRules.QUANTUM_V1):
-                        raise ValueError(
-                            f"This ruleset ({0}) does not allow splits on \
-                              top of non-empty squares".format(self.rules)
-                            )
+            if (
+                (move[0] not in self.empty_squares)
+                or (move[1] not in self.empty_squares)
+            ) and (self.rules == TicTacRules.QUANTUM_V1):
+                raise ValueError(
+                    f"This ruleset ({0}) does not allow splits on \
+                              top of non-empty squares".format(
+                        self.rules
+                    )
+                )
 
             # TicTacSplit first flips the first square before performing a split
             # If either of the two involved squares is empty, we want to do the
             # split on that square.
             if move[1] in self.empty_squares:
-                TicTacSplit(mark, self.rules)(self.squares[move[1]], self.squares[move[0]])
+                TicTacSplit(mark, self.rules)(
+                    self.squares[move[1]], self.squares[move[0]]
+                )
             else:
-                TicTacSplit(mark, self.rules)(self.squares[move[0]], self.squares[move[1]])
+                TicTacSplit(mark, self.rules)(
+                    self.squares[move[0]], self.squares[move[1]]
+                )
 
             # The involved squares are now no longer empty
             self.empty_squares.discard(move[0])
