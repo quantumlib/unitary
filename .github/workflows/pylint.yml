@@ -3,7 +3,7 @@ name: Pylint
 on: [push, pull_request]
 
 jobs:
-  mypy:
+  pylint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
