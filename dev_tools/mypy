@@ -12,8 +12,6 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 cd "$(git rev-parse --show-toplevel)"
 
 
-CIRQ_PACKAGES=$(env PYTHONPATH=. python dev_tools/modules.py list --mode package-path)
-
 echo -e -n "\033[31m"
 mypy --config-file=dev_tools/mypy.ini "$@" .
 result=$?
