@@ -41,6 +41,7 @@ class QuantumWorld:
     ):
 
         self.clear()
+        self.sampler = sampler
 
         if isinstance(objects, QuantumObject):
             objects = [objects]
@@ -57,7 +58,6 @@ class QuantumWorld:
         self.circuit = cirq.Circuit()
         self.effect_history = []
         self.used_object_keys = set()
-        self.sampler = sampler
         self.ancilla_names = set()
         self.post_selection: Dict[QuantumObject, int] = {}
 
@@ -86,12 +86,12 @@ class QuantumWorld:
         """
         if self.used_object_keys.intersection(other_world.used_object_keys):
             raise ValueError("Cannot combine two worlds with overlapping object keys")
-        for obj in other_world.objects:
-            self.add_object(obj)
+        self.objects.extend(other_world.objects)
         self.used_object_keys.update(other_world.used_object_keys)
         self.ancilla_names.update(other_world.ancilla_names)
         self.post_selection.update(other_world.post_selection)
         self.circuit = self.circuit.zip(other_world.circuit)
+        # Clear effect history, since undoing would undo the combined worlds
         self.effect_history.clear()
         # Clear the other world so that objects cannot be used from that world.
         other_world.clear()
