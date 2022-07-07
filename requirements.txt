@@ -4,5 +4,12 @@ cirq-google>=0.14.0
 
 seaborn
 sphinx
+
+# dev tools
 ipython
 black
+mypy
+pylint
+pytest
+pytest-cov
+coverage<=6.2
