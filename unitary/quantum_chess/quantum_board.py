@@ -915,20 +915,12 @@ class CirqBoard:
             is_there = self.post_select_on(squbit, m.measurement)
             if not is_there:
                 return 0
-            if tqubit in self.entangled_squares:
-                old_tqubit = self.unhook(tqubit)
-                self.state = set_nth_bit(tbit, self.state, False)
-                self.add_entangled(squbit, tqubit)
-
-                self.circuit.append(
-                    qm.controlled_operation(
-                        cirq.ISWAP, [squbit, tqubit], [old_tqubit], []
-                    )
-                )
-            else:
+            if tqubit not in self.entangled_squares and nth_bit_of(tbit, self.state):
                 # Classical case
                 self.state = set_nth_bit(sbit, self.state, False)
-                self.state = set_nth_bit(tbit, self.state, True)
+            else:
+                self.add_entangled(squbit, tqubit)
+                self.circuit.append(cirq.CNOT(tqubit, squbit))
             return 1
 
         if m.move_type == enums.MoveType.SPLIT_SLIDE:
