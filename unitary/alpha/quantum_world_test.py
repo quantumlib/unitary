@@ -119,6 +119,12 @@ def test_undo():
     assert all(result[0] == Light.GREEN for result in results)
 
 
+def test_undo_no_effects():
+    board = alpha.QuantumWorld([])
+    with pytest.raises(IndexError, match='No effects'):
+        board.undo_last_effect()
+
+
 def test_undo_post_select():
     light = alpha.QuantumObject("l1", Light.GREEN)
     light2 = alpha.QuantumObject("l2", Light.RED)

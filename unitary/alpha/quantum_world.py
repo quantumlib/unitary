@@ -109,9 +109,14 @@ class QuantumWorld:
 
         Note that pop() is considered to be an effect for the purposes
         of this call.
+
+        Raises:
+            IndexError if there are no effects in the history.
         """
-        if self.effect_history:
-            self.circuit, self.post_selection = self.effect_history.pop()
+        if not self.effect_history:
+            raise IndexError('No effects to undo')
+        self.circuit, self.post_selection = self.effect_history.pop()
+
 
     def _suggest_num_reps(self, sample_size: int) -> int:
         """Guess the number of raw samples needed to get sample_size results.
