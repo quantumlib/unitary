@@ -1316,7 +1316,6 @@ class CirqBoard:
             squbit2 = bit_to_qubit(sbit2)
             self.add_entangled(squbit, squbit2, tqubit)
             self.circuit.append(qm.merge_move(squbit, squbit2, tqubit))
-            # TODO: should the source qubit be 'unhooked'?
             return 1
 
         if m.move_type == enums.MoveType.KS_CASTLE:
