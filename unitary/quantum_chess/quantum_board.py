@@ -970,7 +970,7 @@ class CirqBoard:
                 # (1, 0): No qubit in one arm, one qubit in the other. 0 ancilla needed.
                 if len(path_qubits) == 1:
                     self.circuit.append(
-                        qm.split_slide_zero_one(squbit, tqubit2, tqubit, path_qubits[0])
+                        qm.split_slide_one_zero(squbit, tqubit, tqubit2, path_qubits[0])
                     )
                 # (2+, 0): No qubit in one arm, multiple qubits in the other. 1 ancilla needed.
                 else:
