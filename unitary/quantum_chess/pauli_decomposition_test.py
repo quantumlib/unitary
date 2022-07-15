@@ -23,7 +23,7 @@ def test_pauli_decomposition_wrong_inputs():
     a1 = cirq.NamedQubit("a1")
     a2 = cirq.NamedQubit("a2")
     H_not_2d = [[[0.5 + 0.0j, 0.0 + 0.5j], [0.0 - 0.5j, 0.5 + 0.0j]]]
-    H_not_square = [[0.5 + 0.0j, 0.0 + 0.5j], [0.0 - 0.5j]]
+    H_not_square = [[0.5 + 0.0j], [0.0 - 0.5j]]
     H_good = [[0.5 + 0.0j, 0.0 + 0.5j], [0.0 - 0.5j, 0.5 + 0.0j]]
     with pytest.raises(
         ValueError, match="pauli_decomposition expects a 2-d square matrix."
