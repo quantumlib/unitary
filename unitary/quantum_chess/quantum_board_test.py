@@ -344,9 +344,8 @@ def test_blocked_slide_move(board):
         "a1", "d1", move_type=enums.MoveType.SLIDE, move_variant=enums.MoveVariant.BASIC
     )
     b.do_move(m)
-    samples = b.sample(10)
     expected = u.squares_to_bitboard(["a1", "b1"])
-    assert all(sample == expected for sample in samples)
+    assert_samples_in(b, [expected])
 
 
 @pytest.mark.parametrize("board", ALL_CIRQ_BOARDS)
@@ -381,9 +380,8 @@ def test_blocked_slide_blocked(board):
         "f5", "d5", move_type=enums.MoveType.SLIDE, move_variant=enums.MoveVariant.BASIC
     )
     b.do_move(m)
-    samples = b.sample(100)
     expected = u.squares_to_bitboard(["e5", "f5"])
-    assert all(sample == expected for sample in samples)
+    assert_samples_in(b, [expected])
 
 
 def test_blocked_slide_capture_through():
@@ -549,13 +547,14 @@ def test_split_slide_zero_one():
     assert b.perform_moves(
         "d3^c3d1:SPLIT_SLIDE:BASIC",
         "a1^a4f1:SPLIT_SLIDE:BASIC",
+        "f1a4^f4:MERGE_SLIDE:BASIC",
     )
     assert_sample_distribution(
         b,
         {
-            u.squares_to_bitboard(["d1", "a4"]): 1 / 2,
-            u.squares_to_bitboard(["c3", "f1"]): 1 / 4,
-            u.squares_to_bitboard(["c3", "a4"]): 1 / 4,
+            u.squares_to_bitboard(["c3", "f4"]): 1 / 2,
+            u.squares_to_bitboard(["d1", "f4"]): 1 / 4,
+            u.squares_to_bitboard(["d1", "a4"]): 1 / 4,
         },
     )
 
