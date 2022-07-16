@@ -294,22 +294,37 @@ def merge_slide(squbit, tqubit, squbit2, path1, path2, ancilla):
     yield cirq.X(ancilla).controlled_by(path1, path2)
 
 
-def merge_slide_zero_one(squbit_clear, tqubit, squbit, path_qubit):
+def merge_slide_zero_one(squbit, tqubit, squbit2, path_qubit):
     """Performs a merge slide from two source qubits to tqubit.
-    The path from squbit_clear to tqubit is clear.
+    The path from squbit to tqubit is clear.
+
+    path_qubit is the only qubit in the path from squbit2 to tqubit,
+    and it's used as control.
+    """
+    # Note that the following unconditional ISWAPs are equivalent to
+    # (ISWAP(squbit, tqubit) ** -1).controlled_by(path_qubit)
+    # (ISWAP(squbit, tqubit) ** -1).anti_controlled_by(path_qubit)
+    yield cirq.ISWAP(squbit, tqubit) ** -0.5
+    yield cirq.ISWAP(squbit, tqubit) ** -0.5
+
+    yield cirq.X(path_qubit)
+    yield (cirq.ISWAP(squbit2, tqubit) ** -0.5).controlled_by(path_qubit)
+    yield cirq.X(path_qubit)
+
+
+def merge_slide_one_zero(squbit, tqubit, squbit2, path_qubit):
+    """Performs a merge slide from two source qubits to tqubit.
+    The path from squbit2 to tqubit is clear.
 
     path_qubit is the only qubit in the path from squbit to tqubit,
     and it's used as control.
     """
-    # Note that the following unconditional ISWAPs are equivalent to
-    # (ISWAP(squbit_clear, tqubit) ** -1).controlled_by(path_qubit)
-    # (ISWAP(squbit_clear, tqubit) ** -1).anti_controlled_by(path_qubit)
-    yield cirq.ISWAP(squbit_clear, tqubit) ** -0.5
-    yield cirq.ISWAP(squbit_clear, tqubit) ** -0.5
+    yield cirq.X(path_qubit)
+    yield (cirq.ISWAP(squbit, tqubit) ** -1).controlled_by(path_qubit)
+    yield cirq.X(path_qubit)
 
-    yield cirq.X(path_qubit)
-    yield (cirq.ISWAP(squbit, tqubit) ** -0.5).controlled_by(path_qubit)
-    yield cirq.X(path_qubit)
+    yield (cirq.ISWAP(squbit2, tqubit) ** -0.5)
+    yield (cirq.ISWAP(squbit2, tqubit) ** -0.5).controlled_by(path_qubit)
 
 
 def merge_slide_zero_multiple(squbit_clear, tqubit, squbit, path_ancilla):

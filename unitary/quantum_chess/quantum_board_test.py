@@ -837,36 +837,6 @@ def test_split_merge_slide_self_intersecting(board):
     assert_samples_in(b, [u.squares_to_bitboard(["d2"])])
 
 
-def test_merge_slide_one_side():
-    """Tests merge slide.
-
-    Splits a1 to a4 and d1 and then merges to d4.
-    The square c4 will block one path of the merge in superposition.
-    """
-    b = simulator(u.squares_to_bitboard(["a1", "c3"]))
-    assert b.perform_moves(
-        "a1^a4d1:SPLIT_SLIDE:BASIC",
-        "c3^c4c5:SPLIT_JUMP:BASIC",
-        "a4d1^d4:MERGE_SLIDE:BASIC",
-    )
-    possibilities = [
-        u.squares_to_bitboard(["a4", "c4"]),
-        u.squares_to_bitboard(["d4", "c4"]),
-        u.squares_to_bitboard(["d4", "c5"]),
-    ]
-    assert_samples_in(b, possibilities)
-    probs = b.get_probability_distribution(20000)
-    assert_fifty_fifty(probs, qb.square_to_bit("c4"))
-    assert_fifty_fifty(probs, qb.square_to_bit("c5"))
-    assert_prob_about(probs, qb.square_to_bit("a4"), 0.25)
-    assert_prob_about(probs, qb.square_to_bit("d4"), 0.75)
-    board_probs = b.get_board_probability_distribution(20000)
-    assert len(board_probs) == len(possibilities)
-    assert_prob_about(board_probs, possibilities[0], 0.25)
-    assert_prob_about(board_probs, possibilities[1], 0.25)
-    assert_prob_about(board_probs, possibilities[2], 0.5)
-
-
 def test_merge_slide_both_side():
     """Tests a merge slide where both paths are blocked.
 
@@ -910,12 +880,38 @@ def test_merge_slide_zero_one():
     assert b.perform_moves(
         "a1^a4f1:SPLIT_SLIDE:BASIC",
         "d3^c3d1:SPLIT_SLIDE:BASIC",
-        "a4f1^a1:MERGE_SLIDE:BASIC",
+        "a4a5:SLIDE:BASIC",
+        "a5f1^a1:MERGE_SLIDE:BASIC",
     )
     assert_sample_distribution(
         b,
         {
-            u.squares_to_bitboard(["c3", "a1"]): 1 / 2,
+            u.squares_to_bitboard(["c3", "a1"]): 1 / 4,
+            u.squares_to_bitboard(["c3", "f1"]): 1 / 4,
+            u.squares_to_bitboard(["d1", "f1"]): 1 / 4,
+            u.squares_to_bitboard(["d1", "a1"]): 1 / 4,
+        },
+    )
+
+
+def test_merge_slide_one_zero():
+    """Merge slide with the path from source1 having one potentially obstructing qubit
+    and a clear path from source2.
+
+    Expected outputs obtained from the C++ implementation.
+    """
+    b = simulator(u.squares_to_bitboard(["a1", "d3"]))
+    assert b.perform_moves(
+        "a1^a4f1:SPLIT_SLIDE:BASIC",
+        "d3^c3d1:SPLIT_SLIDE:BASIC",
+        "a4a5:SLIDE:BASIC",
+        "f1a5^a1:MERGE_SLIDE:BASIC",
+    )
+    assert_sample_distribution(
+        b,
+        {
+            u.squares_to_bitboard(["c3", "a1"]): 1 / 4,
+            u.squares_to_bitboard(["c3", "a5"]): 1 / 4,
             u.squares_to_bitboard(["d1", "f1"]): 1 / 4,
             u.squares_to_bitboard(["d1", "a1"]): 1 / 4,
         },
