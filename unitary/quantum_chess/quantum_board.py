@@ -976,7 +976,7 @@ class CirqBoard:
                 else:
                     path1 = self._create_path_ancilla(path_qubits)
                     self.circuit.append(
-                        qm.split_slide_zero_multiple(squbit, tqubit2, tqubit, path1)
+                        qm.split_slide_multiple_zero(squbit, tqubit, tqubit2, path1)
                     )
                     self._clear_path_ancilla(path_qubits, path1)
                 return 1
@@ -1083,7 +1083,7 @@ class CirqBoard:
                 else:
                     path1 = self._create_path_ancilla(path_qubits)
                     self.circuit.append(
-                        qm.merge_slide_zero_multiple(squbit2, tqubit, squbit, path1)
+                        qm.merge_slide_multiple_zero(squbit, tqubit, squbit2, path1)
                     )
                     self._clear_path_ancilla(path_qubits, path1)
                 return 1
