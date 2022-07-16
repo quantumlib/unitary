@@ -255,23 +255,6 @@ def split_slide_one_one_diff_qubits(
     yield cirq.X(path_qubit1)
 
 
-def split_slide_one_multiple(
-    squbit, tqubit_one, tqubit_multiple, path_qubit, path_ancilla, ancilla
-):
-    """Performs a split slide from squbit to two target qubits. Only one qubit
-    (i.e. path_qubit) is in the way from squbit to tqubit_one, while multiple
-    qubits (whose corresponding path ancilla is path_ancilla) are in the way
-    from squbit to tqubit_multiple.
-
-    path_qubit, path_ancilla, and one more ancilla qubit are needed as control.
-    """
-    yield cirq.X(path_qubit)
-    yield split_slide(
-        squbit, tqubit_one, tqubit_multiple, path_qubit, path_ancilla, ancilla
-    )
-    yield cirq.X(path_qubit)
-
-
 def merge_slide(squbit, tqubit, squbit2, path1, path2, ancilla):
     """Performs a merge slide from two source qubits to tqubit.
 
@@ -399,23 +382,6 @@ def merge_slide_one_one_diff_qubits(
     yield merge_slide(squbit, tqubit, squbit2, path_qubit1, path_qubit2, ancilla)
     yield cirq.X(path_qubit2)
     yield cirq.X(path_qubit1)
-
-
-def merge_slide_one_multiple(
-    squbit_one, tqubit, squbit_multiple, path_qubit, path_ancilla, ancilla
-):
-    """Perform a merge slide from two source qubits to tqubit. Only one qubit
-    (i.e. path_qubit) is in the way from squbit_one to tqubit, while multiple
-    qubits (whose corresponding path ancilla is path_ancilla) are in the way
-    from squbit_multiple to tqubit.
-
-    path_qubit, path_ancilla, and one more ancilla qubit are needed as control.
-    """
-    yield cirq.X(path_qubit)
-    yield merge_slide(
-        squbit_one, tqubit, squbit_multiple, path_qubit, path_ancilla, ancilla
-    )
-    yield cirq.X(path_qubit)
 
 
 def en_passant_basic(
