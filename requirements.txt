@@ -2,8 +2,8 @@ cirq-core>=0.14.0
 cirq-google>=0.14.0
 # When changing Cirq requirements be sure to update dev_tools/write-ci-requirements.py
 
-seaborn
-sphinx
+numpy
+sympy
 
 # dev tools
 ipython
