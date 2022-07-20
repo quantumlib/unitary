@@ -119,6 +119,12 @@ def test_undo():
     assert all(result[0] == Light.GREEN for result in results)
 
 
+def test_undo_no_effects():
+    board = alpha.QuantumWorld([])
+    with pytest.raises(IndexError, match='No effects'):
+        board.undo_last_effect()
+
+
 def test_undo_post_select():
     light = alpha.QuantumObject("l1", Light.GREEN)
     light2 = alpha.QuantumObject("l2", Light.RED)
@@ -196,6 +202,38 @@ def test_pop_qubits_twice():
     else:
         assert result2 == green_on_1
     assert all(peek_result == result2 for peek_result in peek_results)
+
+
+def test_combine_overlapping_worlds():
+    l1 = alpha.QuantumObject("l1", Light.GREEN)
+    world1 = alpha.QuantumWorld([l1])
+    l2 = alpha.QuantumObject("l1", StopLight.YELLOW)
+    world2 = alpha.QuantumWorld([l2])
+    with pytest.raises(ValueError, match="overlapping"):
+        world1.combine_with(world2)
+    with pytest.raises(ValueError, match="overlapping"):
+        world2.combine_with(world1)
+
+
+def test_combine_worlds():
+    l1 = alpha.QuantumObject("l1", Light.GREEN)
+    l2 = alpha.QuantumObject("l2", Light.RED)
+    l3 = alpha.QuantumObject("l3", Light.RED)
+    world1 = alpha.QuantumWorld([l1, l2, l3])
+
+    # Split and pop to test post-selection after combining
+    alpha.Split()(l1, l2, l3)
+    result = world1.pop()
+
+    l4 = alpha.QuantumObject("stop_light", StopLight.YELLOW)
+    world2 = alpha.QuantumWorld([l4])
+    world2.combine_with(world1)
+
+    results = world2.peek(count=100)
+    expected = [StopLight.YELLOW] + result
+    print(results)
+    print(expected)
+    assert all(actual == expected for actual in results)
 
 
 def test_get_histogram_and_get_probabilities_one_binary_qobject():

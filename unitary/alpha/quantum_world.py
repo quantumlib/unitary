@@ -20,23 +20,46 @@ from unitary.alpha.quantum_object import QuantumObject
 
 
 class QuantumWorld:
+    """A collection of `QuantumObject`s with effects.
+
+    This object represents an entire state of a quantum game.
+    This includes all the `QuantumObjects` as well as the effects
+    that have been applied to them.  It also includes all
+    criteria of measurement so that repetitions of the circuit
+    will be the same even if some of the quantum objects have
+    already been meaaured,
+
+    This object also has a history so that effects can be undone.
+
+    This object should be initialized with a sampler that determines
+    how to evaluate the quantum game state.  If not specified, this
+    defaults to the built-in cirq Simulator.
+    """
+
     def __init__(
         self, objects: Optional[List[QuantumObject]] = None, sampler=cirq.Simulator()
     ):
-        self.objects: List[QuantumObject] = []
+
+        self.clear()
+        self.sampler = sampler
+
         if isinstance(objects, QuantumObject):
             objects = [objects]
-
-        self.circuit = cirq.Circuit()
-        self.effect_history = []
-        self.used_object_keys = set()
-        self.sampler = sampler
-        self.ancilla_names = set()
-        self.post_selection: Dict[QuantumObject, int] = {}
-
         if objects is not None:
             for obj in objects:
                 self.add_object(obj)
+
+    def clear(self):
+        """Removes all objects and effects from this QuantumWorld.
+
+        This will reset the QuantumWorld to an empty state.
+        """
+        self.objects: List[QuantumObject] = []
+        self.circuit = cirq.Circuit()
+        self.effect_history = []
+        self.used_object_keys = set()
+        self.ancilla_names = set()
+        self.post_selection: Dict[QuantumObject, int] = {}
 
     def add_object(self, obj: QuantumObject):
         """Adds a QuantumObject to the QuantumWorld.
@@ -52,6 +75,27 @@ class QuantumWorld:
         obj.world = self
         obj.initial_effect()
 
+    def combine_with(self, other_world: "QuantumWorld"):
+        """Combines all the objects from the specified world into this one.
+
+        This will add all the objects as well as all the effects into the
+        current world.  The passed in world then becomes unusable.
+
+        Note that the effect history is cleared when this function is called,
+        so previous effects cannot be undone.
+        """
+        if self.used_object_keys.intersection(other_world.used_object_keys):
+            raise ValueError("Cannot combine two worlds with overlapping object keys")
+        self.objects.extend(other_world.objects)
+        self.used_object_keys.update(other_world.used_object_keys)
+        self.ancilla_names.update(other_world.ancilla_names)
+        self.post_selection.update(other_world.post_selection)
+        self.circuit = self.circuit.zip(other_world.circuit)
+        # Clear effect history, since undoing would undo the combined worlds
+        self.effect_history.clear()
+        # Clear the other world so that objects cannot be used from that world.
+        other_world.clear()
+
     def add_effect(self, op_list: List[cirq.Operation]):
         """Adds an operation to the current circuit."""
         self.effect_history.append(
@@ -65,8 +109,14 @@ class QuantumWorld:
 
         Note that pop() is considered to be an effect for the purposes
         of this call.
+
+        Raises:
+            IndexError if there are no effects in the history.
         """
+        if not self.effect_history:
+            raise IndexError('No effects to undo')
         self.circuit, self.post_selection = self.effect_history.pop()
+
 
     def _suggest_num_reps(self, sample_size: int) -> int:
         """Guess the number of raw samples needed to get sample_size results.

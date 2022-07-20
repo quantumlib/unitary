@@ -121,7 +121,7 @@ class TicTacToe:
     def result(self) -> TicTacResult:
         """Returns the result of the TicTacToe game.
 
-        Returns EMPTY if no winnder has been decided, X if
+        Returns EMPTY if no winner has been decided, X if
         three in a row.
         """
         return eval_board(self.last_result)
@@ -130,7 +130,7 @@ class TicTacToe:
         """Measures all squares on the TicTacToe board.
 
         Once the board is measured, a new board is created
-        that is initalized to the measured state.
+        that is initialized to the measured state.
         This should happen when no more squares are empty.
         """
         self.last_result = self.board.pop()

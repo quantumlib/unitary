@@ -75,6 +75,7 @@ class AsciiBoard:
             turn = _flip_turn(turn)
 
         print(f"Result: {result.name}")
+        print(self.board.print())
 
 
 if __name__ == "__main__":
