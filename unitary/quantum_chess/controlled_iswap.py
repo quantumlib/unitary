@@ -14,7 +14,6 @@
 from typing import Sequence, Union, Optional
 
 import cirq
-from cirq import optimizers
 import cirq_google as cg
 import numpy as np
 from cirq.transformers.analytical_decompositions.two_qubit_to_fsim import (
@@ -124,23 +123,25 @@ def controlled_iswap(
 
 def controlled_sqrt_iswap(a: cirq.Qid, b: cirq.Qid, c: cirq.Qid):
     """Performs (ISWAP(a,b)i**0.5).controlled_by(c)"""
-    return cg.optimized_for_sycamore(
+    return cirq.optimize_for_target_gateset(
         cirq.Circuit(
             cirq.CNOT(a, b),
             cirq.TOFFOLI(c, b, a) ** -0.5,
             cirq.CZ(c, b) ** 0.25,
             cirq.CNOT(a, b),
-        )
+        ),
+        gateset=cirq.SqrtIswapTargetGateset()
     )
 
 
 def controlled_inv_sqrt_iswap(a: cirq.Qid, b: cirq.Qid, c: cirq.Qid):
     """Performs (ISWAP(a,b)i**0.5).controlled_by(c)"""
-    return cg.optimized_for_sycamore(
+    return cirq.optimize_for_target_gateset(
         cirq.Circuit(
             cirq.CNOT(a, b),
             cirq.TOFFOLI(c, b, a) ** 0.5,
             cirq.CZ(c, b) ** -0.25,
             cirq.CNOT(a, b),
-        )
+        ),
+        gateset=cirq.SqrtIswapTargetGateset()
     )
