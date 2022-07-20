@@ -692,6 +692,8 @@ class CirqBoard:
         """Adjusts classical bits for a castling operation."""
         self.unhook(bit_to_qubit(tbit))
         self.unhook(bit_to_qubit(rook_tbit))
+        self.unhook(bit_to_qubit(sbit))
+        self.unhook(bit_to_qubit(rook_sbit))
         self.state = set_nth_bit(sbit, self.state, False)
         self.state = set_nth_bit(rook_sbit, self.state, False)
         self.state = set_nth_bit(tbit, self.state, True)
@@ -717,6 +719,7 @@ class CirqBoard:
                 self.set_castle(sbit, rook_sbit, tbit, rook_tbit)
                 return 1
 
+            self.unhook(bit_to_qubit(sbit))
             self.unhook(bit_to_qubit(tbit))
             self.state = set_nth_bit(sbit, self.state, False)
             self.state = set_nth_bit(tbit, self.state, True)
