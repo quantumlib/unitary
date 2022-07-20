@@ -122,6 +122,7 @@ def _swap_to_sqrt_iswap(a, b, turns):
     yield cirq.Z(b) ** (turns / 2 + 0.25)
     yield cirq.CZ.on(a, b) ** (-turns)
 
+
 def generate_decomposed_swap(
     q1: cirq.Qid, q2: cirq.Qid
 ) -> Generator[cirq.Operation, None, None]:
