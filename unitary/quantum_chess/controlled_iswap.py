@@ -130,7 +130,7 @@ def controlled_sqrt_iswap(a: cirq.Qid, b: cirq.Qid, c: cirq.Qid):
             cirq.CZ(c, b) ** 0.25,
             cirq.CNOT(a, b),
         ),
-        gateset=cirq.SqrtIswapTargetGateset()
+        gateset=cirq.SqrtIswapTargetGateset(),
     )
 
 
@@ -143,5 +143,5 @@ def controlled_inv_sqrt_iswap(a: cirq.Qid, b: cirq.Qid, c: cirq.Qid):
             cirq.CZ(c, b) ** -0.25,
             cirq.CNOT(a, b),
         ),
-        gateset=cirq.SqrtIswapTargetGateset()
+        gateset=cirq.SqrtIswapTargetGateset(),
     )
