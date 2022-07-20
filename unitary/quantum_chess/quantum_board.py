@@ -717,6 +717,7 @@ class CirqBoard:
                 self.set_castle(sbit, rook_sbit, tbit, rook_tbit)
                 return 1
 
+            self.unhook(bit_to_qubit(tbit))
             self.state = set_nth_bit(sbit, self.state, False)
             self.state = set_nth_bit(tbit, self.state, True)
             self.add_entangled(rook_squbit, rook_tqubit)
