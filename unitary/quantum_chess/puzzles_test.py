@@ -137,7 +137,7 @@ def test_t6(board):
 
 
 @pytest.mark.parametrize("board", ALL_CIRQ_BOARDS)
-def test_t6(board):
+def test_t7(board):
     b = board(u.squares_to_bitboard(["d4", "a6", "g6"]))
     did_it_move = b.perform_moves(
         "d4^a7g7:SPLIT_SLIDE:BASIC",

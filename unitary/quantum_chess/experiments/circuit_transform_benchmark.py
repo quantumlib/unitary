@@ -76,14 +76,14 @@ def optimize(name: str, circuit: cirq.Circuit) -> cirq.Circuit:
     """
     print(f"optimizing: {name}", flush=True)
     start = timer()
-    optimized = cg.optimized_for_sycamore(circuit)
+    optimized = cirq.optimize_for_target_gateset(circuit, gateset=cirq.SqrtIswapTargetGateset())
     stop = timer()
     print_stats(stop - start, optimized)
     return optimized
 
 
 def benchmark_transform(
-    name: str, circuit: cirq.Circuit, transformer: ct.CircuitTransformer
+    name: str, circuit: cirq.Circuit, transformer
 ) -> cirq.Circuit:
     """Applies a transformation with profiling.
 

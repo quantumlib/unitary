@@ -97,7 +97,7 @@ class CirqBoard:
         error_mitigation: Optional[
             enums.ErrorMitigation
         ] = enums.ErrorMitigation.Nothing,
-        noise_mitigation: Optional[float] = 0.0,
+        noise_mitigation: float = 0.0,
         transformer: Optional[cirq.TRANSFORMER] = None,
         reset_starting_states=False,
     ):
@@ -135,7 +135,9 @@ class CirqBoard:
         self.post_selection = {}
         self.circuit = cirq.Circuit()
         self.ancilla_count = 0
-        initial_square_probs = (float(nth_bit_of(i, basis_state)) for i in range(64))
+        initial_square_probs = list(
+            float(nth_bit_of(i, basis_state)) for i in range(64)
+        )
         # Invariant: len(self.move_history_probabilities_cache) ==
         #            len(self.move_history) + 1
 
@@ -377,7 +379,7 @@ class CirqBoard:
 
         Returns the results as a list of bitboards.
         """
-        rtn = []
+        rtn: List[int] = []
         while len(rtn) < num_samples:
             samples, _ = self.sample_with_ancilla(num_samples)
             rtn = rtn + samples
@@ -507,13 +509,13 @@ class CirqBoard:
         """Samples the state and generates the accumulated probabilities of each board
         in the state, which will be saved as a map(board->prob.) in self.board_probabilities.
         """
-        self.board_probabilities = {}
+        self.board_probabilities: Dict[int, float] = {}
 
         samples = self.sample(repetitions)
         for sample in samples:
             if sample not in self.board_probabilities:
-                self.board_probabilities[sample] = 0
-            self.board_probabilities[sample] += 1
+                self.board_probabilities[sample] = 0.0
+            self.board_probabilities[sample] += 1.0
 
         for board in self.board_probabilities:
             self.board_probabilities[board] /= repetitions
@@ -582,7 +584,7 @@ class CirqBoard:
                 if nth_bit_of(qubit_to_bit(qubit), self.state):
                     self.circuit.append(qm.place_piece(qubit))
 
-    def new_ancilla(self, note: str = "") -> cirq.Qid:
+    def new_ancilla(self, note: str = "") -> cirq.NamedQubit:
         """Adds a new ancilla to the circuit and returns its value.
 
         `note` is an optional string to include in the ancilla qubit's name.
@@ -594,7 +596,7 @@ class CirqBoard:
         self.ancilla_count += 1
         return new_qubit
 
-    def unhook(self, qubit: cirq.Qid) -> cirq.Qid:
+    def unhook(self, qubit: cirq.NamedQubit) -> Optional[cirq.NamedQubit]:
         """Removes a qubit from the quantum portion of the board.
 
         This exchanges all mentions of the qubit in the circuit
@@ -602,7 +604,7 @@ class CirqBoard:
         entangled squares.
         """
         if qubit not in self.entangled_squares:
-            return
+            return None
 
         # Create a new ancilla qubit to replace the qubit with
         new_qubit = self.new_ancilla(note=qubit.name)
@@ -617,7 +619,7 @@ class CirqBoard:
         self.entangled_squares.add(new_qubit)
         return new_qubit
 
-    def path_qubits(self, source: str, target: str) -> List[cirq.Qid]:
+    def path_qubits(self, source: str, target: str) -> List[cirq.NamedQubit]:
         """Returns all entangled qubits (or classical pieces)
         between source and target.
 
@@ -660,7 +662,9 @@ class CirqBoard:
                 rtn.append(path_qubit)
         return rtn
 
-    def _create_path_ancilla(self, path_qubits: List[cirq.Qid]) -> cirq.Qid:
+    def _create_path_ancilla(
+        self, path_qubits: List[cirq.NamedQubit]
+    ) -> cirq.NamedQubit:
         """Creates an ancilla that is anti-controlled by the qubits
         in the path."""
         path_ancilla = self.new_ancilla()
@@ -751,7 +755,7 @@ class CirqBoard:
 
     def post_select_on(
         self,
-        qubit: cirq.Qid,
+        qubit: cirq.NamedQubit,
         measurement_outcome: Optional[int] = None,
         invert: bool = False,
     ) -> int:
@@ -774,10 +778,9 @@ class CirqBoard:
         Returns: the measurement outcome or sample result as 1 or 0.
         """
         if measurement_outcome is not None:
+            result = bool(measurement_outcome)
             if invert:
-                result = 1 - measurement_outcome
-            else:
-                result = measurement_outcome
+                result = not result
         if "anc" in qubit.name:
             if measurement_outcome is None:
                 ancilla_result = []
