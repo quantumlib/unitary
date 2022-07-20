@@ -18,7 +18,7 @@ import math
 import os
 import uuid
 from dataclasses import dataclass, field
-from typing import List, Any, Optional, Callable, Dict, Union
+from typing import List, Any, Optional, Callable, Dict, Union, Sequence
 
 import numpy as np
 
