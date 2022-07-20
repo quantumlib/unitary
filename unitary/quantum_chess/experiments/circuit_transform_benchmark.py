@@ -76,15 +76,15 @@ def optimize(name: str, circuit: cirq.Circuit) -> cirq.Circuit:
     """
     print(f"optimizing: {name}", flush=True)
     start = timer()
-    optimized = cirq.optimize_for_target_gateset(circuit, gateset=cirq.SqrtIswapTargetGateset())
+    optimized = cirq.optimize_for_target_gateset(
+        circuit, gateset=cirq.SqrtIswapTargetGateset()
+    )
     stop = timer()
     print_stats(stop - start, optimized)
     return optimized
 
 
-def benchmark_transform(
-    name: str, circuit: cirq.Circuit, transformer
-) -> cirq.Circuit:
+def benchmark_transform(name: str, circuit: cirq.Circuit, transformer) -> cirq.Circuit:
     """Applies a transformation with profiling.
 
     Prints the (truncated) profile and some statistics about the size of the
