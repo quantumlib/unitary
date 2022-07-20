@@ -23,7 +23,6 @@ from typing import Callable, Dict, Generator, Iterable, List, Optional, Tuple
 import cirq
 
 import unitary.quantum_chess.mcpe_utils as mcpe
-from cirq_google.optimizers.convert_to_sqrt_iswap import swap_to_sqrt_iswap
 
 
 def _satisfies_adjacency(gate: cirq.Operation) -> bool:
@@ -78,11 +77,57 @@ def _pairwise_shortest_distances(
     return shortest
 
 
+def _near_mod_n(e, t, n, atol=1e-8):
+    return abs((e - t + 1) % n - 1) <= atol
+
+
+def _swap_to_sqrt_iswap(a, b, turns):
+    """Implement the evolution of a hopping term using two sqrt_iswap gates and single qubit gates.
+    Output unitary:
+    [[1, 0,        0,     0],
+     [0, g·c,    -i·g·s,  0],
+     [0, -i·g·s,  g·c,    0],
+     [0,   0,      0,     1]]
+     where c = cos(theta) and s = sin(theta).
+    Args:
+        a: the first qubit
+        b: the second qubit
+        turns: The rotational angle that specifies the gate, where
+            c = cos(π·t/2), s = sin(π·t/2), g = exp(i·π·t/2).
+    Yields:
+        A `cirq.OP_TREE` representing the decomposition.
+    """
+    if _near_mod_n(turns, 1.0, 2):
+        # Decomposition for cirq.SWAP
+        yield cirq.Y(a) ** 0.5
+        yield cirq.Y(b) ** 0.5
+        yield cirq.SQRT_ISWAP(a, b)
+        yield cirq.Y(a) ** -0.5
+        yield cirq.Y(b) ** -0.5
+        yield cirq.SQRT_ISWAP(a, b)
+        yield cirq.X(a) ** -0.5
+        yield cirq.X(b) ** -0.5
+        yield cirq.SQRT_ISWAP(a, b)
+        yield cirq.X(a) ** 0.5
+        yield cirq.X(b) ** 0.5
+        return
+
+    yield cirq.Z(a) ** 1.25
+    yield cirq.Z(b) ** -0.25
+    yield cirq.ISWAP(a, b) ** -0.5
+    yield cirq.Z(a) ** (-turns / 2 + 1)
+    yield cirq.Z(b) ** (turns / 2)
+    yield cirq.ISWAP(a, b) ** -0.5
+    yield cirq.Z(a) ** (turns / 2 - 0.25)
+    yield cirq.Z(b) ** (turns / 2 + 0.25)
+    yield cirq.CZ.on(a, b) ** (-turns)
+
+
 def generate_decomposed_swap(
     q1: cirq.Qid, q2: cirq.Qid
 ) -> Generator[cirq.Operation, None, None]:
     """Generates a SWAP operation using sqrt-iswap gates."""
-    yield from swap_to_sqrt_iswap(q1, q2, 1.0)
+    yield from _swap_to_sqrt_iswap(q1, q2, 1.0)
 
 
 class SwapUpdater:
