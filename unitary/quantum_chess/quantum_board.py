@@ -135,9 +135,7 @@ class CirqBoard:
         self.post_selection = {}
         self.circuit = cirq.Circuit()
         self.ancilla_count = 0
-        initial_square_probs = list(
-            float(nth_bit_of(i, basis_state)) for i in range(64)
-        )
+        initial_square_probs = [float(nth_bit_of(i, basis_state)) for i in range(64)]
         # Invariant: len(self.move_history_probabilities_cache) ==
         #            len(self.move_history) + 1
 
