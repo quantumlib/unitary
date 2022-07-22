@@ -18,7 +18,7 @@ import math
 import os
 import uuid
 from dataclasses import dataclass, field
-from typing import List, Any, Optional, Callable, Dict, Union
+from typing import List, Any, Optional, Callable, Dict, Union, Sequence
 
 import numpy as np
 
@@ -164,7 +164,7 @@ class ZerosSampler(work.Sampler):
             program: 'cirq.Circuit',
             params: 'cirq.Sweepable',
             repetitions: int = 1,
-    ) -> List['cirq.Result']:
+    ) -> Sequence['cirq.Result']:
         assert isinstance(program, circuits.Circuit)
         meas = list(program.findall_operations_with_gate_type(
             ops.MeasurementGate))
@@ -247,13 +247,7 @@ class EngineQuantumProcessor:
         return self._engine
 
     def get_sampler(self, gateset: str = None):
-        if gateset == 'sycamore':
-            gateset = cg.SYC_GATESET
-        elif gateset == 'sqrt-iswap':
-            gateset = cg.SQRT_ISWAP_GATESET
-        else:
-            raise ValueError("Unknown gateset {}".format(gateset))
-        return self.engine.sampler(processor_id=self.processor_id, gate_set=gateset)
+        return self.engine.sampler(processor_id=self.processor_id)
 
     @property
     def device_obj(self):

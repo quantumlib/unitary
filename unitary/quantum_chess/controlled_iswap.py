@@ -25,7 +25,7 @@ from cirq.transformers.analytical_decompositions.two_qubit_to_fsim import (
 def _decompose_xx_yy(
     desired_interaction: Union[cirq.Operation, np.ndarray, "cirq.SupportsUnitary"],
     *,
-    available_gate: cirq.Gate,
+    available_gate: cirq.FSimGate,
     atol: float = 1e-8,
     qubits: Optional[Sequence[cirq.Qid]] = None,
 ) -> cirq.Circuit:

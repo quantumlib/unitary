@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Quantum Circuits for common quantum chess moves."""
-from typing import List
+from typing import Sequence
 
 import cirq
 
@@ -67,7 +67,7 @@ def merge_move(s1: cirq.Qid, s2: cirq.Qid, t: cirq.Qid):
 
 
 def slide_move(
-    s: cirq.Qid, t: cirq.Qid, path: List[cirq.Qid], ancilla: cirq.Qid = None
+    s: cirq.Qid, t: cirq.Qid, path: Sequence[cirq.Qid], ancilla: cirq.Qid = None
 ):
     """A Slide move in quantum chess.
 

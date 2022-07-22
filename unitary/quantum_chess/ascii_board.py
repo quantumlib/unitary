@@ -16,7 +16,7 @@ class AsciiBoard:
     so use with caution.
     """
 
-    def __init__(self, size: Optional[int] = 8, reps: Optional[int] = 1000, board=None):
+    def __init__(self, size: int = 8, reps: int = 1000, board=None):
 
         self.size = size
         self.reps = reps
