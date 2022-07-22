@@ -185,10 +185,10 @@ class Move:
           include_type: also include the move type/variant in the string
         """
         movestr = self.source + self.target
-        if self.is_split_move() and self.target2:
-            movestr = self.source + "^" + self.target + self.target2
-        if self.is_merge_move() and self.source2:
-            movestr = self.source + self.source2 + "^" + self.target
+        if self.is_split_move():
+            movestr = self.source + "^" + self.target + str(self.target2)
+        if self.is_merge_move():
+            movestr = self.source + str(self.source2) + "^" + self.target
         if self.promotion_piece is not None:
             movestr += constants.PIECES[self.promotion_piece]
         if self.has_measurement():
