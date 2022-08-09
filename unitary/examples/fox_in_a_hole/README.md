@@ -14,7 +14,7 @@ At the end of the game the program will print out for each day what the fox did 
 ## Rules of the quantum version of the game
 The fox starts in a random hole. The following repeats until the player finds the fox, exceeds 10 guesses or stops the game:
 1.  The player can guess which hole the fox hides in. This implies a measurement on that hole. If the fox is found to be in the guessed hole the player wins.
-2.  The fox chooses a hole with non-zero probability from which one of the following options is carried out randomly:
+2.  The fox chooses a hole in which its existence has non-zero probability. For the chosen hole one of the following options is carried out randomly:
     * Moving left (provided the chosen hole is not the left-most one)
     * Moving right (provided the chosen hole is not the right-most one)
     * Moving left and right at the same time (provided the starting hole is not the left-most or right-most one)
