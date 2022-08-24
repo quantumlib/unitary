@@ -192,8 +192,7 @@ class QuantumGame(Game):
     def take_random_move(self) -> str:
         """Applies a random move on the current state. Gives back the move in string format."""
         # Pick a random non-empty hole
-        non_empty_holes = np.where(self.empty_holes == 0)
-
+        non_empty_holes = np.where(self.empty_holes == 0)[0]
         index = self.rng.integers(low=0, high=len(non_empty_holes))
         source = non_empty_holes[index]
 
@@ -252,6 +251,11 @@ class QuantumGame(Game):
             # The targets are now definitely non-empty
             self.empty_holes[source-1] = 0
             self.empty_holes[source+1] = 0
+
+            # Check if source is now empty (peek at it)
+            result = self.state[0].peek([self.state[1][source]], count=10, convert_to_enum=False)
+            self.empty_holes[source] = 0 if np.any(result) else 1
+
         return move_str
 
 
