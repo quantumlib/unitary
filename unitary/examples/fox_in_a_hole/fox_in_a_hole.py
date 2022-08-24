@@ -174,6 +174,10 @@ class QuantumGame(Game):
             holes.append(hole)
         self.state = (QuantumWorld(holes), holes)
 
+        # Track empty holes
+        self.empty_holes = np.ones(self.hole_nr)
+        self.empty_holes[index] = 0
+
     def state_to_string(self):
         return str(self.state[0].get_binary_probabilities(objects=self.state[1]))
 
@@ -187,20 +191,22 @@ class QuantumGame(Game):
 
     def take_random_move(self) -> str:
         """Applies a random move on the current state. Gives back the move in string format."""
-        probs = self.state[0].get_binary_probabilities(objects=self.state[1])
-        non_empty_holes = []
-        for i, prob in enumerate(probs):
-            if prob > 0:
-                non_empty_holes.append(i)
+        # Pick a random non-empty hole
+        non_empty_holes = np.where(self.empty_holes == 0)
+
         index = self.rng.integers(low=0, high=len(non_empty_holes))
         source = non_empty_holes[index]
-        direction = self.rng.integers(low=-1, high=2)  # -1: left; 0: both; 1:right
 
+        # Pick a random 'direction'
+        direction = self.rng.integers(low=-1, high=2)  # -1: left; 0: both; 1:right
+        # If we're at the edges, force the direction inward
         if source == 0:
             direction = 1
         elif source == self.hole_nr - 1:
             direction = -1
-        if direction in (-1, 1):  # Move left or right
+
+        # If we're just moving left or right (not both)
+        if direction in (-1, 1):
             target = source + direction
             if self.iswap:
                 PhasedMove()(self.state[1][source], self.state[1][target])
@@ -208,12 +214,21 @@ class QuantumGame(Game):
             else:
                 Move()(self.state[1][source], self.state[1][target])
                 swap_str = "SWAP"
+
             if direction == -1:
                 dir_str = "left"
             else:
                 dir_str = "right"
             move_str = f"Moving ({swap_str}-based) {dir_str} from position {source}."
-        else:  # Move left & right (split)
+
+            # If the target was empty, the source will now be
+            if( self.empty_holes[target] ):
+                self.empty_holes[source] = 1
+
+            # The target is now non-empty
+            self.empty_holes[target] = 0
+
+        else:  # Move both left & right (split)
             if self.iswap:
                 PhasedSplit()(
                     self.state[1][source],
@@ -233,6 +248,10 @@ class QuantumGame(Game):
                     swap_str, source, source - 1, source + 1
                 )
             )
+
+            # The targets are now definitely non-empty
+            self.empty_holes[source-1] = 0
+            self.empty_holes[source+1] = 0
         return move_str
 
 
