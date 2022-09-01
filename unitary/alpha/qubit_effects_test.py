@@ -13,29 +13,35 @@
 # limitations under the License.
 #
 
+import pytest
+
 import cirq
 
 import unitary.alpha as alpha
+from unitary.alpha.sparse_vector_simulator import SparseSimulator
 
 
-def test_flip():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_flip(simulator):
+    board = alpha.QuantumWorld(sampler=simulator())
     piece = alpha.QuantumObject("t", 0)
     board.add_object(piece)
     alpha.Flip()(piece)
     assert board.circuit == cirq.Circuit(cirq.X(cirq.NamedQubit("t")))
 
 
-def test_superposition():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_superposition(simulator):
+    board = alpha.QuantumWorld(sampler=simulator())
     piece = alpha.QuantumObject("t", 0)
     board.add_object(piece)
     alpha.Superposition()(piece)
     assert board.circuit == cirq.Circuit(cirq.H(cirq.NamedQubit("t")))
 
 
-def test_move():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_move(simulator):
+    board = alpha.QuantumWorld(sampler=simulator())
     piece1 = alpha.QuantumObject("a", 1)
     piece2 = alpha.QuantumObject("b", 0)
     board.add_object(piece1)
@@ -53,8 +59,9 @@ def test_move():
     assert all(result == [0, 1] for result in results)
 
 
-def test_phased_move():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_phased_move(simulator):
+    board = alpha.QuantumWorld(sampler=simulator())
     piece1 = alpha.QuantumObject("a", 1)
     piece2 = alpha.QuantumObject("b", 0)
     board.add_object(piece1)
@@ -72,8 +79,9 @@ def test_phased_move():
     assert all(result == [0, 1] for result in results)
 
 
-def test_split():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_split(simulator):
+    board = alpha.QuantumWorld(sampler=simulator())
     piece1 = alpha.QuantumObject("a", 1)
     piece2 = alpha.QuantumObject("b", 0)
     piece3 = alpha.QuantumObject("c", 0)
@@ -92,8 +100,9 @@ def test_split():
     assert board.circuit == expected_circuit
 
 
-def test_phased_split():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_phased_split(simulator):
+    board = alpha.QuantumWorld(sampler=simulator())
     piece1 = alpha.QuantumObject("a", 1)
     piece2 = alpha.QuantumObject("b", 0)
     piece3 = alpha.QuantumObject("c", 0)
