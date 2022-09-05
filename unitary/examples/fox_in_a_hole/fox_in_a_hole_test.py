@@ -72,24 +72,47 @@ def test_quantum_game():
     test_game.history_append_state()
     assert len(test_game.history) == hist_len + 1
 
-    test_game = fh.QuantumGame(seed=42)
+    test_game = fh.QuantumGame(seed=12)
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
-    assert probs == [1.0, 0.0, 0.0, 0.0, 0.0]
+    assert probs == [0.0, 0.0, 0.0, 1.0, 0.0]
     test_game.take_random_move()
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
-    assert probs == [0.0, 1.0, 0.0, 0.0, 0.0]
+    assert probs == [0.0, 0.0, 1.0, 0.0, 0.0]
     test_game.take_random_move()
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
-    assert probs[0] > 0.0
+    assert probs[0] == 0.0
+    assert probs[1] > 0.0
+    assert probs[2] == 0.0
+    assert probs[3] > 0.0
+    assert probs[4] == 0.0
+    guess = test_game.check_guess(3)
+    probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
+    assert probs[0] == 0.0
+    assert probs[2] == 0.0
+    assert probs[4] == 0.0
+    assert ( (guess and probs[3]==1.0 and probs[1]==0.0) or
+             (not guess and probs[3]==0.0 and probs[1]==1.0))
+
+    test_game = fh.QuantumGame(seed=12, qprob=1.0)
+    probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
+    assert probs == [0.0, 0.0, 0.0, 1.0, 0.0]
+    test_game.take_random_move()
+    probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
+    assert probs[0] == 0.0
     assert probs[1] == 0.0
     assert probs[2] > 0.0
     assert probs[3] == 0.0
-    assert probs[4] == 0.0
-    guess = test_game.check_guess(0)
+    assert probs[4] > 0.0
+    test_game.take_random_move()
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
-    assert probs[1] == 0.0
-    assert probs[3] == 0.0
-    assert probs[4] == 0.0
-    assert (guess and probs[0] == 1.0 and probs[2] == 0.0) or (
-        not guess and probs[0] == 0.0 and probs[2] == 1.0
-    )
+    print(probs)
+    assert probs[0] == 0.0
+    assert probs[1] >= 0.0
+    assert probs[2] == 0.0
+    assert probs[3] > 0.0
+    assert probs[4] > 0.0
+    guess = test_game.check_guess(1)
+    probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
+    assert probs[0] == 0.0
+    assert probs[2] == 0.0
+    assert ((guess and probs[1]==1.0) or (not guess and probs[1]==0.0))

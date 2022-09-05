@@ -25,10 +25,10 @@ At the end of the game, the program will print out for each day what the player'
 
 This is a command line game. After cloning the Unitary library, change the directory into `examples/fox_in_a_hole`. You can use command line flags to set up the game type:
 
-    python3 fox_in_a_hole.py [-q] [-i]
+    python3 fox_in_a_hole.py [-q[=]] [-i]
 
 | Flag | Description |
 |------|-------------|
-| -q | Play the quantum version of the game. Without this the classical version will run. |
+| -q[=prob] | Play the quantum version of the game. Without this the classical version will run. `prob`: Probability of quantum move. 0.0<=prob<=1.0. Default: 0.5. |
 | -i | For quantum moves/splits use iSWAP, instead of SWAP. |
    
