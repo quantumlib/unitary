@@ -17,6 +17,7 @@ from typing import Dict, List, Optional, Sequence, Union
 import cirq
 
 from unitary.alpha.quantum_object import QuantumObject
+from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
 
 
 class QuantumWorld:
@@ -42,6 +43,7 @@ class QuantumWorld:
 
         self.clear()
         self.sampler = sampler
+        self.use_sparse = isinstance(sampler, SparseSimulator)
 
         if isinstance(objects, QuantumObject):
             objects = [objects]
@@ -86,6 +88,8 @@ class QuantumWorld:
         """
         if self.used_object_keys.intersection(other_world.used_object_keys):
             raise ValueError("Cannot combine two worlds with overlapping object keys")
+        if self.use_sparse != other_world.use_sparse:
+            raise ValueError("Cannot combine sparse simulator world with non-sparse")
         self.objects.extend(other_world.objects)
         self.used_object_keys.update(other_world.used_object_keys)
         self.ancilla_names.update(other_world.ancilla_names)
@@ -96,13 +100,29 @@ class QuantumWorld:
         # Clear the other world so that objects cannot be used from that world.
         other_world.clear()
 
+    def _append_op(self, op: cirq.Operation):
+        """Add the operation in a way designed to speed execution.
+
+        For the sparse simulator post-selections should be as early as possible to cut
+        down the state size. Also X's since they don't increase the size.
+        """
+        if not self.use_sparse:
+            self.circuit.append(op)
+            return
+
+        if isinstance(op, PostSelectOperation) or op.gate is cirq.X:
+            strategy = cirq.InsertStrategy.EARLIEST
+        else:
+            strategy = cirq.InsertStrategy.NEW
+        self.circuit.append(op, strategy=strategy)
+
     def add_effect(self, op_list: List[cirq.Operation]):
         """Adds an operation to the current circuit."""
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
         )
         for op in op_list:
-            self.circuit.append(op)
+            self._append_op(op)
 
     def undo_last_effect(self):
         """Restores the `QuantumWorld` to the state before the last effect.
@@ -124,6 +144,8 @@ class QuantumWorld:
         Noise and error mitigation will discard reps, so increase the total
         number of repetitions to compensate.
         """
+        if self.use_sparse:
+            return sample_size
         if len(self.post_selection) >= 1:
             sample_size <<= len(self.post_selection) + 1
         if sample_size < 100:
@@ -155,6 +177,8 @@ class QuantumWorld:
         )
         post_selection = result.value if isinstance(result, enum.Enum) else result
         self.post_selection[new_obj] = post_selection
+        if self.use_sparse:
+            self._append_op(PostSelectOperation(new_obj.qubit, post_selection))
 
     def peek(
         self,

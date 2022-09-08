@@ -225,6 +225,17 @@ def test_combine_overlapping_worlds():
         world2.combine_with(world1)
 
 
+def test_combine_incompatibly_sparse_worlds():
+    l1 = alpha.QuantumObject("l1", Light.GREEN)
+    world1 = alpha.QuantumWorld([l1], sampler=cirq.Simulator())
+    l2 = alpha.QuantumObject("l2", StopLight.YELLOW)
+    world2 = alpha.QuantumWorld([l2], sampler=alpha.SparseSimulator())
+    with pytest.raises(ValueError, match="sparse"):
+        world1.combine_with(world2)
+    with pytest.raises(ValueError, match="sparse"):
+        world2.combine_with(world1)
+
+
 def test_combine_worlds():
     l1 = alpha.QuantumObject("l1", Light.GREEN)
     l2 = alpha.QuantumObject("l2", Light.RED)
