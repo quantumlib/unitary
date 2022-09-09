@@ -2,6 +2,8 @@
 
 Just enough features to support Unitary are implemented.
 
+Supports standard unitary Cirq gates, plus a post-selection operator.
+
 Does not work with 3+-state qudits. TODO: integrate with qutrit-to-qubit conversion
 when that is available.
 """
@@ -10,7 +12,7 @@ import numpy as np
 
 
 # TODO: Is this a good number?
-EPSILON = 1e-14
+_EPSILON = 1e-14
 
 
 class SparseSimulationState(cirq.SimulationState):
@@ -32,7 +34,24 @@ class SparseSimulationState(cirq.SimulationState):
         if action.gate is cirq.X:
             self._states ^= 1 << self.qubit_map[qubits[0]]
         else:
+            # Create a matrix (partitioned_state) where each nonzero entry corresponds
+            # to an element of the sparse state vector. The row indicates the value of
+            # the qubits acted on by the unitary, the column indicates the value of the
+            # remaining qubits, and the value there is the amplitude. Multiplying by
+            # the gate unitary then gives the resulting state in the same format.
+            # After filtering small entries it is then converted back to the lists
+            # of states and amplitudes.
+            #
+            # The basic algorithm here is short and simple, but we go through a lot of
+            # contortions to optimize it by using numpy operations instead of pure
+            # Python ones (even at the cost of performing a much greater number of
+            # mathematical operations).
+
+            # The nth element of dst_rows tells which row of partitioned_state the
+            # nth element of the state vector will go to.
             dst_rows = np.zeros(len(self._states), dtype=int)
+            # reverse_affected maps row index of partitioned_state -> state with all
+            # qubits not acted on by the unitary masked out.
             reverse_affected = np.zeros(1, dtype=object)
             mask = ~0
             for dst_bit, qubit in enumerate(qubits[::-1]):
@@ -44,13 +63,17 @@ class SparseSimulationState(cirq.SimulationState):
                 )
                 mask ^= 1 << src_bit
             self._states &= mask
+            # unique_affected is the set of states after masking out the qubits acted
+            # on by the unitary.
+            # The nth element of dst_colls which column of partitioned_state the nth
+            # element of the state vector will go to.
             unique_unaffected, dst_cols = np.unique(self._states, return_inverse=True)
             partitioned_state = np.zeros(
-                (1 << len(qubits), len(unique_unaffected)), np.complex128
+                (1 << len(qubits), len(unique_unaffected)), dtype=np.complex128
             )
             partitioned_state[dst_rows, dst_cols] = self._amplitudes
             np.matmul(cirq.unitary(action), partitioned_state, out=partitioned_state)
-            nz_rows, nz_cols = np.nonzero(abs(partitioned_state) > EPSILON)
+            nz_rows, nz_cols = np.nonzero(abs(partitioned_state) > _EPSILON)
             self._states = reverse_affected[nz_rows] | unique_unaffected[nz_cols]
             self._amplitudes = partitioned_state[nz_rows, nz_cols]
         return True
@@ -100,6 +123,11 @@ class SparseSimulator(cirq.SimulatesIntermediateStateVector):
 
 
 class PostSelectOperation(cirq.Operation):
+    """Prunes states where self.qubit is not equal to self.value from the state vector.
+
+    Must be used with SparseSimulator as the sampler.
+    """
+
     def __init__(self, qubit, value):
         super().__init__()
         self.qubit = qubit
