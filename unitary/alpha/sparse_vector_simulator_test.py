@@ -1,7 +1,13 @@
+import pytest
+
 import cirq
 from cirq.testing import random_circuit
 
-from unitary.alpha.sparse_vector_simulator import SparseSimulator, PostSelectOperation
+from unitary.alpha.sparse_vector_simulator import (
+    SparseSimulator,
+    PostSelectOperation,
+    InvalidPostSelectionError,
+)
 
 
 def test_simulation_fidelity():
@@ -58,3 +64,12 @@ def test_post_selection():
     assert 0.23 < sum((data.c1 == 1) & (data.c2 == 1)) / repetitions < 0.43
     assert 0.23 < sum((data.c1 == 1) & (data.c2 == 0)) / repetitions < 0.43
     assert 0.23 < sum((data.c1 == 0) & (data.c2 == 0)) / repetitions < 0.43
+
+
+def test_impossible_post_selection():
+    """Test post-selecting for a state with zero amplitude."""
+    sim = SparseSimulator()
+    qubit = cirq.NamedQubit("q")
+    circuit = cirq.Circuit(PostSelectOperation(qubit, 1), cirq.measure(qubit))
+    with pytest.raises(InvalidPostSelectionError):
+        sim.run(circuit, repetitions=100)

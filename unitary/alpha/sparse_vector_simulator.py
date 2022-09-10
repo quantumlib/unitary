@@ -94,7 +94,9 @@ class SparseSimulationState(cirq.SimulationState):
         assert value in (0, 1)
         mask = 1 << self.qubit_map[qubit]
         value *= mask
-        nonzero_indices = np.nonzero(self._states & mask == value)
+        (nonzero_indices,) = np.nonzero(self._states & mask == value)
+        if len(nonzero_indices) == 0:
+            raise InvalidPostSelectionError(f"No states where {qubit} equals {value}")
         self._states = self._states[nonzero_indices]
         self._amplitudes = self._amplitudes[nonzero_indices]
         self._amplitudes /= np.linalg.norm(self._amplitudes)
@@ -143,6 +145,10 @@ class PostSelectOperation(cirq.Operation):
 
     def with_qubits(self, new_qubit):
         return PostSelectOperation(new_qubit, self.value)
+
+
+class InvalidPostSelectionError(Exception):
+    """When a qubit state with zero amplitude is post-selected for."""
 
 
 class SparseSimulatorStep(cirq.StepResultBase):
