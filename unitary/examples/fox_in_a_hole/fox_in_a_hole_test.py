@@ -19,7 +19,7 @@ import pytest
 import unitary.examples.fox_in_a_hole.fox_in_a_hole as fh
 
 
-def test_classical_game():
+def test_classical_game_basics():
     """Simple tests for ClassicalGame."""
     test_game = fh.ClassicalGame(seed=42)
     assert test_game.hole_nr == 5
@@ -39,6 +39,7 @@ def test_classical_game():
     test_game.history_append_state()
     assert len(test_game.history) == hist_len + 1
 
+def test_classical_game_moves():
     test_game = fh.ClassicalGame(seed=42)
     test_game.take_random_move()
     assert test_game.state == [0.0, 1.0, 0.0, 0.0, 0.0]
@@ -51,7 +52,7 @@ def test_classical_game():
         assert guess == (i == 1)
 
 
-def test_quantum_game():
+def test_quantum_game_basics():
     """Simple tests for QuantumGame."""
     test_game = fh.QuantumGame(seed=42)
     assert test_game.hole_nr == 5
@@ -72,6 +73,7 @@ def test_quantum_game():
     test_game.history_append_state()
     assert len(test_game.history) == hist_len + 1
 
+def test_quantum_game_moves_q_eq_half():
     test_game = fh.QuantumGame(seed=12)
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
     assert probs == [0.0, 0.0, 0.0, 1.0, 0.0]
@@ -93,6 +95,7 @@ def test_quantum_game():
     assert ( (guess and probs[3]==1.0 and probs[1]==0.0) or
              (not guess and probs[3]==0.0 and probs[1]==1.0))
 
+def test_quantum_game_moves_q_eq_one():
     test_game = fh.QuantumGame(seed=12, qprob=1.0)
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
     assert probs == [0.0, 0.0, 0.0, 1.0, 0.0]
