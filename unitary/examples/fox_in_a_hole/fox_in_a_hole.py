@@ -18,6 +18,7 @@ import abc
 import sys
 import enum
 import numpy as np
+import argparse
 
 from unitary.alpha import (
     QuantumObject,
@@ -160,8 +161,9 @@ class QuantumGame(Game):
     (QuantumWorld, [QuantumObject]) -> quantum world, list of holes
     """
 
-    def __init__(self, hole_nr=5, iswap=False, seed=None):
+    def __init__(self, hole_nr=5, iswap=False, qprob=0.5, seed=None):
         self.iswap = iswap
+        self.qprob = qprob
         super().__init__(hole_nr=hole_nr, seed=seed)
 
     def initialize_state(self):
@@ -194,7 +196,10 @@ class QuantumGame(Game):
                 non_empty_holes.append(i)
         index = self.rng.integers(low=0, high=len(non_empty_holes))
         source = non_empty_holes[index]
-        direction = self.rng.integers(low=-1, high=2)  # -1: left; 0: both; 1:right
+        if self.rng.random()<self.qprob:
+            direction = 0 # Left & right at the same time
+        else:
+            direction = self.rng.integers(low=0, high=2)*2-1  # -1: left; 1:right
 
         if source == 0:
             direction = 1
@@ -237,19 +242,36 @@ class QuantumGame(Game):
 
 
 if __name__ == "__main__":
-    if "-h" in sys.argv or "--help" in sys.argv:
-        print("Usage:")
-        print("python3 fox_in_a_hole.py [-q] [-i] [-h]")
-        print("-h: This help.")
-        print("-q: Use quantum version instead of classical version.")
-        print("-i: Use iSWAP for moves in quantum version.")
-        sys.exit(0)
-    if "-q" in sys.argv:
-        use_iswap = "-i" in sys.argv
-        game = QuantumGame(iswap=use_iswap)
-        print("Quantum Fox-in-a-hole game.")
+    parser = argparse.ArgumentParser(description='Fox-in-a-hole game.')
+
+    parser.add_argument('-q', dest='is_quantum', action='store_const', 
+                        const=True, default=False,
+                        help='Use quantum version instead of classical version.')
+    parser.add_argument('-i', dest='use_iswap', action='store_const', 
+                        const=True, default=False,
+                        help='Use iSWAP for moves in quantum case.')
+    parser.add_argument('-qprob', metavar='p', type=float, dest='qprob',
+                        help='Probability p of quantum move: 0.0<=p<=1.0. Default: 0.5.')
+    args = parser.parse_args()
+
+    if args.is_quantum and args.qprob is None:
+        args.qprob = 0.5
+    if args.qprob is not None and not 0.0<args.qprob<=1.0:
+        print("The probability p of a quantum move has to be: 0.0<p<=1.0.")
+        sys.exit()
+
+    print(f"---------------------------------")
+    if args.is_quantum or (args.qprob is not None and args.qprob>0.0):
+        game = QuantumGame(qprob=args.qprob,iswap=args.use_iswap)
+        print(f"Quantum Fox-in-a-hole game.")
+        print(f"Probability of quantum move: {args.qprob}.")
+        if args.use_iswap:
+            print(f"Using iSWAP for moves.")
+        else:
+            print(f"Using SWAP for moves.")
     else:
         game = ClassicalGame()
         print("Classical Fox-in-a-hole game.")
+    print(f"---------------------------------")
 
     game.run()
