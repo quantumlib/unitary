@@ -27,6 +27,7 @@ from unitary.alpha import (
     PhasedMove,
     Split,
     PhasedSplit,
+    SparseSimulator,
 )
 
 
@@ -174,7 +175,7 @@ class QuantumGame(Game):
                 f"Hole-{i}-{i}", Hole.FOX if i == index else Hole.EMPTY
             )
             holes.append(hole)
-        self.state = (QuantumWorld(holes), holes)
+        self.state = (QuantumWorld(holes, sampler=SparseSimulator()), holes)
 
     def state_to_string(self):
         return str(self.state[0].get_binary_probabilities(objects=self.state[1]))

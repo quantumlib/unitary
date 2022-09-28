@@ -17,13 +17,15 @@ import pytest
 import cirq
 
 import unitary.alpha as alpha
+from unitary.alpha.sparse_vector_simulator import SparseSimulator
 
 Q0 = cirq.NamedQubit("q0")
 Q1 = cirq.NamedQubit("q1")
 
 
-def test_quantum_if():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_quantum_if(simulator):
+    board = alpha.QuantumWorld(sampler=simulator())
     piece = alpha.QuantumObject("q0", 1)
     piece2 = alpha.QuantumObject("q1", 0)
     board.add_object(piece)
@@ -42,8 +44,9 @@ def test_quantum_if():
     assert (result[1] == 1 for result in results)
 
 
-def test_anti_control():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_anti_control(simulator):
+    board = alpha.QuantumWorld(sampler=simulator())
     piece = alpha.QuantumObject("q0", 0)
     piece2 = alpha.QuantumObject("q1", 0)
     board.add_object(piece)

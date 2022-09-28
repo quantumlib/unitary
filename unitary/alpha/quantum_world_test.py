@@ -15,6 +15,8 @@
 import enum
 import pytest
 
+import cirq
+
 import unitary.alpha as alpha
 
 
@@ -36,9 +38,10 @@ def test_duplicate_objects():
         board.add_object(alpha.QuantumObject("test", Light.RED))
 
 
-def test_one_qubit():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_one_qubit(simulator):
     light = alpha.QuantumObject("test", Light.GREEN)
-    board = alpha.QuantumWorld([light])
+    board = alpha.QuantumWorld([light], sampler=simulator())
     assert board.peek() == [[Light.GREEN]]
     assert board.peek([light], count=2) == [[Light.GREEN], [Light.GREEN]]
     light = alpha.QuantumObject("test", 1)
@@ -48,10 +51,11 @@ def test_one_qubit():
     assert board.pop() == [1]
 
 
-def test_two_qubits():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_two_qubits(simulator):
     light = alpha.QuantumObject("green", Light.GREEN)
     light2 = alpha.QuantumObject("red", Light.RED)
-    board = alpha.QuantumWorld([light, light2])
+    board = alpha.QuantumWorld([light, light2], sampler=simulator())
     assert board.peek() == [[Light.GREEN, Light.RED]]
     assert board.peek(convert_to_enum=False) == [[1, 0]]
     assert board.peek([light], count=2) == [[Light.GREEN], [Light.GREEN]]
@@ -80,11 +84,12 @@ def test_two_qutrits():
     assert str(board.circuit) == expected
 
 
-def test_pop():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_pop(simulator):
     light = alpha.QuantumObject("l1", Light.GREEN)
     light2 = alpha.QuantumObject("l2", Light.RED)
     light3 = alpha.QuantumObject("l3", Light.RED)
-    board = alpha.QuantumWorld([light, light2, light3])
+    board = alpha.QuantumWorld([light, light2, light3], sampler=simulator())
     alpha.Split()(light, light2, light3)
     results = board.peek([light2, light3], count=200)
     assert all(result[0] != result[1] for result in results)
@@ -97,10 +102,11 @@ def test_pop():
     assert all(result[1] != popped for result in results)
 
 
-def test_pop_and_reuse():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_pop_and_reuse(simulator):
     """Tests reusing a popped qubit."""
     light = alpha.QuantumObject("l1", Light.GREEN)
-    board = alpha.QuantumWorld([light])
+    board = alpha.QuantumWorld([light], sampler=simulator())
     popped = board.pop([light])[0]
     assert popped == Light.GREEN
     alpha.Flip()(light)
@@ -108,9 +114,10 @@ def test_pop_and_reuse():
     assert popped == Light.RED
 
 
-def test_undo():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_undo(simulator):
     light = alpha.QuantumObject("l1", Light.GREEN)
-    board = alpha.QuantumWorld([light])
+    board = alpha.QuantumWorld([light], sampler=simulator())
     alpha.Flip()(light)
     results = board.peek([light], count=200)
     assert all(result[0] == Light.RED for result in results)
@@ -125,11 +132,12 @@ def test_undo_no_effects():
         board.undo_last_effect()
 
 
-def test_undo_post_select():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_undo_post_select(simulator):
     light = alpha.QuantumObject("l1", Light.GREEN)
     light2 = alpha.QuantumObject("l2", Light.RED)
     light3 = alpha.QuantumObject("l3", Light.RED)
-    board = alpha.QuantumWorld([light, light2, light3])
+    board = alpha.QuantumWorld([light, light2, light3], sampler=simulator())
     alpha.Split()(light, light2, light3)
 
     # After split, should be fifty-fifty
@@ -154,13 +162,14 @@ def test_undo_post_select():
     assert not all(result[0] == Light.GREEN for result in results)
 
 
-def test_pop_not_enough_reps():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_pop_not_enough_reps(simulator):
     """Tests forcing a measurement of a rare outcome,
     so that peek needs to be called recursively to get more
     occurances.
     """
     lights = [alpha.QuantumObject("l" + str(i), Light.RED) for i in range(15)]
-    board = alpha.QuantumWorld(lights)
+    board = alpha.QuantumWorld(lights, sampler=simulator())
     alpha.Flip()(lights[0])
     alpha.Split()(lights[0], lights[1], lights[2])
     alpha.Split()(lights[2], lights[3], lights[4])
@@ -183,11 +192,12 @@ def test_pop_not_enough_reps():
     assert all(result == [Light.RED] * 14 + [Light.GREEN] for result in results)
 
 
-def test_pop_qubits_twice():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_pop_qubits_twice(simulator):
     """Tests popping qubits twice, so that 2 ancillas are created
     for each qubit."""
     lights = [alpha.QuantumObject("l" + str(i), Light.RED) for i in range(3)]
-    board = alpha.QuantumWorld(lights)
+    board = alpha.QuantumWorld(lights, sampler=simulator())
     alpha.Flip()(lights[0])
     alpha.Split()(lights[0], lights[1], lights[2])
     result = board.pop()
@@ -215,6 +225,17 @@ def test_combine_overlapping_worlds():
         world2.combine_with(world1)
 
 
+def test_combine_incompatibly_sparse_worlds():
+    l1 = alpha.QuantumObject("l1", Light.GREEN)
+    world1 = alpha.QuantumWorld([l1], sampler=cirq.Simulator())
+    l2 = alpha.QuantumObject("l2", StopLight.YELLOW)
+    world2 = alpha.QuantumWorld([l2], sampler=alpha.SparseSimulator())
+    with pytest.raises(ValueError, match="sparse"):
+        world1.combine_with(world2)
+    with pytest.raises(ValueError, match="sparse"):
+        world2.combine_with(world1)
+
+
 def test_combine_worlds():
     l1 = alpha.QuantumObject("l1", Light.GREEN)
     l2 = alpha.QuantumObject("l2", Light.RED)
@@ -236,9 +257,10 @@ def test_combine_worlds():
     assert all(actual == expected for actual in results)
 
 
-def test_get_histogram_and_get_probabilities_one_binary_qobject():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_get_histogram_and_get_probabilities_one_binary_qobject(simulator):
     l1 = alpha.QuantumObject("l1", Light.GREEN)
-    world = alpha.QuantumWorld([l1])
+    world = alpha.QuantumWorld([l1], sampler=simulator())
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100}]
     probs = world.get_probabilities()

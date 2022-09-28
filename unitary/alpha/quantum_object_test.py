@@ -18,11 +18,13 @@ import pytest
 import cirq
 
 import unitary.alpha as alpha
+from unitary.alpha.sparse_vector_simulator import SparseSimulator
 
 
-def test_negation():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_negation(simulator):
     piece = alpha.QuantumObject("t", 0)
-    board = alpha.QuantumWorld(piece)
+    board = alpha.QuantumWorld(piece, sampler=simulator())
     assert board.peek() == [[0]]
     -piece
     assert board.peek() == [[1]]
@@ -32,10 +34,11 @@ def test_negation():
     assert board.peek() == [[1]]
 
 
-def test_add_world_after_state_change():
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_add_world_after_state_change(simulator):
     piece = alpha.QuantumObject("t", 0)
     piece += 1
-    board = alpha.QuantumWorld(piece)
+    board = alpha.QuantumWorld(piece, sampler=simulator())
     assert board.peek() == [[1]]
 
 

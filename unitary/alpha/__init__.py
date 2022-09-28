@@ -41,3 +41,7 @@ from unitary.alpha.qudit_effects import (
 from unitary.alpha.quantum_object import (
     QuantumObject,
 )
+
+from unitary.alpha.sparse_vector_simulator import (
+    SparseSimulator,
+)
