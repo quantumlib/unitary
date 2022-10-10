@@ -15,7 +15,8 @@
 import numpy as np
 
 
-def qudit_to_qubit_state(dim_single_qudit: int, num_qudits: int, qudit_state_vector: np.ndarray, pad_value: np.complex_ = 0):
+def qudit_to_qubit_state(
+        dim_single_qudit: int, num_qudits: int, qudit_state_vector: np.ndarray, pad_value: np.complex_ = 0):
     """This function converts a qudit-space quantum state vector to m-qubit-per-qudit column vector."""
     num_qubits_per_qudit = np.ceil(np.log(dim_single_qudit)/np.log(2))
     # Reshape the state vector to a `num_qudits` rank tensor.
@@ -40,7 +41,9 @@ def qudit_to_qubit_unitary(dim_single_qudit: int, num_qudits: int, qudit_unitary
     # Treat the unitary as a num_qubits^2 system's state vector and represent it using qubits (pad with 0s).
     padded_unitary = qudit_to_qubit_state(dim_single_qudit, num_qudits**2, np.ravel(qudit_unitary))
     # A qubit-based state vector with the extra padding bits having 1s and rest having 0s.
-    pad_qubits_vector = qudit_to_qubit_state(dim_single_qudit, num_qudits, np.zeros(dim_single_qudit**num_qudits), 1)
-    # Reshape the padded unitary to the final shape and add a diagonal matrix corresponding to the pad_qubits_vector.
-    # This addition ensures that the invalid states with the "padding" bits map to identity, preserving unitarity.
+    pad_qubits_vector = qudit_to_qubit_state(
+        dim_single_qudit, num_qudits, np.zeros(dim_single_qudit**num_qudits), 1)
+    # Reshape the padded unitary to the final shape and add a diagonal matrix corresponding to the
+    # pad_qubits_vector. This addition ensures that the invalid states with the "padding" bits map to identity,
+    # preserving unitarity.
     return padded_unitary.reshape(dim_qubit_space, dim_qubit_space) + np.diag(pad_qubits_vector)
