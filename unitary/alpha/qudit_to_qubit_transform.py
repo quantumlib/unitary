@@ -58,18 +58,38 @@ def qudit_to_qubit_state(
     dim_single_qudit: int,
     num_qudits: int,
     qudit_state_vectors: list[np.ndarray],
-    pad_value: np.complex_ = 0,
 ) -> list[np.ndarray]:
     qubit_to_qudit_index_map = qudit_to_qubit_state_impl(
         dim_single_qudit,
         num_qudits,
         np.array([i + 1 for i in range(dim_single_qudit**num_qudits)]),
-        pad_value,
     )
     return [
         qudit_to_qubit_from_map(state, qubit_to_qudit_index_map)
         for state in qudit_state_vectors
     ]
+
+
+def qudit_to_qubit_unitary(
+    dim_single_qudit: int, num_qudits: int, qudit_unitary: np.ndarray
+) -> np.ndarray:
+    qubit_to_qudit_index_map = qudit_to_qubit_state_impl(
+        dim_single_qudit,
+        num_qudits,
+        np.array([i + 1 for i in range(dim_single_qudit**num_qudits)]),
+    )
+    result = np.identity(dim_single_qudit**num_qudits)
+    for i, j in (
+        range(len(qubit_to_qudit_index_map)),
+        range(len(qubit_to_qudit_index_map)),
+    ):
+        result[i][j] = (
+            qudit_unitary[qubit_to_qudit_index_map[i] - 1][
+                qubit_to_qudit_index_map[j] - 1
+            ]
+            if qubit_to_qudit_index_map[i] and qubit_to_qudit_index_map[j]
+            else 0
+        )
 
 
 def qudit_to_qubit_unitary(
