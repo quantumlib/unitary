@@ -81,14 +81,12 @@ def qudit_to_qubit_unitary(
         d_to_b_index_map = qubit_to_qudit_state(
             qudit_dimension,
             num_qudits,
-            np.array([i + 1 for i in range(dim_qubit_space)]),
+            np.arange(dim_qubit_space),
         )
         result = np.identity(dim_qubit_space, dtype=qudit_unitary.dtype)
         iter_range = range(qudit_dimension**num_qudits)
         for i, j in itertools.product(iter_range, iter_range):
-            result[d_to_b_index_map[i] - 1][d_to_b_index_map[j] - 1] = qudit_unitary[i][
-                j
-            ]
+            result[d_to_b_index_map[i]][d_to_b_index_map[j]] = qudit_unitary[i][j]
         return result
 
     # Treat the unitary as a num_qudits^2 system's state vector and represent it using qubits (pad
