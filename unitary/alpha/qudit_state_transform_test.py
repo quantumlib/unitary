@@ -24,9 +24,9 @@ def test_qudit_state_and_unitary_transform_equivalence(qudit_dim, num_qudits):
         transformed_state = qudit_state_transform.qudit_to_qubit_state(
             qudit_dim, num_qudits, random_state
         )
-        # Qubit space representation of the qudit unitary.
+        # Qubit space representation of the qudit unitary. Alternate between memoizing or not.
         transformed_unitary = qudit_state_transform.qudit_to_qubit_unitary(
-            qudit_dim, num_qudits, random_unitary, memoize=True
+            qudit_dim, num_qudits, random_unitary, memoize=(i % 2)
         )
         # Apply the transformed unitary on the transformed state vector.
         transformed_product = np.matmul(transformed_unitary, transformed_state)
@@ -51,3 +51,118 @@ def test_qudit_state_and_unitary_transform_equivalence(qudit_dim, num_qudits):
         # Assert that the operations in the qubit space are equivalent to the operations in the
         # qudit space.
         np.testing.assert_allclose(product_in_qudit_space, expected_product)
+
+
+@pytest.mark.parametrize(
+    "qudit_dim, num_qudits, qudit_representation, qubit_representation",
+    [
+        (
+            3,
+            2,
+            np.array([0, 0, 0, 0, 0, 0, 0, 0, 1]),
+            np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]),
+        ),
+        (
+            4,
+            2,
+            np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]),
+            np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]),
+        ),
+        (
+            3,
+            2,
+            np.array([1, 0, 0, 0, 0, 0, 0, 0, 1], dtype=np.complex_),
+            np.array(
+                [
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                ]
+            ),
+        ),
+    ],
+)
+def test_specific_transformations_vectors(
+    qudit_dim, num_qudits, qudit_representation, qubit_representation
+):
+    transformed_vector = qudit_state_transform.qudit_to_qubit_state(
+        qudit_dim, num_qudits, qudit_representation
+    )
+    np.testing.assert_allclose(transformed_vector, qubit_representation)
+    untransformed_vector = qudit_state_transform.qubit_to_qudit_state(
+        qudit_dim, num_qudits, transformed_vector
+    )
+    np.testing.assert_allclose(untransformed_vector, qudit_representation)
+
+
+a = complex(0.5, 0.5)
+b = complex(0.5, -0.5)
+
+
+@pytest.mark.parametrize(
+    "qudit_dim, num_qudits, qudit_representation, qubit_representation",
+    [
+        # Qutrit square root of iSwap.
+        (
+            3,
+            2,
+            np.array(
+                [
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, a, 0, b, 0, 0, 0, 0, 0],
+                    [0, 0, a, 0, 0, 0, b, 0, 0],
+                    [0, b, 0, a, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 1, 0, 0, 0],
+                    [0, 0, b, 0, 0, 0, a, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 1],
+                ]
+            ),
+            np.array(
+                [
+                    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, a, 0, 0, b, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, a, 0, 0, 0, 0, 0, b, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, b, 0, 0, a, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, b, 0, 0, 0, 0, 0, a, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                ]
+            ),
+        ),
+    ],
+)
+def test_specific_transformations_unitaries(
+    qudit_dim, num_qudits, qudit_representation, qubit_representation
+):
+    transformed_unitary = qudit_state_transform.qudit_to_qubit_unitary(
+        qudit_dim, num_qudits, qudit_representation
+    )
+    np.testing.assert_allclose(transformed_unitary, qubit_representation)
+    untransformed_unitary = qudit_state_transform.qubit_to_qudit_unitary(
+        qudit_dim, num_qudits, transformed_unitary
+    )
+    np.testing.assert_allclose(untransformed_unitary, qudit_representation)
