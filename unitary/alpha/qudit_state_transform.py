@@ -37,6 +37,8 @@ def qudit_to_qubit_state(
 
     Each qudit is replaced by a set of qubits. Since the set of qubits can represent a larger state
     space than the qudit, the state vector needs to be padded with 0s for those extra elements.
+    Based on https://drive.google.com/file/d/1n1Ym7JdnM44NnvNQDUXSk5rBLTQZzJ9t and
+    https://colab.research.google.com/drive/1MC6D4FyOXG0RjvzyV9IFcdRsLbUwwAcx
 
     Args:
         qudit_dimension: The dimension of a single qudit i.e. the number of states it can
@@ -73,6 +75,8 @@ def qubit_to_qudit_state(
     Each qudit was replaced by a set of qubits. Since the set of qubits could represent a larger
     state space than the qudit, the state vector needs to be sliced up to the qudit length in each
     dimension.
+    Based on https://drive.google.com/file/d/1n1Ym7JdnM44NnvNQDUXSk5rBLTQZzJ9t and
+    https://colab.research.google.com/drive/1MC6D4FyOXG0RjvzyV9IFcdRsLbUwwAcx
 
     Args:
         qudit_dimension: The dimension of a single qudit i.e. the number of states it can
@@ -106,6 +110,8 @@ def qudit_to_qubit_unitary(
     unitary is treated similar to a 2*num_qudits system's state vector and padded using the state
     vector protocol. The resulting unitary is updated to have the extra dimensions map to
     themselves (identity) to preserve unitarity.
+    Based on https://drive.google.com/file/d/1n1Ym7JdnM44NnvNQDUXSk5rBLTQZzJ9t and
+    https://colab.research.google.com/drive/1MC6D4FyOXG0RjvzyV9IFcdRsLbUwwAcx
 
     Args:
         qudit_dimension: The dimension of a single qudit i.e. the number of states it can
@@ -170,6 +176,8 @@ def qubit_to_qudit_unitary(
     Each qudit was replaced by a set of qubits. Since the set of qubits could represent a larger
     state space than the qudit, the unitary needs to be sliced up to the qudit length in each
     dimension. A unitary is treated similar to a 2*num_qudits system's state vector.
+    Based on https://drive.google.com/file/d/1n1Ym7JdnM44NnvNQDUXSk5rBLTQZzJ9t and
+    https://colab.research.google.com/drive/1MC6D4FyOXG0RjvzyV9IFcdRsLbUwwAcx
 
     Args:
         qudit_dimension: The dimension of a single qudit i.e. the number of states it can
