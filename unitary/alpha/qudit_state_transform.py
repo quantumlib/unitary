@@ -21,10 +21,10 @@ def _nearest_power_of_two_ceiling(qudit_dim: int) -> int:
     """Returns the smallest power of two greater than or equal to qudit_dim."""
     if qudit_dim == 0:
         return 0
-    bits = 0
-    while 2**bits < qudit_dim:
-        bits += 1
-    return 2**bits
+    result = 1
+    while result < qudit_dim:
+        result = result << 1
+    return result
 
 
 def qudit_to_qubit_state(
