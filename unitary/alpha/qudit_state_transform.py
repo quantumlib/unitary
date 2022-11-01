@@ -31,7 +31,7 @@ def qudit_to_qubit_state(
     qudit_dimension: int,
     num_qudits: int,
     qudit_state_vector: np.ndarray,
-    pad_value: np.complex_ = 0,
+    _pad_value: np.complex_ = 0,
 ) -> np.ndarray:
     """Converts a qudit-space quantum state vector to m-qubit-per-qudit column vector.
 
@@ -42,24 +42,26 @@ def qudit_to_qubit_state(
 
     Args:
         qudit_dimension: The dimension of a single qudit i.e. the number of states it can
-          represent.
+            represent.
         num_qudits: The number of qudits in the given state vector.
-        qudit_state_vector: A flat, 1-D numpy array representing the state vector in qudit form.
-        pad_value: The value to set for the elements in the extra state space created in the
-          conversion. This field is mostly private, mostly for use by other methods. Do not set
-          this unless you really need to.
+        qudit_state_vector: A numpy array representing the state vector in qudit form.
+            Expected shape: `(qudit_dimension ^ num_qudits,)`.
+        _pad_value: The value to set for the elements in the extra state space created in the
+            conversion. This field is mostly private, mostly for use by other methods. Do not set
+            this unless you really need to.
 
     Returns:
-        A flat numpy array representing the input state vector using qubits.
+        A flat numpy array representing the input state vector using m-qubits-per-qudit.
+            Expected shape: `((2 ^ m) ^ num_qudits,)`.
     """
     # Reshape the state vector to a `num_qudits` rank tensor.
     state_tensor = qudit_state_vector.reshape((qudit_dimension,) * num_qudits)
     # Number of extra elements needed in each dimension if represented using qubits.
     padding_amount = _nearest_power_of_two_ceiling(qudit_dimension) - qudit_dimension
     # Expand the number of elements in each dimension by the padding_amount. Fill
-    # the new elements with the pad_value.
+    # the new elements with the _pad_value.
     padded_state_tensor = np.pad(
-        state_tensor, pad_width=(0, padding_amount), constant_values=pad_value
+        state_tensor, pad_width=(0, padding_amount), constant_values=_pad_value
     )
     # Return a flattened state vector view of the final tensor.
     return np.ravel(padded_state_tensor)
@@ -80,13 +82,14 @@ def qubit_to_qudit_state(
 
     Args:
         qudit_dimension: The dimension of a single qudit i.e. the number of states it can
-          represent.
+            represent.
         num_qudits: The number of qudits in the given/output state vector.
-        qubit_state_vector: A flat, 1-D numpy array representing the state vector in an
-          m-qubit-per-qudit form.
+        qubit_state_vector: A numpy array representing the state vector in an
+            m-qubit-per-qudit form. Expected shape: `((2 ^ m) ^ num_qudits,)`.
 
     Returns:
         A flat numpy array representing the input state vector using qudits.
+            Expected shape: `(qudit_dimension ^ num_qudits,)`.
     """
     mbit_dimension = _nearest_power_of_two_ceiling(qudit_dimension)
     # Reshape the state vector to a `num_qudits` rank tensor.
@@ -118,13 +121,15 @@ def qudit_to_qubit_unitary(
             represent.
         num_qudits: The number of qudits in the given unitary.
         qudit_unitary: A 2-D numpy array representing the unitary in qudit form.
+            Expected shape: `(qudit_dimension ^ num_qudits, qudit_dimension ^ num_qudits)`.
         memoize: Currently, this method has two independent implementations. If memoize is True, an
             alternate implementation than above is used. A special state vector is passed to the
             state vector protocol to get a mapping from qudit state indices to qubit state indices.
             This mapping is then iteratively applied to the input unitary's elements.
 
     Returns:
-        A numpy array representing the input unitary using qubits.
+        A numpy array representing the input unitary using m-qubits-per-qudit.
+            Expected shape: `((2 ^ m) ^ num_qudits, (2 ^ m) ^ num_qudits)`.
     """
     dim_qubit_space = _nearest_power_of_two_ceiling(qudit_dimension) ** num_qudits
 
@@ -156,7 +161,10 @@ def qudit_to_qubit_unitary(
     # A qubit-based state vector with the extra padding bits having 1s and rest having 0s. This
     # vector marks only the bits that are padded.
     pad_qubits_vector = qudit_to_qubit_state(
-        qudit_dimension, num_qudits, np.zeros(qudit_dimension**num_qudits), 1
+        qudit_dimension,
+        num_qudits,
+        np.zeros(qudit_dimension**num_qudits),
+        _pad_value=1,
     )
     # Reshape the padded unitary to the final shape and add a diagonal matrix corresponding to the
     # pad_qubits_vector. This addition ensures that the invalid states with the "padding" bits map
@@ -181,12 +189,14 @@ def qubit_to_qudit_unitary(
 
     Args:
         qudit_dimension: The dimension of a single qudit i.e. the number of states it can
-          represent.
+            represent.
         num_qudits: The number of qudits in the given/output unitary.
         qubit_unitary: A 2-D numpy array representing the unitary in m-qubit-per-qudit form.
+            Expected shape: `((2 ^ m) ^ num_qudits, (2 ^ m) ^ num_qudits)`.
 
     Returns:
         A numpy array representing the input unitary using qudits.
+            Expected shape: `(qudit_dimension ^ num_qudits, qudit_dimension ^ num_qudits)`.
     """
     mbit_dimension = _nearest_power_of_two_ceiling(qudit_dimension)
     # Treat unitary as a `num_qudits*2` qudit system state vector.
