@@ -13,6 +13,13 @@
 # limitations under the License.
 #
 
+from unitary.alpha.qudit_state_transform import (
+    qubit_to_qudit_state,
+    qubit_to_qudit_unitary,
+    qudit_to_qubit_state,
+    qudit_to_qubit_unitary,
+)
+
 from unitary.alpha.quantum_world import (
     QuantumWorld,
 )
