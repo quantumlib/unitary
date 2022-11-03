@@ -19,6 +19,7 @@ class TicTacSquare(enum.Enum):
     EMPTY = 0
     X = 1
     O = 2
+    PADDING = 3
 
 
 class TicTacResult(enum.Enum):

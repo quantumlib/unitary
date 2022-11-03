@@ -14,6 +14,17 @@
 #
 import numpy as np
 import cirq
+from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary
+
+
+def _nearest_power_of_two_ceiling(qudit_dim: int) -> int:
+    """Returns the smallest power of two greater than or equal to qudit_dim."""
+    if qudit_dim == 0:
+        return 0
+    result = 1
+    while result < qudit_dim:
+        result = result << 1
+    return result
 
 
 class QuditXGate(cirq.Gate):
@@ -36,7 +47,7 @@ class QuditXGate(cirq.Gate):
         self.destination_state = destination_state
 
     def _qid_shape_(self):
-        return (self.dimension,)
+        return (_nearest_power_of_two_ceiling(self.dimension),)
 
     def _unitary_(self):
         arr = np.zeros((self.dimension, self.dimension))
@@ -45,7 +56,7 @@ class QuditXGate(cirq.Gate):
         for i in range(self.dimension):
             if i != self.source_state and i != self.destination_state:
                 arr[i, i] = 1
-        return arr
+        return qudit_to_qubit_unitary(self.dimension, 1, arr)
 
     def _circuit_diagram_info_(self, args):
         return f"X({self.source_state}_{self.destination_state})"
@@ -63,13 +74,13 @@ class QuditPlusGate(cirq.Gate):
         self.addend = addend
 
     def _qid_shape_(self):
-        return (self.dimension,)
+        return (_nearest_power_of_two_ceiling(self.dimension),)
 
     def _unitary_(self):
         arr = np.zeros((self.dimension, self.dimension))
         for i in range(self.dimension):
             arr[(i + self.addend) % self.dimension, i] = 1
-        return arr
+        return qudit_to_qubit_unitary(self.dimension, 1, arr)
 
     def _circuit_diagram_info_(self, args):
         return f"[+{self.addend}]"
@@ -99,7 +110,7 @@ class QuditControlledXGate(cirq.Gate):
         self.control_state = control_state
 
     def _qid_shape_(self):
-        return (self.dimension, self.dimension)
+        return (_nearest_power_of_two_ceiling(self.dimension), _nearest_power_of_two_ceiling(self.dimension))
 
     def _unitary_(self):
         size = self.dimension * self.dimension
@@ -111,7 +122,7 @@ class QuditControlledXGate(cirq.Gate):
             for y in range(self.dimension):
                 if x != self.control_state or (y != self.state and y != 0):
                     arr[x * self.dimension + y, x * self.dimension + y] = 1
-        return arr
+        return qudit_to_qubit_unitary(self.dimension, 2, arr)
 
 
 class QuditSwapPowGate(cirq.Gate):
@@ -134,7 +145,7 @@ class QuditSwapPowGate(cirq.Gate):
         self.exponent = exponent
 
     def _qid_shape_(self):
-        return (self.dimension, self.dimension)
+        return (_nearest_power_of_two_ceiling(self.dimension), _nearest_power_of_two_ceiling(self.dimension))
 
     def _unitary_(self):
         size = self.dimension * self.dimension
@@ -149,7 +160,7 @@ class QuditSwapPowGate(cirq.Gate):
                 diag = g * np.cos(np.pi * self.exponent / 2)
                 arr[x * self.dimension + y, y * self.dimension + x] = coeff
                 arr[x * self.dimension + y, x * self.dimension + y] = diag
-        return arr
+        return qudit_to_qubit_unitary(self.dimension, 2, arr)
 
     def _circuit_diagram_info_(self, args):
         if not args.use_unicode_characters:
@@ -181,7 +192,7 @@ class QuditISwapPowGate(cirq.Gate):
         self.exponent = exponent
 
     def _qid_shape_(self):
-        return (self.dimension, self.dimension)
+        return (_nearest_power_of_two_ceiling(self.dimension), _nearest_power_of_two_ceiling(self.dimension))
 
     def _unitary_(self):
         size = self.dimension * self.dimension
@@ -196,7 +207,7 @@ class QuditISwapPowGate(cirq.Gate):
                 arr[x * self.dimension + y, y * self.dimension + x] = coeff
                 arr[x * self.dimension + y, x * self.dimension + y] = diag
 
-        return arr
+        return qudit_to_qubit_unitary(self.dimension, 2, arr)
 
     def _circuit_diagram_info_(self, args):
         return cirq.CircuitDiagramInfo(

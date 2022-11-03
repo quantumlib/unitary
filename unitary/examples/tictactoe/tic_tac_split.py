@@ -20,6 +20,7 @@ import cirq
 from unitary.alpha import QuantumEffect, QuantumObject
 from unitary.alpha.qudit_gates import QuditXGate, QuditISwapPowGate
 from unitary.examples.tictactoe.enums import TicTacSquare, TicTacRules
+from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary
 
 
 class QuditSplitGate(cirq.Gate):
@@ -40,7 +41,7 @@ class QuditSplitGate(cirq.Gate):
             raise ValueError("Not a valid square: {self.square}")
 
     def _qid_shape_(self):
-        return (3, 3)
+        return (4, 4)
 
     def _unitary_(self):
         arr = np.zeros((9, 9), dtype=np.complex64)
@@ -59,7 +60,7 @@ class QuditSplitGate(cirq.Gate):
             arr[3, 1] = coeff
             arr[3, 3] = diag
             arr[1, 1] = diag
-        return arr
+        return qudit_to_qubit_unitary(3, 2, arr)
 
     def _circuit_diagram_info_(self, args):
         if not args.use_unicode_characters:
@@ -81,7 +82,7 @@ class TicTacSplit(QuantumEffect):
         self.rules = rules
 
     def num_dimension(self) -> Optional[int]:
-        return 3
+        return 4
 
     def num_objects(self) -> Optional[int]:
         return 2
