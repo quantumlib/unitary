@@ -68,7 +68,7 @@ def test_escaped() -> None:
     assert not qar.is_down()
     assert qar.is_escaped()
     assert qar.is_inactive()
-    assert qar.status_line() == '1QP (1|1> 0|0> 0?)'
+    assert qar.status_line() == '1QP (1|1> 0|0> 0?) *ESCAPED* '
 
 
 def test_multi_hp_qar() -> None:
@@ -101,4 +101,4 @@ def test_multi_hp_qar() -> None:
     assert not qar.is_down()
     assert qar.is_escaped()
     assert qar.is_inactive()
-    assert qar.status_line() == '3QP (2|1> 1|0> 0?)'
+    assert qar.status_line() == '3QP (2|1> 1|0> 0?) *ESCAPED* '

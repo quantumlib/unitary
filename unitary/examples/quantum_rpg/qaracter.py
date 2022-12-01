@@ -93,44 +93,49 @@ class Qaracter(alpha.QuantumWorld):
         hp_obj = self.get_hp(quantum_name)
         effect(hp_obj)
 
+    @property
+    def damage(self) -> int:
+        """Returns the number of qubits measured to be zero."""
+        return sum(status == 0 for status in self.health_status.values())
+
+    @property
+    def virtue(self) -> int:
+        """Returns the number of qubits measured to be one."""
+        return sum(status == 1 for status in self.health_status.values())
+
     def is_down(self) -> bool:
         """Returns True if over half of the HP have been measured as `HURT`."""
-        damage = len(
-            [q for q in self.health_status if self.health_status[q] == 0])
-        return damage > (self.level / 2)
+        return self.damage > (self.level / 2)
 
     def is_escaped(self) -> bool:
         """Returns True if all HP are measured and at least half are `HEALTHY`."""
-        virtue = len(
-            [q for q in self.health_status if self.health_status[q] == 1])
         return len(
-            self.health_status) == self.level and virtue > (self.level / 2)
+            self.health_status) == self.level and self.virtue > (self.level / 2)
 
     def is_inactive(self) -> bool:
-        """Returns True if all HP are measured."""
+        """Returns True if all HP are measured or if over half are measured as 0."""
         return self.is_down() or self.is_escaped()
 
     def status_line(self) -> str:
         """Returns a one-line string summarizing the Qaracter's HP status."""
-        damage = len(
-            [q for q in self.health_status if self.health_status[q] == 0])
-        virtue = len(
-            [q for q in self.health_status if self.health_status[q] == 1])
+        damage = self.damage
+        virtue = self.virtue
         unknown = self.level - damage - virtue
         down = ' *DOWN* ' if self.is_down() else ''
-        return f'{self.level}QP ({virtue}|1> {damage}|0> {unknown}?){down}'
+        escaped = ' *ESCAPED* ' if self.is_escaped() else ''
+        return f'{self.level}QP ({virtue}|1> {damage}|0> {unknown}?){down}{escaped}'
 
     def sample(self, hp_name: str, save_result: bool) -> enums.HealthPoint:
         """Samples or measures a qubit representing a HP.
 
-    Args:
-        hp_name: Name of the quantum object to measure.
-        save_result: If True, measures the quantum object.
-            If False, sample the quantum object non-destructively.
-            This takes a result from a simulated distribution without
-            'measuring' the qubit.
+        Args:
+            hp_name: Name of the quantum object to measure.
+            save_result: If True, measures the quantum object.
+                If False, sample the quantum object non-destructively.
+                This takes a result from a simulated distribution without
+                'measuring' the qubit.
 
-    """
+        """
         hp_obj = self.get_hp(hp_name)
         if save_result:
             result = self.pop([hp_obj])
