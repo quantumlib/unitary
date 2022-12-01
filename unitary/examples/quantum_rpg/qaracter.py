@@ -60,7 +60,7 @@ class Qaracter(alpha.QuantumWorld):
         return f'{self.name}_{hp_num}'
 
     def add_hp(self) -> alpha.QuantumObject:
-        """Adds an additional Health Point (HP to the Qaracter.
+        """Adds an additional Health Point (HP) to the Qaracter.
 
       Each HP added to the Qaracter is an additional QuantumObject
       with no effects (i.e. is a qubit with no operations).
