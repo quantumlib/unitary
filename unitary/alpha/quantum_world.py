@@ -58,7 +58,7 @@ class QuantumWorld:
         """
         self.circuit = cirq.Circuit()
         self.effect_history = []
-        self.used_object_keys = {}
+        self.object_name_dict: Dict[str, QuantumObject] = {}
         self.ancilla_names = set()
         self.post_selection: Dict[QuantumObject, int] = {}
 
@@ -69,15 +69,15 @@ class QuantumWorld:
             ValueError: if an object with the same name has
                already been added to the world.
         """
-        if obj.name in self.used_object_keys:
+        if obj.name in self.object_name_dict:
             raise ValueError("QuantumObject {obj.name} already added to world.")
-        self.used_object_keys[obj.name] = obj
+        self.object_name_dict[obj.name] = obj
         obj.world = self
         obj.initial_effect()
 
     @property
     def objects(self) -> List[QuantumObject]:
-        return list(self.used_object_keys.values())
+        return list(self.object_name_dict.values())
 
     def get_object_by_name(self, name: str) -> Optional[QuantumObject]:
         """Returns the object with the given name.
@@ -85,7 +85,7 @@ class QuantumWorld:
         If the object with that name does not exist in this QuantumWorld,
         the function returns None.
         """
-        return self.used_object_keys.get(name)
+        return self.object_name_dict.get(name)
 
     def combine_with(self, other_world: "QuantumWorld"):
         """Combines all the objects from the specified world into this one.
@@ -96,15 +96,15 @@ class QuantumWorld:
         Note that the effect history is cleared when this function is called,
         so previous effects cannot be undone.
         """
-        my_keys = set(self.used_object_keys.keys())
-        other_keys = set(other_world.used_object_keys.keys())
+        my_keys = set(self.object_name_dict.keys())
+        other_keys = set(other_world.object_name_dict.keys())
         if my_keys.intersection(other_keys):
             raise ValueError(
                 "Cannot combine two worlds with overlapping object keys")
         if self.use_sparse != other_world.use_sparse:
             raise ValueError(
                 "Cannot combine sparse simulator world with non-sparse")
-        self.used_object_keys.update(other_world.used_object_keys)
+        self.object_name_dict.update(other_world.object_name_dict)
         self.ancilla_names.update(other_world.ancilla_names)
         self.post_selection.update(other_world.post_selection)
         self.circuit = self.circuit.zip(other_world.circuit)
@@ -174,7 +174,7 @@ class QuantumWorld:
         """
         count = 0
         ancilla_name = f"ancilla_{obj.name}_{count}"
-        while ancilla_name in self.used_object_keys:
+        while ancilla_name in self.object_name_dict:
             count += 1
             ancilla_name = f"ancilla_{obj.name}_{count}"
         new_obj = QuantumObject(ancilla_name, result)
@@ -251,10 +251,8 @@ class QuantumWorld:
 
         if convert_to_enum:
             rtn_list = [[
-                objects[idx].enum_type(enum_int)
-                for idx, enum_int in enumerate(result)
-            ]
-                        for result in rtn_list]
+                objects[idx].enum_type(meas) for idx, meas in enumerate(res)
+            ] for res in rtn_list]
 
         return rtn_list
 
