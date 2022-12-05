@@ -110,11 +110,11 @@ class Qaracter(alpha.QuantumWorld):
     def is_escaped(self) -> bool:
         """Returns True if all HP are measured and at least half are `HEALTHY`."""
         return len(
-            self.health_status) == self.level and self.virtue > (self.level / 2)
+            self.health_status) == self.level and self.virtue >= (self.level / 2)
 
-    def is_inactive(self) -> bool:
+    def is_active(self) -> bool:
         """Returns True if all HP are measured or if over half are measured as 0."""
-        return self.is_down() or self.is_escaped()
+        return not self.is_down() and len(self.health_status)<self.level
 
     def status_line(self) -> str:
         """Returns a one-line string summarizing the Qaracter's HP status."""
