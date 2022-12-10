@@ -37,6 +37,14 @@ def test_duplicate_objects():
     with pytest.raises(ValueError, match="already added"):
         board.add_object(alpha.QuantumObject("test", Light.RED))
 
+def test_get_object_by_name():
+    light = alpha.QuantumObject("test", Light.GREEN)
+    light2 = alpha.QuantumObject("test2", Light.RED)
+    board = alpha.QuantumWorld([light, light2])
+    assert board.get_object_by_name("test") == light
+    assert board.get_object_by_name("test2") == light2
+    assert board.get_object_by_name("test3") == None
+
 
 @pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_one_qubit(simulator):
