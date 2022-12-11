@@ -12,10 +12,12 @@ class Engineer(qaracter.Qaracter):
 
     def actions(self) -> Dict[str, Callable]:
         actions = {
-            'x': lambda monster, qubit: monster.add_effect(alpha.Flip(), qubit)
+            'x':
+                lambda monster, qubit: monster.add_quantum_effect(
+                    alpha.Flip(), qubit)
         }
         if self.level >= 3:
-            actions['h'] = lambda monster, qubit: monster.add_effect(
+            actions['h'] = lambda monster, qubit: monster.add_quantum_effect(
                 alpha.Superposition(), qubit)
         return actions
 
@@ -29,8 +31,9 @@ class Analyst(qaracter.Qaracter):
     def actions(self) -> Dict[str, Callable]:
         return {
             's':
-                lambda monster, qubit: print(
-                    f'Sample result {monster.sample(qubit, False)}'),
+                lambda monster, qubit:
+                f'Sample result {monster.sample(monster.quantum_object_name(qubit), False)}',
             'm':
-                lambda monster, qubit: monster.sample(qubit, True)
+                lambda monster, qubit: monster.sample(
+                    monster.quantum_object_name(qubit), True)
         }
