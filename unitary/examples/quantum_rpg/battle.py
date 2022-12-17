@@ -63,17 +63,6 @@ class Battle:
             print(status, file=self.file)
         print('-----------------------------------------------', file=self.file)
 
-    def _get_user_input(self, prompt: str, user_input: Optional[List[str]],
-                        idx: int):
-        """Helper function to retrieve user input.
-
-        If an array of strings is given, retrieve the next input
-        from the array.  Otherwise, prompt the user using raw input.
-        """
-        if user_input and idx < len(user_input):
-            return user_input[idx]
-        return input(prompt)
-
     def take_player_turn(self, user_input: Optional[List[str]] = None):
         """Take a player's turn and record results in the battle.
 
@@ -86,7 +75,14 @@ class Battle:
             user_input: List of strings that substitute for the user's
                 raw input.
         """
-        idx = 0
+
+        # If user input is provided as an argument, then use that.
+        # Otherwise, prompt from raw input.
+        if user_input is not None:
+            user_input = iter(user_input)
+            get_user_input = lambda _: next(user_input)
+        else:
+            get_user_input = input
 
         for current_player in self.player_side:
             self.print_screen()
@@ -97,19 +93,11 @@ class Battle:
             actions = current_player.actions()
             for key in actions:
                 print(key, file=self.file)
-            action = self._get_user_input('Choose your action: ', user_input,
-                                          idx)
-            idx += 1
+            action = get_user_input('Choose your action: ')
             if action in current_player.actions():
-                monster = int(
-                    self._get_user_input('Which enemy number: ', user_input,
-                                         idx)) + 1
-                idx += 1
+                monster = int( get_user_input('Which enemy number: ')) + 1
                 if monster < len(self.enemy_side):
-                    qubit = int(
-                        self._get_user_input('Which enemy qubit number: '),
-                        user_input, idx)
-                    idx += 1
+                    qubit = int(get_user_input('Which enemy qubit number: ')),
                     selected_monster = self.enemy_side[monster]
                     qubit_name = selected_monster.quantum_object_name(qubit)
                     if qubit_name in selected_monster.active_qubits():

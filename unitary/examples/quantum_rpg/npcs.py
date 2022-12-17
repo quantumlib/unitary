@@ -16,9 +16,6 @@ class Npc(qaracter.Qaracter):
 class Observer(Npc):
     """Simple test NPC that measures a random qubit each turn."""
 
-    def is_npc(self):
-        return True
-
     def npc_action(self, battle) -> str:
         enemy_target = random.randint(0, len(battle.player_side) - 1)
         enemy_name = battle.player_side[enemy_target].name
