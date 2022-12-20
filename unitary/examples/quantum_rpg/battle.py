@@ -18,7 +18,7 @@ class Battle:
     Args:
         player_side: a list of player QuantumWorld objects representing
             their character sheets (initial state).
-        player_side: a list of NPC QuantumWorld objects.
+        enemy_side: a list of NPC QuantumWorld objects.
         file:  Optional IOBase file object to write output to.
             This enables the battle to write status to a file or string
             for testing.
