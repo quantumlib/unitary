@@ -95,17 +95,21 @@ class Battle:
                 print(key, file=self.file)
             action = get_user_input('Choose your action: ')
             if action in current_player.actions():
-                monster = int( get_user_input('Which enemy number: ')) + 1
+                monster = int(get_user_input('Which enemy number: ')) - 1
                 if monster < len(self.enemy_side):
-                    qubit = int(get_user_input('Which enemy qubit number: ')),
+                    qubit = int(get_user_input('Which enemy qubit number: '))
                     selected_monster = self.enemy_side[monster]
                     qubit_name = selected_monster.quantum_object_name(qubit)
                     if qubit_name in selected_monster.active_qubits():
-                        res = actions[action](selected_monster, qubit_name)
+                        res = actions[action](selected_monster, qubit)
                         if isinstance(res, str):
                             print(res, file=self.file)
                     else:
-                        print('not an active qubit', file=self.file)
+                        print(f'{qubit_name} is not an active qubit',
+                              file=self.file)
+                else:
+                    print(f'{monster + 1} is not a valid monster',
+                          file=self.file)
 
     def take_npc_turn(self):
         """Take all NPC turns.

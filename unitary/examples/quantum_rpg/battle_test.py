@@ -19,5 +19,42 @@ Aaronson Analyst   watcher Observer
 Aaronson turn:
 s
 m
+Sample result HealthPoint.HURT
 Observer watcher measures Aaronson at qubit Aaronson_1
+""".strip()
+
+
+def test_bad_monster():
+    output = io.StringIO()
+    c = classes.Analyst('Aaronson')
+    e = npcs.Observer('watcher')
+    b = battle.Battle([c], [e], file=output)
+    b.take_player_turn(user_input=['s', '2', '1'])
+    assert output.getvalue().replace('\t', ' ').strip() == r"""
+-----------------------------------------------
+Aaronson Analyst   watcher Observer
+1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
+-----------------------------------------------
+Aaronson turn:
+s
+m
+2 is not a valid monster
+""".strip()
+
+
+def test_bad_qubit():
+    output = io.StringIO()
+    c = classes.Analyst('Aaronson')
+    e = npcs.Observer('watcher')
+    b = battle.Battle([c], [e], file=output)
+    b.take_player_turn(user_input=['s', '1', '2'])
+    assert output.getvalue().replace('\t', ' ').strip() == r"""
+-----------------------------------------------
+Aaronson Analyst   watcher Observer
+1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
+-----------------------------------------------
+Aaronson turn:
+s
+m
+watcher_2 is not an active qubit
 """.strip()
