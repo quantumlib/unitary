@@ -40,7 +40,7 @@ class QuantumWorld:
     def __init__(self,
                  objects: Optional[List[QuantumObject]] = None,
                  sampler=cirq.Simulator(),
-                 compile_to_qubits: bool = True):
+                 compile_to_qubits: bool = False):
 
         self.clear()
         self.sampler = sampler

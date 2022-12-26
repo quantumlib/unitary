@@ -18,9 +18,12 @@ from unitary.alpha.qudit_effects import QuditFlip
 from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules
 from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
 
-
 _SQUARE_NAMES = "abcdefghi"
-_MARK_SYMBOLS = {TicTacSquare.EMPTY: ".", TicTacSquare.X: "X", TicTacSquare.O: "O"}
+_MARK_SYMBOLS = {
+    TicTacSquare.EMPTY: ".",
+    TicTacSquare.X: "X",
+    TicTacSquare.O: "O"
+}
 
 # Possible ways to get three in a row (rows, columns, and diagonal) indices
 _POSSIBLE_WINS = [
@@ -35,7 +38,8 @@ _POSSIBLE_WINS = [
 ]
 
 
-def _histogram(results: List[List[TicTacSquare]]) -> List[Dict[TicTacSquare, int]]:
+def _histogram(
+        results: List[List[TicTacSquare]]) -> List[Dict[TicTacSquare, int]]:
     """Turns a list of whole board measurements into a histogram.
 
     Returns:
@@ -44,7 +48,11 @@ def _histogram(results: List[List[TicTacSquare]]) -> List[Dict[TicTacSquare, int
     """
     hist = []
     for idx in range(9):
-        hist.append({TicTacSquare.EMPTY: 0, TicTacSquare.X: 0, TicTacSquare.O: 0})
+        hist.append({
+            TicTacSquare.EMPTY: 0,
+            TicTacSquare.X: 0,
+            TicTacSquare.O: 0
+        })
     for r in results:
         for idx in range(9):
             hist[idx][r[idx]] += 1
@@ -100,12 +108,13 @@ class TicTacToe:
     human-friendly text format or by using `sample()` to get one
     or more samples (measurements) of the board.
     """
-
-    def __init__(self, rules: TicTacRules = TicTacRules.QUANTUM_V3):
-        self.clear()
+    def __init__(self,
+                 rules: TicTacRules = TicTacRules.QUANTUM_V3,
+                 run_on_hardware: bool = False):
+        self.clear(run_on_hardware)
         self.rules = rules
 
-    def clear(self) -> None:
+    def clear(self, run_on_hardware: bool = False) -> None:
         """Clears the TicTacToe board.
 
         Sets all 9 squares to empty.
@@ -116,7 +125,8 @@ class TicTacToe:
         for name in _SQUARE_NAMES:
             self.empty_squares.add(name)
             self.squares[name] = QuantumObject(name, TicTacSquare.EMPTY)
-        self.board = QuantumWorld(list(self.squares.values()))
+        self.board = QuantumWorld(list(self.squares.values()),
+                                  compile_to_qubits=run_on_hardware)
 
     def result(self) -> TicTacResult:
         """Returns the result of the TicTacToe game.
@@ -153,13 +163,13 @@ class TicTacToe:
         if len(move) > 2 or len(move) == 0:
             raise ValueError(f"Your move ({move}) must be one or two letters.")
         if not all(m in _SQUARE_NAMES for m in move):
-            raise ValueError(f"Your move ({move}) can only have these: {_SQUARE_NAMES}")
+            raise ValueError(
+                f"Your move ({move}) can only have these: {_SQUARE_NAMES}")
         if len(move) == 1:
             # Check if the square is empty
             if move not in self.empty_squares:
                 raise ValueError(
-                    f"You cannot put your token on non-empty square {move}"
-                )
+                    f"You cannot put your token on non-empty square {move}")
             # Flip the square to the correct value (mark.value)
             QuditFlip(3, 0, mark.value)(self.squares[move])
             # This square is now no longer empty
@@ -168,33 +178,26 @@ class TicTacToe:
             # Check if rules allow quantum moves
             if self.rules == TicTacRules.CLASSICAL:
                 raise ValueError(
-                    f"Quantum moves are not allowed in a classical TicTacToe"
-                )
+                    f"Quantum moves are not allowed in a classical TicTacToe")
 
             # Check if either square is non-empty. Splitting on top of
             # non-empty squares is only allowed at full quantumness
-            if (
-                (move[0] not in self.empty_squares)
-                or (move[1] not in self.empty_squares)
-            ) and (self.rules == TicTacRules.QUANTUM_V1):
+            if ((move[0] not in self.empty_squares) or
+                (move[1] not in self.empty_squares)) and (
+                    self.rules == TicTacRules.QUANTUM_V1):
                 raise ValueError(
                     f"This ruleset ({0}) does not allow splits on \
-                              top of non-empty squares".format(
-                        self.rules
-                    )
-                )
+                              top of non-empty squares".format(self.rules))
 
             # TicTacSplit first flips the first square before performing a split
             # If either of the two involved squares is empty, we want to do the
             # split on that square.
             if move[1] in self.empty_squares:
-                TicTacSplit(mark, self.rules)(
-                    self.squares[move[1]], self.squares[move[0]]
-                )
+                TicTacSplit(mark, self.rules)(self.squares[move[1]],
+                                              self.squares[move[0]])
             else:
-                TicTacSplit(mark, self.rules)(
-                    self.squares[move[0]], self.squares[move[1]]
-                )
+                TicTacSplit(mark, self.rules)(self.squares[move[0]],
+                                              self.squares[move[1]])
 
             # The involved squares are now no longer empty
             self.empty_squares.discard(move[0])
@@ -219,7 +222,9 @@ class TicTacToe:
 
         would return '.X.XO..OO'.
         """
-        return [_result_to_str(result) for result in self.board.peek(count=count)]
+        return [
+            _result_to_str(result) for result in self.board.peek(count=count)
+        ]
 
     def print(self) -> str:
         """Returns the TicTacToe board in ASCII form."""
