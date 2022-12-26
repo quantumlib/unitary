@@ -13,11 +13,12 @@
 # limitations under the License.
 import copy
 import enum
-from typing import Dict, List, Optional, Sequence, Union
+from typing import Dict, Iterable, List, Optional, Sequence, Union
 import cirq
 
 from unitary.alpha.quantum_object import QuantumObject
 from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
+from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, _num_bits
 
 
 class QuantumWorld:
@@ -36,14 +37,15 @@ class QuantumWorld:
     how to evaluate the quantum game state.  If not specified, this
     defaults to the built-in cirq Simulator.
     """
-
     def __init__(self,
                  objects: Optional[List[QuantumObject]] = None,
-                 sampler=cirq.Simulator()):
+                 sampler=cirq.Simulator(),
+                 compile_to_qubits: bool = True):
 
         self.clear()
         self.sampler = sampler
         self.use_sparse = isinstance(sampler, SparseSimulator)
+        self.compile_to_qubits = compile_to_qubits
 
         if isinstance(objects, QuantumObject):
             objects = [objects]
@@ -60,6 +62,7 @@ class QuantumWorld:
         self.effect_history = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
         self.ancilla_names = set()
+        self.compiled_qubits: Dict[cirq.Qid, List[cirq.Qid]] = {}
         self.post_selection: Dict[QuantumObject, int] = {}
 
     def add_object(self, obj: QuantumObject):
@@ -70,9 +73,24 @@ class QuantumWorld:
                already been added to the world.
         """
         if obj.name in self.object_name_dict:
-            raise ValueError("QuantumObject {obj.name} already added to world.")
+            raise ValueError(
+                "QuantumObject {obj.name} already added to world.")
         self.object_name_dict[obj.name] = obj
         obj.world = self
+        if self.compile_to_qubits:
+            qudit_dim = obj.qubit.dimension
+            if qudit_dim == 2:
+                self.compiled_qubits[obj.qubit] = [obj.qubit]
+            else:
+                compiled_qubits = [
+                    QuantumObject(f"compiled_{obj.qubit.name}_{qubit_num}", 0)
+                    for qubit_num in range(_num_bits(qudit_dim))
+                ]
+                for qubit in compiled_qubits:
+                    qubit.world = self
+                self.compiled_qubits[obj.qubit] = [
+                    qubit.qubit for qubit in compiled_qubits
+                ]
         obj.initial_effect()
 
     @property
@@ -119,14 +137,44 @@ class QuantumWorld:
         For the sparse simulator post-selections should be as early as possible to cut
         down the state size. Also X's since they don't increase the size.
         """
-        if not self.use_sparse:
-            self.circuit.append(op)
-            return
 
-        if isinstance(op, PostSelectOperation) or op.gate is cirq.X:
+        if not self.use_sparse or isinstance(
+                op, PostSelectOperation) or op.gate is cirq.X:
             strategy = cirq.InsertStrategy.EARLIEST
         else:
             strategy = cirq.InsertStrategy.NEW
+
+        if self.compile_to_qubits:
+            qid_shape = cirq.qid_shape(op)
+            qudit_dim = max(qid_shape)
+            if qudit_dim > 2:
+                num_qudits = len(qid_shape)
+                new_unitary = qudit_to_qubit_unitary(
+                    qudit_dimension=qudit_dim,
+                    num_qudits=num_qudits,
+                    qudit_unitary=cirq.unitary(op))
+                num_qubits_per_qudit = _num_bits(qudit_dim)
+                num_qubits = num_qubits_per_qudit * num_qudits
+                all_qubits = []
+                for qudit in op.qubits:
+                    qubits = self.compiled_qubits[qudit]
+                    if num_qubits_per_qudit > len(qubits):
+                        # Original padding was not enough. This means that one
+                        # of the qubits in the Operation has a higher dimension
+                        # than this qubit.
+                        for qubit_num in range(len(qubits),
+                                               num_qubits_per_qudit):
+                            qubit = QuantumObject(
+                                f"compiled_{qudit.name}_{qubit_num}", 0)
+                            self.add_object(qubit)
+                            qubits.append(qubit.qubit)
+                        self.compiled_qubits[qudit] = qubits
+                    all_qubits.extend(qubits)
+
+                op = cirq.MatrixGate(matrix=new_unitary,
+                                     qid_shape=(2, ) *
+                                     num_qubits).on(*all_qubits)
+
         self.circuit.append(op, strategy=strategy)
 
     def add_effect(self, op_list: List[cirq.Operation]):
@@ -163,6 +211,35 @@ class QuantumWorld:
             sample_size = 100
         return sample_size
 
+    def _interpret_result(self, result: Union[int, Iterable[int]]):
+        if self.compile_to_qubits:
+            return cirq.big_endian_bits_to_int(result)
+        if isinstance(result, Iterable):
+            return result[0]
+        return result
+
+    def add_ancilla(self,
+                    namespace: str,
+                    value: Union[enum.Enum, int] = 0) -> QuantumObject:
+        """Adds an ancilla qudit object with a unique name.
+
+        Args:
+            namespace: Custom string to be added in the name
+            value: The value for the ancilla qudit
+
+        Returns:
+            The added ancilla object.
+        """
+        count = 0
+        ancilla_name = f"ancilla_{namespace}_{count}"
+        while ancilla_name in self.object_name_dict:
+            count += 1
+            ancilla_name = f"ancilla_{namespace}_{count}"
+        new_obj = QuantumObject(ancilla_name, value)
+        self.add_object(new_obj)
+        self.ancilla_names.add(ancilla_name)
+        return new_obj
+
     def force_measurement(self, obj: QuantumObject, result: Union[enum.Enum,
                                                                   int]) -> str:
         """Measures a QuantumObject with a defined outcome.
@@ -172,17 +249,22 @@ class QuantumWorld:
         to be a particular result.  A new qubit set to the initial
         state of the result.
         """
-        count = 0
-        ancilla_name = f"ancilla_{obj.name}_{count}"
-        while ancilla_name in self.object_name_dict:
-            count += 1
-            ancilla_name = f"ancilla_{obj.name}_{count}"
-        new_obj = QuantumObject(ancilla_name, result)
-        self.add_object(new_obj)
-        self.ancilla_names.add(ancilla_name)
+        new_obj = self.add_ancilla(namespace=obj.name, value=result)
+        if self.compile_to_qubits and self.compiled_qubits:
+            obj_qubits = self.compiled_qubits.get(obj.qubit, [obj.qubit])
+            new_obj_qubits = self.compiled_qubits.get(new_obj.qubit,
+                                                      [new_obj.qubit])
+            qubit_remapping_dict = dict({
+                *zip(obj_qubits, new_obj_qubits),
+                *zip(new_obj_qubits, obj_qubits)
+            })
+        else:
+            qubit_remapping_dict = {
+                obj.qubit: new_obj.qubit,
+                new_obj.qubit: obj.qubit
+            }
         self.circuit = self.circuit.transform_qubits(
-            lambda q: q if q != obj.qubit and q != new_obj.qubit else
-            (new_obj.qubit if q == obj.qubit else obj.qubit))
+            lambda q: qubit_remapping_dict.get(q, q))
         post_selection = result.value if isinstance(result,
                                                     enum.Enum) else result
         self.post_selection[new_obj] = post_selection
@@ -220,8 +302,10 @@ class QuantumWorld:
         if objects is None:
             objects = self.objects
         measure_set = set(objects + list(self.post_selection.keys()))
-        measure_circuit.append(
-            [cirq.measure(p.qubit, key=p.qubit.name) for p in measure_set])
+        measure_circuit.append([
+            cirq.measure(self.compiled_qubits.get(p.qubit, [p.qubit]),
+                         key=p.qubit.name) for p in measure_set
+        ])
         results = self.sampler.run(measure_circuit, repetitions=num_reps)
 
         # Perform post-selection
@@ -229,15 +313,15 @@ class QuantumWorld:
         for rep in range(num_reps):
             post_selected = True
             for obj in self.post_selection.keys():
-                result = results.measurements[obj.name][rep][0]
+                result = self._interpret_result(
+                    results.measurements[obj.name][rep])
                 if result != self.post_selection[obj]:
                     post_selected = False
                     break
             if post_selected:
                 rtn_list.append([
-                    results.measurements[obj.name][rep]
-                    for obj in objects
-                    if obj.name not in self.ancilla_names
+                    self._interpret_result(results.measurements[obj.name][rep])
+                    for obj in objects if obj.name not in self.ancilla_names
                 ])
                 if len(rtn_list) == count:
                     break
@@ -294,7 +378,7 @@ class QuantumWorld:
             histogram.append({state: 0 for state in range(obj.num_states)})
         for result in peek_results:
             for idx in range(len(objects)):
-                histogram[idx][result[idx][0]] += 1
+                histogram[idx][result[idx]] += 1
         return histogram
 
     def get_probabilities(self,
@@ -314,7 +398,8 @@ class QuantumWorld:
         probabilities = []
         for obj_hist in histogram:
             probabilities.append({
-                state: obj_hist[state] / count for state in range(len(obj_hist))
+                state: obj_hist[state] / count
+                for state in range(len(obj_hist))
             })
         return probabilities
 

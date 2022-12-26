@@ -88,8 +88,9 @@ def test_two_qutrits():
         [StopLight.YELLOW, StopLight.GREEN],
         [StopLight.YELLOW, StopLight.GREEN],
     ]
-    expected = "green (d=3): ────X(0_2)───\n\nyellow (d=3): ───X(0_1)───"
-    assert str(board.circuit) == expected
+    if not board.compile_to_qubits:
+        expected = "green (d=3): ────X(0_2)───\n\nyellow (d=3): ───X(0_1)───"
+        assert str(board.circuit) == expected
 
 
 @pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
