@@ -25,9 +25,9 @@ from unitary.alpha.sparse_vector_simulator import SparseSimulator
 @pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
 def test_negation(simulator, compile_to_qubits):
     piece = alpha.QuantumObject("t", 0)
-    board = alpha.QuantumWorld(piece,
-                               sampler=simulator(),
-                               compile_to_qubits=compile_to_qubits)
+    board = alpha.QuantumWorld(
+        piece, sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
     assert board.peek() == [[0]]
     -piece
     assert board.peek() == [[1]]
@@ -42,9 +42,9 @@ def test_negation(simulator, compile_to_qubits):
 def test_add_world_after_state_change(simulator, compile_to_qubits):
     piece = alpha.QuantumObject("t", 0)
     piece += 1
-    board = alpha.QuantumWorld(piece,
-                               sampler=simulator(),
-                               compile_to_qubits=compile_to_qubits)
+    board = alpha.QuantumWorld(
+        piece, sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
     assert board.peek() == [[1]]
 
 

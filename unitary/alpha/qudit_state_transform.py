@@ -63,15 +63,14 @@ def qudit_to_qubit_state(
             Expected shape: `((2 ^ m) ^ num_qudits,)`.
     """
     # Reshape the state vector to a `num_qudits` rank tensor.
-    state_tensor = qudit_state_vector.reshape((qudit_dimension, ) * num_qudits)
+    state_tensor = qudit_state_vector.reshape((qudit_dimension,) * num_qudits)
     # Number of extra elements needed in each dimension if represented using qubits.
-    padding_amount = _nearest_power_of_two_ceiling(
-        qudit_dimension) - qudit_dimension
+    padding_amount = _nearest_power_of_two_ceiling(qudit_dimension) - qudit_dimension
     # Expand the number of elements in each dimension by the padding_amount. Fill
     # the new elements with the _pad_value.
-    padded_state_tensor = np.pad(state_tensor,
-                                 pad_width=(0, padding_amount),
-                                 constant_values=_pad_value)
+    padded_state_tensor = np.pad(
+        state_tensor, pad_width=(0, padding_amount), constant_values=_pad_value
+    )
     # Return a flattened state vector view of the final tensor.
     return np.ravel(padded_state_tensor)
 
@@ -102,10 +101,9 @@ def qubit_to_qudit_state(
     """
     mbit_dimension = _nearest_power_of_two_ceiling(qudit_dimension)
     # Reshape the state vector to a `num_qudits` rank tensor.
-    state_tensor = qubit_state_vector.reshape((mbit_dimension, ) * num_qudits)
+    state_tensor = qubit_state_vector.reshape((mbit_dimension,) * num_qudits)
     # Shrink the number of elements in each dimension up to the qudit_dimension, ignoring the rest.
-    trimmed_state_tensor = state_tensor[(slice(qudit_dimension), ) *
-                                        num_qudits]
+    trimmed_state_tensor = state_tensor[(slice(qudit_dimension),) * num_qudits]
     # Return a flattened state vector view of the final tensor.
     return np.ravel(trimmed_state_tensor)
 
@@ -141,8 +139,7 @@ def qudit_to_qubit_unitary(
         A numpy array representing the input unitary using m-qubits-per-qudit.
             Expected shape: `((2 ^ m) ^ num_qudits, (2 ^ m) ^ num_qudits)`.
     """
-    dim_qubit_space = _nearest_power_of_two_ceiling(
-        qudit_dimension)**num_qudits
+    dim_qubit_space = _nearest_power_of_two_ceiling(qudit_dimension) ** num_qudits
 
     if memoize:
         # Perform the transform of the below array from qubit to qudit space so that the indices
@@ -161,14 +158,14 @@ def qudit_to_qubit_unitary(
         iter_range = range(qudit_dimension**num_qudits)
         for i, j in itertools.product(iter_range, iter_range):
             # Use the index map to populate the appropriate element in the qubit representation.
-            result[d_to_b_index_map[i]][
-                d_to_b_index_map[j]] = qudit_unitary[i][j]
+            result[d_to_b_index_map[i]][d_to_b_index_map[j]] = qudit_unitary[i][j]
         return result
 
     # Treat the unitary as a num_qudits^2 system's state vector and represent it using qubits (pad
     # with 0s).
-    padded_unitary = qudit_to_qubit_state(qudit_dimension, num_qudits * 2,
-                                          np.ravel(qudit_unitary))
+    padded_unitary = qudit_to_qubit_state(
+        qudit_dimension, num_qudits * 2, np.ravel(qudit_unitary)
+    )
     # A qubit-based state vector with the extra padding bits having 1s and rest having 0s. This
     # vector marks only the bits that are padded.
     pad_qubits_vector = qudit_to_qubit_state(
@@ -180,8 +177,9 @@ def qudit_to_qubit_unitary(
     # Reshape the padded unitary to the final shape and add a diagonal matrix corresponding to the
     # pad_qubits_vector. This addition ensures that the invalid states with the "padding" bits map
     # to identity, preserving unitarity.
-    return padded_unitary.reshape(dim_qubit_space,
-                                  dim_qubit_space) + np.diag(pad_qubits_vector)
+    return padded_unitary.reshape(dim_qubit_space, dim_qubit_space) + np.diag(
+        pad_qubits_vector
+    )
 
 
 def qubit_to_qudit_unitary(
@@ -212,11 +210,12 @@ def qubit_to_qudit_unitary(
     # Treat unitary as a `num_qudits*2` qudit system state vector.
     effective_num_qudits = num_qudits * 2
     # Reshape the state vector to a `num_qudits*2` rank tensor.
-    unitary_tensor = qubit_unitary.reshape(
-        (mbit_dimension, ) * effective_num_qudits)
+    unitary_tensor = qubit_unitary.reshape((mbit_dimension,) * effective_num_qudits)
     # Shrink the number of elements in each dimension up to the qudit_dimension, ignoring the rest.
-    trimmed_unitary_tensor = unitary_tensor[(slice(qudit_dimension), ) *
-                                            effective_num_qudits]
+    trimmed_unitary_tensor = unitary_tensor[
+        (slice(qudit_dimension),) * effective_num_qudits
+    ]
     # Return a flat unitary view of the final tensor.
-    return trimmed_unitary_tensor.reshape(qudit_dimension**num_qudits,
-                                          qudit_dimension**num_qudits)
+    return trimmed_unitary_tensor.reshape(
+        qudit_dimension**num_qudits, qudit_dimension**num_qudits
+    )
