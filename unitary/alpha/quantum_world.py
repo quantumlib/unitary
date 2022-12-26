@@ -82,15 +82,10 @@ class QuantumWorld:
             if qudit_dim == 2:
                 self.compiled_qubits[obj.qubit] = [obj.qubit]
             else:
-                compiled_qubits = [
-                    QuantumObject(f"compiled_{obj.qubit.name}_{qubit_num}", 0)
-                    for qubit_num in range(_num_bits(qudit_dim))
-                ]
-                for qubit in compiled_qubits:
-                    qubit.world = self
-                self.compiled_qubits[obj.qubit] = [
-                    qubit.qubit for qubit in compiled_qubits
-                ]
+                self.compiled_qubits[obj.qubit] = []
+                for qubit_num in range(_num_bits(qudit_dim)):
+                    new_obj = self.add_ancilla(obj.qubit.name)
+                    self.compiled_qubits[obj.qubit].append(new_obj.qubit)
         obj.initial_effect()
 
     @property
@@ -164,12 +159,9 @@ class QuantumWorld:
                         # than this qubit.
                         for qubit_num in range(len(qubits),
                                                num_qubits_per_qudit):
-                            qubit = QuantumObject(
-                                f"compiled_{qudit.name}_{qubit_num}", 0)
-                            self.add_object(qubit)
-                            qubits.append(qubit.qubit)
-                        self.compiled_qubits[qudit] = qubits
-                    all_qubits.extend(qubits)
+                            new_obj = self.add_ancilla(qudit.name)
+                            qubits.append(new_obj.qubit)
+                    all_qubits.extend(self.compiled_qubits[qudit])
 
                 op = cirq.MatrixGate(matrix=new_unitary,
                                      qid_shape=(2, ) *
@@ -300,10 +292,13 @@ class QuantumWorld:
 
         measure_circuit = self.circuit.copy()
         if objects is None:
-            objects = self.objects
+            objects = [
+                obj for obj in self.objects
+                if obj.name not in self.ancilla_names
+            ]
         measure_set = set(objects + list(self.post_selection.keys()))
         measure_circuit.append([
-            cirq.measure(self.compiled_qubits.get(p.qubit, [p.qubit]),
+            cirq.measure(self.compiled_qubits.get(p.qubit, p.qubit),
                          key=p.qubit.name) for p in measure_set
         ])
         results = self.sampler.run(measure_circuit, repetitions=num_reps)
@@ -321,7 +316,7 @@ class QuantumWorld:
             if post_selected:
                 rtn_list.append([
                     self._interpret_result(results.measurements[obj.name][rep])
-                    for obj in objects if obj.name not in self.ancilla_names
+                    for obj in objects
                 ])
                 if len(rtn_list) == count:
                     break
@@ -348,7 +343,10 @@ class QuantumWorld:
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection)))
         if objects is None:
-            objects = self.objects
+            objects = [
+                obj for obj in self.objects
+                if obj.name not in self.ancilla_names
+            ]
         results = self.peek(objects, convert_to_enum=convert_to_enum)
         for idx, result in enumerate(results[0]):
             self.force_measurement(objects[idx], result)
@@ -369,7 +367,10 @@ class QuantumWorld:
             counts for each state of the given object.
         """
         if not objects:
-            objects = self.objects
+            objects = [
+                obj for obj in self.objects
+                if obj.name not in self.ancilla_names
+            ]
         peek_results = self.peek(objects=objects,
                                  convert_to_enum=False,
                                  count=count)
