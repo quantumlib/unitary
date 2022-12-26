@@ -13,7 +13,10 @@
 # limitations under the License.
 #
 import enum
+
 import pytest
+
+import numpy as np
 
 import cirq
 
@@ -102,9 +105,44 @@ def test_two_qutrits(compile_to_qubits):
         [StopLight.YELLOW, StopLight.GREEN],
         [StopLight.YELLOW, StopLight.GREEN],
     ]
-    if not board.compile_to_qubits:
+    if board.compile_to_qubits:
+        g0 = cirq.NamedQubit("ancilla_green_0")
+        g1 = cirq.NamedQubit("ancilla_green_1")
+        y0 = cirq.NamedQubit("ancilla_yellow_0")
+        y1 = cirq.NamedQubit("ancilla_yellow_1")
+        # Flip the 0 and 2 states from identity for Green.
+        g_x02 = cirq.MatrixGate(
+            np.array([[0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 0, 1]],
+                     dtype=float)).on(g0, g1)
+        # Flip the 0 and 1 states from identity for Yellow.
+        y_x01 = cirq.MatrixGate(
+            np.array([[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+                     dtype=float)).on(y0, y1)
+        circuit = cirq.Circuit(g_x02, y_x01)
+        expected = str(circuit)
+    else:
         expected = "green (d=3): ────X(0_2)───\n\nyellow (d=3): ───X(0_1)───"
-        assert str(board.circuit) == expected
+    assert str(board.circuit) == expected
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_qubit_and_qutrit(compile_to_qubits):
+    light = alpha.QuantumObject("yellow", Light.GREEN)
+    light2 = alpha.QuantumObject("green", StopLight.GREEN)
+    board = alpha.QuantumWorld([light, light2],
+                               compile_to_qubits=compile_to_qubits)
+    assert board.peek(convert_to_enum=False) == [[1, 2]]
+    assert board.peek() == [[Light.GREEN, StopLight.GREEN]]
+    assert board.peek([light], count=2) == [[Light.GREEN], [Light.GREEN]]
+    assert board.peek([light2], count=2) == [[StopLight.GREEN],
+                                             [StopLight.GREEN]]
+    assert board.peek(count=3) == [
+        [Light.GREEN, StopLight.GREEN],
+        [Light.GREEN, StopLight.GREEN],
+        [Light.GREEN, StopLight.GREEN],
+    ]
+    # Only the qutrit gets compiled to ancillas.
+    assert len(board.ancilla_names) == (2 if compile_to_qubits else 0)
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])

@@ -82,6 +82,7 @@ b (d=3): ───×X───
     )
 
 
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize(
     "mark, ruleset",
     [
@@ -91,10 +92,14 @@ b (d=3): ───×X───
         (tictactoe.TicTacSquare.O, tictactoe.TicTacRules.QUANTUM_V3),
     ],
 )
-def test_tic_tac_split(mark: tictactoe.TicTacSquare, ruleset: tictactoe.TicTacRules):
+def test_tic_tac_split(
+    mark: tictactoe.TicTacSquare,
+    ruleset: tictactoe.TicTacRules,
+    compile_to_qubits: bool,
+):
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
-    board = alpha.QuantumWorld([a, b])
+    board = alpha.QuantumWorld([a, b], compile_to_qubits=compile_to_qubits)
     tictactoe.TicTacSplit(mark, ruleset)(a, b)
     results = board.peek(count=1000)
     on_a = [mark, tictactoe.TicTacSquare.EMPTY]
@@ -104,11 +109,12 @@ def test_tic_tac_split(mark: tictactoe.TicTacSquare, ruleset: tictactoe.TicTacRu
     assert all(r == on_a or r == on_b for r in results)
 
 
-def test_tic_tac_split_entangled_v2():
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_tic_tac_split_entangled_v2(compile_to_qubits):
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
     c = alpha.QuantumObject("c", tictactoe.TicTacSquare.EMPTY)
-    board = alpha.QuantumWorld([a, b, c])
+    board = alpha.QuantumWorld([a, b, c], compile_to_qubits=compile_to_qubits)
     ruleset = tictactoe.TicTacRules.QUANTUM_V2
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.X, ruleset)(a, b)
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.O, ruleset)(b, c)
@@ -122,11 +128,12 @@ def test_tic_tac_split_entangled_v2():
     assert all(r == on_ab or r == on_ac or r == on_b for r in results)
 
 
-def test_tic_tac_split_entangled_v3():
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_tic_tac_split_entangled_v3(compile_to_qubits):
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
     c = alpha.QuantumObject("c", tictactoe.TicTacSquare.EMPTY)
-    board = alpha.QuantumWorld([a, b, c])
+    board = alpha.QuantumWorld([a, b, c], compile_to_qubits=compile_to_qubits)
     ruleset = tictactoe.TicTacRules.QUANTUM_V3
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.X, ruleset)(a, b)
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.O, ruleset)(b, c)
@@ -148,11 +155,12 @@ def test_tic_tac_split_entangled_v3():
     )
 
 
-def test_tic_tac_split_entangled_v3_empty():
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_tic_tac_split_entangled_v3_empty(compile_to_qubits):
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
     c = alpha.QuantumObject("c", tictactoe.TicTacSquare.EMPTY)
-    board = alpha.QuantumWorld([a, b, c])
+    board = alpha.QuantumWorld([a, b, c], compile_to_qubits=compile_to_qubits)
     ruleset = tictactoe.TicTacRules.QUANTUM_V3
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.X, ruleset)(a, b)
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.O, ruleset)(c, b)

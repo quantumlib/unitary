@@ -18,7 +18,7 @@ import cirq
 
 from unitary.alpha.quantum_object import QuantumObject
 from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
-from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, _num_bits
+from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, num_bits
 
 
 class QuantumWorld:
@@ -83,14 +83,21 @@ class QuantumWorld:
                 self.compiled_qubits[obj.qubit] = [obj.qubit]
             else:
                 self.compiled_qubits[obj.qubit] = []
-                for qubit_num in range(_num_bits(qudit_dim)):
-                    new_obj = self.add_ancilla(obj.qubit.name)
+                for qubit_num in range(num_bits(qudit_dim)):
+                    new_obj = self._add_ancilla(obj.qubit.name)
                     self.compiled_qubits[obj.qubit].append(new_obj.qubit)
         obj.initial_effect()
 
     @property
     def objects(self) -> List[QuantumObject]:
         return list(self.object_name_dict.values())
+
+    @property
+    def public_objects(self) -> List[QuantumObject]:
+        return [
+            obj for obj in self.object_name_dict.values()
+            if obj.name not in self.ancilla_names
+        ]
 
     def get_object_by_name(self, name: str) -> Optional[QuantumObject]:
         """Returns the object with the given name.
@@ -119,12 +126,35 @@ class QuantumWorld:
                 "Cannot combine sparse simulator world with non-sparse")
         self.object_name_dict.update(other_world.object_name_dict)
         self.ancilla_names.update(other_world.ancilla_names)
+        self.compiled_qubits.update(other_world.compiled_qubits)
         self.post_selection.update(other_world.post_selection)
         self.circuit = self.circuit.zip(other_world.circuit)
         # Clear effect history, since undoing would undo the combined worlds
         self.effect_history.clear()
         # Clear the other world so that objects cannot be used from that world.
         other_world.clear()
+
+    def _add_ancilla(self,
+                     namespace: str,
+                     value: Union[enum.Enum, int] = 0) -> QuantumObject:
+        """Adds an ancilla qudit object with a unique name.
+
+        Args:
+            namespace: Custom string to be added in the name
+            value: The value for the ancilla qudit
+
+        Returns:
+            The added ancilla object.
+        """
+        count = 0
+        ancilla_name = f"ancilla_{namespace}_{count}"
+        while ancilla_name in self.object_name_dict:
+            count += 1
+            ancilla_name = f"ancilla_{namespace}_{count}"
+        new_obj = QuantumObject(ancilla_name, value)
+        self.add_object(new_obj)
+        self.ancilla_names.add(ancilla_name)
+        return new_obj
 
     def _append_op(self, op: cirq.Operation):
         """Add the operation in a way designed to speed execution.
@@ -140,34 +170,45 @@ class QuantumWorld:
             strategy = cirq.InsertStrategy.NEW
 
         if self.compile_to_qubits:
-            qid_shape = cirq.qid_shape(op)
-            qudit_dim = max(qid_shape)
-            if qudit_dim > 2:
-                num_qudits = len(qid_shape)
-                new_unitary = qudit_to_qubit_unitary(
-                    qudit_dimension=qudit_dim,
-                    num_qudits=num_qudits,
-                    qudit_unitary=cirq.unitary(op))
-                num_qubits_per_qudit = _num_bits(qudit_dim)
-                num_qubits = num_qubits_per_qudit * num_qudits
-                all_qubits = []
-                for qudit in op.qubits:
-                    qubits = self.compiled_qubits[qudit]
-                    if num_qubits_per_qudit > len(qubits):
-                        # Original padding was not enough. This means that one
-                        # of the qubits in the Operation has a higher dimension
-                        # than this qubit.
-                        for qubit_num in range(len(qubits),
-                                               num_qubits_per_qudit):
-                            new_obj = self.add_ancilla(qudit.name)
-                            qubits.append(new_obj.qubit)
-                    all_qubits.extend(self.compiled_qubits[qudit])
-
-                op = cirq.MatrixGate(matrix=new_unitary,
-                                     qid_shape=(2, ) *
-                                     num_qubits).on(*all_qubits)
+            op = self._compile_op(op)
 
         self.circuit.append(op, strategy=strategy)
+
+    def _compile_op(self, op: cirq.Operation) -> cirq.Operation:
+        qid_shape = cirq.qid_shape(op)
+        qudit_dim = max(qid_shape)
+        if qudit_dim <= 2:
+            return op
+        num_qudits = len(qid_shape)
+        num_qubits_per_qudit = num_bits(qudit_dim)
+        num_qubits = num_qubits_per_qudit * num_qudits
+        all_qubits = []
+        for qudit in op.qubits:
+            num_compiled_qubits = len(self.compiled_qubits[qudit])
+            if num_qubits_per_qudit > num_compiled_qubits:
+                # Original padding was not enough. This means that one
+                # of the qubits in the Operation has a higher dimension
+                # than this qubit.
+                for qubit_num in range(num_compiled_qubits,
+                                       num_qubits_per_qudit):
+                    new_obj = self._add_ancilla(qudit.name)
+                    self.compiled_qubits[qudit].append(new_obj.qubit)
+                compiled_op_qubits = self.compiled_qubits[qudit]
+            elif num_qubits_per_qudit < num_compiled_qubits:
+                # This op needs less padding than what this qubit has.
+                # Use the first N qubits based on the size required.
+                compiled_op_qubits = self.compiled_qubits[
+                    qudit][:num_qubits_per_qudit]
+            else:
+                compiled_op_qubits = self.compiled_qubits[qudit]
+
+            all_qubits.extend(compiled_op_qubits)
+
+        new_unitary = qudit_to_qubit_unitary(qudit_dimension=qudit_dim,
+                                             num_qudits=num_qudits,
+                                             qudit_unitary=cirq.unitary(op))
+        return cirq.MatrixGate(matrix=new_unitary,
+                               qid_shape=(2, ) * num_qubits).on(*all_qubits)
 
     def add_effect(self, op_list: List[cirq.Operation]):
         """Adds an operation to the current circuit."""
@@ -203,34 +244,21 @@ class QuantumWorld:
             sample_size = 100
         return sample_size
 
-    def _interpret_result(self, result: Union[int, Iterable[int]]):
+    def _interpret_result(self, result: Union[int, Iterable[int]]) -> int:
+        """Canonicalize an entry from the measurement results array to int."""
         if self.compile_to_qubits:
+            # For a compiled qudit, the results will be a bit array
+            # representing an integer outcome.
             return cirq.big_endian_bits_to_int(result)
         if isinstance(result, Iterable):
+            # If it is a single-element iterable, return the first element.
+            if len(result) != 1:
+                raise ValueError(
+                    f"Cannot interpret a multivalued iterable {result} as a "
+                    "single result for a non-compiled world."
+                )
             return result[0]
         return result
-
-    def add_ancilla(self,
-                    namespace: str,
-                    value: Union[enum.Enum, int] = 0) -> QuantumObject:
-        """Adds an ancilla qudit object with a unique name.
-
-        Args:
-            namespace: Custom string to be added in the name
-            value: The value for the ancilla qudit
-
-        Returns:
-            The added ancilla object.
-        """
-        count = 0
-        ancilla_name = f"ancilla_{namespace}_{count}"
-        while ancilla_name in self.object_name_dict:
-            count += 1
-            ancilla_name = f"ancilla_{namespace}_{count}"
-        new_obj = QuantumObject(ancilla_name, value)
-        self.add_object(new_obj)
-        self.ancilla_names.add(ancilla_name)
-        return new_obj
 
     def force_measurement(self, obj: QuantumObject, result: Union[enum.Enum,
                                                                   int]) -> str:
@@ -241,20 +269,22 @@ class QuantumWorld:
         to be a particular result.  A new qubit set to the initial
         state of the result.
         """
-        new_obj = self.add_ancilla(namespace=obj.name, value=result)
-        if self.compile_to_qubits and self.compiled_qubits:
+        new_obj = self._add_ancilla(namespace=obj.name, value=result)
+        # Swap the input and ancilla qubits using a remapping dict.
+        qubit_remapping_dict = {
+            obj.qubit: new_obj.qubit,
+            new_obj.qubit: obj.qubit
+        }
+        if self.compile_to_qubits:
+            # Swap the compiled qubits.
             obj_qubits = self.compiled_qubits.get(obj.qubit, [obj.qubit])
             new_obj_qubits = self.compiled_qubits.get(new_obj.qubit,
                                                       [new_obj.qubit])
-            qubit_remapping_dict = dict({
+            qubit_remapping_dict.update({
                 *zip(obj_qubits, new_obj_qubits),
                 *zip(new_obj_qubits, obj_qubits)
             })
-        else:
-            qubit_remapping_dict = {
-                obj.qubit: new_obj.qubit,
-                new_obj.qubit: obj.qubit
-            }
+
         self.circuit = self.circuit.transform_qubits(
             lambda q: qubit_remapping_dict.get(q, q))
         post_selection = result.value if isinstance(result,
@@ -292,10 +322,7 @@ class QuantumWorld:
 
         measure_circuit = self.circuit.copy()
         if objects is None:
-            objects = [
-                obj for obj in self.objects
-                if obj.name not in self.ancilla_names
-            ]
+            objects = self.public_objects
         measure_set = set(objects + list(self.post_selection.keys()))
         measure_circuit.append([
             cirq.measure(self.compiled_qubits.get(p.qubit, p.qubit),
@@ -343,10 +370,7 @@ class QuantumWorld:
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection)))
         if objects is None:
-            objects = [
-                obj for obj in self.objects
-                if obj.name not in self.ancilla_names
-            ]
+            objects = self.public_objects
         results = self.peek(objects, convert_to_enum=convert_to_enum)
         for idx, result in enumerate(results[0]):
             self.force_measurement(objects[idx], result)
@@ -367,10 +391,7 @@ class QuantumWorld:
             counts for each state of the given object.
         """
         if not objects:
-            objects = [
-                obj for obj in self.objects
-                if obj.name not in self.ancilla_names
-            ]
+            objects = self.public_objects
         peek_results = self.peek(objects=objects,
                                  convert_to_enum=False,
                                  count=count)

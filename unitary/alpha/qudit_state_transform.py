@@ -17,10 +17,10 @@ import itertools
 import numpy as np
 
 
-def _num_bits(num: int) -> int:
+def num_bits(num: int) -> int:
     """Returns the minimum number of bits needed to represent the input."""
     result = 1
-    while 2**result < num:
+    while num > 2**result:
         result += 1
     return result
 
