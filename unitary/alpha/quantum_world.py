@@ -94,6 +94,7 @@ class QuantumWorld:
 
     @property
     def public_objects(self) -> List[QuantumObject]:
+        """All non-ancilla objects in the world."""
         return [
             obj for obj in self.object_name_dict.values()
             if obj.name not in self.ancilla_names
@@ -174,9 +175,41 @@ class QuantumWorld:
 
         self.circuit.append(op, strategy=strategy)
 
+    def _get_num_compiled_qubits(self, qudit: cirq.Qid,
+                                 num_expected_qubits: int) -> List[cirq.Qid]:
+        """Gets the exact number of compiled qubits for the qudit.
+
+        May create extra ancilla qubits, if needed. Currently, none of the
+        non-trivial cases are exercised because our actual qubit compilation
+        does not support mixing of different qudit dimensions.
+        """
+        num_compiled_qubits = len(self.compiled_qubits[qudit])
+        if num_expected_qubits > num_compiled_qubits:
+            # Original padding was not enough. This means that one
+            # of the qubits in the Operation has a higher dimension
+            # than this qubit.
+            for qubit_num in range(num_compiled_qubits, num_expected_qubits):
+                new_obj = self._add_ancilla(qudit.name)
+                self.compiled_qubits[qudit].append(new_obj.qubit)
+            return self.compiled_qubits[qudit]
+        if num_expected_qubits < num_compiled_qubits:
+            # This op needs less padding than what this qubit has.
+            # Use the first N qubits based on the size required.
+            return self.compiled_qubits[qudit][:num_expected_qubits]
+        else:
+            return self.compiled_qubits[qudit]
+
     def _compile_op(self, op: cirq.Operation) -> cirq.Operation:
+        """Compiles the operation down to qubits, if needed."""
         qid_shape = cirq.qid_shape(op)
-        qudit_dim = max(qid_shape)
+        distinct_dims = set(qid_shape)
+        if len(distinct_dims) > 1:
+            # TODO: Add support for arbitrary Qid shapes to
+            #  `qudit_state_transform`.
+            raise ValueError(
+                f"Found operation shape {qid_shape}. Compiling operations with"
+                " a mix of different dimensioned qudits is not supported yet.")
+        qudit_dim = distinct_dims.pop()
         if qudit_dim <= 2:
             return op
         num_qudits = len(qid_shape)
@@ -184,26 +217,10 @@ class QuantumWorld:
         num_qubits = num_qubits_per_qudit * num_qudits
         all_qubits = []
         for qudit in op.qubits:
-            num_compiled_qubits = len(self.compiled_qubits[qudit])
-            if num_qubits_per_qudit > num_compiled_qubits:
-                # Original padding was not enough. This means that one
-                # of the qubits in the Operation has a higher dimension
-                # than this qubit.
-                for qubit_num in range(num_compiled_qubits,
-                                       num_qubits_per_qudit):
-                    new_obj = self._add_ancilla(qudit.name)
-                    self.compiled_qubits[qudit].append(new_obj.qubit)
-                compiled_op_qubits = self.compiled_qubits[qudit]
-            elif num_qubits_per_qudit < num_compiled_qubits:
-                # This op needs less padding than what this qubit has.
-                # Use the first N qubits based on the size required.
-                compiled_op_qubits = self.compiled_qubits[
-                    qudit][:num_qubits_per_qudit]
-            else:
-                compiled_op_qubits = self.compiled_qubits[qudit]
+            all_qubits.extend(
+                self._get_num_compiled_qubits(qudit, num_qubits_per_qudit))
 
-            all_qubits.extend(compiled_op_qubits)
-
+        # Compile the input unitary to a target qubit-based unitary.
         new_unitary = qudit_to_qubit_unitary(qudit_dimension=qudit_dim,
                                              num_qudits=num_qudits,
                                              qudit_unitary=cirq.unitary(op))
@@ -255,8 +272,7 @@ class QuantumWorld:
             if len(result) != 1:
                 raise ValueError(
                     f"Cannot interpret a multivalued iterable {result} as a "
-                    "single result for a non-compiled world."
-                )
+                    "single result for a non-compiled world.")
             return result[0]
         return result
 
