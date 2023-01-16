@@ -21,6 +21,7 @@ import numpy as np
 import cirq
 
 import unitary.alpha as alpha
+import unitary.alpha.qudit_gates as qudit_gates
 
 
 class Light(enum.Enum):
@@ -123,6 +124,7 @@ def test_two_qutrits(compile_to_qubits):
     else:
         expected = "green (d=3): ────X(0_2)───\n\nyellow (d=3): ───X(0_1)───"
     assert str(board.circuit) == expected
+    assert board.pop() == [StopLight.YELLOW, StopLight.GREEN]
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -143,6 +145,7 @@ def test_qubit_and_qutrit(compile_to_qubits):
     ]
     # Only the qutrit gets compiled to ancillas.
     assert len(board.ancilla_names) == (2 if compile_to_qubits else 0)
+    assert board.pop() == [Light.GREEN, StopLight.GREEN]
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -155,6 +158,48 @@ def test_pop(simulator, compile_to_qubits):
                                sampler=simulator(),
                                compile_to_qubits=compile_to_qubits)
     alpha.Split()(light, light2, light3)
+    results = board.peek([light2, light3], count=200)
+    assert all(result[0] != result[1] for result in results)
+    assert not all(result[0] == 0 for result in results)
+    assert not all(result[0] == 1 for result in results)
+    popped = board.pop([light2])[0]
+    results = board.peek([light2, light3], count=200)
+    assert len(results) == 200
+    assert all(result[0] == popped for result in results)
+    assert all(result[1] != popped for result in results)
+
+
+# TODO: Consider moving to qudit_effects.py if this can be broadly useful.
+class QuditSwapEffect(alpha.QuantumEffect):
+    def __init__(self, dimension):
+        self.dimension = dimension
+
+    def effect(self, object1, object2):
+        yield qudit_gates.QuditSwapPowGate(self.dimension)(object1.qubit,
+                                                           object2.qubit)
+
+
+# TODO: Consider moving to qudit_effects.py if this can be broadly useful.
+class QuditSplitEffect(alpha.QuantumEffect):
+    def __init__(self, dimension):
+        self.dimension = dimension
+
+    def effect(self, object1, object2, object3):
+        yield qudit_gates.QuditSwapPowGate(self.dimension, 0.5)(object1.qubit,
+                                                                object2.qubit)
+        yield qudit_gates.QuditSwapPowGate(self.dimension, 1)(object1.qubit,
+                                                              object3.qubit)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_pop_qudit(compile_to_qubits):
+    light = alpha.QuantumObject("l1", StopLight.GREEN)
+    light2 = alpha.QuantumObject("l2", StopLight.RED)
+    light3 = alpha.QuantumObject("l3", StopLight.RED)
+    board = alpha.QuantumWorld([light, light2, light3],
+                               sampler=cirq.Simulator(),
+                               compile_to_qubits=compile_to_qubits)
+    QuditSplitEffect(3)(light, light2, light3)
     results = board.peek([light2, light3], count=200)
     assert all(result[0] != result[1] for result in results)
     assert not all(result[0] == 0 for result in results)
@@ -182,6 +227,20 @@ def test_pop_and_reuse(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_pop_and_reuse_qudit(compile_to_qubits):
+    """Tests reusing a popped qudit."""
+    light = alpha.QuantumObject("l1", StopLight.GREEN)
+    board = alpha.QuantumWorld([light],
+                               sampler=cirq.Simulator(),
+                               compile_to_qubits=compile_to_qubits)
+    popped = board.pop([light])[0]
+    assert popped == StopLight.GREEN
+    alpha.QuditFlip(3, StopLight.RED.value, StopLight.GREEN.value)(light)
+    popped = board.pop([light])[0]
+    assert popped == StopLight.RED
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_undo(simulator, compile_to_qubits):
     light = alpha.QuantumObject("l1", Light.GREEN)
@@ -194,6 +253,20 @@ def test_undo(simulator, compile_to_qubits):
     board.undo_last_effect()
     results = board.peek([light], count=200)
     assert all(result[0] == Light.GREEN for result in results)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_undo_qudit(compile_to_qubits):
+    light = alpha.QuantumObject("l1", StopLight.GREEN)
+    board = alpha.QuantumWorld([light],
+                               sampler=cirq.Simulator(),
+                               compile_to_qubits=compile_to_qubits)
+    alpha.QuditFlip(3, StopLight.RED.value, StopLight.GREEN.value)(light)
+    results = board.peek([light], count=200)
+    assert all(result[0] == StopLight.RED for result in results)
+    board.undo_last_effect()
+    results = board.peek([light], count=200)
+    assert all(result[0] == StopLight.GREEN for result in results)
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -237,6 +310,38 @@ def test_undo_post_select(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_undo_post_select_qudits(compile_to_qubits):
+    light = alpha.QuantumObject("l1", StopLight.GREEN)
+    light2 = alpha.QuantumObject("l2", StopLight.RED)
+    light3 = alpha.QuantumObject("l3", StopLight.RED)
+    board = alpha.QuantumWorld([light, light2, light3],
+                               sampler=cirq.Simulator(),
+                               compile_to_qubits=compile_to_qubits)
+    QuditSplitEffect(3)(light, light2, light3)
+
+    # After split, should be fifty-fifty
+    results = board.peek([light2, light3], count=200)
+    assert all(result[0] != result[1] for result in results)
+    assert not all(result[0] == StopLight.RED for result in results)
+    assert not all(result[0] == StopLight.GREEN for result in results)
+
+    # After pop, should be consistently one value
+    popped = board.pop([light2])[0]
+    results = board.peek([light2, light3], count=200)
+    assert len(results) == 200
+    assert all(result[0] == popped for result in results)
+    assert all(result[1] != popped for result in results)
+
+    # After undo, should be fifty-fifty
+    board.undo_last_effect()
+    results = board.peek([light2, light3], count=200)
+    assert len(results) == 200
+    assert all(result[0] != result[1] for result in results)
+    assert not all(result[0] == StopLight.RED for result in results)
+    assert not all(result[0] == StopLight.GREEN for result in results)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_pop_not_enough_reps(simulator, compile_to_qubits):
     """Tests forcing a measurement of a rare outcome,
@@ -271,6 +376,38 @@ def test_pop_not_enough_reps(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_pop_not_enough_reps_qudits(compile_to_qubits):
+    """Tests forcing a measurement of a rare outcome,
+    so that peek needs to be called recursively to get more
+    occurances.
+    """
+    lights = [
+        alpha.QuantumObject("l" + str(i), StopLight.RED) for i in range(9)
+    ]
+    board = alpha.QuantumWorld(lights,
+                               sampler=cirq.Simulator(),
+                               compile_to_qubits=compile_to_qubits)
+    alpha.QuditFlip(3, StopLight.RED.value, StopLight.GREEN.value)(lights[0])
+    QuditSplitEffect(3)(lights[0], lights[1], lights[2])
+    QuditSplitEffect(3)(lights[2], lights[3], lights[4])
+    QuditSplitEffect(3)(lights[4], lights[5], lights[6])
+    QuditSplitEffect(3)(lights[6], lights[7], lights[8])
+
+    results = board.peek([lights[8]], count=2000)
+    assert any(result[0] == StopLight.GREEN for result in results)
+    assert not all(result[0] == StopLight.GREEN for result in results)
+    board.force_measurement(lights[8], StopLight.GREEN)
+
+    results = board.peek([lights[8]], count=200)
+    assert len(results) == 200
+    assert all(result[0] == StopLight.GREEN for result in results)
+    results = board.peek(count=200)
+    assert all(len(result) == 9 for result in results)
+    assert all(result == [StopLight.RED] * 8 + [StopLight.GREEN]
+               for result in results)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_pop_qubits_twice(simulator, compile_to_qubits):
     """Tests popping qubits twice, so that 2 ancillas are created
@@ -286,6 +423,32 @@ def test_pop_qubits_twice(simulator, compile_to_qubits):
     green_on_2 = [Light.RED, Light.RED, Light.GREEN]
     assert (result == green_on_1) or (result == green_on_2)
     alpha.Move()(lights[1], lights[2])
+    result2 = board.pop()
+    peek_results = board.peek(count=200)
+    if result == green_on_1:
+        assert result2 == green_on_2
+    else:
+        assert result2 == green_on_1
+    assert all(peek_result == result2 for peek_result in peek_results)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_pop_qudits_twice(compile_to_qubits):
+    """Tests popping qudits twice, so that 2 ancillas are created
+    for each qudit."""
+    lights = [
+        alpha.QuantumObject("l" + str(i), StopLight.RED) for i in range(3)
+    ]
+    board = alpha.QuantumWorld(lights,
+                               sampler=cirq.Simulator(),
+                               compile_to_qubits=compile_to_qubits)
+    alpha.QuditFlip(3, StopLight.RED.value, StopLight.GREEN.value)(lights[0])
+    QuditSplitEffect(3)(lights[0], lights[1], lights[2])
+    result = board.pop()
+    green_on_1 = [StopLight.RED, StopLight.GREEN, StopLight.RED]
+    green_on_2 = [StopLight.RED, StopLight.RED, StopLight.GREEN]
+    assert (result == green_on_1) or (result == green_on_2)
+    QuditSwapEffect(3)(lights[1], lights[2])
     result2 = board.pop()
     peek_results = board.peek(count=200)
     if result == green_on_1:

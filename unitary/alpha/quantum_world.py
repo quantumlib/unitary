@@ -36,6 +36,11 @@ class QuantumWorld:
     This object should be initialized with a sampler that determines
     how to evaluate the quantum game state.  If not specified, this
     defaults to the built-in cirq Simulator.
+
+    Setting the `compile_to_qubits` option results in an internal state
+    representation of ancilla qubits for every qudit in the world. That
+    also results in the effects being applied to the corresponding qubits
+    instead of the original qudits.
     """
     def __init__(self,
                  objects: Optional[List[QuantumObject]] = None,
@@ -175,57 +180,31 @@ class QuantumWorld:
 
         self.circuit.append(op, strategy=strategy)
 
-    def _get_num_compiled_qubits(self, qudit: cirq.Qid,
-                                 num_expected_qubits: int) -> List[cirq.Qid]:
-        """Gets the exact number of compiled qubits for the qudit.
-
-        May create extra ancilla qubits, if needed. Currently, none of the
-        non-trivial cases are exercised because our actual qubit compilation
-        does not support mixing of different qudit dimensions.
-        """
-        num_compiled_qubits = len(self.compiled_qubits[qudit])
-        if num_expected_qubits > num_compiled_qubits:
-            # Original padding was not enough. This means that one
-            # of the qubits in the Operation has a higher dimension
-            # than this qubit.
-            for qubit_num in range(num_compiled_qubits, num_expected_qubits):
-                new_obj = self._add_ancilla(qudit.name)
-                self.compiled_qubits[qudit].append(new_obj.qubit)
-            return self.compiled_qubits[qudit]
-        if num_expected_qubits < num_compiled_qubits:
-            # This op needs less padding than what this qubit has.
-            # Use the first N qubits based on the size required.
-            return self.compiled_qubits[qudit][:num_expected_qubits]
-        else:
-            return self.compiled_qubits[qudit]
-
     def _compile_op(self, op: cirq.Operation) -> cirq.Operation:
         """Compiles the operation down to qubits, if needed."""
         qid_shape = cirq.qid_shape(op)
-        distinct_dims = set(qid_shape)
-        if len(distinct_dims) > 1:
+        if len(set(qid_shape)) > 1:
             # TODO: Add support for arbitrary Qid shapes to
             #  `qudit_state_transform`.
             raise ValueError(
                 f"Found operation shape {qid_shape}. Compiling operations with"
                 " a mix of different dimensioned qudits is not supported yet.")
-        qudit_dim = distinct_dims.pop()
-        if qudit_dim <= 2:
+        qudit_dim = qid_shape[0]
+        if qudit_dim == 2:
             return op
         num_qudits = len(qid_shape)
-        num_qubits_per_qudit = num_bits(qudit_dim)
-        num_qubits = num_qubits_per_qudit * num_qudits
-        all_qubits = []
+        compiled_qubits = []
         for qudit in op.qubits:
-            all_qubits.extend(
-                self._get_num_compiled_qubits(qudit, num_qubits_per_qudit))
+            compiled_qubits.extend(self.compiled_qubits[qudit])
 
         # Compile the input unitary to a target qubit-based unitary.
-        new_unitary = qudit_to_qubit_unitary(qudit_dimension=qudit_dim,
-                                             num_qudits=num_qudits,
-                                             qudit_unitary=cirq.unitary(op))
-        return cirq.MatrixGate(matrix=new_unitary,
-                               qid_shape=(2, ) * num_qubits).on(*all_qubits)
+        compiled_unitary = qudit_to_qubit_unitary(
+            qudit_dimension=qudit_dim,
+            num_qudits=num_qudits,
+            qudit_unitary=cirq.unitary(op))
+        return cirq.MatrixGate(matrix=compiled_unitary,
+                               qid_shape=(2, ) *
+                               len(compiled_qubits)).on(*compiled_qubits)
 
     def add_effect(self, op_list: List[cirq.Operation]):
         """Adds an operation to the current circuit."""
@@ -262,7 +241,14 @@ class QuantumWorld:
         return sample_size
 
     def _interpret_result(self, result: Union[int, Iterable[int]]) -> int:
-        """Canonicalize an entry from the measurement results array to int."""
+        """Canonicalize an entry from the measurement results array to int.
+
+        When `compile_to_qubit` is set, the results are expected to be a
+        sequence of bits that are the binary representation of the measurement
+        of the original key. Returns the `int` represented by the bits.
+
+        If the input is a single-element Iterable, returns the first element.
+        """
         if self.compile_to_qubits:
             # For a compiled qudit, the results will be a bit array
             # representing an integer outcome.

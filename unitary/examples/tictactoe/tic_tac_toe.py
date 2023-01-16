@@ -98,6 +98,9 @@ class TicTacToe:
     Results can be viewed by using `print()` to see the board in a
     human-friendly text format or by using `sample()` to get one
     or more samples (measurements) of the board.
+
+    Set `run_on_hardware` to compile the board to qubits for running on
+    actual hardware.
     """
 
     def __init__(

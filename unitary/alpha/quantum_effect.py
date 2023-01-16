@@ -49,7 +49,7 @@ class QuantumEffect(abc.ABC):
                 q.num_states != required_dimension
             ):
                 raise ValueError(
-                    f"Cannot apply effect to qids of dimension {required_dimension}."
+                    f"Cannot apply effect to qids of dimension {q.num_states}."
                 )
             if q.world is None:
                 raise ValueError(

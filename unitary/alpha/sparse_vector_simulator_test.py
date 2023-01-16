@@ -2,6 +2,7 @@ import pytest
 
 import cirq
 from cirq.testing import random_circuit
+from unitary.alpha import qudit_gates
 
 from unitary.alpha.sparse_vector_simulator import (
     SparseSimulator,
@@ -39,6 +40,14 @@ def test_simulation_fidelity():
         test_ones_fraction = test_data[q.name].sum() / repetitions
         validation_ones_fraction = validation_data[q.name].sum() / repetitions
         assert abs(test_ones_fraction - validation_ones_fraction) < 0.1
+
+
+def test_simulation_fidelity_qudits_fails():
+    """Check that SparseSimulator does not support Qudit operations yet."""
+    qudit = cirq.NamedQid("a", 3)
+    circuit = cirq.Circuit(qudit_gates.QuditXGate(3).on(qudit), cirq.measure(qudit))
+    with pytest.raises(ValueError, match="size 2 is different from 3"):
+        _ = SparseSimulator().run(circuit).measurements
 
 
 def test_post_selection():
