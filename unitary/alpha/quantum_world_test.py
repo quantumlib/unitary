@@ -127,11 +127,19 @@ def test_two_qutrits(compile_to_qubits):
     assert board.pop() == [StopLight.YELLOW, StopLight.GREEN]
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_qubit_and_qutrit(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ])
+def test_qubit_and_qutrit(simulator, compile_to_qubits):
     light = alpha.QuantumObject("yellow", Light.GREEN)
     light2 = alpha.QuantumObject("green", StopLight.GREEN)
     board = alpha.QuantumWorld([light, light2],
+                               sampler=simulator(),
                                compile_to_qubits=compile_to_qubits)
     assert board.peek(convert_to_enum=False) == [[1, 2]]
     assert board.peek() == [[Light.GREEN, StopLight.GREEN]]
@@ -191,13 +199,20 @@ class QuditSplitEffect(alpha.QuantumEffect):
                                                               object3.qubit)
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_pop_qudit(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ])
+def test_pop_qudit(simulator, compile_to_qubits):
     light = alpha.QuantumObject("l1", StopLight.GREEN)
     light2 = alpha.QuantumObject("l2", StopLight.RED)
     light3 = alpha.QuantumObject("l3", StopLight.RED)
     board = alpha.QuantumWorld([light, light2, light3],
-                               sampler=cirq.Simulator(),
+                               sampler=simulator(),
                                compile_to_qubits=compile_to_qubits)
     QuditSplitEffect(3)(light, light2, light3)
     results = board.peek([light2, light3], count=200)
@@ -226,12 +241,19 @@ def test_pop_and_reuse(simulator, compile_to_qubits):
     assert popped == Light.RED
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_pop_and_reuse_qudit(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ])
+def test_pop_and_reuse_qudit(simulator, compile_to_qubits):
     """Tests reusing a popped qudit."""
     light = alpha.QuantumObject("l1", StopLight.GREEN)
     board = alpha.QuantumWorld([light],
-                               sampler=cirq.Simulator(),
+                               sampler=simulator(),
                                compile_to_qubits=compile_to_qubits)
     popped = board.pop([light])[0]
     assert popped == StopLight.GREEN
@@ -255,11 +277,18 @@ def test_undo(simulator, compile_to_qubits):
     assert all(result[0] == Light.GREEN for result in results)
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_undo_qudit(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ])
+def test_undo_qudit(simulator, compile_to_qubits):
     light = alpha.QuantumObject("l1", StopLight.GREEN)
     board = alpha.QuantumWorld([light],
-                               sampler=cirq.Simulator(),
+                               sampler=simulator(),
                                compile_to_qubits=compile_to_qubits)
     alpha.QuditFlip(3, StopLight.RED.value, StopLight.GREEN.value)(light)
     results = board.peek([light], count=200)
@@ -309,13 +338,20 @@ def test_undo_post_select(simulator, compile_to_qubits):
     assert not all(result[0] == Light.GREEN for result in results)
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_undo_post_select_qudits(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ])
+def test_undo_post_select_qudits(simulator, compile_to_qubits):
     light = alpha.QuantumObject("l1", StopLight.GREEN)
     light2 = alpha.QuantumObject("l2", StopLight.RED)
     light3 = alpha.QuantumObject("l3", StopLight.RED)
     board = alpha.QuantumWorld([light, light2, light3],
-                               sampler=cirq.Simulator(),
+                               sampler=simulator(),
                                compile_to_qubits=compile_to_qubits)
     QuditSplitEffect(3)(light, light2, light3)
 
@@ -375,8 +411,15 @@ def test_pop_not_enough_reps(simulator, compile_to_qubits):
                for result in results)
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_pop_not_enough_reps_qudits(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ])
+def test_pop_not_enough_reps_qudits(simulator, compile_to_qubits):
     """Tests forcing a measurement of a rare outcome,
     so that peek needs to be called recursively to get more
     occurances.
@@ -385,7 +428,7 @@ def test_pop_not_enough_reps_qudits(compile_to_qubits):
         alpha.QuantumObject("l" + str(i), StopLight.RED) for i in range(9)
     ]
     board = alpha.QuantumWorld(lights,
-                               sampler=cirq.Simulator(),
+                               sampler=simulator(),
                                compile_to_qubits=compile_to_qubits)
     alpha.QuditFlip(3, StopLight.RED.value, StopLight.GREEN.value)(lights[0])
     QuditSplitEffect(3)(lights[0], lights[1], lights[2])
@@ -432,15 +475,22 @@ def test_pop_qubits_twice(simulator, compile_to_qubits):
     assert all(peek_result == result2 for peek_result in peek_results)
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_pop_qudits_twice(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ])
+def test_pop_qudits_twice(simulator, compile_to_qubits):
     """Tests popping qudits twice, so that 2 ancillas are created
     for each qudit."""
     lights = [
         alpha.QuantumObject("l" + str(i), StopLight.RED) for i in range(3)
     ]
     board = alpha.QuantumWorld(lights,
-                               sampler=cirq.Simulator(),
+                               sampler=simulator(),
                                compile_to_qubits=compile_to_qubits)
     alpha.QuditFlip(3, StopLight.RED.value, StopLight.GREEN.value)(lights[0])
     QuditSplitEffect(3)(lights[0], lights[1], lights[2])
@@ -545,11 +595,20 @@ def test_get_histogram_and_get_probabilities_one_binary_qobject(
     assert 0.1 <= bin_probs[0] <= 1.0
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ])
 def test_get_histogram_and_get_probabilities_one_trinary_qobject(
-        compile_to_qubits):
+        simulator, compile_to_qubits):
     l1 = alpha.QuantumObject("l1", StopLight.YELLOW)
-    world = alpha.QuantumWorld([l1], compile_to_qubits=compile_to_qubits)
+    world = alpha.QuantumWorld([l1],
+                               sampler=simulator(),
+                               compile_to_qubits=compile_to_qubits)
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100, 2: 0}]
     probs = world.get_probabilities()
@@ -558,11 +617,21 @@ def test_get_histogram_and_get_probabilities_one_trinary_qobject(
     assert bin_probs == [1.0]
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_get_histogram_and_get_probabilities_two_qobjects(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ])
+def test_get_histogram_and_get_probabilities_two_qobjects(
+        simulator, compile_to_qubits):
     l1 = alpha.QuantumObject("l1", Light.GREEN)
     l2 = alpha.QuantumObject("l2", StopLight.YELLOW)
-    world = alpha.QuantumWorld([l1, l2], compile_to_qubits=compile_to_qubits)
+    world = alpha.QuantumWorld([l1, l2],
+                               sampler=simulator(),
+                               compile_to_qubits=compile_to_qubits)
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100}, {0: 0, 1: 100, 2: 0}]
     probs = world.get_probabilities()

@@ -180,11 +180,12 @@ class QuantumWorld:
 
         self.circuit.append(op, strategy=strategy)
 
-    def _compile_op(self, op: cirq.Operation) -> cirq.Operation:
+    def _compile_op(self,
+                    op: cirq.Operation) -> Union[cirq.Operation, cirq.OP_TREE]:
         """Compiles the operation down to qubits, if needed."""
         qid_shape = cirq.qid_shape(op)
         if len(set(qid_shape)) > 1:
-            # TODO: Add support for arbitrary Qid shapes to
+            # TODO(#77): Add support for arbitrary Qid shapes to
             #  `qudit_state_transform`.
             raise ValueError(
                 f"Found operation shape {qid_shape}. Compiling operations with"
@@ -196,6 +197,16 @@ class QuantumWorld:
         compiled_qubits = []
         for qudit in op.qubits:
             compiled_qubits.extend(self.compiled_qubits[qudit])
+
+        if isinstance(op, PostSelectOperation):
+            # Spread the post-selected value across the compiled qubits using the
+            # big endian convention.
+            value_bits = cirq.big_endian_int_to_bits(
+                op.value, bit_count=len(compiled_qubits))
+            return [
+                PostSelectOperation(qubit, value)
+                for qubit, value in zip(compiled_qubits, value_bits)
+            ]
 
         # Compile the input unitary to a target qubit-based unitary.
         compiled_unitary = qudit_to_qubit_unitary(

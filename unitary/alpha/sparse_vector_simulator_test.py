@@ -43,7 +43,10 @@ def test_simulation_fidelity():
 
 
 def test_simulation_fidelity_qudits_fails():
-    """Check that SparseSimulator does not support Qudit operations yet."""
+    """Check that SparseSimulator does not support Qudit operations yet.
+
+    TODO(#78): Fix this.
+    """
     qudit = cirq.NamedQid("a", 3)
     circuit = cirq.Circuit(qudit_gates.QuditXGate(3).on(qudit), cirq.measure(qudit))
     with pytest.raises(ValueError, match="size 2 is different from 3"):
