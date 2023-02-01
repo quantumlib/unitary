@@ -18,7 +18,6 @@ from unitary.alpha.qudit_effects import QuditFlip
 from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules
 from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
 
-
 _SQUARE_NAMES = "abcdefghi"
 _MARK_SYMBOLS = {TicTacSquare.EMPTY: ".", TicTacSquare.X: "X", TicTacSquare.O: "O"}
 
@@ -99,13 +98,18 @@ class TicTacToe:
     Results can be viewed by using `print()` to see the board in a
     human-friendly text format or by using `sample()` to get one
     or more samples (measurements) of the board.
+
+    Set `run_on_hardware` to compile the board to qubits for running on
+    actual hardware.
     """
 
-    def __init__(self, rules: TicTacRules = TicTacRules.QUANTUM_V3):
-        self.clear()
+    def __init__(
+        self, rules: TicTacRules = TicTacRules.QUANTUM_V3, run_on_hardware: bool = False
+    ):
+        self.clear(run_on_hardware)
         self.rules = rules
 
-    def clear(self) -> None:
+    def clear(self, run_on_hardware: bool = False) -> None:
         """Clears the TicTacToe board.
 
         Sets all 9 squares to empty.
@@ -116,7 +120,9 @@ class TicTacToe:
         for name in _SQUARE_NAMES:
             self.empty_squares.add(name)
             self.squares[name] = QuantumObject(name, TicTacSquare.EMPTY)
-        self.board = QuantumWorld(list(self.squares.values()))
+        self.board = QuantumWorld(
+            list(self.squares.values()), compile_to_qubits=run_on_hardware
+        )
 
     def result(self) -> TicTacResult:
         """Returns the result of the TicTacToe game.

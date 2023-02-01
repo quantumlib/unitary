@@ -23,9 +23,10 @@ Q0 = cirq.NamedQubit("q0")
 Q1 = cirq.NamedQubit("q1")
 
 
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
-def test_quantum_if(simulator):
-    board = alpha.QuantumWorld(sampler=simulator())
+def test_quantum_if(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("q0", 1)
     piece2 = alpha.QuantumObject("q1", 0)
     board.add_object(piece)
@@ -44,9 +45,10 @@ def test_quantum_if(simulator):
     assert (result[1] == 1 for result in results)
 
 
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
-def test_anti_control(simulator):
-    board = alpha.QuantumWorld(sampler=simulator())
+def test_anti_control(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("q0", 0)
     piece2 = alpha.QuantumObject("q1", 0)
     board.add_object(piece)
@@ -72,8 +74,9 @@ def test_no_world():
         alpha.Flip()(piece)
 
 
-def test_bad_length():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_bad_length(compile_to_qubits):
+    board = alpha.QuantumWorld(compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("q0", 1)
     board.add_object(piece)
     with pytest.raises(ValueError, match="Not able to equate"):
@@ -83,8 +86,9 @@ def test_bad_length():
         alpha.Split()(piece)
 
 
-def test_no_qutrits():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_no_qutrits(compile_to_qubits):
+    board = alpha.QuantumWorld(compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("q0", 2)
     board.add_object(piece)
     with pytest.raises(ValueError, match="Cannot apply effect to qids"):

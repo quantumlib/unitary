@@ -53,8 +53,9 @@ def test_eval_board(result, expected):
     assert tictactoe.tic_tac_toe.eval_board(result) == expected
 
 
-def test_measure():
-    board = tictactoe.TicTacToe()
+@pytest.mark.parametrize("run_on_hardware", [False, True])
+def test_measure(run_on_hardware):
+    board = tictactoe.TicTacToe(run_on_hardware=run_on_hardware)
     board.move("ab", tictactoe.TicTacSquare.X)
     board.move("cd", tictactoe.TicTacSquare.O)
     board.move("ef", tictactoe.TicTacSquare.X)
@@ -95,8 +96,9 @@ def test_measure():
     assert all(result == expected for result in results)
 
 
-def test_sample():
-    board = tictactoe.TicTacToe()
+@pytest.mark.parametrize("run_on_hardware", [False, True])
+def test_sample(run_on_hardware):
+    board = tictactoe.TicTacToe(run_on_hardware=run_on_hardware)
     board.move("a", tictactoe.TicTacSquare.X)
     board.move("e", tictactoe.TicTacSquare.O)
     results = board.sample(count=100)
@@ -109,8 +111,9 @@ def test_sample():
     assert all(result == "X...O..OX" for result in results)
 
 
-def test_split():
-    board = tictactoe.TicTacToe()
+@pytest.mark.parametrize("run_on_hardware", [False, True])
+def test_split(run_on_hardware):
+    board = tictactoe.TicTacToe(run_on_hardware=run_on_hardware)
     board.move("ab", tictactoe.TicTacSquare.X)
     results = board.sample(count=1000)
     assert len(results) == 1000
@@ -121,21 +124,27 @@ def test_split():
     assert all(result == in_a or result == in_b for result in results)
 
 
-def test_rulesets():
+@pytest.mark.parametrize("run_on_hardware", [False, True])
+def test_rulesets(run_on_hardware):
     # Try to make a quantum move with classical rules
-    board = tictactoe.TicTacToe(tictactoe.TicTacRules.CLASSICAL)
+    board = tictactoe.TicTacToe(
+        tictactoe.TicTacRules.CLASSICAL, run_on_hardware=run_on_hardware
+    )
     with pytest.raises(ValueError):
         board.move("ab", tictactoe.TicTacSquare.X)
 
     # Try to make a split move on non-empty squares at minimal quantum
-    board = tictactoe.TicTacToe(tictactoe.TicTacRules.QUANTUM_V1)
+    board = tictactoe.TicTacToe(
+        tictactoe.TicTacRules.QUANTUM_V1, run_on_hardware=run_on_hardware
+    )
     board.move("a", tictactoe.TicTacSquare.X)
     with pytest.raises(ValueError):
         board.move("ab", tictactoe.TicTacSquare.O)
 
 
-def test_print():
-    board = tictactoe.TicTacToe()
+@pytest.mark.parametrize("run_on_hardware", [False, True])
+def test_print(run_on_hardware):
+    board = tictactoe.TicTacToe(run_on_hardware=run_on_hardware)
     board.move("a", tictactoe.TicTacSquare.X)
     board.move("e", tictactoe.TicTacSquare.O)
     output = board.print()

@@ -13,8 +13,7 @@
 # limitations under the License.
 #
 import enum
-
-import cirq
+import pytest
 
 import unitary.alpha as alpha
 
@@ -25,8 +24,9 @@ class StopLight(enum.Enum):
     GREEN = 2
 
 
-def test_qudit_cycle():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_qudit_cycle(compile_to_qubits):
+    board = alpha.QuantumWorld(compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", StopLight.GREEN)
     board.add_object(piece)
     alpha.QuditCycle(3)(piece)
@@ -43,8 +43,9 @@ def test_qudit_cycle():
     assert all(result == [StopLight.YELLOW] for result in results)
 
 
-def test_qudit_flip():
-    board = alpha.QuantumWorld()
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_qudit_flip(compile_to_qubits):
+    board = alpha.QuantumWorld(compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", StopLight.GREEN)
     board.add_object(piece)
     alpha.QuditFlip(3, 0, 2)(piece)

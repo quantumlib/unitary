@@ -21,10 +21,13 @@ import unitary.alpha as alpha
 from unitary.alpha.sparse_vector_simulator import SparseSimulator
 
 
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
-def test_negation(simulator):
+def test_negation(simulator, compile_to_qubits):
     piece = alpha.QuantumObject("t", 0)
-    board = alpha.QuantumWorld(piece, sampler=simulator())
+    board = alpha.QuantumWorld(
+        piece, sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
     assert board.peek() == [[0]]
     -piece
     assert board.peek() == [[1]]
@@ -34,17 +37,21 @@ def test_negation(simulator):
     assert board.peek() == [[1]]
 
 
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
-def test_add_world_after_state_change(simulator):
+def test_add_world_after_state_change(simulator, compile_to_qubits):
     piece = alpha.QuantumObject("t", 0)
     piece += 1
-    board = alpha.QuantumWorld(piece, sampler=simulator())
+    board = alpha.QuantumWorld(
+        piece, sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
     assert board.peek() == [[1]]
 
 
-def test_qutrit():
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_qutrit(compile_to_qubits):
     piece = alpha.QuantumObject("t", 2)
-    board = alpha.QuantumWorld(piece)
+    board = alpha.QuantumWorld(piece, compile_to_qubits=compile_to_qubits)
     assert board.peek() == [[2]]
     piece += 1
     assert board.peek() == [[0]]
@@ -58,14 +65,15 @@ def test_qutrit():
     assert board.peek() == [[2]]
 
 
-def test_enum():
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_enum(compile_to_qubits):
     class Color(enum.Enum):
         RED = 0
         YELLOW = 1
         GREEN = 2
 
     piece = alpha.QuantumObject("t", Color.YELLOW)
-    board = alpha.QuantumWorld(piece)
+    board = alpha.QuantumWorld(piece, compile_to_qubits=compile_to_qubits)
     assert board.peek() == [[Color.YELLOW]]
     piece += Color.YELLOW
     assert board.peek() == [[Color.GREEN]]
