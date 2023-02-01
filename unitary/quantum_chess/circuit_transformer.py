@@ -402,7 +402,6 @@ class DynamicLookAheadHeuristicCircuitTransformer:
 
 
 def transform_controlled_iswap(op: cirq.Operation, index: int) -> cirq.OP_TREE:
-
     if len(op.qubits) <= 3 and isinstance(op, cirq.ControlledOperation):
         if not all(v == 1 for values in op.control_values for v in values):
             return op

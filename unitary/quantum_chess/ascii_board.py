@@ -17,7 +17,6 @@ class AsciiBoard:
     """
 
     def __init__(self, size: int = 8, reps: int = 1000, board=None):
-
         self.size = size
         self.reps = reps
         self.board = board or qb.CirqBoard(0)
