@@ -67,6 +67,8 @@ class QuantumWorld:
         self.effect_history = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
         self.ancilla_names = set()
+        # When `compile_to_qubits` is True, this tracks the mapping of the
+        # original qudits to the compiled qubits.
         self.compiled_qubits: Dict[cirq.Qid, List[cirq.Qid]] = {}
         self.post_selection: Dict[QuantumObject, int] = {}
 
