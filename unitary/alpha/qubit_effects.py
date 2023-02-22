@@ -62,7 +62,7 @@ class Phase(QuantumEffect):
     on the |0> and |1> states, but can change the phase (complex sign)
     of states in superpositions.
 
-    A full phase is the same as a rotation around the Z axis, or a Z gate.
+    A full phase is the same as a 180° rotation around the Z axis, or a Z gate.
     For a partial phase, use the `effect_fraction` argument.
 
     These effects will be cumulative.  For instance, two quarter
