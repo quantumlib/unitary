@@ -9,5 +9,6 @@ class HealthPoint(enum.Enum):
     point, while a zero represents no health for that point
     (Hurt).
     """
+
     HURT = 0
     HEALTHY = 1

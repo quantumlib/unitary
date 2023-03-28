@@ -24,10 +24,12 @@ class Battle:
             for testing.
     """
 
-    def __init__(self,
-                 player_side: List[Qaracter],
-                 enemy_side: List[Qaracter],
-                 file: io.IOBase = sys.stdout):
+    def __init__(
+        self,
+        player_side: List[Qaracter],
+        enemy_side: List[Qaracter],
+        file: io.IOBase = sys.stdout,
+    ):
         self.player_side = player_side
         self.enemy_side = enemy_side
         self.file = file
@@ -40,28 +42,32 @@ class Battle:
 
         Output will be written to the `file` attribute.
         """
-        print('-----------------------------------------------', file=self.file)
+        print("-----------------------------------------------", file=self.file)
         for i in range(max(len(self.player_side), len(self.enemy_side))):
-            status = ''
+            status = ""
             if i < len(self.player_side):
-                status += f'{self.player_side[i].name} {type(self.player_side[i]).__name__}'
+                status += (
+                    f"{self.player_side[i].name} {type(self.player_side[i]).__name__}"
+                )
             else:
-                status += '\t\t'
-            status += '\t\t\t'
+                status += "\t\t"
+            status += "\t\t\t"
             if i < len(self.enemy_side):
-                status += f'{self.enemy_side[i].name} {type(self.enemy_side[i]).__name__}'
+                status += (
+                    f"{self.enemy_side[i].name} {type(self.enemy_side[i]).__name__}"
+                )
 
-            status += '\n'
+            status += "\n"
 
             if i < len(self.player_side):
                 status += self.player_side[i].status_line()
             else:
-                status += '\t\t'
-            status += '\t\t\t'
+                status += "\t\t"
+            status += "\t\t\t"
             if i < len(self.enemy_side):
                 status += self.enemy_side[i].status_line()
             print(status, file=self.file)
-        print('-----------------------------------------------', file=self.file)
+        print("-----------------------------------------------", file=self.file)
 
     def take_player_turn(self, user_input: Optional[List[str]] = None):
         """Take a player's turn and record results in the battle.
@@ -86,18 +92,18 @@ class Battle:
 
         for current_player in self.player_side:
             self.print_screen()
-            print(f'{current_player.name} turn:', file=self.file)
+            print(f"{current_player.name} turn:", file=self.file)
             if not current_player.is_active():
-                print(f'{current_player.name} is DOWN!', file=self.file)
+                print(f"{current_player.name} is DOWN!", file=self.file)
                 continue
             actions = current_player.actions()
             for key in actions:
                 print(key, file=self.file)
-            action = get_user_input('Choose your action: ')
+            action = get_user_input("Choose your action: ")
             if action in current_player.actions():
-                monster = int(get_user_input('Which enemy number: ')) - 1
+                monster = int(get_user_input("Which enemy number: ")) - 1
                 if monster < len(self.enemy_side):
-                    qubit = int(get_user_input('Which enemy qubit number: '))
+                    qubit = int(get_user_input("Which enemy qubit number: "))
                     selected_monster = self.enemy_side[monster]
                     qubit_name = selected_monster.quantum_object_name(qubit)
                     if qubit_name in selected_monster.active_qubits():
@@ -105,11 +111,9 @@ class Battle:
                         if isinstance(res, str):
                             print(res, file=self.file)
                     else:
-                        print(f'{qubit_name} is not an active qubit',
-                              file=self.file)
+                        print(f"{qubit_name} is not an active qubit", file=self.file)
                 else:
-                    print(f'{monster + 1} is not a valid monster',
-                          file=self.file)
+                    print(f"{monster + 1} is not a valid monster", file=self.file)
 
     def take_npc_turn(self):
         """Take all NPC turns.
@@ -118,7 +122,7 @@ class Battle:
         """
         for npc in self.enemy_side:
             if not npc.is_active():
-                print(f'{npc.name} is DOWN!', file=self.file)
+                print(f"{npc.name} is DOWN!", file=self.file)
                 continue
             result = npc.npc_action(self)
             print(result, file=self.file)
