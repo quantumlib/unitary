@@ -33,6 +33,48 @@ def test_flip(simulator, compile_to_qubits):
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_partial_flip(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
+    piece = alpha.QuantumObject("t", 0)
+    board.add_object(piece)
+    alpha.Flip(effect_fraction=0.25)(piece)
+    assert board.circuit == cirq.Circuit(cirq.X(cirq.NamedQubit("t")) ** 0.25)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_partial_flip_multiple(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
+    piece = alpha.QuantumObject("t", 0)
+    board.add_object(piece)
+    alpha.Flip(effect_fraction=0.5)(piece)
+    alpha.Flip(effect_fraction=0.5)(piece)
+    results = board.peek([piece], count=100)
+    assert all(result == [1] for result in results)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_phase(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
+    piece = alpha.QuantumObject("t", 0)
+    board.add_object(piece)
+    alpha.Phase()(piece)
+    assert board.circuit == cirq.Circuit(cirq.Z(cirq.NamedQubit("t")))
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_partial_phase(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
+    piece = alpha.QuantumObject("t", 0)
+    board.add_object(piece)
+    alpha.Phase(effect_fraction=0.25)(piece)
+    assert board.circuit == cirq.Circuit(cirq.Z(cirq.NamedQubit("t")) ** 0.25)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
 def test_superposition(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", 0)

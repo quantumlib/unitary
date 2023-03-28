@@ -7,32 +7,32 @@ from unitary.examples.quantum_rpg import enums
 class Qaracter(alpha.QuantumWorld):
     """Base class for quantum RPG characters.
 
-  Quantum characters, or `Qaracter`s are made of
-  `QuantumObject`s.  The level of a quantum character
-  is equivalent to the number of `QuantumObject`s
-  (not including any ancillae added for measurement post-selection).
+    Quantum characters, or `Qaracter`s are made of
+    `QuantumObject`s.  The level of a quantum character
+    is equivalent to the number of `QuantumObject`s
+    (not including any ancillae added for measurement post-selection).
 
-  Qaracters have one hit point (HP) per level.  Qaracters are
-  considered DOWN if they have over half their qubits measured
-  as zero.  Qaracters are considered ESCAPED if they have all
-  their qubits measured and at least half are measured as one.
-  If neither of these is true, the Qaracter is considered to
-  be ACTIVE.
+    Qaracters have one hit point (HP) per level.  Qaracters are
+    considered DOWN if they have over half their qubits measured
+    as zero.  Qaracters are considered ESCAPED if they have all
+    their qubits measured and at least half are measured as one.
+    If neither of these is true, the Qaracter is considered to
+    be ACTIVE.
 
-  Additional HP can be added with the add_hp() function.
-  Additional quantum effects can be added with the add_quantum_effects()
-  function.
+    Additional HP can be added with the add_hp() function.
+    Additional quantum effects can be added with the add_quantum_effects()
+    function.
 
-  Hit point values can be sampled (a random result pulled from
-  the simulated distribution without measuring, which is possible
-  only in simulation) with sample(hp_num, False).
+    Hit point values can be sampled (a random result pulled from
+    the simulated distribution without measuring, which is possible
+    only in simulation) with sample(hp_num, False).
 
-  Hit point values can be measured by calling sample(hp_num, True).
+    Hit point values can be measured by calling sample(hp_num, True).
 
 
-  Args:
-      name: name of this character as a string.
-  """
+    Args:
+        name: name of this character as a string.
+    """
 
     def __init__(self, name: str):
         super().__init__()
@@ -44,31 +44,32 @@ class Qaracter(alpha.QuantumWorld):
     def is_npc(self) -> bool:
         """Returns Trus if a non-player or False if a player.
 
-    Inheritors of NPCs should override this function.
-    """
+        Inheritors of NPCs should override this function.
+        """
         return False
 
     def quantum_object_name(self, hp_num: int) -> str:
         """Canonical name of a QuantumObject for this Qaracter.
 
-      Represents the n-th HP of a Qaracter.
+        Represents the n-th HP of a Qaracter.
 
-      Args:
-          hp_num: Number of the health point requested.  Health points
-              start at 1 and go up to the Qaracter's level (inclusive).
-      """
-        return f'{self.name}_{hp_num}'
+        Args:
+            hp_num: Number of the health point requested.  Health points
+                start at 1 and go up to the Qaracter's level (inclusive).
+        """
+        return f"{self.name}_{hp_num}"
 
     def add_hp(self) -> alpha.QuantumObject:
         """Adds an additional Health Point (HP) to the Qaracter.
 
-      Each HP added to the Qaracter is an additional QuantumObject
-      with no effects (i.e. is a qubit with no operations).
-      Adding a HP also increases the Qaracter's level.
-      """
+        Each HP added to the Qaracter is an additional QuantumObject
+        with no effects (i.e. is a qubit with no operations).
+        Adding a HP also increases the Qaracter's level.
+        """
         self.level += 1
-        obj = alpha.QuantumObject(self.quantum_object_name(self.level),
-                                  enums.HealthPoint.HURT)
+        obj = alpha.QuantumObject(
+            self.quantum_object_name(self.level), enums.HealthPoint.HURT
+        )
         self.add_object(obj)
         return obj
 
@@ -109,8 +110,7 @@ class Qaracter(alpha.QuantumWorld):
 
     def is_escaped(self) -> bool:
         """Returns True if all HP are measured and at least half are `HEALTHY`."""
-        return len(self.health_status) == self.level and self.virtue >= (
-            self.level / 2)
+        return len(self.health_status) == self.level and self.virtue >= (self.level / 2)
 
     def is_active(self) -> bool:
         """Returns True if the Qaracter is not down yet and there are HPs left to measure."""
@@ -121,9 +121,9 @@ class Qaracter(alpha.QuantumWorld):
         damage = self.damage
         virtue = self.virtue
         unknown = self.level - damage - virtue
-        down = ' *DOWN* ' if self.is_down() else ''
-        escaped = ' *ESCAPED* ' if self.is_escaped() else ''
-        return f'{self.level}QP ({virtue}|1> {damage}|0> {unknown}?){down}{escaped}'
+        down = " *DOWN* " if self.is_down() else ""
+        escaped = " *ESCAPED* " if self.is_escaped() else ""
+        return f"{self.level}QP ({virtue}|1> {damage}|0> {unknown}?){down}{escaped}"
 
     def sample(self, hp_name: str, save_result: bool) -> enums.HealthPoint:
         """Samples or measures a qubit representing a HP.
