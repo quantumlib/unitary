@@ -44,7 +44,7 @@ class Flip(QuantumEffect):
             and a fraction of 0.0 has no effect.
     """
 
-    def __init__(self, effect_fraction:float = 1.0):
+    def __init__(self, effect_fraction: float = 1.0):
         self.effect_fraction = effect_fraction
 
     def num_dimension(self) -> Optional[int]:
@@ -53,6 +53,7 @@ class Flip(QuantumEffect):
     def effect(self, *objects):
         for q in objects:
             yield cirq.X(q.qubit) ** self.effect_fraction
+
 
 class Phase(QuantumEffect):
     """Phases a qubit from |+> to |-> and vice versa.
@@ -78,7 +79,7 @@ class Phase(QuantumEffect):
             and a fraction of 0.0 has no effect.
     """
 
-    def __init__(self, effect_fraction:float = 1.0):
+    def __init__(self, effect_fraction: float = 1.0):
         self.effect_fraction = effect_fraction
 
     def num_dimension(self) -> Optional[int]:

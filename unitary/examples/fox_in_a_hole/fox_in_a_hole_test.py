@@ -39,6 +39,7 @@ def test_classical_game_basics():
     test_game.history_append_state()
     assert len(test_game.history) == hist_len + 1
 
+
 def test_classical_game_moves():
     test_game = fh.ClassicalGame(seed=42)
     test_game.take_random_move()
@@ -73,6 +74,7 @@ def test_quantum_game_basics():
     test_game.history_append_state()
     assert len(test_game.history) == hist_len + 1
 
+
 def test_quantum_game_moves_q_eq_half():
     test_game = fh.QuantumGame(seed=12)
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
@@ -92,8 +94,10 @@ def test_quantum_game_moves_q_eq_half():
     assert probs[0] == 0.0
     assert probs[2] == 0.0
     assert probs[4] == 0.0
-    assert ( (guess and probs[3]==1.0 and probs[1]==0.0) or
-             (not guess and probs[3]==0.0 and probs[1]==1.0))
+    assert (guess and probs[3] == 1.0 and probs[1] == 0.0) or (
+        not guess and probs[3] == 0.0 and probs[1] == 1.0
+    )
+
 
 def test_quantum_game_moves_q_eq_one():
     test_game = fh.QuantumGame(seed=12, qprob=1.0)
@@ -118,4 +122,4 @@ def test_quantum_game_moves_q_eq_one():
     probs = test_game.state[0].get_binary_probabilities(objects=test_game.state[1])
     assert probs[0] == 0.0
     assert probs[2] == 0.0
-    assert ((guess and probs[1]==1.0) or (not guess and probs[1]==0.0))
+    assert (guess and probs[1] == 1.0) or (not guess and probs[1] == 0.0)
