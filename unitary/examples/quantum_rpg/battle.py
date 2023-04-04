@@ -123,11 +123,10 @@ class Battle:
                         print(f"{qubit_name} is not an active qubit", file=self.file)
                 else:
                     print(f"{monster + 1} is not a valid monster", file=self.file)
-            result  = self._determine_battle_result()
+            result = self._determine_battle_result()
             if result != BattleResult.UNFINISHED:
                 return result
         return BattleResult.UNFINISHED
-
 
     def take_npc_turn(self):
         """Take all NPC turns.
@@ -140,7 +139,7 @@ class Battle:
                 continue
             result = npc.npc_action(self)
             print(result, file=self.file)
-            result  = self._determine_battle_result()
+            result = self._determine_battle_result()
             if result != BattleResult.UNFINISHED:
                 return result
         return BattleResult.UNFINISHED
@@ -156,7 +155,9 @@ class Battle:
             return BattleResult.ENEMIES_ESCAPED
         return BattleResult.UNFINISHED
 
-    def loop(self, user_input: Optional[List[str]] = None, get_user_input=input) -> BattleResult:
+    def loop(
+        self, user_input: Optional[List[str]] = None, get_user_input=input
+    ) -> BattleResult:
         """Full battle loop until one side is defeated.
 
         Returns the result of a battle as an enum.

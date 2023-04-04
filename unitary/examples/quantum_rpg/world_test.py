@@ -2,17 +2,13 @@ import unitary.examples.quantum_rpg.world as world
 
 
 EXAMPLE_WORLD = [
-    world.Location(
-        label="1", title="upper left", exits={world.Direction.EAST: "2"}
-    ),
+    world.Location(label="1", title="upper left", exits={world.Direction.EAST: "2"}),
     world.Location(
         label="2",
         title="upper right",
         exits={world.Direction.SOUTH: "3", world.Direction.WEST: "1"},
     ),
-    world.Location(
-        label="3", title="lower right", exits={world.Direction.NORTH: "2"}
-    ),
+    world.Location(label="3", title="lower right", exits={world.Direction.NORTH: "2"}),
 ]
 
 

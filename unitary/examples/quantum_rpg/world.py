@@ -20,7 +20,7 @@ class Direction(enum.Enum):
         Allows prefixes, like 'e' to be parsed as EAST.
         """
         if not s:
-          return None
+            return None
         lower_s = s.lower()
         for d in Direction:
             if d.value.startswith(lower_s):

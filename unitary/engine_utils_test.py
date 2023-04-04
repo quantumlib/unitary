@@ -42,15 +42,16 @@ def test_get_program_id_2():
 
 def test_get_program_id_3():
     circuit = cirq.Circuit(cirq.H(cirq.LineQubit(0)))
-    circuit.program_id = ("my_fancy_var_1/my_fancy_var_2/my_fancy_var_3/"
-                          "my_fancy_var_4/my_fancy_var_5/my_fancy_var_6")
+    circuit.program_id = (
+        "my_fancy_var_1/my_fancy_var_2/my_fancy_var_3/"
+        "my_fancy_var_4/my_fancy_var_5/my_fancy_var_6"
+    )
     assert len(circuit.program_id) > 64
     prog_id = _get_program_id(circuit)
     assert isinstance(prog_id, str)
     with pytest.raises(ValueError):
         val = uuid.UUID(prog_id, version=4)
-    assert prog_id.startswith(
-        "my_far_1_my_far_2_my_far_3_my_far_4_my_far_5_my_far_6_")
+    assert prog_id.startswith("my_far_1_my_far_2_my_far_3_my_far_4_my_far_5_my_far_6_")
 
 
 def test_get_program_id_4():
@@ -65,20 +66,20 @@ def test_get_program_id_4():
 
 def test_zeros_sampler_one_big_measure():
     qubits = cirq.LineQubit.range(6)
-    circuit = cirq.Circuit(cirq.H.on_each(*qubits),
-                           cirq.measure(*qubits, key='asdf'))
+    circuit = cirq.Circuit(cirq.H.on_each(*qubits), cirq.measure(*qubits, key="asdf"))
 
     sampler = unitary.ZerosSampler()
     result = sampler.run(circuit, repetitions=155)
     assert len(result.measurements) == 1
-    bitstrings = result.measurements['asdf']
+    bitstrings = result.measurements["asdf"]
     assert bitstrings.shape == (155, 6)
 
 
 def test_zeros_sampler_many_measure():
     qubits = cirq.LineQubit.range(6)
-    circuit = cirq.Circuit(cirq.H.on_each(*qubits),
-                           cirq.measure_each(*qubits, key_func=str))
+    circuit = cirq.Circuit(
+        cirq.H.on_each(*qubits), cirq.measure_each(*qubits, key_func=str)
+    )
     sampler = unitary.ZerosSampler()
     result = sampler.run(circuit, repetitions=155)
     assert len(result.measurements) == 6
@@ -87,24 +88,25 @@ def test_zeros_sampler_many_measure():
 
 
 def test_device_obj():
-    assert unitary.get_device_obj_by_name('Sycamore23') == cirq_google.Sycamore23
+    assert unitary.get_device_obj_by_name("Sycamore23") == cirq_google.Sycamore23
 
 
 def test_processor_id():
-    assert unitary.get_processor_id_by_device_name('Sycamore23') == 'rainbow'
-    assert unitary.get_processor_id_by_device_name('Syc23-simulator') is None
+    assert unitary.get_processor_id_by_device_name("Sycamore23") == "rainbow"
+    assert unitary.get_processor_id_by_device_name("Syc23-simulator") is None
 
 
 def test_sampler_by_name():
-    if 'GOOGLE_CLOUD_PROJECT' in os.environ:
-        assert isinstance(unitary.get_sampler_by_name('Sycamore23'),
-                          unitary.EngineSampler)
-    assert isinstance(unitary.get_sampler_by_name('Syc23-simulator'),
-                      cirq.DensityMatrixSimulator)
-    assert isinstance(unitary.get_sampler_by_name('Syc23-noiseless'),
-                      cirq.Simulator)
-    assert isinstance(unitary.get_sampler_by_name('Syc23-zeros'),
-                      unitary.ZerosSampler)
-    assert isinstance(unitary.get_sampler_by_name('Syc23-zeros',
-                                                 gateset='sqrt-iswap'),
-                      unitary.ZerosSampler)
+    if "GOOGLE_CLOUD_PROJECT" in os.environ:
+        assert isinstance(
+            unitary.get_sampler_by_name("Sycamore23"), unitary.EngineSampler
+        )
+    assert isinstance(
+        unitary.get_sampler_by_name("Syc23-simulator"), cirq.DensityMatrixSimulator
+    )
+    assert isinstance(unitary.get_sampler_by_name("Syc23-noiseless"), cirq.Simulator)
+    assert isinstance(unitary.get_sampler_by_name("Syc23-zeros"), unitary.ZerosSampler)
+    assert isinstance(
+        unitary.get_sampler_by_name("Syc23-zeros", gateset="sqrt-iswap"),
+        unitary.ZerosSampler,
+    )

@@ -47,22 +47,25 @@ def _get_program_id(program: Any):
     allowed. If your program id is *really* long, we give up and return
     a uuid4().
     """
-    if not hasattr(program, 'program_id'):
+    if not hasattr(program, "program_id"):
         return str(uuid.uuid4())
 
     program_id: str = program.program_id
-    program_id = program_id.replace(':', '')
-    parts = program_id.split('/')
+    program_id = program_id.replace(":", "")
+    parts = program_id.split("/")
     parts.append(str(uuid.uuid4()))
     chars_per_part = math.floor(64 / len(parts)) - 1
     if chars_per_part < 3:
         print("Program id too long!")
         return str(uuid.uuid4())
 
-    parts = [p if len(p) <= chars_per_part
-             else p[:chars_per_part // 2] + p[-chars_per_part // 2:]
-             for p in parts]
-    return '_'.join(parts)
+    parts = [
+        p
+        if len(p) <= chars_per_part
+        else p[: chars_per_part // 2] + p[-chars_per_part // 2 :]
+        for p in parts
+    ]
+    return "_".join(parts)
 
 
 class EngineSampler(work.Sampler):
@@ -82,24 +85,23 @@ class EngineSampler(work.Sampler):
     """
 
     def __init__(self, processor_id: str, gateset: str):
-        project_id = os.environ['GOOGLE_CLOUD_PROJECT']
-        engine = cg.Engine(project_id=project_id,
-                           proto_version=cg.ProtoVersion.V2)
+        project_id = os.environ["GOOGLE_CLOUD_PROJECT"]
+        engine = cg.Engine(project_id=project_id, proto_version=cg.ProtoVersion.V2)
         self.engine = engine
         self.processor_id = processor_id
-        if gateset == 'sycamore':
+        if gateset == "sycamore":
             self.gate_set = cg.SYC_GATESET
-        elif gateset == 'sqrt-iswap':
+        elif gateset == "sqrt-iswap":
             self.gate_set = cg.SQRT_ISWAP_GATESET
         else:
             raise ValueError("Unknown gateset {}".format(gateset))
 
     def run(
-            self,
-            program: 'cirq.Circuit',
-            param_resolver: 'cirq.ParamResolverOrSimilarType' = None,
-            repetitions: int = 1,
-    ) -> 'cirq.Result':
+        self,
+        program: "cirq.Circuit",
+        param_resolver: "cirq.ParamResolverOrSimilarType" = None,
+        repetitions: int = 1,
+    ) -> "cirq.Result":
         if param_resolver is None:
             param_resolver = study.ParamResolver({})
         return self.engine.run(
@@ -112,11 +114,11 @@ class EngineSampler(work.Sampler):
         )
 
     def run_sweep(
-            self,
-            program: 'cirq.Circuit',
-            params: 'cirq.Sweepable',
-            repetitions: int = 1,
-    ) -> List['cirq.Result']:
+        self,
+        program: "cirq.Circuit",
+        params: "cirq.Sweepable",
+        repetitions: int = 1,
+    ) -> List["cirq.Result"]:
         return self.engine.run_sweep(
             program=program,
             params=params,
@@ -126,8 +128,9 @@ class EngineSampler(work.Sampler):
             gate_set=self.gate_set,
         ).results()
 
-    async def run_async(self, program: 'cirq.Circuit',
-                        *, repetitions: int) -> 'cirq.Result':
+    async def run_async(
+        self, program: "cirq.Circuit", *, repetitions: int
+    ) -> "cirq.Result":
 
         program_id = _get_program_id(program)
         engine_job = self.engine.run_sweep(
@@ -146,7 +149,8 @@ class EngineSampler(work.Sampler):
         print(f"Done: {program_id}")
         engine_job._raise_on_failure(job)
         response = engine_job.context.client.get_job_results(
-            engine_job.project_id, engine_job.program_id, engine_job.job_id)
+            engine_job.project_id, engine_job.program_id, engine_job.job_id
+        )
         result = response.result
         v2_parsed_result = cg.api.v2.result_pb2.Result()
         v2_parsed_result.ParseFromString(result.value)
@@ -160,14 +164,13 @@ class ZerosSampler(work.Sampler):
     """
 
     def run_sweep(
-            self,
-            program: 'cirq.Circuit',
-            params: 'cirq.Sweepable',
-            repetitions: int = 1,
-    ) -> Sequence['cirq.Result']:
+        self,
+        program: "cirq.Circuit",
+        params: "cirq.Sweepable",
+        repetitions: int = 1,
+    ) -> Sequence["cirq.Result"]:
         assert isinstance(program, circuits.Circuit)
-        meas = list(program.findall_operations_with_gate_type(
-            ops.MeasurementGate))
+        meas = list(program.findall_operations_with_gate_type(ops.MeasurementGate))
         if len(meas) == 0:
             raise ValueError()
         elif len(meas) > 1:
@@ -176,9 +179,11 @@ class ZerosSampler(work.Sampler):
             results = [
                 study.ResultDict(
                     params=p,
-                    measurements={gate.key: np.zeros(
-                        (repetitions, 1), dtype=int)
-                        for _, _, gate in meas})
+                    measurements={
+                        gate.key: np.zeros((repetitions, 1), dtype=int)
+                        for _, _, gate in meas
+                    },
+                )
                 for p in study.to_resolvers(params)
             ]
         else:
@@ -189,14 +194,15 @@ class ZerosSampler(work.Sampler):
             results = [
                 study.ResultDict(
                     params=p,
-                    measurements={k: np.zeros(
-                        (repetitions, n_qubits), dtype=int)})
+                    measurements={k: np.zeros((repetitions, n_qubits), dtype=int)},
+                )
                 for p in study.to_resolvers(params)
             ]
         return results
 
-    async def run_async(self, program: 'cirq.Circuit',
-                        *, repetitions: int) -> 'cirq.Result':
+    async def run_async(
+        self, program: "cirq.Circuit", *, repetitions: int
+    ) -> "cirq.Result":
         program_id = _get_program_id(program)
 
         await asyncio.sleep(0.1)
@@ -211,13 +217,13 @@ class QuantumProcessor:
 
     https://github.com/quantumlib/Cirq/issues/2820
     """
+
     name: str
     device_obj: cirq.Device
     processor_id: Optional[str]
     is_simulator: bool
-    _cached_samplers: Dict[Union[None, str], cirq.Sampler] \
-        = field(default_factory=dict)
-    _get_sampler_func: Callable[['QuantumProcessor', str], cirq.Sampler] = None
+    _cached_samplers: Dict[Union[None, str], cirq.Sampler] = field(default_factory=dict)
+    _get_sampler_func: Callable[["QuantumProcessor", str], cirq.Sampler] = None
 
     def get_sampler(self, gateset: str = None):
         """Why must gateset be supplied?
@@ -240,9 +246,8 @@ class EngineQuantumProcessor:
     @property
     def engine(self):
         if self._engine is None:
-            project_id = os.environ['GOOGLE_CLOUD_PROJECT']
-            engine = cg.Engine(project_id=project_id,
-                               proto_version=cg.ProtoVersion.V2)
+            project_id = os.environ["GOOGLE_CLOUD_PROJECT"]
+            engine = cg.Engine(project_id=project_id, proto_version=cg.ProtoVersion.V2)
             self._engine = engine
         return self._engine
 
@@ -257,73 +262,78 @@ class EngineQuantumProcessor:
 
 
 QUANTUM_PROCESSORS = {
-    'Sycamore23': QuantumProcessor(
-        name='Sycamore23',
+    "Sycamore23": QuantumProcessor(
+        name="Sycamore23",
         device_obj=cg.Sycamore23,
-        processor_id='rainbow',
+        processor_id="rainbow",
         is_simulator=False,
         _get_sampler_func=lambda x, gs: EngineSampler(
-            processor_id=x.processor_id, gateset=gs),
+            processor_id=x.processor_id, gateset=gs
+        ),
     ),
-    'Syc23-noiseless': QuantumProcessor(
-        name='Syc23-noiseless',
+    "Syc23-noiseless": QuantumProcessor(
+        name="Syc23-noiseless",
         device_obj=cg.Sycamore23,
         processor_id=None,
         is_simulator=True,
         _get_sampler_func=lambda x, gs: cirq.Simulator(),
     ),
-    'Syc23-simulator': QuantumProcessor(
-        name='Syc23-simulator',
+    "Syc23-simulator": QuantumProcessor(
+        name="Syc23-simulator",
         device_obj=cg.Sycamore23,
         processor_id=None,
         is_simulator=True,
         _get_sampler_func=lambda x, gs: cirq.DensityMatrixSimulator(
             noise=cirq.ConstantQubitNoiseModel(
                 qubit_noise_gate=cirq.DepolarizingChannel(0.005)
-            ))
+            )
+        ),
     ),
-    'Syc23-simulator-tester': QuantumProcessor(
+    "Syc23-simulator-tester": QuantumProcessor(
         # This simulator has a constant seed for consistent testing
-        name='Syc23-simulator-tester',
+        name="Syc23-simulator-tester",
         device_obj=cg.Sycamore23,
         processor_id=None,
         is_simulator=True,
         _get_sampler_func=lambda x, gs: cirq.DensityMatrixSimulator(
             noise=cirq.ConstantQubitNoiseModel(
                 qubit_noise_gate=cirq.DepolarizingChannel(0.005)
-            ), seed=1234)
+            ),
+            seed=1234,
+        ),
     ),
-    'Syc23-zeros': QuantumProcessor(
-        name='Syc23-zeros',
+    "Syc23-zeros": QuantumProcessor(
+        name="Syc23-zeros",
         device_obj=cg.Sycamore23,
         processor_id=None,
         is_simulator=True,
-        _get_sampler_func=lambda x, gs: ZerosSampler()
+        _get_sampler_func=lambda x, gs: ZerosSampler(),
     ),
-    'Syc54-noiseless': QuantumProcessor(
-        name='Syc54-noiseless',
+    "Syc54-noiseless": QuantumProcessor(
+        name="Syc54-noiseless",
         device_obj=cg.Sycamore,
         processor_id=None,
         is_simulator=True,
         _get_sampler_func=lambda x, gs: cirq.Simulator(),
     ),
-    'Syc54-simulator': QuantumProcessor(
-        name='Syc54-simulator',
+    "Syc54-simulator": QuantumProcessor(
+        name="Syc54-simulator",
         device_obj=cg.Sycamore,
         processor_id=None,
         is_simulator=True,
         _get_sampler_func=lambda x, gs: cirq.DensityMatrixSimulator(
             noise=cirq.ConstantQubitNoiseModel(
                 qubit_noise_gate=cirq.DepolarizingChannel(0.005)
-            ))
+            )
+        ),
     ),
-    'Syc54-zeros': QuantumProcessor(
-        name='Syc54-zeros',
+    "Syc54-zeros": QuantumProcessor(
+        name="Syc54-zeros",
         device_obj=cg.Sycamore,
         processor_id=None,
         is_simulator=True,
-        _get_sampler_func=lambda x, gs: ZerosSampler()
-    )
+        _get_sampler_func=lambda x, gs: ZerosSampler(),
+    ),
 }
 
 
@@ -335,8 +345,7 @@ def get_processor_id_by_device_name(device_name: str):
     return QUANTUM_PROCESSORS[device_name].processor_id
 
 
-def get_sampler_by_name(device_name: str, *,
-                        gateset='sycamore'):
+def get_sampler_by_name(device_name: str, *, gateset="sycamore"):
     return QUANTUM_PROCESSORS[device_name].get_sampler(gateset)
 
 
@@ -362,8 +371,7 @@ async def execute_in_queue(func, tasks, num_workers: int):
     worker_jobs = [asyncio.create_task(worker()) for _ in range(num_workers)]
     for task in tasks:
         await queue.put(task)
-    print("Added everything to the queue. Current queue size: {}"
-          .format(queue.qsize()))
+    print("Added everything to the queue. Current queue size: {}".format(queue.qsize()))
     await queue.join()
     for wjob in worker_jobs:
         wjob.cancel()
