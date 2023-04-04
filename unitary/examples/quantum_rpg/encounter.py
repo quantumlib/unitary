@@ -24,7 +24,7 @@ class Encounter:
         self.probability = probability
         self.description = description
 
-    def trigger(self) -> bool:
+    def will_trigger(self) -> bool:
         """Returns True if the encounter should be triggered.
 
         This is based on the probability of the encounter happening.

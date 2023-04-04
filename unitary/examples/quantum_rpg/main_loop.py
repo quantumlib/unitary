@@ -5,8 +5,8 @@ import sys
 
 import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.encounter as encounter
-import unitary.examples.quantum_rpg.location as location
 import unitary.examples.quantum_rpg.qaracter as qaracter
+import unitary.examples.quantum_rpg.world as world
 
 
 class Command(enum.Enum):
@@ -33,7 +33,7 @@ class MainLoop:
     def __init__(
         self,
         party: List[qaracter.Qaracter],
-        world: location.World,
+        world: world.World,
         file: io.IOBase = sys.stdout,
     ):
         self.world = world
@@ -51,12 +51,11 @@ class MainLoop:
         else:
             get_user_input = input
         while True:
-            print(self.world.current_location.print(), file=self.file)
+            print(self.world.current_location, file=self.file)
             if self.world.current_location.encounters:
                 result = None
                 for random_encounter in self.world.current_location.encounters:
-                    if random_encounter.trigger():
-                        print(random_encounter.description)
+                    if random_encounter.will_trigger():
                         if random_encounter.description:
                             print(random_encounter.description, file=self.file)
                         battle = random_encounter.initiate(self.party, file=self.file)
@@ -66,11 +65,11 @@ class MainLoop:
                         # TODO(dstrain): Resolve battle and award XP.
                         break
                 if result is not None:
-                    # Reprint room description
-                    continue
+                    # Reprint location description now that encounter is over.
+                    print(self.world.current_location, file=self.file)
 
             current_input = get_user_input(">")
-            cmd = location.Direction.parse(current_input)
+            cmd = world.Direction.parse(current_input)
             if cmd is not None:
                 self.world.move(cmd)
                 continue

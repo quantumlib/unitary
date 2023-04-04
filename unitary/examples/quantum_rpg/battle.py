@@ -123,6 +123,11 @@ class Battle:
                         print(f"{qubit_name} is not an active qubit", file=self.file)
                 else:
                     print(f"{monster + 1} is not a valid monster", file=self.file)
+            result  = self._determine_battle_result()
+            if result != BattleResult.UNFINISHED:
+                return result
+        return BattleResult.UNFINISHED
+
 
     def take_npc_turn(self):
         """Take all NPC turns.
@@ -135,6 +140,10 @@ class Battle:
                 continue
             result = npc.npc_action(self)
             print(result, file=self.file)
+            result  = self._determine_battle_result()
+            if result != BattleResult.UNFINISHED:
+                return result
+        return BattleResult.UNFINISHED
 
     def _determine_battle_result(self) -> BattleResult:
         if all(pc.is_down() for pc in self.player_side):
@@ -157,10 +166,8 @@ class Battle:
             get_user_input = lambda _: next(user_input)
         result = self._determine_battle_result()
         while result == BattleResult.UNFINISHED:
-            self.take_player_turn(get_user_input=get_user_input)
-            result = self._determine_battle_result()
+            result = self.take_player_turn(get_user_input=get_user_input)
             if result != BattleResult.UNFINISHED:
                 return result
-            self.take_npc_turn()
-            result = self._determine_battle_result()
+            result = self.take_npc_turn()
         return result

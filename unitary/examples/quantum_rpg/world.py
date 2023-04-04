@@ -19,6 +19,8 @@ class Direction(enum.Enum):
 
         Allows prefixes, like 'e' to be parsed as EAST.
         """
+        if not s:
+          return None
         lower_s = s.lower()
         for d in Direction:
             if d.value.startswith(lower_s):
@@ -53,7 +55,7 @@ class Location:
     def remove_encounter(self, triggered_encounter) -> bool:
         self.encounters.remove(triggered_encounter)
 
-    def print(self) -> str:
+    def __str__(self) -> str:
         return f"{self.title}\n\n{self.description}\nExits: {self._exits()}\n"
 
 

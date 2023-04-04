@@ -7,14 +7,14 @@ import unitary.examples.quantum_rpg.npcs as npcs
 
 def test_trigger():
     e = encounter.Encounter([])
-    assert all(e.trigger() for _ in range(100))
+    assert all(e.will_trigger() for _ in range(100))
     e = encounter.Encounter([], 1)
-    assert all(e.trigger() for _ in range(100))
+    assert all(e.will_trigger() for _ in range(100))
     e = encounter.Encounter([], 0.0)
-    assert all(not e.trigger() for _ in range(100))
+    assert all(not e.will_trigger() for _ in range(100))
     e = encounter.Encounter([], 0.5)
-    assert not all(e.trigger() for _ in range(100))
-    assert not all(not e.trigger() for _ in range(100))
+    assert not all(e.will_trigger() for _ in range(100))
+    assert not all(not e.will_trigger() for _ in range(100))
 
 
 def test_encounter():
