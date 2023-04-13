@@ -67,3 +67,25 @@ m
 watcher_2 is not an active qubit
 """.strip()
     )
+
+
+def test_battle_loop():
+    output = io.StringIO()
+    c = classes.Analyst("Aaronson")
+    e = npcs.Observer("watcher")
+    b = battle.Battle([c], [e], file=output)
+    assert b.loop(user_input=["s", "1", "1"]) == battle.BattleResult.PLAYERS_DOWN
+    assert (
+        output.getvalue().replace("\t", " ").strip()
+        == r"""
+-----------------------------------------------
+Aaronson Analyst   watcher Observer
+1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
+-----------------------------------------------
+Aaronson turn:
+s
+m
+Sample result HealthPoint.HURT
+Observer watcher measures Aaronson at qubit Aaronson_1
+""".strip()
+    )
