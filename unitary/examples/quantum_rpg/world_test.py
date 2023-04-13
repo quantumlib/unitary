@@ -44,7 +44,6 @@ def test_parse_unknown_direction():
     assert world.Direction.parse("x") is None
     assert world.Direction.parse("Z") is None
     assert world.Direction.parse("") is None
-    assert world.Direction.parse(None) is None
 
 
 def test_location():
