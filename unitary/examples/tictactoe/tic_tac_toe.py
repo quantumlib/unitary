@@ -244,3 +244,71 @@ class TicTacToe:
             if idx in [2, 5, 8] and row != 2:
                 output += "--------------------------\n"
         return output
+
+class Game:
+    def __init__(self, game):
+        self.game = game
+
+    def setup(self):
+        print("Welcome to quantum tic tac toe!")
+        print("Here is the board:")
+        self.printBoardMap()
+        self.player = "X"
+        self.playerQuit = False
+
+    def handleMove(self, move): 
+        if move == 'map':
+            self.printBoardMap()
+            raise ValueError("Still your move.")
+        if move == 'exit':
+            print("Goodbye.")
+            self.playerQuit = True
+        if move == "help":
+            self.printHelp() 
+            raise ValueError("Still your move.")
+        else:
+            mark = TicTacSquare.X if self.player == "X" else TicTacSquare.O
+            self.game.move(move, mark)
+
+    def play(self):
+        while self.game.result() == TicTacResult.UNFINISHED and not self.playerQuit: 
+            try:
+                move = self.getMove()
+                self.handleMove(move)
+                self.player = "O" if self.player == "X" else "X"
+                print(self.game.print())
+            except ValueError as e:
+                print(e)
+        print(self.game.result())
+
+    def getMove(self):
+        return input(
+                f"""Player {self.player} to move ("help" for help): """ 
+                )
+    
+    def printHelp(self):
+        print("""
+    You can enter:
+    - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
+    - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
+    - "map": show board map
+    - "exit" to quit
+    """)
+
+    def printBoardMap(self):
+        boardMap = """
+        a | b | c
+        -----------
+        d | e | f
+        -----------
+        g | h | i
+        """
+        print(boardMap)
+
+def main():
+    game = Game(TicTacToe())
+    game.setup()
+    game.play()
+    
+if __name__ == "__main__":
+    main()
