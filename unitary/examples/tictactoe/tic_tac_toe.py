@@ -11,11 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import io
+import sys
 from typing import Dict, List
 
 from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.alpha.qudit_effects import QuditFlip
-from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules
+from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules, GameMoves
 from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
 
 _SQUARE_NAMES = "abcdefghi"
@@ -246,47 +248,72 @@ class TicTacToe:
         return output
 
 class Game:
-    def __init__(self, game):
-        self.game = game
+    """
+    A class that provides a command-line interface to play Quantum Tic Tac Toe.
 
-    def setup(self):
-        print("Welcome to quantum tic tac toe!")
-        print("Here is the board:")
-        self.printBoardMap()
+    Initialize by providing an instance of a TicTacToe game, then call play()
+    to run the game.
+
+    Args:
+        game: A TicTacToe instance for the game interface to wrap.
+        file:  Optional IOBase file object to write output to.
+            This enables the battle to write status to a file or string
+            for testing.
+
+    """
+    def __init__(self, game: TicTacToe, file: io.IOBase = sys.stdout):
+        self.game = game
+        self.file = file
         self.player = "X"
         self.playerQuit = False
 
-    def handleMove(self, move): 
-        if move == 'map':
-            self.printBoardMap()
+    def player_move(self) -> None: 
+        """
+        Gets and handles the player's move.
+
+        A move can be a one or two letter string within the set [abcdefghi],
+        in which case this function hands the move off to the TicTacToe instance,
+        or one of the Move enums (Move.MAP, Move.EXIT, Move.HELP), which prevent
+        the game loop from alternating to the next player.
+
+        Raises:
+            ValueError if it is still the player's move.
+        """
+        move = input(f"""Player {self.player} to move ("help" for help): """)
+        if move == GameMoves.MAP:
+            self.print_board_map()
             raise ValueError("Still your move.")
-        if move == 'exit':
+        if move == GameMoves.EXIT:
             print("Goodbye.")
             self.playerQuit = True
-        if move == "help":
-            self.printHelp() 
+        if move == GameMoves.HELP:
+            self.print_help() 
             raise ValueError("Still your move.")
         else:
             mark = TicTacSquare.X if self.player == "X" else TicTacSquare.O
             self.game.move(move, mark)
 
-    def play(self):
+    def play(self) -> None:
+        """
+        Run the game loop, requesting player moves, alternating players, until
+        the TicTacToe instance reports that the game ends with a winner or a tie
+        or one of the players has quit.
+        """
+        print("Welcome to quantum tic tac toe!", file=self.file)
+        print("Here is the board:", file=self.file)
+        print(self.print_board_map(), file=self.file)
+
         while self.game.result() == TicTacResult.UNFINISHED and not self.playerQuit: 
             try:
-                move = self.getMove()
-                self.handleMove(move)
+                self.player_move()
                 self.player = "O" if self.player == "X" else "X"
-                print(self.game.print())
+                print(self.game.print(), file=self.file)
             except ValueError as e:
-                print(e)
-        print(self.game.result())
-
-    def getMove(self):
-        return input(
-                f"""Player {self.player} to move ("help" for help): """ 
-                )
+                print(e, file=self.file)
+        print(self.game.result(), file=self.file)
     
-    def printHelp(self):
+    def print_help(self) -> None:
+        """Print the available moves that player can take."""
         print("""
     You can enter:
     - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
@@ -295,19 +322,18 @@ class Game:
     - "exit" to quit
     """)
 
-    def printBoardMap(self):
-        boardMap = """
+    def print_board_map(self) -> None:
+        """Print the mapping of letters to board spaces for player move reference."""
+        print("""
         a | b | c
         -----------
         d | e | f
         -----------
         g | h | i
-        """
-        print(boardMap)
+        """)
 
 def main():
     game = Game(TicTacToe())
-    game.setup()
     game.play()
     
 if __name__ == "__main__":
