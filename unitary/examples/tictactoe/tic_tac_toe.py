@@ -265,7 +265,7 @@ class Game:
         self.game = game
         self.file = file
         self.player = "X"
-        self.playerQuit = False
+        self.player_quit = False
 
     def player_move(self) -> None: 
         """
@@ -284,7 +284,7 @@ class Game:
             print(self.print_board_map(), file=self.file)
             raise ValueError("Still your move.")
         if move == GameMoves.EXIT.name:
-            self.playerQuit = True
+            self.player_quit = True
             raise ValueError("Goodbye!", file=self.file)
         if move == GameMoves.HELP.name:
             print(self.print_help())
