@@ -279,15 +279,15 @@ class Game:
         Raises:
             ValueError if it is still the player's move.
         """
-        move = input(f"""Player {self.player} to move ("help" for help): """)
-        if move == GameMoves.MAP:
-            self.print_board_map()
+        move = input(f"Player {self.player} to move (\"help\" for help): ").upper()
+        if move == GameMoves.MAP.name:
+            print(self.print_board_map())
             raise ValueError("Still your move.")
-        if move == GameMoves.EXIT:
-            print("Goodbye.")
+        if move == GameMoves.EXIT.name:
             self.playerQuit = True
-        if move == GameMoves.HELP:
-            self.print_help() 
+            raise ValueError("Goodbye!")
+        if move == GameMoves.HELP.name:
+            print(self.print_help())
             raise ValueError("Still your move.")
         else:
             mark = TicTacSquare.X if self.player == "X" else TicTacSquare.O
@@ -314,23 +314,23 @@ class Game:
     
     def print_help(self) -> None:
         """Print the available moves that player can take."""
-        print("""
+        return """
     You can enter:
     - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
     - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
     - "map": show board map
     - "exit" to quit
-    """)
+    """
 
     def print_board_map(self) -> None:
         """Print the mapping of letters to board spaces for player move reference."""
-        print("""
+        return """
         a | b | c
         -----------
         d | e | f
         -----------
         g | h | i
-        """)
+        """
 
 def main():
     game = Game(TicTacToe())
