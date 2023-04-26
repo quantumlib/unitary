@@ -281,14 +281,14 @@ class Game:
         """
         move = input(f"Player {self.player} to move (\"help\" for help): ").upper()
         if move == GameMoves.MAP.name:
-            print(self.print_board_map())
+            print(self.print_board_map(), file=self.file)
             raise ValueError("Still your move.")
         if move == GameMoves.EXIT.name:
             self.playerQuit = True
-            raise ValueError("Goodbye!")
+            raise ValueError("Goodbye!", file=self.file)
         if move == GameMoves.HELP.name:
             print(self.print_help())
-            raise ValueError("Still your move.")
+            raise ValueError("Still your move.", file=self.file)
         else:
             mark = TicTacSquare.X if self.player == "X" else TicTacSquare.O
             self.game.move(move, mark)
