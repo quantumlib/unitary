@@ -13,9 +13,8 @@
 # limitations under the License.
 #
 import enum
-from enum import StrEnum
 
-class GameMoves(StrEnum):
+class GameMoves(enum.Enum):
     EXIT = 0
     MAP = 1
     HELP = 2
