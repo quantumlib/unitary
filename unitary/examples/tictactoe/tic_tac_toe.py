@@ -273,8 +273,8 @@ class Game:
 
         A move can be a one or two letter string within the set [abcdefghi],
         in which case this function hands the move off to the TicTacToe instance,
-        or one of the Move enums (Move.MAP, Move.EXIT, Move.HELP), which prevent
-        the game loop from alternating to the next player.
+        or one of the GameMoves enums (GameMoves.MAP, GameMoves.EXIT, GameMoves.HELP),
+        which prevent the game loop from alternating to the next player.
 
         Raises:
             ValueError if it is still the player's move.
