@@ -20,7 +20,3 @@ from unitary.engine_utils import (
     get_sampler_by_name,
     execute_in_queue,
 )
-
-from unitary.documentation_utils import (
-    display_markdown_docstring,
-)
