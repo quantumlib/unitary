@@ -163,13 +163,14 @@ def test_welcome():
 
 def test_help():
     original_get_move = tictactoe.GameInterface.get_move
-    test_file = open("test.txt", "w")
     tictactoe.GameInterface.get_move = lambda _: 'help'
+    test_file = open("test.txt", "w")
     board = tictactoe.TicTacToe()
     game = tictactoe.GameInterface(board, test_file)
     game.player_move()
     test_file.close()
     output = open("test.txt", "r").read()
+
     os.remove('test.txt')
     tictactoe.GameInterface.get_move = original_get_move
 
@@ -183,6 +184,7 @@ def test_help():
 Still your move.
 """
     )
+    assert (game.player == 'X')
 
 def test_map():
     original_get_move = tictactoe.GameInterface.get_move
@@ -206,6 +208,7 @@ def test_map():
 Still your move.
 """
     )
+    assert (game.player == 'X')
 
 def test_exit():
     original_get_move = tictactoe.GameInterface.get_move
@@ -221,6 +224,17 @@ def test_exit():
 
     assert (output == "Goodbye!\n"
     )
+
+def test_player_alternates():
+    original_get_move = tictactoe.GameInterface.get_move
+    tictactoe.GameInterface.get_move = lambda _: 'a'
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board)
+
+    game.player_move()
+    tictactoe.GameInterface.get_move = original_get_move
+
+    assert(game.player == 'O')
 
 
 def test_print_board():
