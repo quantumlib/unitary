@@ -229,25 +229,8 @@ class TicTacToe:
         """
         return [_result_to_str(result) for result in self.board.peek(count=count)]
 
-    def print(self) -> str:
-        """Returns the TicTacToe board in ASCII form."""
-        results = self.board.peek(count=100)
-        hist = _histogram(results)
-        output = "\n"
-        for row in range(3):
-            for mark in TicTacSquare:
-                output += " "
-                for col in range(3):
-                    idx = row * 3 + col
-                    output += f" {_MARK_SYMBOLS[mark]} {hist[idx][mark]:3}"
-                    if col != 2:
-                        output += " |"
-                output += "\n"
-            if idx in [2, 5, 8] and row != 2:
-                output += "--------------------------\n"
-        return output
 
-class Game:
+class GameInterface:
     """
     A class that provides a command-line interface to play Quantum Tic Tac Toe.
 
@@ -279,14 +262,14 @@ class Game:
         Raises:
             ValueError if it is still the player's move.
         """
-        move = input(f"Player {self.player} to move (\"help\" for help): ").upper()
-        if move == GameMoves.MAP.name:
+        move = input(f"Player {self.player} to move (\"help\" for help): ")
+        if move == GameMoves.MAP.name.lower():
             print(self.print_board_map(), file=self.file)
             raise ValueError("Still your move.")
-        if move == GameMoves.EXIT.name:
+        if move == GameMoves.EXIT.name.lower():
             self.player_quit = True
             raise ValueError("Goodbye!", file=self.file)
-        if move == GameMoves.HELP.name:
+        if move == GameMoves.HELP.name.lower():
             print(self.print_help())
             raise ValueError("Still your move.", file=self.file)
         else:
@@ -303,16 +286,16 @@ class Game:
         print("Here is the board:", file=self.file)
         print(self.print_board_map(), file=self.file)
 
-        while self.game.result() == TicTacResult.UNFINISHED and not self.playerQuit: 
+        while self.game.result() == TicTacResult.UNFINISHED and not self.player_quit: 
             try:
                 self.player_move()
                 self.player = "O" if self.player == "X" else "X"
-                print(self.game.print(), file=self.file)
+                print(self.print_board(), file=self.file)
             except ValueError as e:
                 print(e, file=self.file)
         print(self.game.result(), file=self.file)
     
-    def print_help(self) -> None:
+    def print_help(self) -> str:
         """Print the available moves that player can take."""
         return """
     You can enter:
@@ -322,7 +305,7 @@ class Game:
     - "exit" to quit
     """
 
-    def print_board_map(self) -> None:
+    def print_board_map(self) -> str:
         """Print the mapping of letters to board spaces for player move reference."""
         return """
         a | b | c
@@ -332,8 +315,26 @@ class Game:
         g | h | i
         """
 
+    def print_board(self) -> str:
+        """Returns the TicTacToe board in ASCII form."""
+        results = self.game.board.peek(count=100)
+        hist = _histogram(results)
+        output = "\n"
+        for row in range(3):
+            for mark in TicTacSquare:
+                output += " "
+                for col in range(3):
+                    idx = row * 3 + col
+                    output += f" {_MARK_SYMBOLS[mark]} {hist[idx][mark]:3}"
+                    if col != 2:
+                        output += " |"
+                output += "\n"
+            if idx in [2, 5, 8] and row != 2:
+                output += "--------------------------\n"
+        return output
+
 def main():
-    game = Game(TicTacToe())
+    game = GameInterface(TicTacToe())
     game.play()
     
 if __name__ == "__main__":
