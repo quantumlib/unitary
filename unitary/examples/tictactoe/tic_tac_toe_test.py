@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import pytest
+from unittest.mock import patch
 
 import unitary.examples.tictactoe as tictactoe
 
@@ -142,16 +144,93 @@ def test_rulesets(run_on_hardware):
         board.move("ab", tictactoe.TicTacSquare.O)
 
 
-@pytest.mark.parametrize("run_on_hardware", [False, True])
-def test_print(run_on_hardware):
-    board = tictactoe.TicTacToe(run_on_hardware=run_on_hardware)
+def test_welcome():
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board)
+    output = game.print_welcome()
+
+    assert (output == """
+        Welcome to quantum tic tac toe!
+        Here is the board:
+        
+        a | b | c
+        -----------
+        d | e | f
+        -----------
+        g | h | i
+        """
+    )
+
+def test_help():
+    original_get_move = tictactoe.GameInterface.get_move
+    test_file = open("test.txt", "w")
+    tictactoe.GameInterface.get_move = lambda _: 'help'
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board, test_file)
+    game.player_move()
+    test_file.close()
+    output = open("test.txt", "r").read()
+    os.remove('test.txt')
+    tictactoe.GameInterface.get_move = original_get_move
+
+    assert (output == """
+    You can enter:
+    - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
+    - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
+    - "map": show board map
+    - "exit" to quit
+    
+Still your move.
+"""
+    )
+
+def test_map():
+    original_get_move = tictactoe.GameInterface.get_move
+    test_file = open("test.txt", "w")
+    tictactoe.GameInterface.get_move = lambda _: 'map'
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board, test_file)
+    game.player_move()
+    test_file.close()
+    output = open("test.txt", "r").read()
+    os.remove('test.txt')
+    tictactoe.GameInterface.get_move = original_get_move
+
+    assert (output == """
+        a | b | c
+        -----------
+        d | e | f
+        -----------
+        g | h | i
+        
+Still your move.
+"""
+    )
+
+def test_exit():
+    original_get_move = tictactoe.GameInterface.get_move
+    test_file = open("test.txt", "w")
+    tictactoe.GameInterface.get_move = lambda _: 'exit'
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board, test_file)
+    game.player_move()
+    test_file.close()
+    output = open("test.txt", "r").read()
+    os.remove('test.txt')
+    tictactoe.GameInterface.get_move = original_get_move
+
+    assert (output == "Goodbye!\n"
+    )
+
+
+def test_print_board():
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board)
     board.move("a", tictactoe.TicTacSquare.X)
     board.move("e", tictactoe.TicTacSquare.O)
-    output = board.print()
+    output = game.print_board()
 
-    assert (
-        output
-        == """
+    assert (output == """
   .   0 | . 100 | . 100
   X 100 | X   0 | X   0
   O   0 | O   0 | O   0

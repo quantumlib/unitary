@@ -250,9 +250,17 @@ class GameInterface:
         self.player = "X"
         self.player_quit = False
 
-    def player_move(self) -> None: 
+    def get_move(self) -> str: 
         """
-        Gets and handles the player's move.
+        Gets and returns the player's move.
+
+        Basically a wrapper around input to facilitate testing.
+        """
+        return input(f"Player {self.player} to move (\"help\" for help): ")
+    
+    def player_move(self) -> None:
+        """
+        Interprets the player's move and takes the appropriate action.
 
         A move can be a one or two letter string within the set [abcdefghi],
         in which case this function hands the move off to the TicTacToe instance,
@@ -262,19 +270,37 @@ class GameInterface:
         Raises:
             ValueError if it is still the player's move.
         """
-        move = input(f"Player {self.player} to move (\"help\" for help): ")
+        move = self.get_move()
+        print(move)
+
         if move == GameMoves.MAP.name.lower():
             print(self.print_board_map(), file=self.file)
-            raise ValueError("Still your move.")
+            print("Still your move.", file=self.file)
+            return
         if move == GameMoves.EXIT.name.lower():
             self.player_quit = True
-            raise ValueError("Goodbye!", file=self.file)
+            print("Goodbye!", file=self.file)
+            return
         if move == GameMoves.HELP.name.lower():
-            print(self.print_help())
-            raise ValueError("Still your move.", file=self.file)
-        else:
-            mark = TicTacSquare.X if self.player == "X" else TicTacSquare.O
-            self.game.move(move, mark)
+            print(self.print_help(), file=self.file)
+            print("Still your move.", file=self.file)
+            return
+
+        mark = TicTacSquare.X if self.player == "X" else TicTacSquare.O
+        self.game.move(move, mark)
+        print(self.print_board(), file=self.file)
+        self.player = "O" if self.player == "X" else "X"
+
+    def print_welcome(self) -> str:
+        """
+        Prints the welcome message for the game interface.
+        """
+        message = """
+        Welcome to quantum tic tac toe!
+        Here is the board:
+        """
+        message += self.print_board_map()
+        return message
 
     def play(self) -> None:
         """
@@ -282,17 +308,9 @@ class GameInterface:
         the TicTacToe instance reports that the game ends with a winner or a tie
         or one of the players has quit.
         """
-        print("Welcome to quantum tic tac toe!", file=self.file)
-        print("Here is the board:", file=self.file)
-        print(self.print_board_map(), file=self.file)
-
+        print(self.print_welcome(), file=self.file)
         while self.game.result() == TicTacResult.UNFINISHED and not self.player_quit: 
-            try:
-                self.player_move()
-                self.player = "O" if self.player == "X" else "X"
-                print(self.print_board(), file=self.file)
-            except ValueError as e:
-                print(e, file=self.file)
+            self.player_move()
         print(self.game.result(), file=self.file)
     
     def print_help(self) -> str:
