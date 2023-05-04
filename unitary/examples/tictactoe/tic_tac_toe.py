@@ -295,7 +295,7 @@ class GameInterface:
             print("Goodbye!", file=self.file)
             return
         if move == GameMoves.HELP.value:
-            print(_HELP_TEXT, file=self.file)
+            print(_HELP_TEXT, file=self.file))
             print("Still your move.", file=self.file)
             return
 
