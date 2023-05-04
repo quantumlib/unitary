@@ -35,6 +35,23 @@ _POSSIBLE_WINS = [
     (2, 4, 6),
 ]
 
+# Explanation of commands usable by a player.
+_HELP_TEXT = """
+You can enter:
+- 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
+- 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
+- "map": show board map
+- "exit" to quit
+"""
+
+# Explanation of which letters map to which board spaces.
+_BOARD_MAP = """
+    a | b | c
+    -----------
+    d | e | f
+    -----------
+    g | h | i
+    """
 
 def _histogram(results: List[List[TicTacSquare]]) -> List[Dict[TicTacSquare, int]]:
     """Turns a list of whole board measurements into a histogram.
@@ -229,7 +246,6 @@ class TicTacToe:
         """
         return [_result_to_str(result) for result in self.board.peek(count=count)]
 
-
 class GameInterface:
     """
     A class that provides a command-line interface to play Quantum Tic Tac Toe.
@@ -244,22 +260,6 @@ class GameInterface:
             for testing.
 
     """
-
-    help_text = """
-    You can enter:
-    - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
-    - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
-    - "map": show board map
-    - "exit" to quit
-    """
-
-    board_map = """
-        a | b | c
-        -----------
-        d | e | f
-        -----------
-        g | h | i
-        """
 
     def __init__(self, game: TicTacToe, file: io.IOBase = sys.stdout):
         self.game = game
@@ -286,16 +286,16 @@ class GameInterface:
         """
         move = self.get_move()
 
-        if move == GameMoves.MAP.name.lower():
-            print(self.board_map, file=self.file)
+        if move == GameMoves.MAP.value:
+            print(_BOARD_MAP, file=self.file)
             print("Still your move.", file=self.file)
             return
-        if move == GameMoves.EXIT.name.lower():
+        if move == GameMoves.EXIT.value:
             self.player_quit = True
             print("Goodbye!", file=self.file)
             return
-        if move == GameMoves.HELP.name.lower():
-            print(self.help_text, file=self.file)
+        if move == GameMoves.HELP.value:
+            print(_HELP_TEXT, file=self.file)
             print("Still your move.", file=self.file)
             return
 
@@ -312,7 +312,7 @@ class GameInterface:
         Welcome to quantum tic tac toe!
         Here is the board:
         """
-        message += self.board_map
+        message += _BOARD_MAP
         return message
 
     def play(self) -> None:
@@ -325,8 +325,8 @@ class GameInterface:
         while self.game.result() == TicTacResult.UNFINISHED and not self.player_quit: 
             try:
                 self.player_move()
-            except:
-                print('Catch error')
+            except ValueError as e:
+                print(e)
 
         print(self.game.result(), file=self.file)
     

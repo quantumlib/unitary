@@ -15,9 +15,9 @@
 import enum
 
 class GameMoves(enum.Enum):
-    EXIT = 0
-    MAP = 1
-    HELP = 2
+    EXIT = 'exit'
+    MAP = 'map'
+    HELP = 'help'
 
 class TicTacSquare(enum.Enum):
     EMPTY = 0
