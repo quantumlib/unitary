@@ -244,6 +244,23 @@ class GameInterface:
             for testing.
 
     """
+
+    help_text = """
+    You can enter:
+    - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
+    - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
+    - "map": show board map
+    - "exit" to quit
+    """
+
+    board_map = """
+        a | b | c
+        -----------
+        d | e | f
+        -----------
+        g | h | i
+        """
+
     def __init__(self, game: TicTacToe, file: io.IOBase = sys.stdout):
         self.game = game
         self.file = file
@@ -266,15 +283,11 @@ class GameInterface:
         in which case this function hands the move off to the TicTacToe instance,
         or one of the GameMoves enums (GameMoves.MAP, GameMoves.EXIT, GameMoves.HELP),
         which prevent the game loop from alternating to the next player.
-
-        Raises:
-            ValueError if it is still the player's move.
         """
         move = self.get_move()
-        print(move)
 
         if move == GameMoves.MAP.name.lower():
-            print(self.print_board_map(), file=self.file)
+            print(self.board_map, file=self.file)
             print("Still your move.", file=self.file)
             return
         if move == GameMoves.EXIT.name.lower():
@@ -282,7 +295,7 @@ class GameInterface:
             print("Goodbye!", file=self.file)
             return
         if move == GameMoves.HELP.name.lower():
-            print(self.print_help(), file=self.file)
+            print(self.help_text, file=self.file)
             print("Still your move.", file=self.file)
             return
 
@@ -299,7 +312,7 @@ class GameInterface:
         Welcome to quantum tic tac toe!
         Here is the board:
         """
-        message += self.print_board_map()
+        message += self.board_map
         return message
 
     def play(self) -> None:
@@ -310,29 +323,13 @@ class GameInterface:
         """
         print(self.print_welcome(), file=self.file)
         while self.game.result() == TicTacResult.UNFINISHED and not self.player_quit: 
-            self.player_move()
+            try:
+                self.player_move()
+            except:
+                print('Catch error')
+
         print(self.game.result(), file=self.file)
     
-    def print_help(self) -> str:
-        """Print the available moves that player can take."""
-        return """
-    You can enter:
-    - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
-    - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
-    - "map": show board map
-    - "exit" to quit
-    """
-
-    def print_board_map(self) -> str:
-        """Print the mapping of letters to board spaces for player move reference."""
-        return """
-        a | b | c
-        -----------
-        d | e | f
-        -----------
-        g | h | i
-        """
-
     def print_board(self) -> str:
         """Returns the TicTacToe board in ASCII form."""
         results = self.game.board.peek(count=100)

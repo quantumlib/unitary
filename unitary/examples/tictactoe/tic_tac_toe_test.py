@@ -13,7 +13,8 @@
 # limitations under the License.
 import os
 import pytest
-from unittest.mock import patch
+import io
+from unittest.mock import MagicMock
 
 import unitary.examples.tictactoe as tictactoe
 
@@ -162,19 +163,13 @@ def test_welcome():
     )
 
 def test_help():
-    original_get_move = tictactoe.GameInterface.get_move
-    tictactoe.GameInterface.get_move = lambda _: 'help'
-    test_file = open("test.txt", "w")
+    output = io.StringIO()
     board = tictactoe.TicTacToe()
-    game = tictactoe.GameInterface(board, test_file)
+    game = tictactoe.GameInterface(board, output)
+    game.get_move = MagicMock(return_value='help')
     game.player_move()
-    test_file.close()
-    output = open("test.txt", "r").read()
 
-    os.remove('test.txt')
-    tictactoe.GameInterface.get_move = original_get_move
-
-    assert (output == """
+    assert (output.getvalue() == """
     You can enter:
     - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
     - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
@@ -187,18 +182,13 @@ Still your move.
     assert (game.player == 'X')
 
 def test_map():
-    original_get_move = tictactoe.GameInterface.get_move
-    test_file = open("test.txt", "w")
-    tictactoe.GameInterface.get_move = lambda _: 'map'
+    output = io.StringIO()
     board = tictactoe.TicTacToe()
-    game = tictactoe.GameInterface(board, test_file)
+    game = tictactoe.GameInterface(board, output)
+    game.get_move = MagicMock(return_value='map')
     game.player_move()
-    test_file.close()
-    output = open("test.txt", "r").read()
-    os.remove('test.txt')
-    tictactoe.GameInterface.get_move = original_get_move
 
-    assert (output == """
+    assert (output.getvalue() == """
         a | b | c
         -----------
         d | e | f
@@ -211,31 +201,22 @@ Still your move.
     assert (game.player == 'X')
 
 def test_exit():
-    original_get_move = tictactoe.GameInterface.get_move
-    test_file = open("test.txt", "w")
-    tictactoe.GameInterface.get_move = lambda _: 'exit'
+    output = io.StringIO()
     board = tictactoe.TicTacToe()
-    game = tictactoe.GameInterface(board, test_file)
+    game = tictactoe.GameInterface(board, file=output)
+    game.get_move = MagicMock(return_value='exit')
     game.player_move()
-    test_file.close()
-    output = open("test.txt", "r").read()
-    os.remove('test.txt')
-    tictactoe.GameInterface.get_move = original_get_move
 
-    assert (output == "Goodbye!\n"
+    assert (output.getvalue() == "Goodbye!\n"
     )
 
 def test_player_alternates():
-    original_get_move = tictactoe.GameInterface.get_move
-    tictactoe.GameInterface.get_move = lambda _: 'a'
     board = tictactoe.TicTacToe()
     game = tictactoe.GameInterface(board)
-
+    game.get_move = MagicMock(return_value='a')
     game.player_move()
-    tictactoe.GameInterface.get_move = original_get_move
 
     assert(game.player == 'O')
-
 
 def test_print_board():
     board = tictactoe.TicTacToe()
