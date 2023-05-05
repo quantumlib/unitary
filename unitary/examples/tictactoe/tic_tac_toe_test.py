@@ -150,7 +150,7 @@ def test_welcome():
     game = tictactoe.GameInterface(board)
     output = game.print_welcome()
 
-    assert (output == """
+    assert output == """
         Welcome to quantum tic tac toe!
         Here is the board:
         
@@ -159,8 +159,7 @@ def test_welcome():
         d | e | f
         -----------
         g | h | i
-        """
-    )
+"""
 
 def test_help():
     output = io.StringIO()
@@ -175,7 +174,7 @@ def test_help():
     - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
     - "map": show board map
     - "exit" to quit
-    
+
 Still your move.
 """
     )
@@ -194,7 +193,7 @@ def test_map():
         d | e | f
         -----------
         g | h | i
-        
+
 Still your move.
 """
     )

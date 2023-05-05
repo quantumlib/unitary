@@ -37,21 +37,21 @@ _POSSIBLE_WINS = [
 
 # Explanation of commands usable by a player.
 _HELP_TEXT = """
-You can enter:
-- 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
-- 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
-- "map": show board map
-- "exit" to quit
+    You can enter:
+    - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
+    - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
+    - "map": show board map
+    - "exit" to quit
 """
 
 # Explanation of which letters map to which board spaces.
 _BOARD_MAP = """
-    a | b | c
-    -----------
-    d | e | f
-    -----------
-    g | h | i
-    """
+        a | b | c
+        -----------
+        d | e | f
+        -----------
+        g | h | i
+"""
 
 def _histogram(results: List[List[TicTacSquare]]) -> List[Dict[TicTacSquare, int]]:
     """Turns a list of whole board measurements into a histogram.
