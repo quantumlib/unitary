@@ -17,7 +17,12 @@ from typing import Dict, List
 
 from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.alpha.qudit_effects import QuditFlip
-from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules, GameMoves
+from unitary.examples.tictactoe.enums import (
+    TicTacSquare,
+    TicTacResult,
+    TicTacRules,
+    GameMoves,
+)
 from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
 
 _SQUARE_NAMES = "abcdefghi"
@@ -52,6 +57,7 @@ _BOARD_MAP = """
         -----------
         g | h | i
 """
+
 
 def _histogram(results: List[List[TicTacSquare]]) -> List[Dict[TicTacSquare, int]]:
     """Turns a list of whole board measurements into a histogram.
@@ -246,6 +252,7 @@ class TicTacToe:
         """
         return [_result_to_str(result) for result in self.board.peek(count=count)]
 
+
 class GameInterface:
     """
     A class that provides a command-line interface to play Quantum Tic Tac Toe.
@@ -267,14 +274,14 @@ class GameInterface:
         self.player = "X"
         self.player_quit = False
 
-    def get_move(self) -> str: 
+    def get_move(self) -> str:
         """
         Gets and returns the player's move.
 
         Basically a wrapper around input to facilitate testing.
         """
-        return input(f"Player {self.player} to move (\"help\" for help): ")
-    
+        return input(f'Player {self.player} to move ("help" for help): ')
+
     def player_move(self) -> None:
         """
         Interprets the player's move and takes the appropriate action.
@@ -322,14 +329,14 @@ class GameInterface:
         or one of the players has quit.
         """
         print(self.print_welcome(), file=self.file)
-        while self.game.result() == TicTacResult.UNFINISHED and not self.player_quit: 
+        while self.game.result() == TicTacResult.UNFINISHED and not self.player_quit:
             try:
                 self.player_move()
             except ValueError as e:
                 print(e)
 
         print(self.game.result(), file=self.file)
-    
+
     def print_board(self) -> str:
         """Returns the TicTacToe board in ASCII form."""
         results = self.game.board.peek(count=100)
@@ -348,9 +355,11 @@ class GameInterface:
                 output += "--------------------------\n"
         return output
 
+
 def main():
     game = GameInterface(TicTacToe())
     game.play()
-    
+
+
 if __name__ == "__main__":
     main()

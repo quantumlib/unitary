@@ -160,15 +160,17 @@ def test_welcome():
         -----------
         g | h | i
 """
+    
+
 
 def test_help():
     output = io.StringIO()
     board = tictactoe.TicTacToe()
     game = tictactoe.GameInterface(board, output)
-    game.get_move = MagicMock(return_value='help')
+    game.get_move = MagicMock(return_value="help")
     game.player_move()
 
-    assert (output.getvalue() == """
+    assert output.getvalue() == """
     You can enter:
     - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
     - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
@@ -177,17 +179,17 @@ def test_help():
 
 Still your move.
 """
-    )
-    assert (game.player == 'X')
+    assert game.player == "X"
+
 
 def test_map():
     output = io.StringIO()
     board = tictactoe.TicTacToe()
     game = tictactoe.GameInterface(board, output)
-    game.get_move = MagicMock(return_value='map')
+    game.get_move = MagicMock(return_value="map")
     game.player_move()
 
-    assert (output.getvalue() == """
+    assert output.getvalue() == """
         a | b | c
         -----------
         d | e | f
@@ -196,26 +198,27 @@ def test_map():
 
 Still your move.
 """
-    )
-    assert (game.player == 'X')
+    assert game.player == "X"
+
 
 def test_exit():
     output = io.StringIO()
     board = tictactoe.TicTacToe()
     game = tictactoe.GameInterface(board, file=output)
-    game.get_move = MagicMock(return_value='exit')
+    game.get_move = MagicMock(return_value="exit")
     game.player_move()
 
-    assert (output.getvalue() == "Goodbye!\n"
-    )
+    assert output.getvalue() == "Goodbye!\n"
+
 
 def test_player_alternates():
     board = tictactoe.TicTacToe()
     game = tictactoe.GameInterface(board)
-    game.get_move = MagicMock(return_value='a')
+    game.get_move = MagicMock(return_value="a")
     game.player_move()
 
-    assert(game.player == 'O')
+    assert game.player == "O"
+
 
 def test_print_board():
     board = tictactoe.TicTacToe()
@@ -224,7 +227,7 @@ def test_print_board():
     board.move("e", tictactoe.TicTacSquare.O)
     output = game.print_board()
 
-    assert (output == """
+    assert output == """
   .   0 | . 100 | . 100
   X 100 | X   0 | X   0
   O   0 | O   0 | O   0
@@ -237,4 +240,3 @@ def test_print_board():
   X   0 | X   0 | X   0
   O   0 | O   0 | O   0
 """
-    )

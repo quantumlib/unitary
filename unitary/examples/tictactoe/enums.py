@@ -14,10 +14,12 @@
 #
 import enum
 
+
 class GameMoves(enum.Enum):
-    EXIT = 'exit'
-    MAP = 'map'
-    HELP = 'help'
+    EXIT = "exit"
+    MAP = "map"
+    HELP = "help"
+
 
 class TicTacSquare(enum.Enum):
     EMPTY = 0
