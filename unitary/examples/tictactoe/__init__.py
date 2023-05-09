@@ -14,4 +14,4 @@
 
 from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules
 from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
-from unitary.examples.tictactoe.tic_tac_toe import TicTacToe
+from unitary.examples.tictactoe.tic_tac_toe import TicTacToe, GameInterface

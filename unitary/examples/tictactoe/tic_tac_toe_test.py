@@ -11,7 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 import pytest
+import io
+from unittest.mock import MagicMock
 
 import unitary.examples.tictactoe as tictactoe
 
@@ -142,16 +145,89 @@ def test_rulesets(run_on_hardware):
         board.move("ab", tictactoe.TicTacSquare.O)
 
 
-@pytest.mark.parametrize("run_on_hardware", [False, True])
-def test_print(run_on_hardware):
-    board = tictactoe.TicTacToe(run_on_hardware=run_on_hardware)
+def test_welcome():
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board)
+    output = game.print_welcome()
+
+    assert output == """
+        Welcome to quantum tic tac toe!
+        Here is the board:
+        
+        a | b | c
+        -----------
+        d | e | f
+        -----------
+        g | h | i
+"""
+    
+
+
+def test_help():
+    output = io.StringIO()
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board, output)
+    game.get_move = MagicMock(return_value="help")
+    game.player_move()
+
+    assert output.getvalue() == """
+    You can enter:
+    - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
+    - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
+    - "map": show board map
+    - "exit" to quit
+
+Still your move.
+"""
+    assert game.player == "X"
+
+
+def test_map():
+    output = io.StringIO()
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board, output)
+    game.get_move = MagicMock(return_value="map")
+    game.player_move()
+
+    assert output.getvalue() == """
+        a | b | c
+        -----------
+        d | e | f
+        -----------
+        g | h | i
+
+Still your move.
+"""
+    assert game.player == "X"
+
+
+def test_exit():
+    output = io.StringIO()
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board, file=output)
+    game.get_move = MagicMock(return_value="exit")
+    game.player_move()
+
+    assert output.getvalue() == "Goodbye!\n"
+
+
+def test_player_alternates():
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board)
+    game.get_move = MagicMock(return_value="a")
+    game.player_move()
+
+    assert game.player == "O"
+
+
+def test_print_board():
+    board = tictactoe.TicTacToe()
+    game = tictactoe.GameInterface(board)
     board.move("a", tictactoe.TicTacSquare.X)
     board.move("e", tictactoe.TicTacSquare.O)
-    output = board.print()
+    output = game.print_board()
 
-    assert (
-        output
-        == """
+    assert output == """
   .   0 | . 100 | . 100
   X 100 | X   0 | X   0
   O   0 | O   0 | O   0
@@ -164,4 +240,3 @@ def test_print(run_on_hardware):
   X   0 | X   0 | X   0
   O   0 | O   0 | O   0
 """
-    )

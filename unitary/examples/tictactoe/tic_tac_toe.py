@@ -11,11 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import io
+import sys
 from typing import Dict, List
 
 from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.alpha.qudit_effects import QuditFlip
-from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules
+from unitary.examples.tictactoe.enums import (
+    TicTacSquare,
+    TicTacResult,
+    TicTacRules,
+    GameMoves,
+)
 from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
 
 _SQUARE_NAMES = "abcdefghi"
@@ -32,6 +39,24 @@ _POSSIBLE_WINS = [
     (0, 4, 8),
     (2, 4, 6),
 ]
+
+# Explanation of commands usable by a player.
+_HELP_TEXT = """
+    You can enter:
+    - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
+    - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
+    - "map": show board map
+    - "exit" to quit
+"""
+
+# Explanation of which letters map to which board spaces.
+_BOARD_MAP = """
+        a | b | c
+        -----------
+        d | e | f
+        -----------
+        g | h | i
+"""
 
 
 def _histogram(results: List[List[TicTacSquare]]) -> List[Dict[TicTacSquare, int]]:
@@ -227,9 +252,94 @@ class TicTacToe:
         """
         return [_result_to_str(result) for result in self.board.peek(count=count)]
 
-    def print(self) -> str:
+
+class GameInterface:
+    """
+    A class that provides a command-line interface to play Quantum Tic Tac Toe.
+
+    Initialize by providing an instance of a TicTacToe game, then call play()
+    to run the game.
+
+    Args:
+        game: A TicTacToe instance for the game interface to wrap.
+        file:  Optional IOBase file object to write output to.
+            This enables the battle to write status to a file or string
+            for testing.
+
+    """
+
+    def __init__(self, game: TicTacToe, file: io.IOBase = sys.stdout):
+        self.game = game
+        self.file = file
+        self.player = "X"
+        self.player_quit = False
+
+    def get_move(self) -> str:
+        """
+        Gets and returns the player's move.
+
+        Basically a wrapper around input to facilitate testing.
+        """
+        return input(f'Player {self.player} to move ("help" for help): ')
+
+    def player_move(self) -> None:
+        """
+        Interprets the player's move and takes the appropriate action.
+
+        A move can be a one or two letter string within the set [abcdefghi],
+        in which case this function hands the move off to the TicTacToe instance,
+        or one of the GameMoves enums (GameMoves.MAP, GameMoves.EXIT, GameMoves.HELP),
+        which prevent the game loop from alternating to the next player.
+        """
+        move = self.get_move()
+
+        if move == GameMoves.MAP.value:
+            print(_BOARD_MAP, file=self.file)
+            print("Still your move.", file=self.file)
+            return
+        if move == GameMoves.EXIT.value:
+            self.player_quit = True
+            print("Goodbye!", file=self.file)
+            return
+        if move == GameMoves.HELP.value:
+            print(_HELP_TEXT, file=self.file)
+            print("Still your move.", file=self.file)
+            return
+
+        mark = TicTacSquare.X if self.player == "X" else TicTacSquare.O
+        self.game.move(move, mark)
+        print(self.print_board(), file=self.file)
+        self.player = "O" if self.player == "X" else "X"
+
+    def print_welcome(self) -> str:
+        """
+        Prints the welcome message for the game interface.
+        """
+        message = """
+        Welcome to quantum tic tac toe!
+        Here is the board:
+        """
+        message += _BOARD_MAP
+        return message
+
+    def play(self) -> None:
+        """
+        Run the game loop, requesting player moves, alternating players, until
+        the TicTacToe instance reports that the game ends with a winner or a tie
+        or one of the players has quit.
+        """
+        print(self.print_welcome(), file=self.file)
+        while self.game.result() == TicTacResult.UNFINISHED and not self.player_quit:
+            try:
+                self.player_move()
+            except ValueError as e:
+                print(e)
+
+        print(self.game.result(), file=self.file)
+
+    def print_board(self) -> str:
         """Returns the TicTacToe board in ASCII form."""
-        results = self.board.peek(count=100)
+        results = self.game.board.peek(count=100)
         hist = _histogram(results)
         output = "\n"
         for row in range(3):
@@ -244,3 +354,12 @@ class TicTacToe:
             if idx in [2, 5, 8] and row != 2:
                 output += "--------------------------\n"
         return output
+
+
+def main():
+    game = GameInterface(TicTacToe())
+    game.play()
+
+
+if __name__ == "__main__":
+    main()
