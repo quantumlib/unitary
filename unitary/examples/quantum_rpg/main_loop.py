@@ -3,6 +3,7 @@ import enum
 import io
 import sys
 
+import unitary.examples.quantum_rpg.ascii_art as ascii_art
 import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.encounter as encounter
 import unitary.examples.quantum_rpg.qaracter as qaracter
@@ -39,6 +40,10 @@ class MainLoop:
         self.world = world
         self.file = file
         self.party = party
+
+
+    def print_title_screen(self):
+        print(ascii_art.TITLE_SCREEN, file=self.file)
 
     def loop(self, user_input: Optional[Sequence[str]] = None) -> None:
         """Full battle loop until one side is defeated.
