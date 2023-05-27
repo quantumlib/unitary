@@ -19,6 +19,7 @@ import random
 
 import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.qaracter as qaracter
+import unitary.examples.quantum_rpg.xp_utils as xp_utils
 from typing import Sequence
 
 
@@ -33,10 +34,12 @@ class Encounter:
         enemies: Sequence[qaracter.Qaracter] = (),
         probability: float = 1.0,
         description: Optional[str] = None,
+        xp: Optional[xp_utils.EncounterXp] = None
     ):
         self.enemies = enemies
         self.probability = probability
         self.description = description
+        self.xp = xp
 
     def will_trigger(self) -> bool:
         """Returns True if the encounter should be triggered.
@@ -49,5 +52,5 @@ class Encounter:
         self, players: Sequence[qaracter.Qaracter], file: Optional[io.IOBase] = None
     ) -> battle.Battle:
         if file:
-            return battle.Battle(players, self.enemies, file)
-        return battle.Battle(players, self.enemies)
+            return battle.Battle(players, self.enemies, file, xp=self.xp)
+        return battle.Battle(players, self.enemies, xp=self.xp)

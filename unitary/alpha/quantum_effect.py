@@ -63,6 +63,10 @@ class QuantumEffect(abc.ABC):
         world.add_effect(list(self.effect(*objects)))
 
 
+    def __str__(self):
+        return self.__class__.__name__
+
+
 class QuantumIf:
     """A `QuantumIf` effect allows quantum conditional effects.
 

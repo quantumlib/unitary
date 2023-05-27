@@ -54,6 +54,10 @@ class Flip(QuantumEffect):
         for q in objects:
             yield cirq.X(q.qubit) ** self.effect_fraction
 
+    def __eq__(self, other):
+        if isinstance(other, Flip):
+            return self.effect_fraction == other.effect_fraction
+        return False
 
 class Phase(QuantumEffect):
     """Phases a qubit from |+> to |-> and vice versa.
@@ -89,6 +93,10 @@ class Phase(QuantumEffect):
         for q in objects:
             yield cirq.Z(q.qubit) ** self.effect_fraction
 
+    def __eq__(self, other):
+        if isinstance(other, Phase):
+            return self.effect_fraction == other.effect_fraction
+        return False
 
 class Superposition(QuantumEffect):
     """Takes a qubit in a basis state into a superposition."""
@@ -100,6 +108,8 @@ class Superposition(QuantumEffect):
         for q in objects:
             yield cirq.H(q.qubit)
 
+    def __eq__(self, other):
+        return isinstance(other, Superposition):
 
 class Move(QuantumEffect):
     """Moves a qubit state into another quantum objects."""
@@ -113,6 +123,8 @@ class Move(QuantumEffect):
     def effect(self, *objects):
         yield cirq.SWAP(objects[0].qubit, objects[1].qubit)
 
+    def __eq__(self, other):
+        return isinstance(other, Move):
 
 class PhasedMove(QuantumEffect):
     """Moves a qubit state into another quantum objects with phase change."""
@@ -126,6 +138,8 @@ class PhasedMove(QuantumEffect):
     def effect(self, *objects):
         yield cirq.ISWAP(objects[0].qubit, objects[1].qubit)
 
+    def __eq__(self, other):
+        return isinstance(other, PhasedMove):
 
 class Split(QuantumEffect):
     """Splits a qubit state into two different quantum objects."""
@@ -142,6 +156,9 @@ class Split(QuantumEffect):
         yield cirq.SWAP(objects[0].qubit, objects[2].qubit) ** 0.5
 
 
+    def __eq__(self, other):
+        return isinstance(other, Split):
+
 class PhasedSplit(QuantumEffect):
     """Splits a qubit state into two different quantum objects with a phase."""
 
@@ -155,3 +172,6 @@ class PhasedSplit(QuantumEffect):
         yield cirq.ISWAP(objects[0].qubit, objects[1].qubit) ** 0.5
         yield cirq.ISWAP(objects[0].qubit, objects[2].qubit) ** 0.5
         yield cirq.ISWAP(objects[0].qubit, objects[2].qubit) ** 0.5
+
+    def __eq__(self, other):
+        return isinstance(other, PhasedSplit):

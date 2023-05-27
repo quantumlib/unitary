@@ -22,6 +22,7 @@ import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.encounter as encounter
 import unitary.examples.quantum_rpg.qaracter as qaracter
 import unitary.examples.quantum_rpg.world as world
+import unitary.examples.quantum_rpg.xp_utils as xp_utils
 
 
 class Command(enum.Enum):
@@ -77,11 +78,13 @@ class MainLoop:
                     if random_encounter.will_trigger():
                         if random_encounter.description:
                             print(random_encounter.description, file=self.file)
-                        battle = random_encounter.initiate(self.party, file=self.file)
-                        result = battle.loop(get_user_input=get_user_input)
+                        current_battle = random_encounter.initiate(self.party, file=self.file)
+                        result = current_battle.loop(get_user_input=get_user_input)
                         self.world.current_location.remove_encounter(random_encounter)
 
-                        # TODO(dstrain): Resolve battle and award XP.
+                        if result == battle.BattleResult.PLAYERS_WON:
+                            awarded_xp = current_battle.xp
+                            xp_utils.award_xp(self.party, awarded_xp)
                         break
                 if result is not None:
                     # Reprint location description now that encounter is over.
