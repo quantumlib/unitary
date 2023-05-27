@@ -49,7 +49,6 @@ class QuantumWorld:
         sampler=cirq.Simulator(),
         compile_to_qubits: bool = False,
     ):
-
         self.clear()
         self.sampler = sampler
         self.use_sparse = isinstance(sampler, SparseSimulator)
