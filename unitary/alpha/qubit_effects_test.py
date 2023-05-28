@@ -29,6 +29,7 @@ def test_flip(simulator, compile_to_qubits):
     board.add_object(piece)
     alpha.Flip()(piece)
     assert board.circuit == cirq.Circuit(cirq.X(cirq.NamedQubit("t")))
+    assert str(alpha.Flip()) == "Flip"
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -39,6 +40,7 @@ def test_partial_flip(simulator, compile_to_qubits):
     board.add_object(piece)
     alpha.Flip(effect_fraction=0.25)(piece)
     assert board.circuit == cirq.Circuit(cirq.X(cirq.NamedQubit("t")) ** 0.25)
+    assert str(alpha.Flip(effect_fraction=0.25)) == "Flip(effect_fraction=0.25)"
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -61,6 +63,7 @@ def test_phase(simulator, compile_to_qubits):
     board.add_object(piece)
     alpha.Phase()(piece)
     assert board.circuit == cirq.Circuit(cirq.Z(cirq.NamedQubit("t")))
+    assert str(alpha.Phase()) == "Phase"
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -71,6 +74,7 @@ def test_partial_phase(simulator, compile_to_qubits):
     board.add_object(piece)
     alpha.Phase(effect_fraction=0.25)(piece)
     assert board.circuit == cirq.Circuit(cirq.Z(cirq.NamedQubit("t")) ** 0.25)
+    assert str(alpha.Phase(effect_fraction=0.25)) == "Phase(effect_fraction=0.25)"
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -81,6 +85,7 @@ def test_superposition(simulator, compile_to_qubits):
     board.add_object(piece)
     alpha.Superposition()(piece)
     assert board.circuit == cirq.Circuit(cirq.H(cirq.NamedQubit("t")))
+    assert str(alpha.Superposition()) == "Superposition"
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -167,3 +172,19 @@ def test_phased_split(simulator, compile_to_qubits):
     expected_circuit.append(cirq.ISWAP(a, c) ** 0.5)
     expected_circuit.append(cirq.ISWAP(a, c) ** 0.5)
     assert board.circuit == expected_circuit
+
+
+def test_equalis():
+    eq = cirq.testing.EqualsTester()
+    eq.add_equality_group(alpha.Flip(), alpha.Flip(), alpha.Flip(effect_fraction=1.0))
+    eq.add_equality_group(alpha.Phase(), alpha.Phase(effect_fraction=1.0))
+    eq.add_equality_group(alpha.Superposition(), alpha.Superposition())
+    eq.add_equality_group(
+        alpha.Flip(effect_fraction=0.25), alpha.Flip(effect_fraction=0.25)
+    )
+    eq.add_equality_group(
+        alpha.Phase(effect_fraction=0.25), alpha.Phase(effect_fraction=0.25)
+    )
+    eq.add_equality_group(alpha.Split(), alpha.Split())
+    eq.add_equality_group(alpha.Move(), alpha.Move())
+    eq.add_equality_group(alpha.PhasedMove(), alpha.PhasedMove())
