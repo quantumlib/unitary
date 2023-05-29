@@ -17,6 +17,7 @@ import io
 import sys
 from typing import List, Optional
 
+import unitary.examples.quantum_rpg.input_helpers as input_helpers
 from unitary.examples.quantum_rpg.qaracter import Qaracter
 
 
@@ -110,8 +111,7 @@ class Battle:
         # If user input is provided as an argument, then use that.
         # Otherwise, prompt from raw input.
         if user_input is not None:
-            user_input = iter(user_input)
-            get_user_input = lambda _: next(user_input)
+            get_user_input = input_helpers.get_user_input_function(user_input)
 
         for current_player in self.player_side:
             self.print_screen()
@@ -124,19 +124,26 @@ class Battle:
                 print(key, file=self.file)
             action = get_user_input("Choose your action: ")
             if action in current_player.actions():
-                monster = int(get_user_input("Which enemy number: ")) - 1
-                if monster < len(self.enemy_side):
-                    qubit = int(get_user_input("Which enemy qubit number: "))
-                    selected_monster = self.enemy_side[monster]
-                    qubit_name = selected_monster.quantum_object_name(qubit)
-                    if qubit_name in selected_monster.active_qubits():
-                        res = actions[action](selected_monster, qubit)
-                        if isinstance(res, str):
-                            print(res, file=self.file)
-                    else:
-                        print(f"{qubit_name} is not an active qubit", file=self.file)
+                monster = (
+                    input_helpers.get_user_input_number(
+                        get_user_input,
+                        "Which enemy number: ",
+                        max_number=len(self.enemy_side),
+                        file=self.file,
+                    )
+                    - 1
+                )
+                selected_monster = self.enemy_side[monster]
+                qubit = input_helpers.get_user_input_number(
+                    get_user_input, "Which enemy qubit number: ", file=self.file
+                )
+                qubit_name = selected_monster.quantum_object_name(qubit)
+                if qubit_name in selected_monster.active_qubits():
+                    res = actions[action](selected_monster, qubit)
+                    if isinstance(res, str):
+                        print(res, file=self.file)
                 else:
-                    print(f"{monster + 1} is not a valid monster", file=self.file)
+                    print(f"{qubit_name} is not an active qubit", file=self.file)
             result = self._determine_battle_result()
             if result != BattleResult.UNFINISHED:
                 return result
@@ -177,8 +184,7 @@ class Battle:
         Returns the result of a battle as an enum.
         """
         if user_input is not None:
-            user_input = iter(user_input)
-            get_user_input = lambda _: next(user_input)
+            get_user_input = input_helpers.get_user_input_function(user_input)
         result = self._determine_battle_result()
         while result == BattleResult.UNFINISHED:
             result = self.take_player_turn(get_user_input=get_user_input)

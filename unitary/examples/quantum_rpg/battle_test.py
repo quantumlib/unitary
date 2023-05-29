@@ -46,7 +46,7 @@ def test_bad_monster():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     b = battle.Battle([c], [e], file=output)
-    b.take_player_turn(user_input=["s", "2", "1"])
+    b.take_player_turn(user_input=["s", "2", "1", "1"])
     assert (
         output.getvalue().replace("\t", " ").strip()
         == r"""
@@ -57,7 +57,8 @@ Aaronson Analyst   watcher Observer
 Aaronson turn:
 s
 m
-2 is not a valid monster
+Invalid number selected.
+Sample result HealthPoint.HURT
 """.strip()
     )
 
