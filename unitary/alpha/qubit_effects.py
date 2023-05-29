@@ -173,9 +173,6 @@ class Split(QuantumEffect):
     def __eq__(self, other):
         return isinstance(other, Split) or NotImplemented
 
-    def __eq__(self, other):
-        return isinstance(other, Split) or NotImplemented
-
 
 class PhasedSplit(QuantumEffect):
     """Splits a qubit state into two different quantum objects with a phase."""
