@@ -76,7 +76,7 @@ def award_xp(
         qubit_choices = []
         num_qubits = effect.num_objects() or 1
         for qubit_num in range(num_qubits):
-            print(f"Choose qubit for {effect}:", file=file)
+            print(f"Choose qubit {qubit_num} for {effect}:", file=file)
             for idx, q in enumerate(qubit_list):
                 print(f"{idx+1}) {q}", file=file)
             choice = int(get_user_input(">")) - 1
