@@ -64,6 +64,7 @@ class Flip(QuantumEffect):
             return self.effect_fraction == other.effect_fraction
         return NotImplemented
 
+
 class Phase(QuantumEffect):
     """Phases a qubit from |+> to |-> and vice versa.
 
@@ -122,6 +123,7 @@ class Superposition(QuantumEffect):
     def __eq__(self, other):
         return isinstance(other, Superposition) or NotImplemented
 
+
 class Move(QuantumEffect):
     """Moves a qubit state into another quantum objects."""
 
@@ -171,9 +173,9 @@ class Split(QuantumEffect):
     def __eq__(self, other):
         return isinstance(other, Split) or NotImplemented
 
-
     def __eq__(self, other):
         return isinstance(other, Split) or NotImplemented
+
 
 class PhasedSplit(QuantumEffect):
     """Splits a qubit state into two different quantum objects with a phase."""

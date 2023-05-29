@@ -66,10 +66,6 @@ class QuantumEffect(abc.ABC):
         return self.__class__.__name__
 
 
-    def __str__(self):
-        return self.__class__.__name__
-
-
 class QuantumIf:
     """A `QuantumIf` effect allows quantum conditional effects.
 
