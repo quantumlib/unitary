@@ -54,10 +54,15 @@ class Flip(QuantumEffect):
         for q in objects:
             yield cirq.X(q.qubit) ** self.effect_fraction
 
+    def __str__(self):
+        if self.effect_fraction == 1:
+            return "Flip"
+        return f"Flip(effect_fraction={self.effect_fraction})"
+
     def __eq__(self, other):
         if isinstance(other, Flip):
             return self.effect_fraction == other.effect_fraction
-        return False
+        return NotImplemented
 
 class Phase(QuantumEffect):
     """Phases a qubit from |+> to |-> and vice versa.
@@ -93,10 +98,16 @@ class Phase(QuantumEffect):
         for q in objects:
             yield cirq.Z(q.qubit) ** self.effect_fraction
 
+    def __str__(self):
+        if self.effect_fraction == 1:
+            return "Phase"
+        return f"Phase(effect_fraction={self.effect_fraction})"
+
     def __eq__(self, other):
         if isinstance(other, Phase):
             return self.effect_fraction == other.effect_fraction
-        return False
+        return NotImplemented
+
 
 class Superposition(QuantumEffect):
     """Takes a qubit in a basis state into a superposition."""
@@ -109,7 +120,7 @@ class Superposition(QuantumEffect):
             yield cirq.H(q.qubit)
 
     def __eq__(self, other):
-        return isinstance(other, Superposition):
+        return isinstance(other, Superposition) or NotImplemented
 
 class Move(QuantumEffect):
     """Moves a qubit state into another quantum objects."""
@@ -124,7 +135,8 @@ class Move(QuantumEffect):
         yield cirq.SWAP(objects[0].qubit, objects[1].qubit)
 
     def __eq__(self, other):
-        return isinstance(other, Move):
+        return isinstance(other, Move) or NotImplemented
+
 
 class PhasedMove(QuantumEffect):
     """Moves a qubit state into another quantum objects with phase change."""
@@ -139,7 +151,8 @@ class PhasedMove(QuantumEffect):
         yield cirq.ISWAP(objects[0].qubit, objects[1].qubit)
 
     def __eq__(self, other):
-        return isinstance(other, PhasedMove):
+        return isinstance(other, PhasedMove) or NotImplemented
+
 
 class Split(QuantumEffect):
     """Splits a qubit state into two different quantum objects."""
@@ -154,6 +167,9 @@ class Split(QuantumEffect):
         yield cirq.SWAP(objects[0].qubit, objects[1].qubit) ** 0.5
         yield cirq.SWAP(objects[0].qubit, objects[2].qubit) ** 0.5
         yield cirq.SWAP(objects[0].qubit, objects[2].qubit) ** 0.5
+
+    def __eq__(self, other):
+        return isinstance(other, Split) or NotImplemented
 
 
     def __eq__(self, other):
@@ -174,4 +190,4 @@ class PhasedSplit(QuantumEffect):
         yield cirq.ISWAP(objects[0].qubit, objects[2].qubit) ** 0.5
 
     def __eq__(self, other):
-        return isinstance(other, PhasedSplit):
+        return isinstance(other, PhasedSplit) or NotImplemented
