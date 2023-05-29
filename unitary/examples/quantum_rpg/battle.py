@@ -53,7 +53,7 @@ class Battle:
         player_side: List[Qaracter],
         enemy_side: List[Qaracter],
         file: io.IOBase = sys.stdout,
-        xp: Optional[EncounterXp]=None,
+        xp: Optional[EncounterXp] = None,
     ):
         self.player_side = player_side
         self.enemy_side = enemy_side

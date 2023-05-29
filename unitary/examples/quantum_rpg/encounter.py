@@ -34,7 +34,7 @@ class Encounter:
         enemies: Sequence[qaracter.Qaracter] = (),
         probability: float = 1.0,
         description: Optional[str] = None,
-        xp: Optional[xp_utils.EncounterXp] = None
+        xp: Optional[xp_utils.EncounterXp] = None,
     ):
         self.enemies = enemies
         self.probability = probability
