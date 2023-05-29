@@ -20,6 +20,7 @@ import sys
 import unitary.examples.quantum_rpg.ascii_art as ascii_art
 import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.encounter as encounter
+import unitary.examples.quantum_rpg.input_helpers as input_helpers
 import unitary.examples.quantum_rpg.qaracter as qaracter
 import unitary.examples.quantum_rpg.world as world
 import unitary.examples.quantum_rpg.xp_utils as xp_utils
@@ -65,11 +66,7 @@ class MainLoop:
 
         Returns the result of a battle as an enum.
         """
-        if user_input is not None:
-            user_input = iter(user_input)
-            get_user_input = lambda _: next(user_input)
-        else:
-            get_user_input = input
+        get_user_input = input_helpers.get_user_input_function(user_input)
         while True:
             print(self.world.current_location, file=self.file)
             if self.world.current_location.encounters:

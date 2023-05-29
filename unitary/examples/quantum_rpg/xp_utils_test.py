@@ -55,7 +55,35 @@ Choose the qaracter to add the Superposition to:
 1) wizard
 Current qaracter sheet:
 
-Choose qubit for Superposition:
+Choose qubit 0 for Superposition:
 1) wizard_1
+"""
+    )
+
+
+def test_award_xp_multi_qubit_gate():
+    output = io.StringIO()
+    c = classes.Analyst("wizard")
+    c.add_hp()
+    enc = xp_utils.EncounterXp([[alpha.Move()]])
+    xp_utils.award_xp([c], enc, ["1", "1", "2"], output)
+    assert c.circuit == cirq.Circuit(
+        cirq.SWAP(cirq.NamedQubit("wizard_1"), cirq.NamedQubit("wizard_2"))
+    )
+    assert (
+        output.getvalue()
+        == """You have been awarded XP!
+  Move
+
+Choose the qaracter to add the Move to:
+1) wizard
+Current qaracter sheet:
+
+Choose qubit 0 for Move:
+1) wizard_1
+2) wizard_2
+Choose qubit 1 for Move:
+1) wizard_1
+2) wizard_2
 """
     )

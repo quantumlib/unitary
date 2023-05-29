@@ -19,6 +19,7 @@ import random
 import sys
 
 import unitary.alpha as alpha
+import unitary.examples.quantum_rpg.input_helpers as input_helpers
 import unitary.examples.quantum_rpg.qaracter as qaracter
 
 
@@ -54,11 +55,7 @@ def award_xp(
     """Prompt user to choose a qaracter to award XP to."""
     if not xp:
         return
-    if user_input is not None:
-        user_input = iter(user_input)
-        get_user_input = lambda _: next(user_input)
-    else:
-        get_user_input = input
+    get_user_input = input_helpers.get_user_input_function(user_input)
     print("You have been awarded XP!", file=file)
     effect_list = xp.choose()
     for effect in effect_list:
@@ -68,7 +65,9 @@ def award_xp(
         print(f"Choose the qaracter to add the {effect} to:", file=file)
         for idx, qar in enumerate(party):
             print(f"{idx+1}) {qar.name}", file=file)
-        qar_choice = int(get_user_input(">"))
+        qar_choice = input_helpers.get_user_input_number(
+            get_user_input, ">", len(party)
+        )
         qar = party[qar_choice - 1]
         print("Current qaracter sheet:", file=file)
         print(qar.circuit, file=file)
@@ -79,6 +78,9 @@ def award_xp(
             print(f"Choose qubit {qubit_num} for {effect}:", file=file)
             for idx, q in enumerate(qubit_list):
                 print(f"{idx+1}) {q}", file=file)
-            choice = int(get_user_input(">")) - 1
-            effect(qar.get_hp(qubit_list[choice]))
+            choice = input_helpers.get_user_input_number(
+                get_user_input, ">", len(qubit_list)
+            )
+            qubit_choices.append(qar.get_hp(qubit_list[choice - 1]))
+        effect(*qubit_choices)
         # TODO: level up if # moments > level
