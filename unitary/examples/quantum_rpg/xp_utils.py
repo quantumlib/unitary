@@ -51,7 +51,7 @@ def award_xp(
     user_input: Optional[Sequence[str]],
     file: io.IOBase = sys.stdout,
 ):
-    """Promopt user to choose qaracter to award xp to."""
+    """Prompt user to choose a qaracter to award XP to."""
     if not xp:
         return
     if user_input is not None:
