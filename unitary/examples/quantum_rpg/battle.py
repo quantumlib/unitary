@@ -19,6 +19,7 @@ from typing import List, Optional
 
 import unitary.examples.quantum_rpg.input_helpers as input_helpers
 from unitary.examples.quantum_rpg.qaracter import Qaracter
+from unitary.examples.quantum_rpg.xp_utils import EncounterXp
 
 
 class BattleResult(enum.Enum):
@@ -53,10 +54,12 @@ class Battle:
         player_side: List[Qaracter],
         enemy_side: List[Qaracter],
         file: io.IOBase = sys.stdout,
+        xp: Optional[EncounterXp] = None,
     ):
         self.player_side = player_side
         self.enemy_side = enemy_side
         self.file = file
+        self.xp = xp
 
     def print_screen(self):
         """Prints a two-column output of the battle status.
