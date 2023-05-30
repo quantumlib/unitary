@@ -87,3 +87,19 @@ Choose qubit 1 for Move:
 2) wizard_2
 """
     )
+
+
+def test_qaracter_not_high_enough():
+    output = io.StringIO()
+    c = classes.Analyst("wizard")
+    enc = xp_utils.EncounterXp([[alpha.Move()]])
+    xp_utils.award_xp([c], enc, ["1", "1", "2"], output)
+    assert c.circuit == cirq.Circuit()
+    assert (
+        output.getvalue()
+        == """You have been awarded XP!
+  Move
+
+Qaracters are not high-enough level for Move!
+"""
+    )

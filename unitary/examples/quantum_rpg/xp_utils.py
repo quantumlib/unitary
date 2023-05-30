@@ -62,18 +62,24 @@ def award_xp(
         print(f"  {effect}", file=file)
     print("", file=file)
     for effect in effect_list:
+        num_qubits = effect.num_objects() or 1
+        eligible_party = [
+            qar for qar in party if len(qar.active_qubits()) >= num_qubits
+        ]
+        if not eligible_party:
+            print(f"Qaracters are not high-enough level for {effect}!", file=file)
+            continue
         print(f"Choose the qaracter to add the {effect} to:", file=file)
-        for idx, qar in enumerate(party):
+        for idx, qar in enumerate(eligible_party):
             print(f"{idx+1}) {qar.name}", file=file)
         qar_choice = input_helpers.get_user_input_number(
-            get_user_input, ">", len(party)
+            get_user_input, ">", len(eligible_party)
         )
-        qar = party[qar_choice - 1]
+        qar = eligible_party[qar_choice - 1]
         print("Current qaracter sheet:", file=file)
         print(qar.circuit, file=file)
         qubit_list = list(qar.active_qubits())
         qubit_choices = []
-        num_qubits = effect.num_objects() or 1
         for qubit_num in range(num_qubits):
             print(f"Choose qubit {qubit_num} for {effect}:", file=file)
             for idx, q in enumerate(qubit_list):
