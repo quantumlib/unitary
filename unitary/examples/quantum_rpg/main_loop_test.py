@@ -21,7 +21,7 @@ import unitary.examples.quantum_rpg.npcs as npcs
 import unitary.examples.quantum_rpg.world as world
 
 SIGN = item.Item(
-    keyword_actions=[("read", "This is an example world!")],
+    keyword_actions=[("read", "sign", "This is an example world!")],
     description="A helpful sign is here.",
 )
 
@@ -102,7 +102,6 @@ A helpful sign is here.
 Exits: south, west.
 
 This is an example world!
-
 Lab Entrance
 
 You stand before the entrance to the premier quantum lab.

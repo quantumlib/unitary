@@ -97,11 +97,10 @@ class MainLoop:
             if cmd is not None:
                 self.world.move(cmd)
                 continue
-            words = current_input.split()
-            action = self.world.current_location.get_action(words[0])
+            action = self.world.current_location.get_action(current_input)
             if action is not None:
                 if isinstance(action, str):
-                    print(action + "\n", file=self.file)
+                    print(action, file=self.file)
                 print_room_description = False
                 # TODO: actions that are 'callables'
                 continue
