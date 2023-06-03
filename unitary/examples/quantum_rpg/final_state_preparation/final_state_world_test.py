@@ -28,10 +28,9 @@ def go_directions(path: str) -> World:
     """Parse one letter directions from the start point."""
     example_world = World(final_state.WORLD)
     for cmd in path:
-        assert (
-            example_world.move(Direction.parse(cmd)) is not None,
-            f"Moving {cmd} in room {example_world.current_location.label} not valid",
-        )
+        cur_room = example_world.current_location.label
+        result = example_world.move(Direction.parse(cmd))
+        assert cmd is not None, f"Moving {cmd} in room {cur_room} not valid"
     return example_world
 
 
