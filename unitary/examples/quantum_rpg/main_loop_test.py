@@ -15,9 +15,15 @@
 import io
 import unitary.examples.quantum_rpg.classes as classes
 import unitary.examples.quantum_rpg.encounter as encounter
+import unitary.examples.quantum_rpg.item as item
 import unitary.examples.quantum_rpg.main_loop as main_loop
 import unitary.examples.quantum_rpg.npcs as npcs
 import unitary.examples.quantum_rpg.world as world
+
+SIGN = item.Item(
+    keyword_actions=[("read", "sign", "This is an example world!")],
+    description="A helpful sign is here.",
+)
 
 EXAMPLE_WORLD = [
     world.Location(
@@ -30,6 +36,7 @@ EXAMPLE_WORLD = [
         label="2",
         title="Disorganized Lab",
         description="Tables are here with tons of electronics.\nThe lab continues to the south.",
+        items=[SIGN],
         exits={world.Direction.SOUTH: "3", world.Direction.WEST: "1"},
     ),
     world.Location(
@@ -77,7 +84,7 @@ def test_do_simple_move() -> None:
     output = io.StringIO()
     c = classes.Analyst("Mensing")
     loop = main_loop.MainLoop([c], world.World(EXAMPLE_WORLD), output)
-    loop.loop(user_input=["e", "w", "quit"])
+    loop.loop(user_input=["e", "read sign", "w", "quit"])
     assert (
         output.getvalue().replace("\t", " ").strip()
         == r"""
@@ -91,8 +98,10 @@ Disorganized Lab
 
 Tables are here with tons of electronics.
 The lab continues to the south.
+A helpful sign is here.
 Exits: south, west.
 
+This is an example world!
 Lab Entrance
 
 You stand before the entrance to the premier quantum lab.
@@ -122,6 +131,7 @@ Disorganized Lab
 
 Tables are here with tons of electronics.
 The lab continues to the south.
+A helpful sign is here.
 Exits: south, west.
 
 Cryostats
@@ -148,12 +158,15 @@ Exits: north.
 """.strip()
     )
 
+
 def test_title_screen():
     output = io.StringIO()
     loop = main_loop.MainLoop([], world.World(EXAMPLE_WORLD), output)
     loop.print_title_screen()
 
-    assert output.getvalue() == r"""
+    assert (
+        output.getvalue()
+        == r"""
 ______  _                _             _____  _           _
 |  ___|(_)              | |           /  ___|| |         | |
 | |_    _  _ __    __ _ | |    __     \ `--. | |_   __ _ | |_   ___
@@ -172,3 +185,4 @@ ______                         ||              _    _
                    |_|         \/
 
 """
+    )

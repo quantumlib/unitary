@@ -57,7 +57,6 @@ class MainLoop:
         self.file = file
         self.party = party
 
-
     def print_title_screen(self):
         print(ascii_art.TITLE_SCREEN, file=self.file)
 
@@ -67,15 +66,21 @@ class MainLoop:
         Returns the result of a battle as an enum.
         """
         get_user_input = input_helpers.get_user_input_function(user_input)
+        print_room_description = True
         while True:
-            print(self.world.current_location, file=self.file)
+            if print_room_description:
+                print(self.world.current_location, file=self.file)
+            else:
+                print_room_description = True
             if self.world.current_location.encounters:
                 result = None
                 for random_encounter in self.world.current_location.encounters:
                     if random_encounter.will_trigger():
                         if random_encounter.description:
                             print(random_encounter.description, file=self.file)
-                        current_battle = random_encounter.initiate(self.party, file=self.file)
+                        current_battle = random_encounter.initiate(
+                            self.party, file=self.file
+                        )
                         result = current_battle.loop(get_user_input=get_user_input)
                         self.world.current_location.remove_encounter(random_encounter)
 
@@ -91,6 +96,13 @@ class MainLoop:
             cmd = world.Direction.parse(current_input)
             if cmd is not None:
                 self.world.move(cmd)
+                continue
+            action = self.world.current_location.get_action(current_input)
+            if action is not None:
+                if isinstance(action, str):
+                    print(action, file=self.file)
+                print_room_description = False
+                # TODO: actions that are 'callables'
                 continue
             cmd = Command.parse(current_input)
             if cmd == Command.QUIT:

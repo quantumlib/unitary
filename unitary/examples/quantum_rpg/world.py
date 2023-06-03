@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List, Optional, Sequence
+from typing import Callable, Dict, List, Optional, Sequence, Union
 
 import dataclasses
 import unitary.examples.quantum_rpg.encounter as encounter
+import unitary.examples.quantum_rpg.item as item
 import enum
 
 
@@ -62,15 +63,29 @@ class Location:
     exits: Dict[Direction, str]
     encounters: Optional[List[encounter.Encounter]] = None
     description: Optional[str] = None
+    items: Optional[List[item.Item]] = None
 
     def _exits(self) -> str:
         return ", ".join([ex.value for ex in self.exits]) + "."
+
+    def _item_str(self) -> str:
+        if not self.items:
+            return ""
+        return "\n" + "\n".join([item.description or "" for item in self.items])
+
+    def get_action(self, keyword: str) -> Union[str, Callable]:
+        if self.items:
+            for item in self.items:
+                action = item.get_action(keyword)
+                if action:
+                    return action
+        return None
 
     def remove_encounter(self, triggered_encounter) -> bool:
         self.encounters.remove(triggered_encounter)
 
     def __str__(self) -> str:
-        return f"{self.title}\n\n{self.description}\nExits: {self._exits()}\n"
+        return f"{self.title}\n\n{self.description}{self._item_str()}\nExits: {self._exits()}\n"
 
 
 class World:
