@@ -19,3 +19,5 @@ def test_item_str():
     assert sign.get_action("pass by") == "Or enter, Im a sign, not a cop"
     assert sign.get_action("eat sign") is None
     assert sign.description == "A sign blocks the way forward."
+
+    assert sign.get_action("") is None

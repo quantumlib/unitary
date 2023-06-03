@@ -27,7 +27,11 @@ class Item:
     def __init__(
         self,
         keyword_actions: Sequence[
-            Tuple[Union[str, Sequence[str]], Optional[Union[str,Sequence[str]]], Union[str, Callable]]
+            Tuple[
+                Union[str, Sequence[str]],
+                Optional[Union[str, Sequence[str]]],
+                Union[str, Callable],
+            ]
         ],
         description: Optional[str] = None,
     ):
@@ -36,14 +40,16 @@ class Item:
 
     def get_action(self, user_input: str) -> Optional[Union[str, Callable]]:
         words = user_input.lower().split()
+        if not words:
+            return None
         keyword = words[0]
-        target = words[1] if len(words)>1 else None
+        target = words[1] if len(words) > 1 else None
         for keywords, targets, action in self.keyword_actions:
             if isinstance(targets, str):
-              targets=[targets]
+                targets = [targets]
             if keyword == keywords or keyword in keywords:
-              if not targets or target in targets:
-                return action
-              if target is None and targets:
-                return f"{keyword} what?"
+                if not targets or target in targets:
+                    return action
+                if target is None and targets:
+                    return f"{keyword} what?"
         return None
