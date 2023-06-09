@@ -101,12 +101,14 @@ class Qaracter(alpha.QuantumWorld):
             if self.quantum_object_name(i) not in self.health_status
         ]
 
-    def add_quantum_effect(self, effect, quantum_name: Union[int, str]):
+    def add_quantum_effect(self, effect, *quantum_names: Union[int, str]):
         """Adds a Quantum Effect to a specific quantum object."""
-        if isinstance(quantum_name, int):
-            quantum_name = self.quantum_object_name(quantum_name)
-        hp_obj = self.get_hp(quantum_name)
-        effect(hp_obj)
+        hp_objs = []
+        for quantum_name in quantum_names:
+            if isinstance(quantum_name, int):
+                quantum_name = self.quantum_object_name(quantum_name)
+            hp_objs.append(self.get_hp(quantum_name))
+        effect(*hp_objs)
 
     @property
     def damage(self) -> int:
