@@ -18,6 +18,7 @@ import cirq
 
 import unitary.alpha as alpha
 import unitary.examples.quantum_rpg.classes as classes
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.xp_utils as xp_utils
 
 
@@ -41,13 +42,13 @@ def test_choose():
 
 
 def test_award_xp():
-    output = io.StringIO()
     c = classes.Analyst("wizard")
+    state = game_state.GameState(party=[c], user_input=["1", "1"], file=io.StringIO())
     enc = xp_utils.EncounterXp([[alpha.Superposition()]])
-    xp_utils.award_xp([c], enc, ["1", "1"], output)
+    xp_utils.award_xp(state, enc)
     assert c.circuit == cirq.Circuit(cirq.H(cirq.NamedQubit("wizard_1")))
     assert (
-        output.getvalue()
+        state.file.getvalue()
         == """You have been awarded XP!
   Superposition
 
@@ -62,16 +63,18 @@ Choose qubit 0 for Superposition:
 
 
 def test_award_xp_multi_qubit_gate():
-    output = io.StringIO()
     c = classes.Analyst("wizard")
     c.add_hp()
+    state = game_state.GameState(
+        party=[c], user_input=["1", "1", "2"], file=io.StringIO()
+    )
     enc = xp_utils.EncounterXp([[alpha.Move()]])
-    xp_utils.award_xp([c], enc, ["1", "1", "2"], output)
+    xp_utils.award_xp(state, enc)
     assert c.circuit == cirq.Circuit(
         cirq.SWAP(cirq.NamedQubit("wizard_1"), cirq.NamedQubit("wizard_2"))
     )
     assert (
-        output.getvalue()
+        state.file.getvalue()
         == """You have been awarded XP!
   Move
 
@@ -90,13 +93,15 @@ Choose qubit 1 for Move:
 
 
 def test_qaracter_not_high_enough():
-    output = io.StringIO()
     c = classes.Analyst("wizard")
     enc = xp_utils.EncounterXp([[alpha.Move()]])
-    xp_utils.award_xp([c], enc, ["1", "1", "2"], output)
+    state = game_state.GameState(
+        party=[c], user_input=["1", "1", "2"], file=io.StringIO()
+    )
+    xp_utils.award_xp(state, enc)
     assert c.circuit == cirq.Circuit()
     assert (
-        output.getvalue()
+        state.file.getvalue()
         == """You have been awarded XP!
   Move
 

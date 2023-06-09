@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import cirq
 
 from typing import Callable, Dict, List, Optional, Union
 import random
@@ -157,3 +158,51 @@ class Qaracter(alpha.QuantumWorld):
             return result[0]
         else:
             return self.peek([hp_obj], count=1)[0][0]
+
+    @classmethod
+    def from_save_file(
+        cls,
+        save_file: str,
+    ) -> "Qaracter":
+        lines = save_file.split(":")
+        name = lines[0]
+        qar = cls(name)
+        level = int(lines[1])
+        for _ in range(level - 1):
+            qar.add_hp()
+        for line in lines[2:]:
+            fields = line.split(",")
+            exponent = float(fields[1])
+            qubit0 = int(fields[2])
+            qubit1 = int(fields[3]) if len(fields) > 3 else None
+            if fields[0] == "X":
+                qar.add_quantum_effect(alpha.Flip(effect_fraction=exponent), qubit0)
+            elif fields[0] == "Z":
+                qar.add_quantum_effect(alpha.Phase(effect_fraction=exponent), qubit0)
+            elif fields[0] == "H":
+                qar.add_quantum_effect(alpha.Superposition(), qubit0)
+            elif fields[0] == "S":
+                # TODO: add 2 qubit effects
+                pass
+            elif fields[0] == "I":
+                # TODO: add 2 qubit effects
+                pass
+        return qar
+
+    def to_save_file(self) -> str:
+        s = f"{self.name}:{self.level}:"
+        prefix = len(self.name) + 1
+        for op in self.circuit.all_operations():
+            qubit0 = int(op.qubits[0].name[prefix:])
+            qubit1 = int(op.qubits[1].name[prefix:]) if len(op.qubits) > 1 else None
+            if isinstance(op.gate, cirq.XPowGate):
+                s += f"X,{op.gate.exponent:3f},{qubit0}:"
+            elif isinstance(op.gate, cirq.ZPowGate):
+                s += f"Z,{op.gate.exponent:3f},{qubit0}:"
+            elif isinstance(op.gate, cirq.HPowGate):
+                s += f"H,{op.gate.exponent:3f},{qubit0}:"
+            elif isinstance(op.gate, cirq.SwapPowGate):
+                s += f"S,{op.gate.exponent:3f},{qubit0},{qubit1}:"
+            elif isinstance(op.gate, cirq.SwapPowGate):
+                s += f"I,{op.gate.exponent:3f},{qubit0},{qubit1}:"
+        return s[:-1]

@@ -1,6 +1,6 @@
 # ASCII art generated with font
 # DOOM by Frans P. de Vries <fpv@xymph.iaf.nl>  18 Jun 1996
-#based on Big by Glenn Chappell 4/93 -- based on Standard
+# based on Big by Glenn Chappell 4/93 -- based on Standard
 # figlet release 2.1 -- 12 Aug 1994
 TITLE_SCREEN = r"""
 ______  _                _             _____  _           _

@@ -18,6 +18,7 @@ from typing import Optional, Sequence
 import random
 
 import unitary.examples.quantum_rpg.battle as battle
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.qaracter as qaracter
 import unitary.examples.quantum_rpg.xp_utils as xp_utils
 from typing import Sequence
@@ -48,9 +49,5 @@ class Encounter:
         """
         return random.random() < self.probability
 
-    def initiate(
-        self, players: Sequence[qaracter.Qaracter], file: Optional[io.IOBase] = None
-    ) -> battle.Battle:
-        if file:
-            return battle.Battle(players, self.enemies, file, xp=self.xp)
-        return battle.Battle(players, self.enemies, xp=self.xp)
+    def initiate(self, state: game_state.GameState) -> battle.Battle:
+        return battle.Battle(state, self.enemies, xp=self.xp)

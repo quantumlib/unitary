@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import enum
 import io
 import sys
 from typing import List, Optional
 
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.input_helpers as input_helpers
 from unitary.examples.quantum_rpg.qaracter import Qaracter
 from unitary.examples.quantum_rpg.xp_utils import EncounterXp
@@ -41,25 +41,24 @@ class Battle:
     the status.
 
     Args:
-        player_side: a list of player QuantumWorld objects representing
-            their character sheets (initial state).
+        state: a GameState which contains a list of player QuantumWorld
+            objects representing their character sheets (initial state).
+            Includes other information, such as file objects to write ouput to.
         enemy_side: a list of NPC QuantumWorld objects.
-        file:  Optional IOBase file object to write output to.
-            This enables the battle to write status to a file or string
-            for testing.
     """
 
     def __init__(
         self,
-        player_side: List[Qaracter],
+        state: game_state.GameState,
         enemy_side: List[Qaracter],
-        file: io.IOBase = sys.stdout,
         xp: Optional[EncounterXp] = None,
     ):
-        self.player_side = player_side
+        self.player_side = state.party  # TODO: copy this
         self.enemy_side = enemy_side
-        self.file = file
+        self.game_state = state
+        self.file = self.game_state.file
         self.xp = xp
+        self.get_user_input = self.game_state.get_user_input
 
     def print_screen(self):
         """Prints a two-column output of the battle status.
@@ -96,9 +95,7 @@ class Battle:
             print(status, file=self.file)
         print("-----------------------------------------------", file=self.file)
 
-    def take_player_turn(
-        self, user_input: Optional[List[str]] = None, get_user_input=input
-    ):
+    def take_player_turn(self):
         """Take a player's turn and record results in the battle.
 
         1) Retrieve the possible actions from the player.
@@ -110,12 +107,6 @@ class Battle:
             user_input: List of strings that substitute for the user's
                 raw input.
         """
-
-        # If user input is provided as an argument, then use that.
-        # Otherwise, prompt from raw input.
-        if user_input is not None:
-            get_user_input = input_helpers.get_user_input_function(user_input)
-
         for current_player in self.player_side:
             self.print_screen()
             print(f"{current_player.name} turn:", file=self.file)
@@ -125,11 +116,11 @@ class Battle:
             actions = current_player.actions()
             for key in actions:
                 print(key, file=self.file)
-            action = get_user_input("Choose your action: ")
+            action = self.get_user_input("Choose your action: ")
             if action in current_player.actions():
                 monster = (
                     input_helpers.get_user_input_number(
-                        get_user_input,
+                        self.get_user_input,
                         "Which enemy number: ",
                         max_number=len(self.enemy_side),
                         file=self.file,
@@ -138,7 +129,7 @@ class Battle:
                 )
                 selected_monster = self.enemy_side[monster]
                 qubit = input_helpers.get_user_input_number(
-                    get_user_input, "Which enemy qubit number: ", file=self.file
+                    self.get_user_input, "Which enemy qubit number: ", file=self.file
                 )
                 qubit_name = selected_monster.quantum_object_name(qubit)
                 if qubit_name in selected_monster.active_qubits():
@@ -179,18 +170,14 @@ class Battle:
             return BattleResult.ENEMIES_ESCAPED
         return BattleResult.UNFINISHED
 
-    def loop(
-        self, user_input: Optional[List[str]] = None, get_user_input=input
-    ) -> BattleResult:
+    def loop(self) -> BattleResult:
         """Full battle loop until one side is defeated.
 
         Returns the result of a battle as an enum.
         """
-        if user_input is not None:
-            get_user_input = input_helpers.get_user_input_function(user_input)
         result = self._determine_battle_result()
         while result == BattleResult.UNFINISHED:
-            result = self.take_player_turn(get_user_input=get_user_input)
+            result = self.take_player_turn()
             if result != BattleResult.UNFINISHED:
                 return result
             result = self.take_npc_turn()

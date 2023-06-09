@@ -15,6 +15,7 @@
 import io
 import unitary.examples.quantum_rpg.classes as classes
 import unitary.examples.quantum_rpg.encounter as encounter
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.item as item
 import unitary.examples.quantum_rpg.main_loop as main_loop
 import unitary.examples.quantum_rpg.npcs as npcs
@@ -64,12 +65,12 @@ def test_parse_commands() -> None:
 
 
 def test_simple_main_loop() -> None:
-    output = io.StringIO()
     c = classes.Analyst("Mensing")
-    loop = main_loop.MainLoop([c], world.World(EXAMPLE_WORLD), output)
+    state = game_state.GameState(party=[c], user_input=["quit"], file=io.StringIO())
+    loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
     loop.loop(user_input=["quit"])
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
 Lab Entrance
 
@@ -81,12 +82,14 @@ Exits: east.
 
 
 def test_do_simple_move() -> None:
-    output = io.StringIO()
     c = classes.Analyst("Mensing")
-    loop = main_loop.MainLoop([c], world.World(EXAMPLE_WORLD), output)
-    loop.loop(user_input=["e", "read sign", "w", "quit"])
+    state = game_state.GameState(
+        party=[c], user_input=["e", "read sign", "w", "quit"], file=io.StringIO()
+    )
+    loop = main_loop.MainLoop(world.World(EXAMPLE_WORLD), state)
+    loop.loop()
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
 Lab Entrance
 
@@ -114,12 +117,14 @@ Exits: east.
 
 
 def test_battle() -> None:
-    output = io.StringIO()
     c = classes.Analyst("Mensing")
-    loop = main_loop.MainLoop([c], world.World(EXAMPLE_WORLD), output)
-    loop.loop(user_input=["e", "south", "s", "1", "1", "quit"])
+    state = game_state.GameState(
+        party=[c], user_input=["e", "south", "s", "1", "1", "quit"], file=io.StringIO()
+    )
+    loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
+    loop.loop()
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
 Lab Entrance
 
@@ -160,12 +165,12 @@ Exits: north.
 
 
 def test_title_screen():
-    output = io.StringIO()
-    loop = main_loop.MainLoop([], world.World(EXAMPLE_WORLD), output)
+    state = game_state.GameState(party=[], user_input=[], file=io.StringIO())
+    loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
     loop.print_title_screen()
 
     assert (
-        output.getvalue()
+        state.file.getvalue()
         == r"""
 ______  _                _             _____  _           _
 |  ___|(_)              | |           /  ___|| |         | |
