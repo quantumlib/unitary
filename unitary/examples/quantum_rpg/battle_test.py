@@ -36,7 +36,7 @@ Aaronson turn:
 s
 m
 Sample result HealthPoint.HURT
-Observer watcher measures Aaronson at qubit Aaronson_1
+Observer watcher measures Aaronson_1 as HURT.
 """.strip()
     )
 
@@ -101,6 +101,6 @@ Aaronson turn:
 s
 m
 Sample result HealthPoint.HURT
-Observer watcher measures Aaronson at qubit Aaronson_1
+Observer watcher measures Aaronson_1 as HURT.
 """.strip()
     )

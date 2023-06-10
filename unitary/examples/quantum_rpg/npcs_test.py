@@ -15,6 +15,7 @@
 import unitary.alpha as alpha
 import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.classes as classes
+import unitary.examples.quantum_rpg.enums as enums
 import unitary.examples.quantum_rpg.npcs as npcs
 
 
@@ -23,4 +24,59 @@ def test_observer():
     c = classes.Analyst("cat")
     b = battle.Battle([c], [qar])
     assert qar.is_npc()
-    assert qar.npc_action(b) == "Observer glasses measures cat at qubit cat_1"
+    assert qar.npc_action(b) == "Observer glasses measures cat_1 as HURT."
+
+
+def test_blue_foam():
+    qar = npcs.BlueFoam(name="bubbles")
+    assert all(
+        qar.sample("bubbles_1", False) == enums.HealthPoint.HURT for _ in range(100)
+    )
+    c = classes.Analyst("person")
+    assert qar.is_npc()
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.1)
+    assert msg == "BlueFoam bubbles measures person_1 as HURT."
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.3, slime=0.25)
+    assert msg == "BlueFoam bubbles slimes person_1 for 0.250."
+
+
+def test_green_foam():
+    qar = npcs.GreenFoam(name="bubbles")
+    assert all(
+        qar.sample("bubbles_1", False) == enums.HealthPoint.HURT for _ in range(100)
+    )
+    c = classes.Analyst("person")
+    assert qar.is_npc()
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.1)
+    assert msg == "GreenFoam bubbles measures person_1 as HURT."
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.3, slime=0.25)
+    assert msg == "GreenFoam bubbles oozes person_1 for 0.250 phase."
+
+
+def test_red_foam():
+    qar = npcs.RedFoam(name="bubbles")
+    assert all(
+        qar.sample("bubbles_1", False) == enums.HealthPoint.HEALTHY for _ in range(100)
+    )
+    c = classes.Analyst("person")
+    assert qar.is_npc()
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.1)
+    assert msg == "RedFoam bubbles measures person_1 as HURT."
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.3, slime=0.25)
+    assert msg == "RedFoam bubbles slimes person_1 for 0.250."
+
+
+def test_purple_foam():
+    qar = npcs.PurpleFoam(name="bubbles")
+    assert any(
+        qar.sample("bubbles_1", False) == enums.HealthPoint.HEALTHY for _ in range(100)
+    )
+    assert any(
+        qar.sample("bubbles_1", False) == enums.HealthPoint.HURT for _ in range(100)
+    )
+    c = classes.Analyst("person")
+    assert qar.is_npc()
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.1)
+    assert msg == "PurpleFoam bubbles measures person_1 as HURT."
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.3, slime=0.25)
+    assert msg == "PurpleFoam bubbles covers person_1 with foam!"
