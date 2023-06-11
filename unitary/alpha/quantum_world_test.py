@@ -284,6 +284,50 @@ def test_undo(simulator, compile_to_qubits):
     assert all(result[0] == Light.GREEN for result in results)
 
 
+def test_copy():
+    light1 = alpha.QuantumObject("l1", Light.GREEN)
+    light2 = alpha.QuantumObject("l2", Light.RED)
+    board = alpha.QuantumWorld([light1, light2])
+    alpha.Flip()(light1)
+    alpha.Flip()(light2)
+    assert board.pop([light1])[0] == Light.RED
+    assert board.pop([light2])[0] == Light.GREEN
+
+    board2 = board.copy()
+
+    # Assert the board and the copy are equivalent
+    # (but are two distinct objects)
+    assert board.get_object_by_name("l1") is light1
+    assert board.get_object_by_name("l2") is light2
+    light1_copy = board2.get_object_by_name("l1")
+    light2_copy = board2.get_object_by_name("l2")
+    assert light1_copy is not light1
+    assert light2_copy is not light2
+    assert board.peek([light1])[0] == [Light.RED]
+    assert board.peek([light2])[0] == [Light.GREEN]
+    assert board2.peek([light1])[0] == [Light.RED]
+    assert board2.peek([light2])[0] == [Light.GREEN]
+    assert board.circuit == board2.circuit
+    assert board.circuit is not board2.circuit
+    assert board.effect_history == board2.effect_history
+    assert board.effect_history is not board2.effect_history
+    assert board.ancilla_names == board2.ancilla_names
+    assert board.ancilla_names is not board2.ancilla_names
+    assert len(board2.post_selection) == 2
+
+    # Assert that they now evolve independently
+    board2.undo_last_effect()
+    board2.undo_last_effect()
+    assert len(board.post_selection) == 2
+    assert len(board2.post_selection) == 1
+    alpha.Flip()(light1_copy)
+    alpha.Flip()(light2_copy)
+    assert board.peek([light1])[0] == [Light.RED]
+    assert board.peek([light2])[0] == [Light.GREEN]
+    assert board2.peek([light1])[0] == [Light.GREEN]
+    assert board2.peek([light2])[0] == [Light.RED]
+
+
 @pytest.mark.parametrize(
     ("simulator", "compile_to_qubits"),
     [
