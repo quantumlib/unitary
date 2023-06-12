@@ -284,7 +284,8 @@ def test_undo(simulator, compile_to_qubits):
     assert all(result[0] == Light.GREEN for result in results)
 
 
-def test_copy():
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+def test_copy(compile_to_qubits):
     light1 = alpha.QuantumObject("l1", Light.GREEN)
     light2 = alpha.QuantumObject("l2", Light.RED)
     board = alpha.QuantumWorld([light1, light2])
