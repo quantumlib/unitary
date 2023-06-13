@@ -21,6 +21,10 @@ import unitary.examples.quantum_rpg.input_helpers as input_helpers
 import unitary.examples.quantum_rpg.qaracter as qaracter
 
 
+_SAVE_DELIMITER = ";"
+_DICT_DELIMITER = ":"
+
+
 class GameState:
     def __init__(
         self,
@@ -44,7 +48,7 @@ class GameState:
         user_input: Optional[Sequence[str]] = None,
         file: io.IOBase = sys.stdout,
     ) -> "GameState":
-        lines = save_file.split(";")
+        lines = save_file.split(_SAVE_DELIMITER)
         current_location_label = lines[0]
         party: List[qaracter.Qaracter] = []
         num_party = int(lines[1])
@@ -57,9 +61,9 @@ class GameState:
         return cls(party, current_location_label, state_dict, user_input, file)
 
     def to_save_file(self) -> str:
-        s = f"{self.current_location_label};{len(self.party)};"
+        s = f"{self.current_location_label}{_SAVE_DELIMITER}{len(self.party)}{_SAVE_DELIMITER}"
         for p in self.party:
-            s += p.to_save_file() + ";"
+            s += p.to_save_file() + _SAVE_DELIMITER
         for k, v in self.state_dict.items():
-            s += f"{k}:{v};"
+            s += f"{k}{_DICT_DELIMITER}{v}{_SAVE_DELIMITER}"
         return s[:-1]

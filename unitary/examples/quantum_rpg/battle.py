@@ -55,9 +55,9 @@ class Battle:
     ):
         self.player_side = state.party  # TODO: copy this
         self.enemy_side = enemy_side
-        self.file = game_state.file
+        self.file = state.file
         self.xp = xp
-        self.get_user_input = game_state.get_user_input
+        self.get_user_input = state.get_user_input
 
     def print_screen(self):
         """Prints a two-column output of the battle status.
