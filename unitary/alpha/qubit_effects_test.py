@@ -111,6 +111,29 @@ def test_move(simulator, compile_to_qubits):
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_partial_move(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
+    piece1 = alpha.QuantumObject("a", 1)
+    piece2 = alpha.QuantumObject("b", 0)
+    board.add_object(piece1)
+    board.add_object(piece2)
+    results = board.peek([piece1, piece2], count=100)
+    assert all(result == [1, 0] for result in results)
+    alpha.Move(effect_fraction=0.5)(piece1, piece2)
+    expected_circuit = cirq.Circuit()
+    a = cirq.NamedQubit("a")
+    b = cirq.NamedQubit("b")
+    expected_circuit.append(cirq.X(a))
+    expected_circuit.append(cirq.SWAP(a, b) ** 0.5)
+    assert board.circuit == expected_circuit
+    results = board.peek([piece1, piece2], count=100)
+    assert any(result == [0, 1] for result in results)
+    assert any(result == [1, 0] for result in results)
+    assert all(result == [0, 1] or result == [1, 0] for result in results)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
 def test_phased_move(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece1 = alpha.QuantumObject("a", 1)
@@ -128,6 +151,29 @@ def test_phased_move(simulator, compile_to_qubits):
     assert board.circuit == expected_circuit
     results = board.peek([piece1, piece2], count=100)
     assert all(result == [0, 1] for result in results)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_partial_phased_move(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
+    piece1 = alpha.QuantumObject("a", 1)
+    piece2 = alpha.QuantumObject("b", 0)
+    board.add_object(piece1)
+    board.add_object(piece2)
+    results = board.peek([piece1, piece2], count=100)
+    assert all(result == [1, 0] for result in results)
+    alpha.PhasedMove(effect_fraction=0.5)(piece1, piece2)
+    expected_circuit = cirq.Circuit()
+    a = cirq.NamedQubit("a")
+    b = cirq.NamedQubit("b")
+    expected_circuit.append(cirq.X(a))
+    expected_circuit.append(cirq.ISWAP(a, b) ** 0.5)
+    assert board.circuit == expected_circuit
+    results = board.peek([piece1, piece2], count=100)
+    assert any(result == [0, 1] for result in results)
+    assert any(result == [1, 0] for result in results)
+    assert all(result == [0, 1] or result == [1, 0] for result in results)
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
