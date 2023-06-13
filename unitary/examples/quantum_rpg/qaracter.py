@@ -18,6 +18,8 @@ import random
 from unitary import alpha
 from unitary.examples.quantum_rpg import enums
 
+_GATE_DELIMITER = ","
+_FIELD_DELIMITER = "#"
 
 class Qaracter(alpha.QuantumWorld):
     """Base class for quantum RPG characters.
@@ -55,6 +57,8 @@ class Qaracter(alpha.QuantumWorld):
         self.health_status: Dict[alpha.QuantumObject, int] = {}
         self.level = 0
         self.add_hp()
+        if _FIELD_DELIMITER in self.name:
+          raise ValueError('{_FIELD_DELIMITER} is not allowed as part of a name')
 
     def is_npc(self) -> bool:
         """Returns Trus if a non-player or False if a player.
@@ -164,14 +168,15 @@ class Qaracter(alpha.QuantumWorld):
         cls,
         save_file: str,
     ) -> "Qaracter":
-        lines = save_file.split(":")
+        lines = save_file.split(_FIELD_DELIMITER)
         name = lines[0]
         qar = cls(name)
         level = int(lines[1])
         for _ in range(level - 1):
             qar.add_hp()
         for line in lines[2:]:
-            fields = line.split(",")
+            gate_type=line[0]
+            fields = line[1:].split(_GATE_DELIMITER)
             exponent = float(fields[1])
             qubit0 = int(fields[2])
             qubit1 = int(fields[3]) if len(fields) > 3 else None
@@ -190,19 +195,21 @@ class Qaracter(alpha.QuantumWorld):
         return qar
 
     def to_save_file(self) -> str:
-        s = f"{self.name}:{self.level}:"
+        s = f"{self.name}{_FIELD_DELIMITER}{self.level}{_FIELD_DELIMITER}"
         prefix = len(self.name) + 1
         for op in self.circuit.all_operations():
             qubit0 = int(op.qubits[0].name[prefix:])
             qubit1 = int(op.qubits[1].name[prefix:]) if len(op.qubits) > 1 else None
             if isinstance(op.gate, cirq.XPowGate):
-                s += f"X,{op.gate.exponent:3f},{qubit0}:"
+                s += f"X{op.gate.exponent:3f}{_GATE_DELIMITER}{qubit0}{_FIELD_DELIMITER}"
             elif isinstance(op.gate, cirq.ZPowGate):
-                s += f"Z,{op.gate.exponent:3f},{qubit0}:"
+                s += f"Z{op.gate.exponent:3f}{_GATE_DELIMITER}{qubit0}{_FIELD_DELIMITER}"
             elif isinstance(op.gate, cirq.HPowGate):
-                s += f"H,{op.gate.exponent:3f},{qubit0}:"
+                s += f"H{op.gate.exponent:3f}{_GATE_DELIMITER}{qubit0}{_FIELD_DELIMITER}"
             elif isinstance(op.gate, cirq.SwapPowGate):
-                s += f"S,{op.gate.exponent:3f},{qubit0},{qubit1}:"
+                s += f"S{op.gate.exponent:3f}{_GATE_DELIMITER}"
+                s += f"{qubit0}{_GATE_DELIMITER}{qubit1}{_FIELD_DELIMITER}"
             elif isinstance(op.gate, cirq.SwapPowGate):
-                s += f"I,{op.gate.exponent:3f},{qubit0},{qubit1}:"
+                s += f"I{op.gate.exponent:3f}{_GATE_DELIMITER}"
+                s += f"{qubit0}{_GATE_DELIMITER}{qubit1}{_FIELD_DELIMITER}"
         return s[:-1]
