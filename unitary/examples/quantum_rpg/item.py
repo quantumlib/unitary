@@ -1,5 +1,8 @@
 from typing import Callable, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
+# Common synonyms for action keywords for different objects:
+EXAMINE = ["read", "look", "examine", "investigate", "search"]
+TALK = ["talk", "chat", "ask"]
 
 class Item:
     """An item is an object or person that can be interacted with.
