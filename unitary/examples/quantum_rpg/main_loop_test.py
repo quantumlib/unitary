@@ -21,16 +21,30 @@ import unitary.examples.quantum_rpg.main_loop as main_loop
 import unitary.examples.quantum_rpg.npcs as npcs
 import unitary.examples.quantum_rpg.world as world
 
+_COUNTER = "counter"
+
+
+def _press_button(state: game_state.GameState) -> str:
+    counter = state.state_dict.get(_COUNTER, 0)
+    state.state_dict[_COUNTER] = counter + 1
+    return f"You've pressed the button {counter} times before!"
+
+
 SIGN = item.Item(
     keyword_actions=[("read", "sign", "This is an example world!")],
     description="A helpful sign is here.",
 )
+BUTTON = item.Item(
+    keyword_actions=[("press", "button", _press_button)],
+)
+
 
 EXAMPLE_WORLD = [
     world.Location(
         label="1",
         title="Lab Entrance",
         description="You stand before the entrance to the premier quantum lab.\nDouble doors lead east.",
+        items=[BUTTON],
         exits={world.Direction.EAST: "2"},
     ),
     world.Location(
@@ -76,6 +90,7 @@ Lab Entrance
 
 You stand before the entrance to the premier quantum lab.
 Double doors lead east.
+
 Exits: east.
 """.strip()
     )
@@ -95,6 +110,7 @@ Lab Entrance
 
 You stand before the entrance to the premier quantum lab.
 Double doors lead east.
+
 Exits: east.
 
 Disorganized Lab
@@ -102,6 +118,7 @@ Disorganized Lab
 Tables are here with tons of electronics.
 The lab continues to the south.
 A helpful sign is here.
+
 Exits: south, west.
 
 This is an example world!
@@ -109,6 +126,7 @@ Lab Entrance
 
 You stand before the entrance to the premier quantum lab.
 Double doors lead east.
+
 Exits: east.
 
 
@@ -130,6 +148,7 @@ Lab Entrance
 
 You stand before the entrance to the premier quantum lab.
 Double doors lead east.
+
 Exits: east.
 
 Disorganized Lab
@@ -137,12 +156,14 @@ Disorganized Lab
 Tables are here with tons of electronics.
 The lab continues to the south.
 A helpful sign is here.
+
 Exits: south, west.
 
 Cryostats
 
 Giant aluminum cylinders hang suspended by large frames.
 Rhythmic whirring of a pulse tube can be heard overhead.
+
 Exits: north.
 
 A weird security guard approaches!
@@ -159,7 +180,34 @@ Cryostats
 
 Giant aluminum cylinders hang suspended by large frames.
 Rhythmic whirring of a pulse tube can be heard overhead.
+
 Exits: north.
+""".strip()
+    )
+
+
+def test_item_function():
+    c = classes.Analyst("michalakis")
+    state = game_state.GameState(
+        party=[c],
+        user_input=["press button", "press button", "press button", "quit"],
+        file=io.StringIO(),
+    )
+    loop = main_loop.MainLoop(world.World(EXAMPLE_WORLD), state)
+    loop.loop()
+    assert (
+        state.file.getvalue().replace("\t", " ").strip()
+        == r"""
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+
+You've pressed the button 0 times before!
+You've pressed the button 1 times before!
+You've pressed the button 2 times before!
 """.strip()
     )
 
