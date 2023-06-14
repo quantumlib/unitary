@@ -15,18 +15,21 @@
 import io
 import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.classes as classes
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.npcs as npcs
 
 
 def test_battle():
-    output = io.StringIO()
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
-    b = battle.Battle([c], [e], file=output)
-    b.take_player_turn(user_input=["s", "1", "1"])
+    state = game_state.GameState(
+        party=[c], user_input=["s", "1", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    b.take_player_turn()
     b.take_npc_turn()
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
 -----------------------------------------------
 Aaronson Analyst   watcher Observer
@@ -42,13 +45,15 @@ Observer watcher measures Aaronson_1 as HURT.
 
 
 def test_bad_monster():
-    output = io.StringIO()
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
-    b = battle.Battle([c], [e], file=output)
-    b.take_player_turn(user_input=["s", "2", "1", "1"])
+    state = game_state.GameState(
+        party=[c], user_input=["s", "2", "1", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    b.take_player_turn()
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
 -----------------------------------------------
 Aaronson Analyst   watcher Observer
@@ -64,13 +69,15 @@ Sample result HealthPoint.HURT
 
 
 def test_bad_qubit():
-    output = io.StringIO()
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
-    b = battle.Battle([c], [e], file=output)
-    b.take_player_turn(user_input=["s", "1", "2"])
+    state = game_state.GameState(
+        party=[c], user_input=["s", "1", "2"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    b.take_player_turn()
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
 -----------------------------------------------
 Aaronson Analyst   watcher Observer
@@ -85,13 +92,15 @@ watcher_2 is not an active qubit
 
 
 def test_battle_loop():
-    output = io.StringIO()
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
-    b = battle.Battle([c], [e], file=output)
-    assert b.loop(user_input=["s", "1", "1"]) == battle.BattleResult.PLAYERS_DOWN
+    state = game_state.GameState(
+        party=[c], user_input=["s", "1", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    assert b.loop() == battle.BattleResult.PLAYERS_DOWN
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
 -----------------------------------------------
 Aaronson Analyst   watcher Observer

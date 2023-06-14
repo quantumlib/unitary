@@ -34,6 +34,17 @@ def test_qubit_getters_and_effects() -> None:
     assert qar.sample(obj_name, save_result=False) == enums.HealthPoint.HEALTHY
 
 
+def test_multi_qubit_effects() -> None:
+    qar = qaracter.Qaracter(name="lovelace")
+    qar.add_hp()
+    qar.add_quantum_effect(alpha.Flip(), 1)
+    qar.add_quantum_effect(alpha.Move(), 1, 2)
+    q1 = qar.quantum_object_name(1)
+    q2 = qar.quantum_object_name(2)
+    assert qar.sample(q1, save_result=False) == enums.HealthPoint.HURT
+    assert qar.sample(q2, save_result=False) == enums.HealthPoint.HEALTHY
+
+
 def test_save_result() -> None:
     qar = qaracter.Qaracter(name="bohr")
     obj_name = qar.quantum_object_name(1)
@@ -149,3 +160,20 @@ def test_even_hp_qar() -> None:
     assert not qar.is_down()
     assert qar.is_escaped()
     assert not qar.is_active()
+
+
+def test_serialization() -> None:
+    qar = qaracter.Qaracter(name="curie")
+    qar.add_hp()
+    qar.add_hp()
+    qar.add_hp()
+    qar.add_quantum_effect(alpha.Flip(), 1)
+    qar.add_quantum_effect(alpha.Phase(), 2)
+    qar.add_quantum_effect(alpha.Superposition(), 3)
+    qar.add_quantum_effect(alpha.Flip(effect_fraction=0.25), 2)
+    qar.add_quantum_effect(alpha.Phase(effect_fraction=0.125), 1)
+    serialized_str = qar.to_save_file()
+    deserialized_qar = qaracter.Qaracter.from_save_file(serialized_str)
+    assert deserialized_qar.name == qar.name
+    assert deserialized_qar.level == qar.level
+    assert deserialized_qar.circuit == qar.circuit

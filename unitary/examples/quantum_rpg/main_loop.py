@@ -19,9 +19,8 @@ import sys
 
 import unitary.examples.quantum_rpg.ascii_art as ascii_art
 import unitary.examples.quantum_rpg.battle as battle
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.encounter as encounter
-import unitary.examples.quantum_rpg.input_helpers as input_helpers
-import unitary.examples.quantum_rpg.qaracter as qaracter
 import unitary.examples.quantum_rpg.world as world
 import unitary.examples.quantum_rpg.xp_utils as xp_utils
 
@@ -47,15 +46,17 @@ class Command(enum.Enum):
 
 
 class MainLoop:
-    def __init__(
-        self,
-        party: List[qaracter.Qaracter],
-        world: world.World,
-        file: io.IOBase = sys.stdout,
-    ):
+    def __init__(self, world: world.World, state: game_state.GameState):
         self.world = world
-        self.file = file
-        self.party = party
+        self.game_state = state
+
+    @property
+    def party(self):
+        return self.game_state.party
+
+    @property
+    def file(self):
+        return self.game_state.file
 
     def print_title_screen(self):
         print(ascii_art.TITLE_SCREEN, file=self.file)
@@ -65,7 +66,6 @@ class MainLoop:
 
         Returns the result of a battle as an enum.
         """
-        get_user_input = input_helpers.get_user_input_function(user_input)
         print_room_description = True
         while True:
             if print_room_description:
@@ -78,10 +78,8 @@ class MainLoop:
                     if random_encounter.will_trigger():
                         if random_encounter.description:
                             print(random_encounter.description, file=self.file)
-                        current_battle = random_encounter.initiate(
-                            self.party, file=self.file
-                        )
-                        result = current_battle.loop(get_user_input=get_user_input)
+                        current_battle = random_encounter.initiate(self.game_state)
+                        result = current_battle.loop()
                         self.world.current_location.remove_encounter(random_encounter)
 
                         if result == battle.BattleResult.PLAYERS_WON:
@@ -92,10 +90,12 @@ class MainLoop:
                     # Reprint location description now that encounter is over.
                     print(self.world.current_location, file=self.file)
 
-            current_input = get_user_input(">")
+            current_input = self.game_state.get_user_input(">")
             cmd = world.Direction.parse(current_input)
             if cmd is not None:
-                self.world.move(cmd)
+                new_location = self.world.move(cmd)
+                if new_location is not None:
+                    self.game_state.current_location_label = new_location.label
                 continue
             action = self.world.current_location.get_action(current_input)
             if action is not None:
