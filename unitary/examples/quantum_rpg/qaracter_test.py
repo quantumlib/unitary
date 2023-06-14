@@ -160,3 +160,20 @@ def test_even_hp_qar() -> None:
     assert not qar.is_down()
     assert qar.is_escaped()
     assert not qar.is_active()
+
+
+def test_serialization() -> None:
+    qar = qaracter.Qaracter(name="curie")
+    qar.add_hp()
+    qar.add_hp()
+    qar.add_hp()
+    qar.add_quantum_effect(alpha.Flip(), 1)
+    qar.add_quantum_effect(alpha.Phase(), 2)
+    qar.add_quantum_effect(alpha.Superposition(), 3)
+    qar.add_quantum_effect(alpha.Flip(effect_fraction=0.25), 2)
+    qar.add_quantum_effect(alpha.Phase(effect_fraction=0.125), 1)
+    serialized_str = qar.to_save_file()
+    deserialized_qar = qaracter.Qaracter.from_save_file(serialized_str)
+    assert deserialized_qar.name == qar.name
+    assert deserialized_qar.level == qar.level
+    assert deserialized_qar.circuit == qar.circuit

@@ -19,6 +19,7 @@ import random
 import sys
 
 import unitary.alpha as alpha
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.input_helpers as input_helpers
 import unitary.examples.quantum_rpg.qaracter as qaracter
 
@@ -47,45 +48,42 @@ class EncounterXp:
 
 
 def award_xp(
-    party: Sequence[qaracter.Qaracter],
+    state: game_state.GameState,
     xp: Optional[EncounterXp],
-    user_input: Optional[Sequence[str]],
-    file: io.IOBase = sys.stdout,
 ):
     """Prompt user to choose a qaracter to award XP to."""
     if not xp:
         return
-    get_user_input = input_helpers.get_user_input_function(user_input)
-    print("You have been awarded XP!", file=file)
+    print("You have been awarded XP!", file=state.file)
     effect_list = xp.choose()
     for effect in effect_list:
-        print(f"  {effect}", file=file)
-    print("", file=file)
+        print(f"  {effect}", file=state.file)
+    print("", file=state.file)
     for effect in effect_list:
         num_qubits = effect.num_objects() or 1
         eligible_party = [
-            qar for qar in party if len(qar.active_qubits()) >= num_qubits
+            qar for qar in state.party if len(qar.active_qubits()) >= num_qubits
         ]
         if not eligible_party:
-            print(f"Qaracters are not high-enough level for {effect}!", file=file)
+            print(f"Qaracters are not high-enough level for {effect}!", file=state.file)
             continue
-        print(f"Choose the qaracter to add the {effect} to:", file=file)
+        print(f"Choose the qaracter to add the {effect} to:", file=state.file)
         for idx, qar in enumerate(eligible_party):
-            print(f"{idx+1}) {qar.name}", file=file)
+            print(f"{idx+1}) {qar.name}", file=state.file)
         qar_choice = input_helpers.get_user_input_number(
-            get_user_input, ">", len(eligible_party)
+            state.get_user_input, ">", len(eligible_party)
         )
         qar = eligible_party[qar_choice - 1]
-        print("Current qaracter sheet:", file=file)
-        print(qar.circuit, file=file)
+        print("Current qaracter sheet:", file=state.file)
+        print(qar.circuit, file=state.file)
         qubit_list = list(qar.active_qubits())
         qubit_choices = []
         for qubit_num in range(num_qubits):
-            print(f"Choose qubit {qubit_num} for {effect}:", file=file)
+            print(f"Choose qubit {qubit_num} for {effect}:", file=state.file)
             for idx, q in enumerate(qubit_list):
-                print(f"{idx+1}) {q}", file=file)
+                print(f"{idx+1}) {q}", file=state.file)
             choice = input_helpers.get_user_input_number(
-                get_user_input, ">", len(qubit_list)
+                state.get_user_input, ">", len(qubit_list)
             )
             qubit_choices.append(qar.get_hp(qubit_list[choice - 1]))
         effect(*qubit_choices)
