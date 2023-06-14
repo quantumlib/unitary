@@ -74,6 +74,24 @@ class QuantumWorld:
         self.compiled_qubits: Dict[cirq.Qid, List[cirq.Qid]] = {}
         self.post_selection: Dict[QuantumObject, int] = {}
 
+    def copy(self) -> "QuantumWorld":
+        new_objects = []
+        new_post_selection: Dict[QuantumObject, int] = {}
+        for obj in self.object_name_dict.values():
+            new_obj = copy.copy(obj)
+            new_objects.append(new_obj)
+            if obj in self.post_selection:
+                new_post_selection[new_obj] = self.post_selection[obj]
+        new_obj = self.__class__(new_objects, self.sampler, self.compile_to_qubits)
+        new_obj.circuit = self.circuit.copy()
+        new_obj.ancilla_names = self.ancilla_names.copy()
+        new_obj.effect_history = [
+            (circuit.copy(), copy.copy(post_selection))
+            for circuit, post_selection in self.effect_history
+        ]
+        new_obj.post_selection = new_post_selection
+        return new_obj
+
     def add_object(self, obj: QuantumObject):
         """Adds a QuantumObject to the QuantumWorld.
 
