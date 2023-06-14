@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Callable, Dict, List, Optional, Sequence, Union
+from typing import Callable, Dict, List, Optional, Sequence
 
 import dataclasses
 import unitary.examples.quantum_rpg.encounter as encounter
@@ -71,9 +71,12 @@ class Location:
     def _item_str(self) -> str:
         if not self.items:
             return ""
-        return "\n" + "\n".join([item.description or "" for item in self.items])
+        item_descriptions = [
+            item.description + "\n" for item in self.items if item.description
+        ]
+        return "".join(item_descriptions)
 
-    def get_action(self, keyword: str) -> Union[str, Callable]:
+    def get_action(self, keyword: str) -> item.ITEM_ACTION_TYPE:
         if self.items:
             for item in self.items:
                 action = item.get_action(keyword)
@@ -85,7 +88,7 @@ class Location:
         self.encounters.remove(triggered_encounter)
 
     def __str__(self) -> str:
-        return f"{self.title}\n\n{self.description}{self._item_str()}\nExits: {self._exits()}\n"
+        return f"{self.title}\n\n{self.description}\n{self._item_str()}\nExits: {self._exits()}\n"
 
 
 class World:

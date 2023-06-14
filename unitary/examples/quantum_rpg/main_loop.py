@@ -101,8 +101,11 @@ class MainLoop:
             if action is not None:
                 if isinstance(action, str):
                     print(action, file=self.file)
+                elif callable(action):
+                    msg = action(self.game_state)
+                    if msg:
+                        print(msg, file=self.file)
                 print_room_description = False
-                # TODO: actions that are 'callables'
                 continue
             cmd = Command.parse(current_input)
             if cmd == Command.QUIT:

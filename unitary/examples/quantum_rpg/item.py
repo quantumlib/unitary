@@ -1,8 +1,14 @@
 from typing import Callable, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
+import unitary.examples.quantum_rpg.game_state as game_state
+
 # Common synonyms for action keywords for different objects:
 EXAMINE = ["read", "look", "examine", "investigate", "search"]
 TALK = ["talk", "chat", "ask"]
+
+ITEM_FUNCTION_TYPE = Callable[[game_state.GameState], Optional[str]]
+ITEM_ACTION_TYPE = Union[str, ITEM_FUNCTION_TYPE]
+
 
 class Item:
     """An item is an object or person that can be interacted with.
@@ -33,7 +39,7 @@ class Item:
             Tuple[
                 Union[str, Sequence[str]],
                 Optional[Union[str, Sequence[str]]],
-                Union[str, Callable],
+                ITEM_ACTION_TYPE,
             ]
         ],
         description: Optional[str] = None,
@@ -41,7 +47,7 @@ class Item:
         self.keyword_actions = keyword_actions
         self.description = description
 
-    def get_action(self, user_input: str) -> Optional[Union[str, Callable]]:
+    def get_action(self, user_input: str) -> Optional[ITEM_ACTION_TYPE]:
         words = user_input.lower().split()
         if not words:
             return None
