@@ -285,10 +285,13 @@ def test_undo(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_copy(compile_to_qubits):
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_copy(simulator, compile_to_qubits):
     light1 = alpha.QuantumObject("l1", Light.GREEN)
     light2 = alpha.QuantumObject("l2", Light.RED)
-    board = alpha.QuantumWorld([light1, light2])
+    board = alpha.QuantumWorld(
+        [light1, light2], sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
     alpha.Flip()(light1)
     alpha.Flip()(light2)
     assert board.pop([light1])[0] == Light.RED
