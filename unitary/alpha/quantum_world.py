@@ -82,7 +82,11 @@ class QuantumWorld:
             new_objects.append(new_obj)
             if obj in self.post_selection:
                 new_post_selection[new_obj] = self.post_selection[obj]
-        new_obj = self.__class__(new_objects, self.sampler, self.compile_to_qubits)
+        new_obj = self.__class__(
+            objects=new_objects,
+            sampler=self.sampler,
+            compile_to_qubits=self.compile_to_qubits,
+        )
         new_obj.circuit = self.circuit.copy()
         new_obj.ancilla_names = self.ancilla_names.copy()
         new_obj.effect_history = [
