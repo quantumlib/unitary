@@ -212,10 +212,9 @@ You've pressed the button 2 times before!
     )
 
 
-def test_title_screen():
-    state = game_state.GameState(party=[], user_input=[], file=io.StringIO())
-    loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
-    loop.print_title_screen()
+def test_main_quit():
+    state = game_state.GameState(party=[], user_input=["4"], file=io.StringIO())
+    loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()
@@ -237,5 +236,70 @@ ______                         ||              _    _
                    | |         ||
                    |_|         \/
 
+-----------------------------------------------
+1) Begin new adventure
+2) Load existing adventure
+3) Help
+4) Quit
+-----------------------------------------------
 """
+    )
+
+
+def test_main_begin():
+    state = game_state.GameState(
+        party=[], user_input=["1", "nova", "n", "quit"], file=io.StringIO()
+    )
+    loop = main_loop.main(state)
+
+    assert (
+        state.file.getvalue().strip()
+        == r"""
+______  _                _             _____  _           _
+|  ___|(_)              | |           /  ___|| |         | |
+| |_    _  _ __    __ _ | |    __     \ `--. | |_   __ _ | |_   ___
+|  _|  | || '_ \  / _` || |    ()      `--. \| __| / _` || __| / _ \
+| |    | || | | || (_| || |    )(     /\__/ /| |_ | (_| || |_ |  __/
+\_|    |_||_| |_| \__,_||_|    )(     \____/  \__| \__,_| \__| \___|
+                            o======o
+                               ||
+______                         ||              _    _
+| ___ \                        ||             | |  (_)
+| |_/ / _ __   ___  _ __    __ _| _ __   __ _ | |_  _   ___   _ __
+|  __/ | '__| / _ \| '_ \  / _` || '__| / _` || __|| | / _ \ | '_ \
+| |    | |   |  __/| |_) || (_| || |   | (_| || |_ | || (_) || | | |
+\_|    |_|    \___|| .__/  \__,_||_|    \__,_| \__||_| \___/ |_| |_|
+                   | |         ||
+                   |_|         \/
+
+-----------------------------------------------
+1) Begin new adventure
+2) Load existing adventure
+3) Help
+4) Quit
+-----------------------------------------------
+Science Hut
+
+At the edge of the classical frontier, a solitary hut
+looks north towards the mountains in the distance.
+Though still in the classical realm, it is clear the
+researchers in this humble abode have aspirations for
+the future.  Desks and chalkboards filled with diagrams
+fill this room.
+It is only natural that Richard is here to help start your journey.
+
+Exits: north.
+
+Edge of the Classical Frontier
+
+You are standing outside a hut near the end of the classical domain.
+This wild place which separates the classical from the quantum
+realms. To the north is the frontier, where quantum phenomena are
+studied and classified.  Far off in the distance are the fabled mountains
+of error-correction, the subject of many theories and discussion.
+
+A bent sign sticks out of the ground at an angle.
+
+Exits: south, north.
+""".strip()
     )

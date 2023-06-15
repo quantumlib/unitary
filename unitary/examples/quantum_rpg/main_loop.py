@@ -19,10 +19,13 @@ import sys
 
 import unitary.examples.quantum_rpg.ascii_art as ascii_art
 import unitary.examples.quantum_rpg.battle as battle
+import unitary.examples.quantum_rpg.classes as classes
 import unitary.examples.quantum_rpg.game_state as game_state
+import unitary.examples.quantum_rpg.input_helpers as input_helpers
 import unitary.examples.quantum_rpg.encounter as encounter
 import unitary.examples.quantum_rpg.world as world
 import unitary.examples.quantum_rpg.xp_utils as xp_utils
+import unitary.examples.quantum_rpg.final_state_preparation.final_state_world as final_state_world
 
 
 class Command(enum.Enum):
@@ -57,9 +60,6 @@ class MainLoop:
     @property
     def file(self):
         return self.game_state.file
-
-    def print_title_screen(self):
-        print(ascii_art.TITLE_SCREEN, file=self.file)
 
     def loop(self, user_input: Optional[Sequence[str]] = None) -> None:
         """Full battle loop until one side is defeated.
@@ -114,3 +114,31 @@ class MainLoop:
                 print(
                     f"I did not understand the command {current_input}", file=self.file
                 )
+
+
+def main(state: game_state.GameState) -> None:
+    main_loop = None
+    while not main_loop:
+        print(ascii_art.TITLE_SCREEN, file=state.file)
+        print(ascii_art.START_MENU, file=state.file)
+        menu_choice = int(
+            input_helpers.get_user_input_number(state.get_user_input, ">", 4)
+        )
+        if menu_choice == 1:
+            name = input_helpers.get_user_input_qaracter_name(
+                state.get_user_input, "your initial Analyst qaracter", file=state.file
+            )
+            qar = classes.Analyst(name)
+            state.party.append(qar)
+            main_loop = MainLoop(world.World(final_state_world.WORLD), state)
+        elif menu_choice == 2:
+            pass
+        elif menu_choice == 3:
+            pass
+        elif menu_choice == 4:
+            return
+    main_loop.loop()
+
+
+if __name__ == "__main__":
+    main(game_state.GameState(party=[]))

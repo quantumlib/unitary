@@ -1,3 +1,6 @@
+"""ASCII art and other large text constants."""
+
+
 # ASCII art generated with font
 # DOOM by Frans P. de Vries <fpv@xymph.iaf.nl>  18 Jun 1996
 # based on Big by Glenn Chappell 4/93 -- based on Standard
@@ -20,3 +23,13 @@ ______                         ||              _    _
                    | |         ||
                    |_|         \/
 """
+
+
+START_MENU = """
+-----------------------------------------------
+1) Begin new adventure
+2) Load existing adventure
+3) Help
+4) Quit
+-----------------------------------------------
+""".strip()
