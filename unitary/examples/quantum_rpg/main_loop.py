@@ -118,13 +118,14 @@ class MainLoop:
 
 def main(state: game_state.GameState) -> None:
     main_loop = None
+    print(ascii_art.TITLE_SCREEN, file=state.file)
     while not main_loop:
-        print(ascii_art.TITLE_SCREEN, file=state.file)
         print(ascii_art.START_MENU, file=state.file)
         menu_choice = int(
             input_helpers.get_user_input_number(state.get_user_input, ">", 4)
         )
         if menu_choice == 1:
+            print(ascii_art.INTRO_STORY, file=state.file)
             name = input_helpers.get_user_input_qaracter_name(
                 state.get_user_input, "your initial Analyst qaracter", file=state.file
             )
@@ -134,7 +135,7 @@ def main(state: game_state.GameState) -> None:
         elif menu_choice == 2:
             pass
         elif menu_choice == 3:
-            pass
+            print(ascii_art.HELP, file=state.file)
         elif menu_choice == 4:
             return
     main_loop.loop()
