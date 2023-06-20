@@ -175,7 +175,7 @@ Mensing turn:
 s
 m
 Sample result HealthPoint.HURT
-Observer watcher measures Mensing at qubit Mensing_1
+Observer watcher measures Mensing_1 as HURT.
 Cryostats
 
 Giant aluminum cylinders hang suspended by large frames.

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
 
 import random
 
@@ -18,20 +19,128 @@ import unitary.alpha as alpha
 from unitary.examples.quantum_rpg import qaracter
 
 
+def _enemy_qubits(party: List[qaracter.Qaracter]) -> List[alpha.QuantumObject]:
+    """Determines valid enemy target qubits and returns them with the player."""
+    return [player.get_hp(q) for player in party for q in player.active_qubits()]
+
+
+def _sample_qubit(my_name: str, enemy_qubit: alpha.QuantumObject) -> str:
+    enemy_name = enemy_qubit.name
+    value = enemy_qubit.world.sample(enemy_name, True)
+    return f"{my_name} measures {enemy_name} as {value.name}."
+
+
 class Npc(qaracter.Qaracter):
-    """Base class for non-player character `Qaracter` objects."""
+    """Base class for non-player character `Qaracter` objects.
+
+    Inheritors can overload either do_action or npc_action.
+
+    For NPCs that target a single random qubit with an effect,
+    one can overload act_on_enemy_qubit.
+
+    For more general effects, npc_action can be overloaded.
+    **kwargs can be used to add extra arguments for deterministic
+    testing.
+    """
+
+    @property
+    def display_name(self) -> str:
+        return f"{self.__class__.__name__} {self.name}"
 
     def is_npc(self):
         return True
+
+    def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
+        return ""
+
+    def npc_action(self, battle, **kwargs) -> str:
+        enemy_qubit = random.choice(_enemy_qubits(battle.player_side))
+        action_choice = random.random()
+        return self.act_on_enemy_qubit(enemy_qubit, action_choice, **kwargs)
+
+
+#####################
+#
+#  Level 1 NPCs
+#
+#####################
 
 
 class Observer(Npc):
     """Simple test NPC that measures a random qubit each turn."""
 
-    def npc_action(self, battle) -> str:
-        enemy_target = random.randint(0, len(battle.player_side) - 1)
-        enemy_name = battle.player_side[enemy_target].name
-        enemy_qubit = random.choice(battle.player_side[enemy_target].active_qubits())
+    def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
+        return _sample_qubit(self.display_name, enemy_qubit)
 
-        battle.player_side[enemy_target].sample(enemy_qubit, True)
-        return f"Observer {self.name} measures {enemy_name} at qubit {enemy_qubit}"
+
+class BlueFoam(Npc):
+    """Introductory NPC that starts in |0> state.
+
+    Two actions:  can slime someone for a small X rotation,
+    or measure a qubit.
+    """
+
+    def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
+        if action_choice > 0.2:
+            slime = kwargs["slime"] or random.randint(0, 250) / 1000.0
+            alpha.Flip(effect_fraction=slime)(enemy_qubit)
+            return f"{self.display_name} slimes {enemy_qubit.name} for {slime:0.3f}."
+        else:
+            return _sample_qubit(self.display_name, enemy_qubit)
+
+
+class GreenFoam(Npc):
+    """Introductory NPC that starts in |0> state.
+
+    Two actions: can slime someone for a small Z rotation,
+    or measure a qubit.
+    """
+
+    def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
+        if action_choice > 0.2:
+            slime = kwargs["slime"] or random.randint(0, 250) / 1000.0
+            alpha.Phase(effect_fraction=slime)(enemy_qubit)
+            return (
+                f"{self.display_name} oozes {enemy_qubit.name} for {slime:0.3f} phase."
+            )
+        else:
+            return _sample_qubit(self.display_name, enemy_qubit)
+
+
+class RedFoam(Npc):
+    """Introductory NPC that starts in |1> state.
+
+    Two actions: can slime someone for a small X rotation,
+    or measure a qubit.
+    """
+
+    def __init__(self, name):
+        super().__init__(name)
+        alpha.Flip()(self.get_hp(self.quantum_object_name(1)))
+
+    def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
+        if action_choice > 0.2:
+            slime = kwargs["slime"] or random.randint(0, 350) / 1000.0
+            alpha.Flip(effect_fraction=slime)(enemy_qubit)
+            return f"{self.display_name} slimes {enemy_qubit.name} for {slime:0.3f}."
+        else:
+            return _sample_qubit(self.display_name, enemy_qubit)
+
+
+class PurpleFoam(Npc):
+    """Introductory NPC that starts in |+> state.
+
+    Two actions: can slime someone for a small X rotation,
+    or measure a qubit.
+    """
+
+    def __init__(self, name):
+        super().__init__(name)
+        alpha.Superposition()(self.get_hp(self.quantum_object_name(1)))
+
+    def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
+        if action_choice > 0.2:
+            alpha.Superposition()(enemy_qubit)
+            return f"{self.display_name} covers {enemy_qubit.name} with foam!"
+        else:
+            return _sample_qubit(self.display_name, enemy_qubit)
