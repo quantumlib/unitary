@@ -2,7 +2,7 @@
 
 ################################################################################
 # Runs pylint on the repository using a preconfigured .pylintrc file.
-#
+# 
 # Usage:
 #     check/pylint [--flags for pylint]
 ################################################################################
