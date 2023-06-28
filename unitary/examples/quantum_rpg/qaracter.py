@@ -66,7 +66,7 @@ class Qaracter(alpha.QuantumWorld):
         return _FIELD_DELIMITER not in name
 
     def is_npc(self) -> bool:
-        """Returns Trus if a non-player or False if a player.
+        """Returns True if a non-player or False if a player.
 
         Inheritors of NPCs should override this function.
         """
