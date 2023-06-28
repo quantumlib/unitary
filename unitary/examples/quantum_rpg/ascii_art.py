@@ -37,7 +37,7 @@ START_MENU = """
 
 INTRO_STORY = """
 As a young analyst straight out of school,
-you have heard about the hype and excitement about
+you have heard the hype and excitement about
 the quantum realm and the rumors of a great computer
 that can calculate beyond what any classical device
 can do.  When the call for able adventurers comes,
@@ -55,7 +55,7 @@ abilities rolled by dice, your characters (or qaracters)
 are determined by a quantum circuit!
 
 Each qaracter in your party will have a number of qubits
-equal to their level as well as a circuit that determines
+equal to their level, and a circuit that determines
 their initial state.  If you get into a battle, you will
 need to make sure that you measure your party's qubits as
 1's and your opponent's qubits as 0's.  Each qaracter
