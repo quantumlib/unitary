@@ -24,16 +24,16 @@ def _enemy_qubits(party: List[qaracter.Qaracter]) -> List[alpha.QuantumObject]:
     """Determines valid enemy target qubits and returns them with the player."""
     enemy_qubits: List[alpha.QuantumObject] = []
     for player in party:
-      for q in player.active_qubits():
-          hp = player.get_hp(q)
-          if hp is not None:
-            enemy_qubits.append(hp)
+        for q in player.active_qubits():
+            hp = player.get_hp(q)
+            if hp is not None:
+                enemy_qubits.append(hp)
     return enemy_qubits
 
 
 def _sample_qubit(my_name: str, enemy_qubit: alpha.QuantumObject) -> str:
     if not enemy_qubit.world:
-      return f"{enemy_qubit.name} is without a world!"
+        return f"{enemy_qubit.name} is without a world!"
     enemy_name = enemy_qubit.name
     value = cast(qaracter.Qaracter, enemy_qubit.world).sample(enemy_name, True)
     return f"{my_name} measures {enemy_name} as {value.name}."

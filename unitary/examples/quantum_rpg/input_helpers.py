@@ -8,7 +8,6 @@ _USER_INPUT = Callable[[str], str]
 _INVALID_MESSAGE = "Invalid number selected."
 
 
-
 def get_user_input_function(user_input: Optional[Sequence[str]] = None) -> _USER_INPUT:
     """Returns a lambda for getting user input.
 
@@ -39,7 +38,7 @@ def get_user_input_number(
     """
     while True:
         try:
-          user_input = int(get_user_input(message or ""))
+            user_input = int(get_user_input(message or ""))
         except ValueError as e:
             if invalid_message:
                 print(invalid_message, file=file)

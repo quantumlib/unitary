@@ -165,14 +165,14 @@ class Qaracter(alpha.QuantumWorld):
         """
         hp_obj = self.get_hp(hp_name)
         if not hp_obj:
-            raise ValueError(f'{hp_name} is not a valid hp name')
+            raise ValueError(f"{hp_name} is not a valid hp name")
         if save_result:
             result = self.pop([hp_obj])
             hp = cast(enums.HealthPoint, result[0])
             self.health_status[hp_name] = hp.value
             return hp
         else:
-          return cast(enums.HealthPoint, self.peek([hp_obj], count=1)[0][0])
+            return cast(enums.HealthPoint, self.peek([hp_obj], count=1)[0][0])
 
     @classmethod
     def from_save_file(
