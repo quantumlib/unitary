@@ -56,7 +56,7 @@ def get_user_input_number(
 def get_user_input_qaracter_name(
     get_user_input: _USER_INPUT,
     qaracter_type: Optional[str] = "a new qaracter",
-    file: io.IOBase = sys.stdout,
+    file: TextIO = sys.stdout,
 ):
     while True:
         user_input = get_user_input(f"Please enter a name for {qaracter_type}:")
