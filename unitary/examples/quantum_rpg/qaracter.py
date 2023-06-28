@@ -58,11 +58,15 @@ class Qaracter(alpha.QuantumWorld):
         self.health_status: Dict[alpha.QuantumObject, int] = {}
         self.level = 0
         self.add_hp()
-        if _FIELD_DELIMITER in self.name:
-            raise ValueError("{_FIELD_DELIMITER} is not allowed as part of a name")
+        if not self.is_valid_name(self.name):
+            raise ValueError(f"{_FIELD_DELIMITER} is not allowed as part of a name")
+
+    @staticmethod
+    def is_valid_name(name):
+        return _FIELD_DELIMITER not in name
 
     def is_npc(self) -> bool:
-        """Returns Trus if a non-player or False if a player.
+        """Returns True if a non-player or False if a player.
 
         Inheritors of NPCs should override this function.
         """

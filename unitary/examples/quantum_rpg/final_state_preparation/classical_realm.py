@@ -280,8 +280,8 @@ CLASSICAL_REALM = [
             "looks north towards the mountains in the distance.\n"
             "Though still in the classical realm, it is clear the\n"
             "researchers in this humble abode have aspirations for\n"
-            "the future.  Desks and chalkboards filled with diagrams\n",
-            "fill this room.",
+            "the future.  Desks and chalkboards filled with diagrams\n"
+            "fill this room."
         ),
         items=[RICHARD, HUT_DESK, HUT_CHALKBOARD],
         exits={Direction.NORTH: "classical2"},
@@ -293,8 +293,8 @@ CLASSICAL_REALM = [
             "You are standing outside a hut near the end of the classical domain.\n"
             "This wild place which separates the classical from the quantum\n"
             "realms. To the north is the frontier, where quantum phenomena are\n"
-            "studied and classified.  Far off in the distance are the fabled mountains\n",
-            "of error-correction, the subject of many theories and discussion.\n",
+            "studied and classified.  Far off in the distance are the fabled mountains\n"
+            "of error-correction, the subject of many theories and discussion.\n"
         ),
         items=[BENT_SIGN],
         exits={Direction.SOUTH: "classical1", Direction.NORTH: "classical3"},
@@ -303,10 +303,10 @@ CLASSICAL_REALM = [
         label="classical3",
         title="The Classical Frontier",
         description=(
-            "Here, the frontier between the classical and quantum realms begins.\n",
+            "Here, the frontier between the classical and quantum realms begins.\n"
             "Farther north, you can see faint undulations, as if the way is blurred\n"
             "by some mirage.  To proceed, you will need to move around this strange\n"
-            "occurance.",
+            "occurance."
         ),
         items=[],
         exits={
