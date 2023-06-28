@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, TextIO
 
 import io
 import sys
@@ -30,9 +30,9 @@ class GameState:
         self,
         party: List[qaracter.Qaracter],
         current_location_label: str = "",
-        state_dict: Dict[str, str] = None,
+        state_dict: Optional[Dict[str, str]] = None,
         user_input: Optional[Sequence[str]] = None,
-        file: io.IOBase = sys.stdout,
+        file: TextIO = sys.stdout,
     ):
         self.party = party
         self.current_location_label = current_location_label
@@ -46,7 +46,7 @@ class GameState:
         cls,
         save_file: str,
         user_input: Optional[Sequence[str]] = None,
-        file: io.IOBase = sys.stdout,
+        file: TextIO = sys.stdout,
     ) -> "GameState":
         lines = save_file.split(_SAVE_DELIMITER)
         current_location_label = lines[0]

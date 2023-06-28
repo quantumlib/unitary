@@ -13,7 +13,7 @@
 # limitations under the License.
 import copy
 import enum
-from typing import Dict, Iterable, List, Optional, Sequence, Union
+from typing import cast, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 import cirq
 
 from unitary.alpha.quantum_object import QuantumObject
@@ -60,15 +60,15 @@ class QuantumWorld:
             for obj in objects:
                 self.add_object(obj)
 
-    def clear(self):
+    def clear(self) -> None:
         """Removes all objects and effects from this QuantumWorld.
 
         This will reset the QuantumWorld to an empty state.
         """
         self.circuit = cirq.Circuit()
-        self.effect_history = []
+        self.effect_history:List[Tuple[cirq.Circuit, Dict[QuantumObject, int]]] = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
-        self.ancilla_names = set()
+        self.ancilla_names:Set[str] = set()
         # When `compile_to_qubits` is True, this tracks the mapping of the
         # original qudits to the compiled qubits.
         self.compiled_qubits: Dict[cirq.Qid, List[cirq.Qid]] = {}
@@ -82,15 +82,15 @@ class QuantumWorld:
             new_objects.append(new_obj)
             if obj in self.post_selection:
                 new_post_selection[new_obj] = self.post_selection[obj]
-        new_obj = self.__class__(new_objects, self.sampler, self.compile_to_qubits)
-        new_obj.circuit = self.circuit.copy()
-        new_obj.ancilla_names = self.ancilla_names.copy()
-        new_obj.effect_history = [
+        new_world = self.__class__(new_objects, self.sampler, self.compile_to_qubits)
+        new_world.circuit = self.circuit.copy()
+        new_world.ancilla_names = self.ancilla_names.copy()
+        new_world.effect_history = [
             (circuit.copy(), copy.copy(post_selection))
             for circuit, post_selection in self.effect_history
         ]
-        new_obj.post_selection = new_post_selection
-        return new_obj
+        new_world.post_selection = new_post_selection
+        return new_world
 
     def add_object(self, obj: QuantumObject):
         """Adds a QuantumObject to the QuantumWorld.
@@ -292,17 +292,18 @@ class QuantumWorld:
             return cirq.big_endian_bits_to_int(result)
         if isinstance(result, Iterable):
             # If it is a single-element iterable, return the first element.
-            if len(result) != 1:
+            result_list = list(result)
+            if len(result_list) != 1:
                 raise ValueError(
                     f"Cannot interpret a multivalued iterable {result} as a "
                     "single result for a non-compiled world."
                 )
-            return result[0]
+            return result_list[0]
         return result
 
     def force_measurement(
         self, obj: QuantumObject, result: Union[enum.Enum, int]
-    ) -> str:
+    ) -> None:
         """Measures a QuantumObject with a defined outcome.
 
         This function will move the qubit to an ancilla and set
@@ -334,7 +335,7 @@ class QuantumWorld:
         objects: Optional[Sequence[QuantumObject]] = None,
         count: int = 1,
         convert_to_enum: bool = True,
-        _existing_list: List[List[Union[enum.Enum, int]]] = None,
+        _existing_list: Optional[List[List[Union[enum.Enum, int]]]] = None,
         _num_reps: Optional[int] = None,
     ) -> List[List[Union[enum.Enum, int]]]:
         """Measures the state of the system 'non-destructively'.
@@ -360,7 +361,8 @@ class QuantumWorld:
         measure_circuit = self.circuit.copy()
         if objects is None:
             objects = self.public_objects
-        measure_set = set(objects + list(self.post_selection.keys()))
+        measure_set = set(objects)
+        measure_set.update(self.post_selection.keys())
         measure_circuit.append(
             [
                 cirq.measure(

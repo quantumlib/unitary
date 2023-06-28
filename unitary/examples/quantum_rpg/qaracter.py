@@ -13,7 +13,7 @@
 # limitations under the License.
 import cirq
 
-from typing import Callable, Dict, List, Optional, Union
+from typing import cast, Callable, Dict, List, Optional, Union
 import random
 from unitary import alpha
 from unitary.examples.quantum_rpg import enums
@@ -55,7 +55,7 @@ class Qaracter(alpha.QuantumWorld):
     def __init__(self, name: str):
         super().__init__()
         self.name = name
-        self.health_status: Dict[alpha.QuantumObject, int] = {}
+        self.health_status: Dict[str, int] = {}
         self.level = 0
         self.add_hp()
         if _FIELD_DELIMITER in self.name:
@@ -93,11 +93,12 @@ class Qaracter(alpha.QuantumWorld):
         self.add_object(obj)
         return obj
 
-    def get_hp(self, hp_name: str) -> alpha.QuantumObject:
+    def get_hp(self, hp_name: str) -> Optional[alpha.QuantumObject]:
         """Retrieves a QuantumObject with the specified name."""
         for obj in self.objects:
             if hp_name == obj.name:
                 return obj
+        return None
 
     def active_qubits(self) -> List[str]:
         """Returns the names of all active (non-measured) quantum objects (HP)."""
@@ -159,12 +160,15 @@ class Qaracter(alpha.QuantumWorld):
 
         """
         hp_obj = self.get_hp(hp_name)
+        if not hp_obj:
+            raise ValueError(f'{hp_name} is not a valid hp name')
         if save_result:
             result = self.pop([hp_obj])
-            self.health_status[hp_name] = result[0].value
-            return result[0]
+            hp = cast(enums.HealthPoint, result[0])
+            self.health_status[hp_name] = hp.value
+            return hp
         else:
-            return self.peek([hp_obj], count=1)[0][0]
+          return cast(enums.HealthPoint, self.peek([hp_obj], count=1)[0][0])
 
     @classmethod
     def from_save_file(
@@ -189,10 +193,10 @@ class Qaracter(alpha.QuantumWorld):
                 qar.add_quantum_effect(alpha.Phase(effect_fraction=exponent), qubit0)
             elif gate_type == "H":
                 qar.add_quantum_effect(alpha.Superposition(), qubit0)
-            elif gate_type == "S":
+            elif gate_type == "S" and qubit1:
                 # TODO: effect_fraction
                 qar.add_quantum_effect(alpha.Move(), qubit0, qubit1)
-            elif gate_type == "I":
+            elif gate_type == "I" and qubit1:
                 # TODO: effect_fraction
                 qar.add_quantum_effect(alpha.PhasedMove(), qubit0, qubit1)
         return qar

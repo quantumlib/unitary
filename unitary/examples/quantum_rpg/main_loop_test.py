@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import cast
 
 import io
 import unitary.examples.quantum_rpg.classes as classes
@@ -25,8 +26,8 @@ _COUNTER = "counter"
 
 
 def _press_button(state: game_state.GameState) -> str:
-    counter = state.state_dict.get(_COUNTER, 0)
-    state.state_dict[_COUNTER] = counter + 1
+    counter = state.state_dict.get(_COUNTER, "0")
+    state.state_dict[_COUNTER] = str(int(counter) + 1)
     return f"You've pressed the button {counter} times before!"
 
 
@@ -84,7 +85,7 @@ def test_simple_main_loop() -> None:
     loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
     loop.loop(user_input=["quit"])
     assert (
-        state.file.getvalue().replace("\t", " ").strip()
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
         == r"""
 Lab Entrance
 
@@ -104,7 +105,7 @@ def test_do_simple_move() -> None:
     loop = main_loop.MainLoop(world.World(EXAMPLE_WORLD), state)
     loop.loop()
     assert (
-        state.file.getvalue().replace("\t", " ").strip()
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
         == r"""
 Lab Entrance
 
@@ -142,7 +143,7 @@ def test_battle() -> None:
     loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
     loop.loop()
     assert (
-        state.file.getvalue().replace("\t", " ").strip()
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
         == r"""
 Lab Entrance
 

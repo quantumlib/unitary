@@ -5,9 +5,6 @@ import unitary.examples.quantum_rpg.final_state_preparation.final_state_world as
 from unitary.examples.quantum_rpg.world import Direction, World
 
 
-# Rooms with deliberate one-way exits that should be skipped by exit tests.
-ONE_WAY_EXIT_ROOMS = []
-
 OPPOSITE_DIR = {
     Direction.EAST: Direction.WEST,
     Direction.WEST: Direction.EAST,
@@ -29,7 +26,9 @@ def go_directions(path: str) -> World:
     example_world = World(final_state.WORLD)
     for cmd in path:
         cur_room = example_world.current_location.label
-        result = example_world.move(Direction.parse(cmd))
+        direction = Direction.parse(cmd)
+        assert direction is not None
+        result = example_world.move(direction)
         assert cmd is not None, f"Moving {cmd} in room {cur_room} not valid"
     return example_world
 

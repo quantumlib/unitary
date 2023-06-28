@@ -87,7 +87,7 @@ class QuantumIf:
     """
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
-        pass
+        return iter(())
 
     def __call__(self, *objects):
         return QuantumThen(*objects)

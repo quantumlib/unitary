@@ -45,7 +45,7 @@ class ConnectivityHeuristicCircuitTransformer:
     def __init__(self, device: cirq.Device):
         super().__init__()
         self.device = device
-        self.mapping = None
+        self.mapping:Optional[Dict] = None
         self.qubit_list = list(device.metadata.qubit_set or {})
         self.starting_qubit = self.find_start_qubit(self.qubit_list)
 
@@ -76,7 +76,7 @@ class ConnectivityHeuristicCircuitTransformer:
             c += self.qubits_within(depth - 1, qubit + diff, qubit_list, visited)
         return c
 
-    def find_start_qubit(self, qubit_list: List[cirq.Qid], depth=3) -> cirq.GridQubit:
+    def find_start_qubit(self, qubit_list: Iterable[cirq.Qid], depth=3) -> cirq.GridQubit:
         """Finds a reasonable starting qubit to start the mapping.
 
         Uses the heuristic of the most connected qubit.
