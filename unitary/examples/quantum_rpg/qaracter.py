@@ -11,10 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import cirq
-
 from typing import cast, Callable, Dict, List, Optional, Union
+import inspect
 import random
+import sys
+
+import cirq
 from unitary import alpha
 from unitary.examples.quantum_rpg import enums
 
@@ -181,11 +183,23 @@ class Qaracter(alpha.QuantumWorld):
     ) -> "Qaracter":
         lines = save_file.split(_FIELD_DELIMITER)
         name = lines[0]
-        qar = cls(name)
-        level = int(lines[1])
+        class_name = lines[1]
+
+        # Avoid circular import
+        import unitary.examples.quantum_rpg.classes
+
+        class_tuples = inspect.getmembers(
+            sys.modules["unitary.examples.quantum_rpg.classes"], inspect.isclass
+        )
+        new_cls = cls
+        for cls_name, cls_type in class_tuples:
+            if cls_name == class_name:
+                new_cls = cls_type
+        qar = new_cls(name)
+        level = int(lines[2])
         for _ in range(level - 1):
             qar.add_hp()
-        for line in lines[2:]:
+        for line in lines[3:]:
             gate_type = line[0]
             fields = line[1:].split(_GATE_DELIMITER)
             exponent = float(fields[0])
@@ -208,7 +222,8 @@ class Qaracter(alpha.QuantumWorld):
         return qar
 
     def to_save_file(self) -> str:
-        s = f"{self.name}{_FIELD_DELIMITER}{self.level}{_FIELD_DELIMITER}"
+        s = f"{self.name}{_FIELD_DELIMITER}{self. __class__. __name__ }{_FIELD_DELIMITER}"
+        s += f"{self.level}{_FIELD_DELIMITER}"
         prefix = len(self.name) + 1
         for op in self.circuit.all_operations():
             qubit0 = int(op.qubits[0].name[prefix:])
