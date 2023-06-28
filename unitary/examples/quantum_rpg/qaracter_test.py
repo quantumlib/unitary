@@ -165,14 +165,15 @@ def test_even_hp_qar() -> None:
 
 def test_serialization() -> None:
     qar = classes.Engineer(name="curie")
-    qar.add_hp()
-    qar.add_hp()
-    qar.add_hp()
+    for _ in range(7):
+        qar.add_hp()
     qar.add_quantum_effect(alpha.Flip(), 1)
     qar.add_quantum_effect(alpha.Phase(), 2)
     qar.add_quantum_effect(alpha.Superposition(), 3)
     qar.add_quantum_effect(alpha.Flip(effect_fraction=0.25), 2)
     qar.add_quantum_effect(alpha.Phase(effect_fraction=0.125), 1)
+    qar.add_quantum_effect(alpha.Split(), 1, 4, 5)
+    qar.add_quantum_effect(alpha.PhasedSplit(), 3, 6, 7)
     serialized_str = qar.to_save_file()
     deserialized_qar = qaracter.Qaracter.from_save_file(serialized_str)
     assert type(deserialized_qar) == type(qar)

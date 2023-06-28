@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import io
+import unitary.examples.quantum_rpg.ascii_art as ascii_art
 import unitary.examples.quantum_rpg.classes as classes
 import unitary.examples.quantum_rpg.encounter as encounter
 import unitary.examples.quantum_rpg.game_state as game_state
@@ -37,7 +38,6 @@ SIGN = item.Item(
 BUTTON = item.Item(
     keyword_actions=[("press", "button", _press_button)],
 )
-
 
 EXAMPLE_WORLD = [
     world.Location(
@@ -68,6 +68,32 @@ EXAMPLE_WORLD = [
         exits={world.Direction.NORTH: "2"},
     ),
 ]
+
+_TITLE = r"""
+______  _                _             _____  _           _
+|  ___|(_)              | |           /  ___|| |         | |
+| |_    _  _ __    __ _ | |    __     \ `--. | |_   __ _ | |_   ___
+|  _|  | || '_ \  / _` || |    ()      `--. \| __| / _` || __| / _ \
+| |    | || | | || (_| || |    )(     /\__/ /| |_ | (_| || |_ |  __/
+\_|    |_||_| |_| \__,_||_|    )(     \____/  \__| \__,_| \__| \___|
+                            o======o
+                               ||
+______                         ||              _    _
+| ___ \                        ||             | |  (_)
+| |_/ / _ __   ___  _ __    __ _| _ __   __ _ | |_  _   ___   _ __
+|  __/ | '__| / _ \| '_ \  / _` || '__| / _` || __|| | / _ \ | '_ \
+| |    | |   |  __/| |_) || (_| || |   | (_| || |_ | || (_) || | | |
+\_|    |_|    \___|| .__/  \__,_||_|    \__,_| \__||_| \___/ |_| |_|
+                   | |         ||
+                   |_|         \/
+
+-----------------------------------------------
+1) Begin new adventure
+2) Load existing adventure
+3) Help
+4) Quit
+-----------------------------------------------
+"""
 
 
 def test_parse_commands() -> None:
@@ -175,7 +201,7 @@ Mensing turn:
 s
 m
 Sample result HealthPoint.HURT
-Observer watcher measures Mensing at qubit Mensing_1
+Observer watcher measures Mensing_1 as HURT.
 Cryostats
 
 Giant aluminum cylinders hang suspended by large frames.
@@ -212,30 +238,57 @@ You've pressed the button 2 times before!
     )
 
 
-def test_title_screen():
-    state = game_state.GameState(party=[], user_input=[], file=io.StringIO())
-    loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
-    loop.print_title_screen()
+def test_main_quit():
+    state = game_state.GameState(party=[], user_input=["4"], file=io.StringIO())
+    loop = main_loop.main(state)
+
+    assert state.file.getvalue() == _TITLE
+
+
+def test_main_help():
+    state = game_state.GameState(party=[], user_input=["3", "4"], file=io.StringIO())
+    loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()
-        == r"""
-______  _                _             _____  _           _
-|  ___|(_)              | |           /  ___|| |         | |
-| |_    _  _ __    __ _ | |    __     \ `--. | |_   __ _ | |_   ___
-|  _|  | || '_ \  / _` || |    ()      `--. \| __| / _` || __| / _ \
-| |    | || | | || (_| || |    )(     /\__/ /| |_ | (_| || |_ |  __/
-\_|    |_||_| |_| \__,_||_|    )(     \____/  \__| \__,_| \__| \___|
-                            o======o
-                               ||
-______                         ||              _    _
-| ___ \                        ||             | |  (_)
-| |_/ / _ __   ___  _ __    __ _| _ __   __ _ | |_  _   ___   _ __
-|  __/ | '__| / _ \| '_ \  / _` || '__| / _` || __|| | / _ \ | '_ \
-| |    | |   |  __/| |_) || (_| || |   | (_| || |_ | || (_) || | | |
-\_|    |_|    \___|| .__/  \__,_||_|    \__,_| \__||_| \___/ |_| |_|
-                   | |         ||
-                   |_|         \/
+        == _TITLE + ascii_art.HELP + "\n" + ascii_art.START_MENU + "\n"
+    )
+
+
+def test_main_begin():
+    state = game_state.GameState(
+        party=[], user_input=["1", "nova", "n", "quit"], file=io.StringIO()
+    )
+    loop = main_loop.main(state)
+
+    assert (
+        state.file.getvalue()
+        == _TITLE
+        + ascii_art.INTRO_STORY
+        + r"""
+Science Hut
+
+At the edge of the classical frontier, a solitary hut
+looks north towards the mountains in the distance.
+Though still in the classical realm, it is clear the
+researchers in this humble abode have aspirations for
+the future.  Desks and chalkboards filled with diagrams
+fill this room.
+It is only natural that Richard is here to help start your journey.
+
+Exits: north.
+
+Edge of the Classical Frontier
+
+You are standing outside a hut near the end of the classical domain.
+This wild place which separates the classical from the quantum
+realms. To the north is the frontier, where quantum phenomena are
+studied and classified.  Far off in the distance are the fabled mountains
+of error-correction, the subject of many theories and discussion.
+
+A bent sign sticks out of the ground at an angle.
+
+Exits: south, north.
 
 """
     )

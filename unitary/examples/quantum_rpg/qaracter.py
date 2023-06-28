@@ -60,11 +60,15 @@ class Qaracter(alpha.QuantumWorld):
         self.health_status: Dict[alpha.QuantumObject, int] = {}
         self.level = 0
         self.add_hp()
-        if _FIELD_DELIMITER in self.name:
-            raise ValueError("{_FIELD_DELIMITER} is not allowed as part of a name")
+        if not self.is_valid_name(self.name):
+            raise ValueError(f"{_FIELD_DELIMITER} is not allowed as part of a name")
+
+    @staticmethod
+    def is_valid_name(name):
+        return _FIELD_DELIMITER not in name
 
     def is_npc(self) -> bool:
-        """Returns Trus if a non-player or False if a player.
+        """Returns True if a non-player or False if a player.
 
         Inheritors of NPCs should override this function.
         """
@@ -196,7 +200,7 @@ class Qaracter(alpha.QuantumWorld):
             fields = line[1:].split(_GATE_DELIMITER)
             exponent = float(fields[0])
             qubit0 = int(fields[1])
-            qubit1 = int(fields[2]) if len(fields) > 3 else None
+            qubit1 = int(fields[2]) if len(fields) > 2 else None
             if gate_type == "X":
                 qar.add_quantum_effect(alpha.Flip(effect_fraction=exponent), qubit0)
             elif gate_type == "Z":
@@ -204,11 +208,13 @@ class Qaracter(alpha.QuantumWorld):
             elif gate_type == "H":
                 qar.add_quantum_effect(alpha.Superposition(), qubit0)
             elif gate_type == "S":
-                # TODO: effect_fraction
-                qar.add_quantum_effect(alpha.Move(), qubit0, qubit1)
+                qar.add_quantum_effect(
+                    alpha.Move(effect_fraction=exponent), qubit0, qubit1
+                )
             elif gate_type == "I":
-                # TODO: effect_fraction
-                qar.add_quantum_effect(alpha.PhasedMove(), qubit0, qubit1)
+                qar.add_quantum_effect(
+                    alpha.PhasedMove(effect_fraction=exponent), qubit0, qubit1
+                )
         return qar
 
     def to_save_file(self) -> str:

@@ -1,5 +1,53 @@
+import unitary.alpha as alpha
+
+from unitary.examples.quantum_rpg.encounter import Encounter
 from unitary.examples.quantum_rpg.world import Direction, Location
 from unitary.examples.quantum_rpg.item import EXAMINE, TALK, Item
+from unitary.examples.quantum_rpg.npcs import BlueFoam, GreenFoam, Observer
+from unitary.examples.quantum_rpg.xp_utils import EncounterXp
+
+
+_BLUE_XP = EncounterXp(
+    [
+        [],
+        [alpha.Flip(effect_fraction=0.5)],
+        [alpha.Flip(effect_fraction=0.25)],
+        [alpha.Flip(effect_fraction=0.125)],
+        [alpha.Superposition()],
+        [alpha.Phase(effect_fraction=0.375)],
+    ],
+    [0.35, 0.05, 0.20, 0.20, 0.10, 0.10],
+)
+
+_GREEN_XP = EncounterXp(
+    [
+        [],
+        [alpha.Phase(effect_fraction=0.5)],
+        [alpha.Phase(effect_fraction=0.25)],
+        [alpha.Phase(effect_fraction=0.125)],
+        [alpha.Superposition()],
+        [alpha.Flip(effect_fraction=0.375)],
+    ],
+    [0.35, 0.05, 0.20, 0.20, 0.10, 0.10],
+)
+
+
+def _blue_foam(number: int, prob: float = 0.5, xp=_BLUE_XP):
+    return Encounter(
+        [BlueFoam(f"bluey gooey {idx}") for idx in range(number)],
+        probability=prob,
+        description="Some blue quantum foam oozes towards you!",
+        xp=xp,
+    )
+
+
+def _green_foam(number: int, prob: float = 0.5, xp=_GREEN_XP):
+    return Encounter(
+        [GreenFoam(f"green goo {idx}") for idx in range(number)],
+        probability=prob,
+        description="Some green quantum foam oozes towards you!",
+        xp=xp,
+    )
 
 
 RICHARD = Item(
@@ -232,8 +280,8 @@ CLASSICAL_REALM = [
             "looks north towards the mountains in the distance.\n"
             "Though still in the classical realm, it is clear the\n"
             "researchers in this humble abode have aspirations for\n"
-            "the future.  Desks and chalkboards filled with diagrams\n",
-            "fill this room.",
+            "the future.  Desks and chalkboards filled with diagrams\n"
+            "fill this room."
         ),
         items=[RICHARD, HUT_DESK, HUT_CHALKBOARD],
         exits={Direction.NORTH: "classical2"},
@@ -245,8 +293,8 @@ CLASSICAL_REALM = [
             "You are standing outside a hut near the end of the classical domain.\n"
             "This wild place which separates the classical from the quantum\n"
             "realms. To the north is the frontier, where quantum phenomena are\n"
-            "studied and classified.  Far off in the distance are the fabled mountains\n",
-            "of error-correction, the subject of many theories and discussion.\n",
+            "studied and classified.  Far off in the distance are the fabled mountains\n"
+            "of error-correction, the subject of many theories and discussion.\n"
         ),
         items=[BENT_SIGN],
         exits={Direction.SOUTH: "classical1", Direction.NORTH: "classical3"},
@@ -255,10 +303,10 @@ CLASSICAL_REALM = [
         label="classical3",
         title="The Classical Frontier",
         description=(
-            "Here, the frontier between the classical and quantum realms begins.\n",
+            "Here, the frontier between the classical and quantum realms begins.\n"
             "Farther north, you can see faint undulations, as if the way is blurred\n"
             "by some mirage.  To proceed, you will need to move around this strange\n"
-            "occurance.",
+            "occurance."
         ),
         items=[],
         exits={
@@ -278,6 +326,7 @@ CLASSICAL_REALM = [
             "open field.\n"
         ),
         items=[LOOPED_PATH],
+        encounters=[_blue_foam(1, 0.2), _green_foam(1, 0.2)],
         exits={
             Direction.EAST: "classical5",
             Direction.NORTH: "classical6",
@@ -293,6 +342,12 @@ CLASSICAL_REALM = [
             "and filled with tangles of weeds and bramble.  In spots, you can see\n"
             "spots covered in iridicent colored slime roughly in the shape of waterdrops.\n"
         ),
+        encounters=[
+            _blue_foam(2, 0.4),
+            _green_foam(2, 0.4),
+            _blue_foam(3, 0.1),
+            _green_foam(3, 0.1),
+        ],
         exits={Direction.WEST: "classical4", Direction.EAST: "oxtail1"},
     ),
     Location(
@@ -311,7 +366,11 @@ CLASSICAL_REALM = [
     Location(
         label="classical7",
         title="A Wild Frontier",
-        description=("Blah"),
+        description=(
+            "The land here slopes along a ridge and climbs steadily towards\n"
+            "the north, where the foothills begin to slowly climb in altitude."
+        ),
+        encounters=[_blue_foam(2, 0.4), _green_foam(3, 0.3), _blue_foam(1, 0.1)],
         exits={Direction.EAST: "classical3", Direction.NORTH: "classical8"},
     ),
     Location(
@@ -326,6 +385,7 @@ CLASSICAL_REALM = [
             "Farther to the east, you can see the cathedral-like buildings of a baroque\n"
             "college campus."
         ),
+        encounters=[_blue_foam(2, 0.3), _green_foam(2, 0.2)],
         exits={Direction.SOUTH: "classical7"},
         # TODO: Connect to the next zone.
     ),
@@ -368,6 +428,7 @@ CLASSICAL_REALM = [
             "purple ooze seems to be eating away at the pillars and walls, and\n"
             "one entire section has collapsed into a pile of rubble.\n"
         ),
+        encounters=[_blue_foam(1, 0.3), _green_foam(3, 0.2), _blue_foam(3, 0.1)],
         items=[],
         exits={Direction.SOUTH: "quad4", Direction.EAST: "quad2"},
     ),
@@ -382,6 +443,7 @@ CLASSICAL_REALM = [
             "dripping out of its open windows."
         ),
         items=[],
+        encounters=[_blue_foam(3, 0.3), _green_foam(3, 0.2)],
         exits={
             Direction.NORTH: "comms1",
             Direction.WEST: "quad1",
@@ -399,6 +461,7 @@ CLASSICAL_REALM = [
             "of the black holes Hawking was famous for casts a dark shadow on the wall."
         ),
         items=[],
+        encounters=[_blue_foam(4, 0.1)],
         exits={Direction.SOUTH: "quad6", Direction.WEST: "quad2"},
     ),
     Location(
@@ -411,6 +474,13 @@ CLASSICAL_REALM = [
             "contrasting sharply with the green grass.\n"
         ),
         items=[STUDENT[0]],
+        encounters=[
+            _blue_foam(2, 0.1),
+            _green_foam(2, 0.1),
+            _blue_foam(1, 0.1),
+            _blue_foam(3, 0.1),
+            _green_foam(1, 0.2),
+        ],
         exits={
             Direction.NORTH: "quad2",
             Direction.EAST: "quad6",
@@ -422,7 +492,10 @@ CLASSICAL_REALM = [
         label="quad6",
         title="Lab Entrance",
         description=(
-            "A stone building home to a laboratory.A plan for this room, who needs one?"
+            "A stone building here seems mostly untouched by the corrosion evident\n"
+            "across most of the rest of the campus.  Etched into the arched doorway\n"
+            "are the words 'Chemistry Research Laboratory' and below that reads,\n"
+            "'Nuclear Magnetic Resonance Facility'."
         ),
         items=[],
         exits={
@@ -446,8 +519,14 @@ CLASSICAL_REALM = [
     Location(
         label="quad8",
         title="South end",
-        description=("A plan for this room, who needs one?"),
+        description=(
+            "Here on the south end of campus is the mathematics\n"
+            "department.  Most of the windows and doors have been\n"
+            "boarded up or blocked.  A hastily drawn sign on the\n"
+            "entrance proclaims: 'QUIET PLEASE! THEOREM CREATION IN PROGRESS.'"
+        ),
         items=[STUDENT[2]],
+        encounters=[_blue_foam(2, 0.2)],
         exits={
             Direction.WEST: "quad7",
             Direction.NORTH: "quad5",
@@ -464,6 +543,12 @@ CLASSICAL_REALM = [
             "in reality form irregular disjointed cavities.\n"
         ),
         items=[],
+        encounters=[
+            _blue_foam(1, 0.2),
+            _blue_foam(2, 0.1),
+            _green_foam(1, 0.2),
+            _green_foam(2, 0.1),
+        ],
         exits={Direction.NORTH: "quad6", Direction.WEST: "quad8"},
     ),
     Location(
@@ -475,6 +560,7 @@ CLASSICAL_REALM = [
             "lab spaces.  Slimy foam drips down from a stairway leading upwards.\n"
         ),
         items=[],
+        encounters=[_blue_foam(3, 0.3), _green_foam(3, 0.1)],
         exits={Direction.SOUTH: "quad2", Direction.UP: "comms2"},
     ),
     Location(
@@ -487,7 +573,21 @@ CLASSICAL_REALM = [
             "and it seems like parts of the building are phasing in and out of\n"
             "existence."
         ),
-        items=[],  # TODO: quantum foam boss battle
+        items=[],
+        encounters=[
+            Encounter(
+                [
+                    BlueFoam("Blue Foamy"),
+                    BlueFoam("Blue Slimy"),
+                    GreenFoam("Green Gooey"),
+                    GreenFoam("Green Foamy"),
+                    Observer("The Observer"),
+                ],
+                probability=1.0,
+                description="The quantum slime oozes off all the walls and surrounds you!",
+                xp=EncounterXp([[alpha.Flip()]]),
+            )
+        ],
         exits={Direction.DOWN: "comms1", Direction.UP: "comms3"},
     ),
     Location(
