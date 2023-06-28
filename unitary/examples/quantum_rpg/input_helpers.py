@@ -2,6 +2,7 @@
 from typing import Callable, Optional, Sequence, TextIO
 
 import sys
+import unitary.examples.quantum_rpg.qaracter as qaracter
 
 _USER_INPUT = Callable[[str], str]
 _INVALID_MESSAGE = "Invalid number selected."
@@ -51,3 +52,15 @@ def get_user_input_number(
             print(invalid_message, file=file)
         else:
             print("number out of range", file=file)
+
+
+def get_user_input_qaracter_name(
+    get_user_input: _USER_INPUT,
+    qaracter_type: Optional[str] = "a new qaracter",
+    file: io.IOBase = sys.stdout,
+):
+    while True:
+        user_input = get_user_input(f"Please enter a name for {qaracter_type}:")
+        if qaracter.Qaracter.is_valid_name(user_input):
+            return user_input
+        print("Invalid qaracter name", file=file)

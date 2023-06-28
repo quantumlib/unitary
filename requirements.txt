@@ -5,3 +5,5 @@ cirq-google>=0.15.0
 scipy
 ipython
 black
+pylint
+pytest
