@@ -940,7 +940,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.SPLIT_SLIDE:
             if not m.target2:
-              raise ValueError(f"Merge slide must have a second source move")
+                raise ValueError(f"Merge slide must have a second source move")
             tbit2 = square_to_bit(m.target2)
             tqubit2 = bit_to_qubit(tbit2)
 
@@ -1053,7 +1053,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.MERGE_SLIDE:
             if not m.source2:
-              raise ValueError(f"Merge slide must have a second source move")
+                raise ValueError(f"Merge slide must have a second source move")
             sbit2 = square_to_bit(m.source2)
             squbit2 = bit_to_qubit(sbit2)
 
@@ -1300,7 +1300,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.SPLIT_JUMP:
             if not m.target2:
-              raise ValueError(f"Split jumps must have a second target move")
+                raise ValueError(f"Split jumps must have a second target move")
             tbit2 = square_to_bit(m.target2)
             tqubit2 = bit_to_qubit(tbit2)
             is_basic_case = (
@@ -1320,7 +1320,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.MERGE_JUMP:
             if not m.source2:
-              raise ValueError(f"Merge jumps must have a second source move")
+                raise ValueError(f"Merge jumps must have a second source move")
             sbit2 = square_to_bit(m.source2)
             squbit2 = bit_to_qubit(sbit2)
             self.add_entangled(squbit, squbit2, tqubit)
