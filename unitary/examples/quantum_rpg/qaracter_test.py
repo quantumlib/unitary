@@ -29,6 +29,7 @@ def test_qubit_getters_and_effects() -> None:
     qar = qaracter.Qaracter(name="lovelace")
     obj_name = qar.quantum_object_name(1)
     qar_obj1 = qar.get_hp(obj_name)
+    assert qar_obj1 is not None
     assert qar_obj1.name == obj_name
     assert qar.sample(obj_name, save_result=False) == enums.HealthPoint.HURT
     qar.add_quantum_effect(alpha.Flip(), 1)

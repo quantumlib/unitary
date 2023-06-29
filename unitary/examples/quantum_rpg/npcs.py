@@ -11,22 +11,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+from typing import cast, List
 
 import random
 
 import unitary.alpha as alpha
-from unitary.examples.quantum_rpg import qaracter
+import unitary.examples.quantum_rpg.enums as enums
+import unitary.examples.quantum_rpg.qaracter as qaracter
 
 
 def _enemy_qubits(party: List[qaracter.Qaracter]) -> List[alpha.QuantumObject]:
     """Determines valid enemy target qubits and returns them with the player."""
-    return [player.get_hp(q) for player in party for q in player.active_qubits()]
+    enemy_qubits: List[alpha.QuantumObject] = []
+    for player in party:
+        for q in player.active_qubits():
+            hp = player.get_hp(q)
+            if hp is not None:
+                enemy_qubits.append(hp)
+    return enemy_qubits
 
 
 def _sample_qubit(my_name: str, enemy_qubit: alpha.QuantumObject) -> str:
+    if not enemy_qubit.world:
+        return f"{enemy_qubit.name} is without a world!"
     enemy_name = enemy_qubit.name
-    value = enemy_qubit.world.sample(enemy_name, True)
+    value = cast(qaracter.Qaracter, enemy_qubit.world).sample(enemy_name, True)
     return f"{my_name} measures {enemy_name} as {value.name}."
 
 

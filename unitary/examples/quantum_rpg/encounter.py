@@ -37,7 +37,7 @@ class Encounter:
         description: Optional[str] = None,
         xp: Optional[xp_utils.EncounterXp] = None,
     ):
-        self.enemies = enemies
+        self.enemies = list(enemies)
         self.probability = probability
         self.description = description
         self.xp = xp
