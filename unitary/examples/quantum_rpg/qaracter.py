@@ -54,8 +54,8 @@ class Qaracter(alpha.QuantumWorld):
         name: name of this character as a string.
     """
 
-    def __init__(self, name: str):
-        super().__init__()
+    def __init__(self, name: str = "", **kwargs):
+        super().__init__(**kwargs)
         self.name = name
         self.health_status: Dict[str, int] = {}
         self.level = 0
@@ -122,6 +122,13 @@ class Qaracter(alpha.QuantumWorld):
                 quantum_name = self.quantum_object_name(quantum_name)
             hp_objs.append(self.get_hp(quantum_name))
         effect(*hp_objs)
+
+    def copy(self) -> "Qaracter":
+        new_obj = super().copy()
+        new_obj.name = self.name
+        new_obj.health_status = self.health_status
+        new_obj.level = self.level
+        return new_obj
 
     @property
     def damage(self) -> int:
