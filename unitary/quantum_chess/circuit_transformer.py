@@ -77,7 +77,7 @@ class ConnectivityHeuristicCircuitTransformer:
         return c
 
     def find_start_qubit(
-        self, qubit_list: Iterable[cirq.Qid], depth=3
+        self, qubit_list: Sequence[cirq.Qid], depth=3
     ) -> cirq.GridQubit:
         """Finds a reasonable starting qubit to start the mapping.
 
