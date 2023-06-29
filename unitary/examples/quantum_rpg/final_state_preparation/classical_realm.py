@@ -56,14 +56,14 @@ RICHARD = Item(
             TALK,
             ["richard", "feynmann", "physicist"],
             (
-                "Richard excitedly talks, as if continuing a lecture in progress.\n"
-                "Modern computers are truly powerful and wondrous, but if want to\n"
+                "Richard excitedly talks, as if continuing a lecture in progress:\n"
+                "'Modern computers are truly powerful and wondrous, but if want to\n"
                 "truly understand nature and the laws of the world around, we are\n"
                 "going to need a much more powerful device.\n"
                 "Nature isn't classical, dammit, and if you want to make a simulation\n"
                 "of nature, you'd better make it quantum mechanical!  By golly, it's\n"
                 "a wonderful problem, but it doesn't look easy.  I would start by\n"
-                "searching for an abandoned nuclear lab on the ruins of Oxtail university.\n"
+                "searching for an abandoned nuclear lab on the ruins of Oxtail university.'\n"
             ),
         )
     ],
@@ -141,14 +141,14 @@ DAVID = Item(
             TALK,
             ["david", "man", "deutsch"],
             (
-                "David turns to you.  'Welcome to Oxtail University.'\n"
+                "David turns to you.  'Welcome to Oxtail University.' David says.\n"
                 "'You seems to have come at an interesting time.  Our university was\n"
                 "founded here at the forefront of the quantum realm, and we have been\n"
                 "researching quantum computation in search of a computational thoery of\n"
                 "everything.  Unfortunately, our university has been less of an invariant\n"
                 "than hoped.  Quantum fluctuations and errors have infiltrated this whole\n"
                 "place, and we are in dire straits I fear.  Look for my student Artur.\n"
-                "If he still survives, he will be in the communications outpust.\n"
+                "If he still survives, he will be in the communications outpust.i'\n"
             ),
         )
     ],
@@ -163,7 +163,7 @@ ARTUR = Item(
             (
                 "Artur stands up tall and address you.  'We have lost contact\n"
                 "with our field researchers in the quantum realm.  They were exploring\n"
-                "techniques of communicating in the quantum realm.  If you can find them,\n"
+                "techniques of communicating using quantum states.  If you can find them,\n"
                 "they may be able to help figure out a way to stop the quantum errors\n"
                 "that are destroying our campus.'\n"
             ),
@@ -455,7 +455,7 @@ CLASSICAL_REALM = [
         label="quad3",
         title="Lone Monument",
         description=(
-            "A statue stands in this corner of campus dedicated to Stephen Hawking,"
+            "A statue stands in this corner of campus dedicated to Stephen Hawking,\n"
             "one of the pioneers of theoretical physics.  A pool of quantum foam\n"
             "surrounds the statue, and nearby, an unnerving tenebrous spot reminiscent\n"
             "of the black holes Hawking was famous for casts a dark shadow on the wall."
@@ -612,7 +612,6 @@ CLASSICAL_REALM = [
             "area.  The sterile white walls, impeccably clean and illuminated by the warm\n"
             "glow of recessed lights, creates an atmosphere of precision and meticulousness.\n"
             "A low hum of machinery comes from a larger room to the east.\n"
-            "A plan for this room, who needs one?"
         ),
         items=[],
         exits={Direction.WEST: "quad6", Direction.EAST: "nmr_lab2"},
@@ -635,7 +634,7 @@ CLASSICAL_REALM = [
         label="nmr_lab3",
         title="Atop the NMR Spectrometer",
         description=(
-            "Yoiu stand on a narrow walk way that circles around the massive\n"
+            "You stand on a narrow walk way that circles around the massive\n"
             "spectrometer.  From up here, you can see the entirety of the lab\n"
             "supporting the NMR research effort.  Wires and cables lead from\n"
             "the machine up to the ceiling and snake outward, connecting to all\n"
