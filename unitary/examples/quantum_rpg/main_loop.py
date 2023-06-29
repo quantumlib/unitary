@@ -117,7 +117,7 @@ class MainLoop:
             if input_cmd == Command.QUIT:
                 return
             elif input_cmd == Command.HELP:
-                print(ascii_art.HELP, file=state.file)
+                print(ascii_art.HELP, file=self.file)
             elif input_cmd == Command.LOAD:
                 print(
                     "Paste the save file here to load the game from that point.",
