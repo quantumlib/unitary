@@ -51,6 +51,8 @@ def test_green_foam():
     assert qar.is_npc()
     msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.1)
     assert msg == "GreenFoam bubbles measures person_1 as HURT."
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.3)
+    assert "GreenFoam bubbles oozes person_1 for " in msg
     msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.3, slime=0.25)
     assert msg == "GreenFoam bubbles oozes person_1 for 0.250 phase."
 
@@ -64,6 +66,8 @@ def test_red_foam():
     assert qar.is_npc()
     msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.1)
     assert msg == "RedFoam bubbles measures person_1 as HURT."
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.3)
+    assert "RedFoam bubbles slimes person_1 for " in msg
     msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.3, slime=0.25)
     assert msg == "RedFoam bubbles slimes person_1 for 0.250."
 
