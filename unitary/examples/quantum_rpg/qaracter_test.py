@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import unitary.alpha as alpha
-import unitary.examples.quantum_rpg.qaracter as qaracter
+import unitary.examples.quantum_rpg.classes as classes
 import unitary.examples.quantum_rpg.enums as enums
+import unitary.examples.quantum_rpg.qaracter as qaracter
 
 
 def test_initialization() -> None:
@@ -164,7 +165,7 @@ def test_even_hp_qar() -> None:
 
 
 def test_serialization() -> None:
-    qar = qaracter.Qaracter(name="curie")
+    qar = classes.Engineer(name="curie")
     for _ in range(7):
         qar.add_hp()
     qar.add_quantum_effect(alpha.Flip(), 1)
@@ -176,6 +177,7 @@ def test_serialization() -> None:
     qar.add_quantum_effect(alpha.PhasedSplit(), 3, 6, 7)
     serialized_str = qar.to_save_file()
     deserialized_qar = qaracter.Qaracter.from_save_file(serialized_str)
+    assert type(deserialized_qar) == type(qar)
     assert deserialized_qar.name == qar.name
     assert deserialized_qar.level == qar.level
     assert deserialized_qar.circuit == qar.circuit
