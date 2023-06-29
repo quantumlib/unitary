@@ -46,6 +46,7 @@ class Command(enum.Enum):
         for cmd in Command:
             if cmd.value.startswith(lower_s):
                 return cmd
+        return None
 
 
 class MainLoop:
@@ -107,8 +108,8 @@ class MainLoop:
                         print(msg, file=self.file)
                 print_room_description = False
                 continue
-            cmd = Command.parse(current_input)
-            if cmd == Command.QUIT:
+            input_cmd = Command.parse(current_input)
+            if input_cmd == Command.QUIT:
                 return
             else:
                 print(

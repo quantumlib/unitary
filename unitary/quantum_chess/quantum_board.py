@@ -13,7 +13,7 @@
 # limitations under the License.
 import time
 from collections import defaultdict
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 import cirq
 import pandas
@@ -114,7 +114,7 @@ class CirqBoard:
         # Stores the repetition number if there is a cache.
         self.board_accumulations_repetitions = _NO_CACHE_AVAILABLE
 
-        self.cache = {}
+        self.cache: Dict[CacheKey, Dict[str, float]] = {}
 
         # Will only be turned on if user specifies
         self.reset_starting_states = reset_starting_states
@@ -131,7 +131,7 @@ class CirqBoard:
         self.state = basis_state
         self.allowed_pieces = set()
         self.allowed_pieces.add(num_ones(self.state))
-        self.entangled_squares = set()
+        self.entangled_squares: Set[cirq.Qid] = set()
         self.post_selection = {}
         self.circuit = cirq.Circuit()
         self.ancilla_count = 0
@@ -451,6 +451,7 @@ class CirqBoard:
         # Caching is supported for a split jump from one full square to two empty squares.
         if (
             m.move_type == enums.MoveType.SPLIT_JUMP
+            and m.target2
             and nth_bit_of(square_to_bit(m.source), last_probs.full_squares)
             and nth_bit_of(square_to_bit(m.target), last_probs.empty_squares)
             and nth_bit_of(square_to_bit(m.target2), last_probs.empty_squares)
@@ -938,6 +939,8 @@ class CirqBoard:
             return 1
 
         if m.move_type == enums.MoveType.SPLIT_SLIDE:
+            if not m.target2:
+                raise ValueError(f"Merge slide must have a second source move")
             tbit2 = square_to_bit(m.target2)
             tqubit2 = bit_to_qubit(tbit2)
 
@@ -1049,6 +1052,8 @@ class CirqBoard:
                 return 1
 
         if m.move_type == enums.MoveType.MERGE_SLIDE:
+            if not m.source2:
+                raise ValueError(f"Merge slide must have a second source move")
             sbit2 = square_to_bit(m.source2)
             squbit2 = bit_to_qubit(sbit2)
 
@@ -1294,6 +1299,8 @@ class CirqBoard:
             return 1
 
         if m.move_type == enums.MoveType.SPLIT_JUMP:
+            if not m.target2:
+                raise ValueError(f"Split jumps must have a second target move")
             tbit2 = square_to_bit(m.target2)
             tqubit2 = bit_to_qubit(tbit2)
             is_basic_case = (
@@ -1312,6 +1319,8 @@ class CirqBoard:
             return 1
 
         if m.move_type == enums.MoveType.MERGE_JUMP:
+            if not m.source2:
+                raise ValueError(f"Merge jumps must have a second source move")
             sbit2 = square_to_bit(m.source2)
             squbit2 = bit_to_qubit(sbit2)
             self.add_entangled(squbit, squbit2, tqubit)

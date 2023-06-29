@@ -86,7 +86,9 @@ class TicTacSplit(QuantumEffect):
     def num_objects(self) -> Optional[int]:
         return 2
 
-    def effect(self, square1: QuantumObject, square2: QuantumObject):
+    def effect(self, *objects):
+        square1 = objects[0]
+        square2 = objects[1]
         yield QuditXGate(3, 0, self.mark.value)(square1.qubit)
 
         if self.rules == TicTacRules.QUANTUM_V3:

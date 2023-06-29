@@ -222,10 +222,10 @@ class QuantumProcessor:
     device_obj: cirq.Device
     processor_id: Optional[str]
     is_simulator: bool
+    _get_sampler_func: Callable[["QuantumProcessor", Optional[str]], cirq.Sampler]
     _cached_samplers: Dict[Union[None, str], cirq.Sampler] = field(default_factory=dict)
-    _get_sampler_func: Callable[["QuantumProcessor", str], cirq.Sampler] = None
 
-    def get_sampler(self, gateset: str = None):
+    def get_sampler(self, gateset: Optional[str] = None):
         """Why must gateset be supplied?
 
         https://github.com/quantumlib/Cirq/issues/2819
@@ -251,7 +251,7 @@ class EngineQuantumProcessor:
             self._engine = engine
         return self._engine
 
-    def get_sampler(self, gateset: str = None):
+    def get_sampler(self, gateset: Optional[str] = None):
         return self.engine.sampler(processor_id=self.processor_id)
 
     @property

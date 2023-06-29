@@ -40,6 +40,7 @@ class Direction(enum.Enum):
         for d in Direction:
             if d.value.startswith(lower_s):
                 return d
+        return None
 
 
 @dataclasses.dataclass
@@ -76,7 +77,7 @@ class Location:
         ]
         return "".join(item_descriptions)
 
-    def get_action(self, keyword: str) -> item.ITEM_ACTION_TYPE:
+    def get_action(self, keyword: str) -> Optional[item.ITEM_ACTION_TYPE]:
         if self.items:
             for item in self.items:
                 action = item.get_action(keyword)
@@ -84,8 +85,9 @@ class Location:
                     return action
         return None
 
-    def remove_encounter(self, triggered_encounter) -> bool:
-        self.encounters.remove(triggered_encounter)
+    def remove_encounter(self, triggered_encounter: encounter.Encounter) -> None:
+        if self.encounters:
+            return self.encounters.remove(triggered_encounter)
 
     def __str__(self) -> str:
         return f"{self.title}\n\n{self.description}\n{self._item_str()}\nExits: {self._exits()}\n"

@@ -34,7 +34,7 @@ class EncounterXp:
     ):
         self.xp_choices = list(xp_choices)
         if not weights:
-            self.weights = [1] * len(self.xp_choices)
+            self.weights = [1.0] * len(self.xp_choices)
         else:
             self.weights = list(weights)
         if len(self.weights) != len(self.xp_choices):

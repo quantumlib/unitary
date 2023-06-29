@@ -53,7 +53,7 @@ class Battle:
         enemy_side: List[Qaracter],
         xp: Optional[EncounterXp] = None,
     ):
-        self.player_side = state.party  # TODO: copy this
+        self.player_side = [qar.copy() for qar in state.party]
         self.enemy_side = enemy_side
         self.file = state.file
         self.xp = xp
