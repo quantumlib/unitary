@@ -49,5 +49,14 @@ class Encounter:
         """
         return random.random() < self.probability
 
+    def copy(self) -> "Encounter":
+        enemies_copy = [qar.copy() for qar in self.enemies]
+        return Encounter(
+            enemies=enemies_copy,
+            probability=self.probability,
+            description=self.description,
+            xp=self.xp,
+        )
+
     def initiate(self, state: game_state.GameState) -> battle.Battle:
         return battle.Battle(state, self.enemies, xp=self.xp)
