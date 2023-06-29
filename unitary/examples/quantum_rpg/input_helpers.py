@@ -24,7 +24,7 @@ def get_user_input_function(user_input: Optional[Sequence[str]] = None) -> _USER
 
 def get_user_input_number(
     get_user_input: _USER_INPUT,
-    message: Optional[str] = "",
+    message: str = "",
     max_number: Optional[int] = None,
     invalid_message: Optional[str] = _INVALID_MESSAGE,
     file: TextIO = sys.stdout,
