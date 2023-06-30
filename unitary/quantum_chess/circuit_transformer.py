@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import copy
-from typing import Dict, Iterable, List, Optional, Set
+from typing import Dict, List, Optional, Sequence, Set
 
 import cirq
 import cirq_google as cg
@@ -45,7 +45,7 @@ class ConnectivityHeuristicCircuitTransformer:
     def __init__(self, device: cirq.Device):
         super().__init__()
         self.device = device
-        self.mapping = None
+        self.mapping: Optional[Dict] = None
         self.qubit_list = list(device.metadata.qubit_set or {})
         self.starting_qubit = self.find_start_qubit(self.qubit_list)
 
@@ -53,7 +53,7 @@ class ConnectivityHeuristicCircuitTransformer:
         self,
         depth: int,
         qubit: cirq.GridQubit,
-        qubit_list: Iterable[cirq.GridQubit],
+        qubit_list: Sequence[cirq.GridQubit],
         visited: Set[cirq.GridQubit],
     ) -> int:
         """Returns the number of qubits within `depth` of the input `qubit`.
@@ -76,7 +76,9 @@ class ConnectivityHeuristicCircuitTransformer:
             c += self.qubits_within(depth - 1, qubit + diff, qubit_list, visited)
         return c
 
-    def find_start_qubit(self, qubit_list: List[cirq.Qid], depth=3) -> cirq.GridQubit:
+    def find_start_qubit(
+        self, qubit_list: Sequence[cirq.Qid], depth=3
+    ) -> cirq.GridQubit:
         """Finds a reasonable starting qubit to start the mapping.
 
         Uses the heuristic of the most connected qubit.
@@ -98,7 +100,7 @@ class ConnectivityHeuristicCircuitTransformer:
         self,
         depth: int,
         node: cirq.Qid,
-        graph: Dict[cirq.Qid, Iterable[cirq.Qid]],
+        graph: Dict[cirq.Qid, Sequence[cirq.Qid]],
         visited: Set[cirq.Qid],
     ) -> int:
         """Returns the number of qubits within `depth` of the specified `node`.
@@ -122,7 +124,7 @@ class ConnectivityHeuristicCircuitTransformer:
 
     def find_start_node(
         self,
-        graph: Dict[cirq.Qid, Iterable[cirq.Qid]],
+        graph: Dict[cirq.Qid, Sequence[cirq.Qid]],
         mapping: Dict[cirq.Qid, cirq.GridQubit],
     ) -> cirq.Qid:
         """Finds a reasonable starting qubit from an adjacency graph.
@@ -149,7 +151,7 @@ class ConnectivityHeuristicCircuitTransformer:
         cur_node: cirq.Qid,
         mapping: Dict[cirq.Qid, cirq.GridQubit],
         available_qubits: Set[cirq.GridQubit],
-        graph: Dict[cirq.Qid, Iterable[cirq.Qid]],
+        graph: Dict[cirq.Qid, Sequence[cirq.Qid]],
         nodes_trying: List[cirq.Qid],
         print_debug: bool = False,
     ) -> bool:
