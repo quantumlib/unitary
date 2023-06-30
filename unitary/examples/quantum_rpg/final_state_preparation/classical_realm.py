@@ -56,11 +56,11 @@ RICHARD = Item(
             TALK,
             ["richard", "feynmann", "physicist"],
             (
-                "Richard excitedly talks, as if continuing a lecture in progress:\n"
-                "'Modern computers are truly powerful and wondrous, but if want to\n"
-                "truly understand nature and the laws of the world around, we are\n"
+                "Richard speaks excitedly, as if continuing a lecture in progress:\n"
+                "'Modern computers are truly powerful and wondrous, but if we want to\n"
+                "truly understand nature and the laws of the world around us, we are\n"
                 "going to need a much more powerful device.\n"
-                "Nature isn't classical, dammit, and if you want to make a simulation\n"
+                "Nature isn't classical, damnit, and if you want to make a simulation\n"
                 "of nature, you'd better make it quantum mechanical!  By golly, it's\n"
                 "a wonderful problem, but it doesn't look easy.  I would start by\n"
                 "searching for an abandoned nuclear lab on the ruins of Oxtail university.'\n"
@@ -142,13 +142,13 @@ DAVID = Item(
             ["david", "man", "deutsch"],
             (
                 "David turns to you.  'Welcome to Oxtail University.' David says.\n"
-                "'You seems to have come at an interesting time.  Our university was\n"
+                "'You seem to have come at an interesting time.  Our university was\n"
                 "founded here at the forefront of the quantum realm, and we have been\n"
-                "researching quantum computation in search of a computational thoery of\n"
+                "researching quantum computation in search of a computational theory of\n"
                 "everything.  Unfortunately, our university has been less of an invariant\n"
                 "than hoped.  Quantum fluctuations and errors have infiltrated this whole\n"
-                "place, and we are in dire straits I fear.  Look for my student Artur.\n"
-                "If he still survives, he will be in the communications outpust.i'\n"
+                "place, and we are in dire straits, I fear.  Look for my student Artur.\n"
+                "If he is still alive, he will be in the communications outpust.'\n"
             ),
         )
     ],
@@ -455,9 +455,9 @@ CLASSICAL_REALM = [
         label="quad3",
         title="Lone Monument",
         description=(
-            "A statue stands in this corner of campus dedicated to Stephen Hawking,\n"
-            "one of the pioneers of theoretical physics.  A pool of quantum foam\n"
-            "surrounds the statue, and nearby, an unnerving tenebrous spot reminiscent\n"
+            "A statue dedicated to Stephen Hawking stands in this corner of the campus,\n"
+            "He was one of the pioneers of theoretical physics.  A pool of quantum foam\n"
+            "surrounds the statue and, nearby, an unnerving tenebrous spot reminiscent\n"
             "of the black holes Hawking was famous for casts a dark shadow on the wall."
         ),
         items=[],
