@@ -161,6 +161,69 @@ Exits: east.
     )
 
 
+def test_save() -> None:
+    c = classes.Analyst("Mensing")
+    state = game_state.GameState(
+        party=[c], user_input=["e", "save", "quit"], file=io.StringIO()
+    )
+    loop = main_loop.MainLoop(world.World(EXAMPLE_WORLD), state)
+    loop.loop()
+    assert (
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
+        == r"""
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+
+Disorganized Lab
+
+Tables are here with tons of electronics.
+The lab continues to the south.
+A helpful sign is here.
+
+Exits: south, west.
+
+Use this code to return to this point in the game:
+2;1;Mensing#Analyst#1
+""".strip()
+    )
+
+
+def test_load() -> None:
+    c = classes.Analyst("Broglie")
+    state = game_state.GameState(
+        party=[c],
+        user_input=["load", "2;1;Mensing#Analyst#1", "quit"],
+        file=io.StringIO(),
+    )
+    loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
+    loop.loop()
+    assert loop.game_state.party[0].name == "Mensing"
+    assert (
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
+        == r"""
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+
+Paste the save file here to load the game from that point.
+Disorganized Lab
+
+Tables are here with tons of electronics.
+The lab continues to the south.
+A helpful sign is here.
+
+Exits: south, west.
+""".strip()
+    )
+
+
 def test_battle() -> None:
     c = classes.Analyst("Mensing")
     state = game_state.GameState(
@@ -290,6 +353,31 @@ of error-correction, the subject of many theories and discussion.
 A bent sign sticks out of the ground at an angle.
 
 Exits: south, north.
+
+"""
+    )
+
+
+def test_main_load():
+    state = game_state.GameState(
+        party=[],
+        user_input=["2", "classical3;1;Doug#Analyst#1", "quit"],
+        file=io.StringIO(),
+    )
+    loop = main_loop.main(state)
+
+    assert (
+        state.file.getvalue()
+        == _TITLE
+        + r"""Paste the save file here to load the game from that point.
+The Classical Frontier
+
+Here, the frontier between the classical and quantum realms begins.
+Farther north, you can see faint undulations, as if the way is blurred
+by some mirage.  To proceed, you will need to move around this strange
+occurance.
+
+Exits: south, east, west.
 
 """
     )

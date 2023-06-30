@@ -34,6 +34,9 @@ class Command(enum.Enum):
     Currently only supports 'quit' but future expansion planned.
     """
 
+    LOAD = "load"
+    SAVE = "save"
+    HELP = "help"
     QUIT = "quit"
 
     @classmethod
@@ -63,9 +66,9 @@ class MainLoop:
         return self.game_state.file
 
     def loop(self, user_input: Optional[Sequence[str]] = None) -> None:
-        """Full battle loop until one side is defeated.
+        """Main loop of Quantum RPG.
 
-        Returns the result of a battle as an enum.
+        Loop by getting user input and then acting on it.
         """
         print_room_description = True
         while True:
@@ -75,6 +78,8 @@ class MainLoop:
                 print_room_description = True
             if self.world.current_location.encounters:
                 result = None
+                # If this location has random encounters, then see if any will
+                # trigger.  If so, initiate the battle.
                 for random_encounter in self.world.current_location.encounters:
                     if random_encounter.will_trigger():
                         if random_encounter.description:
@@ -111,6 +116,25 @@ class MainLoop:
             input_cmd = Command.parse(current_input)
             if input_cmd == Command.QUIT:
                 return
+            elif input_cmd == Command.HELP:
+                print(ascii_art.HELP, file=self.file)
+            elif input_cmd == Command.LOAD:
+                print(
+                    "Paste the save file here to load the game from that point.",
+                    file=self.file,
+                )
+                save_file = self.game_state.get_user_input("")
+                self.game_state.with_save_file(save_file)
+                self.world.current_location = self.world.locations[
+                    self.game_state.current_location_label
+                ]
+            elif input_cmd == Command.SAVE:
+                print(
+                    "Use this code to return to this point in the game:", file=self.file
+                )
+                print(self.game_state.to_save_file(), file=self.file)
+                print("")
+                print_room_description = False
             else:
                 print(
                     f"I did not understand the command {current_input}", file=self.file
@@ -118,12 +142,19 @@ class MainLoop:
 
 
 def main(state: game_state.GameState) -> None:
+    """Initial start screen for Quantum RPG.
+
+    Display intro image and then get initial choice(s)
+    to start the game.
+    """
     main_loop = None
     print(ascii_art.TITLE_SCREEN, file=state.file)
     while not main_loop:
         print(ascii_art.START_MENU, file=state.file)
         menu_choice = int(
-            input_helpers.get_user_input_number(state.get_user_input, ">", 4)
+            input_helpers.get_user_input_number(
+                state.get_user_input, ">", 4, file=state.file
+            )
         )
         if menu_choice == 1:
             print(ascii_art.INTRO_STORY, file=state.file)
@@ -134,7 +165,16 @@ def main(state: game_state.GameState) -> None:
             state.party.append(qar)
             main_loop = MainLoop(world.World(final_state_world.WORLD), state)
         elif menu_choice == 2:
-            pass
+            print(
+                "Paste the save file here to load the game from that point.",
+                file=state.file,
+            )
+            save_file = state.get_user_input("")
+            state = state.with_save_file(save_file)
+            main_loop = MainLoop(world.World(final_state_world.WORLD), state)
+            main_loop.world.current_location = main_loop.world.locations[
+                state.current_location_label
+            ]
         elif menu_choice == 3:
             print(ascii_art.HELP, file=state.file)
         elif menu_choice == 4:

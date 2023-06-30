@@ -41,15 +41,17 @@ class GameState:
         self.get_user_input = input_helpers.get_user_input_function(user_input)
         self.file = file
 
-    @classmethod
-    def from_save_file(
-        cls,
-        save_file: str,
-        user_input: Optional[Sequence[str]] = None,
-        file: TextIO = sys.stdout,
-    ) -> "GameState":
+    def with_save_file(self, save_file) -> "GameState":
+        """Modifies GameState object in place to load info from save file.
+
+        Overwrites the party, state dictionary, and current location.
+
+        Note that this should be done if loading information during a game
+        in progress, since we don't want to lose the state of where we
+        are in parsing the user input.
+        """
         lines = save_file.split(_SAVE_DELIMITER)
-        current_location_label = lines[0]
+        self.current_location_label = lines[0]
         party: List[qaracter.Qaracter] = []
         num_party = int(lines[1])
         for party_idx in range(2, 2 + num_party):
@@ -58,9 +60,22 @@ class GameState:
         for line in lines[2 + num_party :]:
             dict_value = line.split(":")
             state_dict[dict_value[0]] = dict_value[1]
-        return cls(party, current_location_label, state_dict, user_input, file)
+        self.state_dict = state_dict
+        self.party = party
+        return self
+
+    @classmethod
+    def from_save_file(
+        cls,
+        save_file: str,
+        user_input: Optional[Sequence[str]] = None,
+        file: TextIO = sys.stdout,
+    ) -> "GameState":
+        """Creates a new Gamestate from a save file."""
+        return cls([], "", {}, user_input, file).with_save_file(save_file)
 
     def to_save_file(self) -> str:
+        """Serializes a GameState into a string for saving/loading."""
         s = f"{self.current_location_label}{_SAVE_DELIMITER}{len(self.party)}{_SAVE_DELIMITER}"
         for p in self.party:
             s += p.to_save_file() + _SAVE_DELIMITER

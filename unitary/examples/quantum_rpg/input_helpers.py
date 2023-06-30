@@ -43,7 +43,7 @@ def get_user_input_number(
             if invalid_message:
                 print(invalid_message, file=file)
             else:
-                print(e)
+                print(e, file=file)
             continue
         if max_number is None or (user_input > 0 and user_input <= max_number):
             return user_input
