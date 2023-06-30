@@ -60,8 +60,8 @@ def _engineer_joins(state: GameState) -> str:
     print("the engineer says.  'And we have learned a lot.  But, ultimately,")
     print("I can already see that this technology is not scalable and will")
     print("not solve the problems that plague us today.  I will leave this")
-    print("for the scientists wotking on other technologies and join you")
-    print("on the journey towards quantum error correction.!")
+    print("for the scientists working in other disciplines and join you")
+    print("on the journey towards quantum error correction!")
 
     name = get_user_input_qaracter_name(
         state.get_user_input, "the engineer", file=state.file

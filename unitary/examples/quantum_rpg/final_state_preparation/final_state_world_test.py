@@ -70,7 +70,11 @@ def test_classical_realm_paths(path, expected_location):
     assert test_world.current_location.label == expected_location
 
 
-def test_engineer():
+def test_engineer_joins_the_party():
+    """Test that the engineer (second qaracter) propoerly joins the party.
+
+    This should happen when you talk to the engineer in the NMR lab.
+    """
     c = classes.Analyst("Mensing")
     state = game_state.GameState(party=[c], user_input=["Hamilton"], file=io.StringIO())
     test_world = go_directions("nneeeeeeeeu")
@@ -78,4 +82,8 @@ def test_engineer():
     assert callable(action)
     msg = action(state)
     assert msg == "Hamilton has joined the group!"
+    assert len(state.party) == 2
+    # Make sure that the engineer can't join the party twice.
+    msg = action(state)
+    assert msg == "The engineer reminisces about his former experiment."
     assert len(state.party) == 2
