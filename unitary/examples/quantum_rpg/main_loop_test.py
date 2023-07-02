@@ -164,7 +164,7 @@ Exits: east.
 def test_battle() -> None:
     c = classes.Analyst("Mensing")
     state = game_state.GameState(
-        party=[c], user_input=["e", "south", "s", "1", "1", "quit"], file=io.StringIO()
+        party=[c], user_input=["e", "south", "m", "1", "1", "quit"], file=io.StringIO()
     )
     loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
     loop.loop()
@@ -199,10 +199,8 @@ Mensing Analyst   watcher Observer
 1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
 -----------------------------------------------
 Mensing turn:
-s
-m
-Sample result HealthPoint.HURT
-Observer watcher measures Mensing_1 as HURT.
+m) Measure enemy qubit.
+h) Help.
 Cryostats
 
 Giant aluminum cylinders hang suspended by large frames.

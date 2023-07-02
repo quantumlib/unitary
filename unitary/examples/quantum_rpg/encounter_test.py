@@ -38,7 +38,7 @@ def test_encounter():
     c = classes.Analyst("Aaronson")
     o = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["s", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["m", "1", "1"], file=io.StringIO()
     )
     e = encounter.Encounter([o])
 
@@ -53,10 +53,9 @@ Aaronson Analyst   watcher Observer
 1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
 -----------------------------------------------
 Aaronson turn:
-s
-m
-Sample result HealthPoint.HURT
-Observer watcher measures Aaronson_1 as HURT.
+m) Measure enemy qubit.
+h) Help.
+watcher is DOWN!
 """.strip()
     )
 

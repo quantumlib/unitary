@@ -23,7 +23,7 @@ def test_battle():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["s", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["m", "1", "1"], file=io.StringIO()
     )
     b = battle.Battle(state, [e])
     b.take_player_turn()
@@ -36,10 +36,9 @@ Aaronson Analyst   watcher Observer
 1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
 -----------------------------------------------
 Aaronson turn:
-s
-m
-Sample result HealthPoint.HURT
-Observer watcher measures Aaronson_1 as HURT.
+m) Measure enemy qubit.
+h) Help.
+watcher is DOWN!
 """.strip()
     )
 
@@ -48,7 +47,7 @@ def test_bad_monster():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["s", "2", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["m", "2", "1", "1"], file=io.StringIO()
     )
     b = battle.Battle(state, [e])
     b.take_player_turn()
@@ -60,10 +59,9 @@ Aaronson Analyst   watcher Observer
 1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
 -----------------------------------------------
 Aaronson turn:
-s
-m
+m) Measure enemy qubit.
+h) Help.
 Invalid number selected.
-Sample result HealthPoint.HURT
 """.strip()
     )
 
@@ -84,9 +82,8 @@ Aaronson Analyst   watcher Observer
 1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
 -----------------------------------------------
 Aaronson turn:
-s
-m
-watcher_2 is not an active qubit
+m) Measure enemy qubit.
+h) Help.
 """.strip()
     )
 
@@ -95,10 +92,10 @@ def test_battle_loop():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["s", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["m", "1", "1"], file=io.StringIO()
     )
     b = battle.Battle(state, [e])
-    assert b.loop() == battle.BattleResult.PLAYERS_DOWN
+    assert b.loop() == battle.BattleResult.PLAYERS_WON
     assert (
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
@@ -107,9 +104,32 @@ Aaronson Analyst   watcher Observer
 1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
 -----------------------------------------------
 Aaronson turn:
-s
-m
-Sample result HealthPoint.HURT
-Observer watcher measures Aaronson_1 as HURT.
+m) Measure enemy qubit.
+h) Help.
+""".strip()
+    )
+
+
+def test_battle_help():
+    c = classes.Analyst("Aaronson")
+    e = npcs.Observer("watcher")
+    state = game_state.GameState(
+        party=[c], user_input=["h", "m", "1", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    assert b.loop() == battle.BattleResult.PLAYERS_WON
+    assert (
+        state.file.getvalue().replace("\t", " ").strip()
+        == r"""
+-----------------------------------------------
+Aaronson Analyst   watcher Observer
+1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
+-----------------------------------------------
+Aaronson turn:
+m) Measure enemy qubit.
+h) Help.
+The analyst can measure enemy qubits.  This forces an enemy qubit
+into the |0> state or |1> state with a probability based on its
+amplitude. Try to measure the enemy qubits as |0> to defwat them.
 """.strip()
     )

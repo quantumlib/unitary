@@ -113,9 +113,15 @@ class Battle:
                 print(f"{current_player.name} is DOWN!", file=self.file)
                 continue
             actions = current_player.actions()
-            for key in actions:
-                print(key, file=self.file)
-            action = self.get_user_input("Choose your action: ")
+            descriptions = current_player.action_descriptions()
+            for key in sorted(actions):
+                print(f"{key}) {descriptions[key]}.", file=self.file)
+            print("h) Help.", file=self.file)
+            action = "h"
+            while action == "h":
+                action = self.get_user_input("Choose your action: ")
+                if action == "h":
+                    print(current_player.help(), file=self.file)
             if action in current_player.actions():
                 monster = (
                     input_helpers.get_user_input_number(
