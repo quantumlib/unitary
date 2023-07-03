@@ -45,12 +45,3 @@ REV_PIECES = {
  'g': '-6',
  'C': '7',
  'c': '-7'}
-
-EMPTY = 0
-SOLDIER = 1
-HORSE = 2
-ELEPHANT = 3
-ROOK = 4
-ADVISOR = 5
-GENERAL = 6
-CANNON = 7

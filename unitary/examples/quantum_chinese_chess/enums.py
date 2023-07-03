@@ -13,6 +13,11 @@
 # limitations under the License.
 import enum
 
+class SquareState(enum.Enum):
+    EMPTY = 0
+    OCCUPIED = 1
+
+
 class MoveType(enum.Enum):
     NULL_TYPE = 0
     UNSPECIFIED_STANDARD = 1
@@ -33,3 +38,14 @@ class MoveVariant(enum.Enum):
     BASIC = 1
     EXCLUDED = 2
     CAPTURE = 3
+
+
+class Piece(enum.Enum):
+    EMPTY = 0
+    SOLDIER = 1
+    CANNON = 2
+    ROOK = 3
+    HORSE = 4
+    ELEPHANT = 5
+    ADVISOR = 6
+    GENERAL = 7
