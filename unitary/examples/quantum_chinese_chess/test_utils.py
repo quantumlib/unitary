@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.alpha import QuantumObject
+from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.examples.quantum_chinese_chess.enums import SquareState
 from string import ascii_lowercase, digits
 
-# build quantum objects a0 to i9
+# Build quantum objects a0 to i9, and add them to a quantum world.
+board = {}
 for col in ascii_lowercase[:9]:
     for row in digits:
-        obj_name = "%s%s" % (col, row)
-        exec("%s = QuantumObject(%r, SquareState.EMPTY)" % (obj_name, obj_name))
+        board[col + row] = QuantumObject(col + row, SquareState.EMPTY)
+chess_board = QuantumWorld(board.values())
