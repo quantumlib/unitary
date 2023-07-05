@@ -1,6 +1,9 @@
 """Various consistency checks to make sure the world is correctly built."""
 import pytest
+import io
 
+import unitary.examples.quantum_rpg.classes as classes
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.final_state_preparation.final_state_world as final_state
 from unitary.examples.quantum_rpg.world import Direction, World
 
@@ -65,3 +68,22 @@ def test_consistent_exits():
 def test_classical_realm_paths(path, expected_location):
     test_world = go_directions(path)
     assert test_world.current_location.label == expected_location
+
+
+def test_engineer_joins_the_party():
+    """Test that the engineer (second qaracter) propoerly joins the party.
+
+    This should happen when you talk to the engineer in the NMR lab.
+    """
+    c = classes.Analyst("Mensing")
+    state = game_state.GameState(party=[c], user_input=["Hamilton"], file=io.StringIO())
+    test_world = go_directions("nneeeeeeeeu")
+    action = test_world.current_location.get_action("talk engineer")
+    assert callable(action)
+    msg = action(state)
+    assert msg == "Hamilton has joined the group!"
+    assert len(state.party) == 2
+    # Make sure that the engineer can't join the party twice.
+    msg = action(state)
+    assert msg == "The engineer reminisces about his former experiment."
+    assert len(state.party) == 2

@@ -1,11 +1,13 @@
 import unitary.alpha as alpha
 
+from unitary.examples.quantum_rpg.classes import Engineer
 from unitary.examples.quantum_rpg.encounter import Encounter
-from unitary.examples.quantum_rpg.world import Direction, Location
+from unitary.examples.quantum_rpg.game_state import GameState
+from unitary.examples.quantum_rpg.input_helpers import get_user_input_qaracter_name
 from unitary.examples.quantum_rpg.item import EXAMINE, TALK, Item
 from unitary.examples.quantum_rpg.npcs import BlueFoam, GreenFoam, Observer
 from unitary.examples.quantum_rpg.xp_utils import EncounterXp
-
+from unitary.examples.quantum_rpg.world import Direction, Location
 
 _BLUE_XP = EncounterXp(
     [
@@ -48,6 +50,38 @@ def _green_foam(number: int, prob: float = 0.5, xp=_GREEN_XP):
         description="Some green quantum foam oozes towards you!",
         xp=xp,
     )
+
+
+def _engineer_joins(state: GameState) -> str:
+    if len(state.party) > 1:
+        return f"The engineer reminisces about his former experiment."
+    print("The engineer looks at the apparatus that dominates the room.")
+    print("'NMR has been a promising technology for quantum computing,'")
+    print("the engineer says.  'And we have learned a lot.  But, ultimately,")
+    print("I can already see that this technology is not scalable and will")
+    print("not solve the problems that plague us today.  I will leave this")
+    print("for the scientists working in other disciplines and join you")
+    print("on the journey towards quantum error correction!")
+
+    name = get_user_input_qaracter_name(
+        state.get_user_input, "the engineer", file=state.file
+    )
+    qar = Engineer(name)
+    state.party.append(qar)
+
+    return f"{name} has joined the group!"
+
+
+ENGINEER = Item(
+    keyword_actions=[
+        (
+            TALK,
+            ["engineer"],
+            _engineer_joins,
+        )
+    ],
+    description="The engineer stands here wondering how to build a better quantum computer.",
+)
 
 
 RICHARD = Item(
@@ -640,7 +674,7 @@ CLASSICAL_REALM = [
             "the machine up to the ceiling and snake outward, connecting to all\n"
             "manner of machinery.  A whirring hum echoes throughout the space.\n"
         ),
-        items=[SPECTROMETER],  # TODO: The engineer joins the party!
+        items=[SPECTROMETER, ENGINEER],
         exits={Direction.DOWN: "nmr_lab2"},
     ),
 ]
