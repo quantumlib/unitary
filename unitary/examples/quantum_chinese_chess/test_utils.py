@@ -16,8 +16,9 @@ from unitary.examples.quantum_chinese_chess.enums import SquareState
 from string import ascii_lowercase, digits
 
 # Build quantum objects a0 to i9, and add them to a quantum world.
-board = {}
-for col in ascii_lowercase[:9]:
-    for row in digits:
-        board[col + row] = QuantumObject(col + row, SquareState.EMPTY)
-chess_board = QuantumWorld(board.values())
+def init_board() -> QuantumWorld:
+    board = {}
+    for col in ascii_lowercase[:9]:
+        for row in digits:
+            board[col + row] = QuantumObject(col + row, SquareState.EMPTY)
+    return QuantumWorld(board.values())

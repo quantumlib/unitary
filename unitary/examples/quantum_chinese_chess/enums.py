@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import enum
+from typing import Optional
 
 class SquareState(enum.Enum):
     EMPTY = 0
@@ -41,11 +42,26 @@ class MoveVariant(enum.Enum):
 
 
 class Piece(enum.Enum):
-    EMPTY = 0
-    SOLDIER = 1
-    CANNON = 2
-    ROOK = 3
-    HORSE = 4
-    ELEPHANT = 5
-    ADVISOR = 6
-    GENERAL = 7
+    EMPTY = '.'
+    SOLDIER = 's'
+    CANNON = 'c'
+    ROOK = 'r'
+    HORSE = 'h'
+    ELEPHANT = 'e'
+    ADVISOR = 'a'
+    GENERAL = 'g'
+    def type_of(c: str) -> Optional["Piece"]:
+        return {
+            's': Piece.SOLDIER,
+            'c': Piece.CANNON,
+            'r': Piece.ROOK,
+            'h': Piece.HORSE,
+            'e': Piece.ELEPHANT,
+            'a': Piece.ADVISOR,
+            'g': Piece.GENERAL,
+            '.': Piece.EMPTY
+            }.get(c.lower(), None)
+    def red_symbol(self) -> str:
+        return self.value.upper()
+    def black_symbol(self) -> str:
+        return self.value
