@@ -90,7 +90,7 @@ class MainLoop:
 
                         if result == battle.BattleResult.PLAYERS_WON:
                             awarded_xp = current_battle.xp
-                            xp_utils.award_xp(self.party, awarded_xp)
+                            xp_utils.award_xp(self.game_state, awarded_xp)
                         break
                 if result is not None:
                     # Reprint location description now that encounter is over.

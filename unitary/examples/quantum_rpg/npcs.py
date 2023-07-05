@@ -91,7 +91,7 @@ class BlueFoam(Npc):
 
     def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
         if action_choice > 0.2:
-            slime = kwargs["slime"] or random.randint(0, 250) / 1000.0
+            slime = kwargs.get("slime") or random.randint(0, 250) / 1000.0
             alpha.Flip(effect_fraction=slime)(enemy_qubit)
             return f"{self.display_name} slimes {enemy_qubit.name} for {slime:0.3f}."
         else:
@@ -107,7 +107,7 @@ class GreenFoam(Npc):
 
     def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
         if action_choice > 0.2:
-            slime = kwargs["slime"] or random.randint(0, 250) / 1000.0
+            slime = kwargs.get("slime") or random.randint(0, 250) / 1000.0
             alpha.Phase(effect_fraction=slime)(enemy_qubit)
             return (
                 f"{self.display_name} oozes {enemy_qubit.name} for {slime:0.3f} phase."
@@ -129,7 +129,7 @@ class RedFoam(Npc):
 
     def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
         if action_choice > 0.2:
-            slime = kwargs["slime"] or random.randint(0, 350) / 1000.0
+            slime = kwargs.get("slime") or random.randint(0, 350) / 1000.0
             alpha.Flip(effect_fraction=slime)(enemy_qubit)
             return f"{self.display_name} slimes {enemy_qubit.name} for {slime:0.3f}."
         else:
