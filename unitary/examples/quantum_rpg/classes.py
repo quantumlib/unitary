@@ -30,7 +30,7 @@ class Engineer(qaracter.Qaracter):
 
     def help(self) -> str:
         return (
-            "The Engineer can 'attack' by applying an X gate to an enemw'y qubit.\n"
+            "The Engineer can 'attack' by applying an X gate to an enemy qubit.\n"
             "This flips a qubit from |0> to |1> and vice versa."
         )
 
@@ -59,7 +59,7 @@ class Analyst(qaracter.Qaracter):
     def help(self) -> str:
         msg = "The analyst can measure enemy qubits.  This forces an enemy qubit\n"
         msg += "into the |0> state or |1> state with a probability based on its\n"
-        msg += "amplitude. Try to measure the enemy qubits as |0> to defwat them.\n"
+        msg += "amplitude. Try to measure the enemy qubits as |0> to defeat them.\n"
         if self.level >= 3:
             msg += "At level 3 and above, the analyst can sample enemy qubits.\n"
             msg += "This allows you to test the value of a qubit by choosing\n"

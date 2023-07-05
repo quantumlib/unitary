@@ -130,6 +130,6 @@ m) Measure enemy qubit.
 h) Help.
 The analyst can measure enemy qubits.  This forces an enemy qubit
 into the |0> state or |1> state with a probability based on its
-amplitude. Try to measure the enemy qubits as |0> to defwat them.
+amplitude. Try to measure the enemy qubits as |0> to defeat them.
 """.strip()
     )
