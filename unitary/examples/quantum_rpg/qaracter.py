@@ -126,7 +126,7 @@ class Qaracter(alpha.QuantumWorld):
     def copy(self) -> "Qaracter":
         new_obj = super().copy()
         new_obj.name = self.name
-        new_obj.health_status = self.health_status
+        new_obj.health_status = self.health_status.copy()
         new_obj.level = self.level
         return new_obj
 
