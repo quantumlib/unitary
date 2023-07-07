@@ -91,6 +91,14 @@ class MainLoop:
                         if result == battle.BattleResult.PLAYERS_WON:
                             awarded_xp = current_battle.xp
                             xp_utils.award_xp(self.game_state, awarded_xp)
+                        if result == battle.BattleResult.PLAYERS_DOWN:
+                            print(ascii_art.RIP, file=self.file)
+                            print(
+                                "You have been measured and were found wanting.",
+                                file=self.file,
+                            )
+                            print("Better luck next repetition.", file=self.file)
+                            return
                         break
                 if result is not None:
                     # Reprint location description now that encounter is over.

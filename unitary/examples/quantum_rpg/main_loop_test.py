@@ -13,6 +13,7 @@
 # limitations under the License.
 from typing import cast
 
+import copy
 import io
 import unitary.examples.quantum_rpg.ascii_art as ascii_art
 import unitary.examples.quantum_rpg.classes as classes
@@ -40,35 +41,38 @@ BUTTON = item.Item(
     keyword_actions=[("press", "button", _press_button)],
 )
 
-EXAMPLE_WORLD = [
-    world.Location(
-        label="1",
-        title="Lab Entrance",
-        description="You stand before the entrance to the premier quantum lab.\nDouble doors lead east.",
-        items=[BUTTON],
-        exits={world.Direction.EAST: "2"},
-    ),
-    world.Location(
-        label="2",
-        title="Disorganized Lab",
-        description="Tables are here with tons of electronics.\nThe lab continues to the south.",
-        items=[SIGN],
-        exits={world.Direction.SOUTH: "3", world.Direction.WEST: "1"},
-    ),
-    world.Location(
-        label="3",
-        title="Cryostats",
-        description="Giant aluminum cylinders hang suspended by large frames.\nRhythmic whirring of a pulse tube can be heard overhead.",
-        encounters=[
-            encounter.Encounter(
-                [npcs.Observer("watcher")],
-                description="A weird security guard approaches!",
-                probability=1.0,
-            )
-        ],
-        exits={world.Direction.NORTH: "2"},
-    ),
-]
+
+def example_world():
+    return [
+        world.Location(
+            label="1",
+            title="Lab Entrance",
+            description="You stand before the entrance to the premier quantum lab.\nDouble doors lead east.",
+            items=[BUTTON],
+            exits={world.Direction.EAST: "2"},
+        ),
+        world.Location(
+            label="2",
+            title="Disorganized Lab",
+            description="Tables are here with tons of electronics.\nThe lab continues to the south.",
+            items=[SIGN],
+            exits={world.Direction.SOUTH: "3", world.Direction.WEST: "1"},
+        ),
+        world.Location(
+            label="3",
+            title="Cryostats",
+            description="Giant aluminum cylinders hang suspended by large frames.\nRhythmic whirring of a pulse tube can be heard overhead.",
+            encounters=[
+                encounter.Encounter(
+                    [npcs.Observer("watcher")],
+                    description="A weird security guard approaches!",
+                    probability=1.0,
+                )
+            ],
+            exits={world.Direction.NORTH: "2"},
+        ),
+    ]
+
 
 _TITLE = r"""
 ______  _                _             _____  _           _
@@ -108,7 +112,7 @@ def test_parse_commands() -> None:
 def test_simple_main_loop() -> None:
     c = classes.Analyst("Mensing")
     state = game_state.GameState(party=[c], user_input=["quit"], file=io.StringIO())
-    loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
+    loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
     loop.loop(user_input=["quit"])
     assert (
         cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
@@ -128,7 +132,7 @@ def test_do_simple_move() -> None:
     state = game_state.GameState(
         party=[c], user_input=["e", "read sign", "w", "quit"], file=io.StringIO()
     )
-    loop = main_loop.MainLoop(world.World(EXAMPLE_WORLD), state)
+    loop = main_loop.MainLoop(world.World(example_world()), state)
     loop.loop()
     assert (
         cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
@@ -166,7 +170,7 @@ def test_save() -> None:
     state = game_state.GameState(
         party=[c], user_input=["e", "save", "quit"], file=io.StringIO()
     )
-    loop = main_loop.MainLoop(world.World(EXAMPLE_WORLD), state)
+    loop = main_loop.MainLoop(world.World(example_world()), state)
     loop.loop()
     assert (
         cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
@@ -199,7 +203,7 @@ def test_load() -> None:
         user_input=["load", "2;1;Mensing#Analyst#1", "quit"],
         file=io.StringIO(),
     )
-    loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
+    loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
     loop.loop()
     assert loop.game_state.party[0].name == "Mensing"
     assert (
@@ -229,7 +233,7 @@ def test_battle() -> None:
     state = game_state.GameState(
         party=[c], user_input=["e", "south", "m", "1", "1", "quit"], file=io.StringIO()
     )
-    loop = main_loop.MainLoop(state=state, world=world.World(EXAMPLE_WORLD))
+    loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
     loop.loop()
     assert (
         cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
@@ -274,6 +278,59 @@ Exits: north.
     )
 
 
+def test_lost_battle() -> None:
+    c = classes.Engineer("Mensing")
+    state = game_state.GameState(
+        party=[c], user_input=["e", "south", "x", "1", "1", "quit"], file=io.StringIO()
+    )
+    assert state.party[0].name == "Mensing"
+    assert len(state.party[0].active_qubits()) == 1
+    loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
+    loop.loop()
+    assert state.party[0].name == "Mensing"
+    assert len(state.party[0].active_qubits()) == 1
+
+    assert (
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
+        == r"""Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+
+Disorganized Lab
+
+Tables are here with tons of electronics.
+The lab continues to the south.
+A helpful sign is here.
+
+Exits: south, west.
+
+Cryostats
+
+Giant aluminum cylinders hang suspended by large frames.
+Rhythmic whirring of a pulse tube can be heard overhead.
+
+Exits: north.
+
+A weird security guard approaches!
+-----------------------------------------------
+Mensing Engineer   watcher Observer
+1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
+-----------------------------------------------
+Mensing turn:
+x) Attack with X gate.
+h) Help.
+Observer watcher measures Mensing_1 as HURT.
+"""
+        + ascii_art.RIP
+        + """
+You have been measured and were found wanting.
+Better luck next repetition."""
+    )
+
+
 def test_item_function():
     c = classes.Analyst("michalakis")
     state = game_state.GameState(
@@ -281,7 +338,7 @@ def test_item_function():
         user_input=["press button", "press button", "press button", "quit"],
         file=io.StringIO(),
     )
-    loop = main_loop.MainLoop(world.World(EXAMPLE_WORLD), state)
+    loop = main_loop.MainLoop(world.World(example_world()), state)
     loop.loop()
     assert (
         state.file.getvalue().replace("\t", " ").strip()
