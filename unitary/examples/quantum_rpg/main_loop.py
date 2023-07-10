@@ -20,6 +20,7 @@ import sys
 import unitary.examples.quantum_rpg.ascii_art as ascii_art
 import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.classes as classes
+import unitary.examples.quantum_rpg.exceptions as exceptions
 import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.input_helpers as input_helpers
 import unitary.examples.quantum_rpg.encounter as encounter
@@ -71,82 +72,92 @@ class MainLoop:
         Loop by getting user input and then acting on it.
         """
         print_room_description = True
-        while True:
-            if print_room_description:
-                print(self.world.current_location, file=self.file)
-            else:
-                print_room_description = True
-            if self.world.current_location.encounters:
-                result = None
-                # If this location has random encounters, then see if any will
-                # trigger.  If so, initiate the battle.
-                for random_encounter in self.world.current_location.encounters:
-                    if random_encounter.will_trigger():
-                        if random_encounter.description:
-                            print(random_encounter.description, file=self.file)
-                        current_battle = random_encounter.initiate(self.game_state)
-                        result = current_battle.loop()
-                        self.world.current_location.remove_encounter(random_encounter)
-
-                        if result == battle.BattleResult.PLAYERS_WON:
-                            awarded_xp = current_battle.xp
-                            xp_utils.award_xp(self.game_state, awarded_xp)
-                        if result == battle.BattleResult.PLAYERS_DOWN:
-                            print(ascii_art.RIP, file=self.file)
-                            print(
-                                "You have been measured and were found wanting.",
-                                file=self.file,
-                            )
-                            print("Better luck next repetition.", file=self.file)
-                            return
-                        break
-                if result is not None:
-                    # Reprint location description now that encounter is over.
+        try:
+            while True:
+                if print_room_description:
                     print(self.world.current_location, file=self.file)
+                else:
+                    print_room_description = True
+                if self.world.current_location.encounters:
+                    result = None
+                    # If this location has random encounters, then see if any will
+                    # trigger.  If so, initiate the battle.
+                    for random_encounter in self.world.current_location.encounters:
+                        if random_encounter.will_trigger():
+                            if random_encounter.description:
+                                print(random_encounter.description, file=self.file)
+                            current_battle = random_encounter.initiate(self.game_state)
+                            result = current_battle.loop()
+                            self.world.current_location.remove_encounter(
+                                random_encounter
+                            )
 
-            current_input = self.game_state.get_user_input(">")
-            cmd = world.Direction.parse(current_input)
-            if cmd is not None:
-                new_location = self.world.move(cmd)
-                if new_location is not None:
-                    self.game_state.current_location_label = new_location.label
-                continue
-            action = self.world.current_location.get_action(current_input)
-            if action is not None:
-                if isinstance(action, str):
-                    print(action, file=self.file)
-                elif callable(action):
-                    msg = action(self.game_state)
-                    if msg:
-                        print(msg, file=self.file)
-                print_room_description = False
-                continue
-            input_cmd = Command.parse(current_input)
-            if input_cmd == Command.QUIT:
-                return
-            elif input_cmd == Command.HELP:
-                print(ascii_art.HELP, file=self.file)
-            elif input_cmd == Command.LOAD:
-                print(
-                    "Paste the save file here to load the game from that point.",
-                    file=self.file,
-                )
-                save_file = self.game_state.get_user_input("")
-                self.game_state.with_save_file(save_file)
-                self.world.current_location = self.world.locations[
-                    self.game_state.current_location_label
-                ]
-            elif input_cmd == Command.SAVE:
-                print(
-                    "Use this code to return to this point in the game:", file=self.file
-                )
-                print(self.game_state.to_save_file(), file=self.file)
-                print("")
-                print_room_description = False
-            else:
-                print(
-                    f"I did not understand the command {current_input}", file=self.file
-                )
+                            if result == battle.BattleResult.PLAYERS_WON:
+                                awarded_xp = current_battle.xp
+                                xp_utils.award_xp(self.game_state, awarded_xp)
+                            if result == battle.BattleResult.PLAYERS_DOWN:
+                                raise exceptions.UntimelyDeathException(
+                                    "You have been defeated!"
+                                )
+                            break
+                    if result is not None:
+                        # Reprint location description now that encounter is over.
+                        print(self.world.current_location, file=self.file)
+
+                current_input = self.game_state.get_user_input(">")
+                cmd = world.Direction.parse(current_input)
+                if cmd is not None:
+                    new_location = self.world.move(cmd)
+                    if new_location is not None:
+                        self.game_state.current_location_label = new_location.label
+                    continue
+                action = self.world.current_location.get_action(current_input)
+                if action is not None:
+                    if isinstance(action, str):
+                        print(action, file=self.file)
+                    elif callable(action):
+                        msg = action(self.game_state, self.world)
+                        if msg:
+                            print(msg, file=self.file)
+                    print_room_description = False
+                    continue
+                input_cmd = Command.parse(current_input)
+                if input_cmd == Command.QUIT:
+                    return
+                elif input_cmd == Command.HELP:
+                    print(ascii_art.HELP, file=self.file)
+                elif input_cmd == Command.LOAD:
+                    print(
+                        "Paste the save file here to load the game from that point.",
+                        file=self.file,
+                    )
+                    save_file = self.game_state.get_user_input("")
+                    self.game_state.with_save_file(save_file)
+                    self.world.current_location = self.world.locations[
+                        self.game_state.current_location_label
+                    ]
+                elif input_cmd == Command.SAVE:
+                    print(
+                        "Use this code to return to this point in the game:",
+                        file=self.file,
+                    )
+                    print(self.game_state.to_save_file(), file=self.file)
+                    print("")
+                    print_room_description = False
+                else:
+                    print(
+                        f"I did not understand the command {current_input}",
+                        file=self.file,
+                    )
+        except exceptions.UntimelyDeathException as e:
+            print(e, file=self.file)
+            print(ascii_art.RIP, file=self.file)
+            print(
+                "You have been measured and were found wanting.",
+                file=self.file,
+            )
+            print("Better luck next repetition.", file=self.file)
+            return
 
 
 def main(state: game_state.GameState) -> None:

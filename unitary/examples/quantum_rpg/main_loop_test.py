@@ -27,7 +27,7 @@ import unitary.examples.quantum_rpg.world as world
 _COUNTER = "counter"
 
 
-def _press_button(state: game_state.GameState) -> str:
+def _press_button(state: game_state.GameState, world: world.World) -> str:
     counter = state.state_dict.get(_COUNTER, "0")
     state.state_dict[_COUNTER] = str(int(counter) + 1)
     return f"You've pressed the button {counter} times before!"
@@ -323,6 +323,7 @@ Mensing turn:
 x) Attack with X gate.
 h) Help.
 Observer watcher measures Mensing_1 as HURT.
+You have been defeated!
 """
         + ascii_art.RIP
         + """

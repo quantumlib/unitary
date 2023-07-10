@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
 import unitary.examples.quantum_rpg.game_state as game_state
 
@@ -6,7 +6,8 @@ import unitary.examples.quantum_rpg.game_state as game_state
 EXAMINE = ["read", "look", "examine", "investigate", "search"]
 TALK = ["talk", "chat", "ask"]
 
-ITEM_FUNCTION_TYPE = Callable[[game_state.GameState], Optional[str]]
+# Note: second argument is a World, omitting to avoid circular dependency
+ITEM_FUNCTION_TYPE = Callable[[game_state.GameState, Any], Optional[str]]
 ITEM_ACTION_TYPE = Union[str, ITEM_FUNCTION_TYPE]
 
 
