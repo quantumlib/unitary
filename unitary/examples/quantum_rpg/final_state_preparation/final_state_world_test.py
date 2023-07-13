@@ -1,8 +1,22 @@
+# Copyright 2023 The Unitary Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 """Various consistency checks to make sure the world is correctly built."""
 import pytest
 import io
 
 import unitary.examples.quantum_rpg.classes as classes
+import unitary.examples.quantum_rpg.exceptions as exceptions
 import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.final_state_preparation.final_state_world as final_state
 from unitary.examples.quantum_rpg.world import Direction, World
@@ -16,6 +30,9 @@ OPPOSITE_DIR = {
     Direction.UP: Direction.DOWN,
     Direction.DOWN: Direction.UP,
 }
+
+# Rooms that purposely do not have a way back.
+_ONE_WAY_ROOMS = {"hadamard1"}
 
 
 def find_room(room_name: str):
@@ -39,10 +56,17 @@ def go_directions(path: str) -> World:
 def test_consistent_exits():
     """Test that going to and from all exits is consistent."""
     for location in final_state.WORLD:
+        if location.label in _ONE_WAY_ROOMS:
+            continue
         for direction, room_name in location.exits.items():
             nearby_room = find_room(room_name)
             assert nearby_room is not None, f"Missing room {room_name}"
-            return_exit = nearby_room.exits[OPPOSITE_DIR[direction]]
+            try:
+                return_exit = nearby_room.exits[OPPOSITE_DIR[direction]]
+            except KeyError as e:
+                raise KeyError(
+                    f"{room_name} does not have a return exit in {direction} to {location.label}"
+                )
             assert (
                 return_exit == location.label
             ), f"Inconsistent {direction} exit in {location.label}"
@@ -80,10 +104,49 @@ def test_engineer_joins_the_party():
     test_world = go_directions("nneeeeeeeeu")
     action = test_world.current_location.get_action("talk engineer")
     assert callable(action)
-    msg = action(state)
+    msg = action(state, test_world)
     assert msg == "Hamilton has joined the group!"
     assert len(state.party) == 2
     # Make sure that the engineer can't join the party twice.
-    msg = action(state)
+    msg = action(state, test_world)
     assert msg == "The engineer reminisces about his former experiment."
     assert len(state.party) == 2
+
+
+def test_hole():
+    test_world = go_directions("nnen")
+    assert test_world.current_location.title == "Near a Pixelated Hole"
+    state = game_state.GameState(party=[], user_input=[""], file=io.StringIO())
+    action = test_world.current_location.get_action("enter hole")
+    assert callable(action)
+    with pytest.raises(
+        exceptions.UntimelyDeathException,
+        match="You feel your entire existence dissolve into errors",
+    ):
+        _ = action(state, test_world)
+
+
+def test_bridge():
+    c = classes.Analyst("Mensing")
+    state = game_state.GameState(party=[c], user_input=["Hamilton"], file=io.StringIO())
+    state.current_location_label = "classical12"
+    test_world = go_directions("nnwnnnne")
+    assert test_world.current_location.title == "At a Broken Bridge"
+    action = test_world.current_location.get_action("fix bridge")
+    assert callable(action)
+    msg = action(state, test_world)
+    assert msg == "You do not have the required skills to fix the bridge."
+    bridge_location = test_world.get("classical12")
+    assert Direction.NORTH not in bridge_location.exits
+    c = classes.Engineer("Tesla")
+    state.party.append(c)
+    assert callable(action)
+    msg = action(state, test_world)
+    assert (
+        msg
+        == "The engineer uses nearby logs to repair the bridge and provide a safe passage."
+    )
+    assert Direction.NORTH in bridge_location.exits
+    assert callable(action)
+    msg = action(state, test_world)
+    assert msg == "You have already fixed the bridge."

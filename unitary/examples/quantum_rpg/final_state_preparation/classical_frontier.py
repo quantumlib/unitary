@@ -1,10 +1,26 @@
+# Copyright 2023 The Unitary Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import unitary.alpha as alpha
 
+from unitary.examples.quantum_rpg.classes import Engineer
 from unitary.examples.quantum_rpg.encounter import Encounter
+from unitary.examples.quantum_rpg.exceptions import UntimelyDeathException
 from unitary.examples.quantum_rpg.game_state import GameState
 from unitary.examples.quantum_rpg.final_state_preparation.monsters import (
     green_foam,
     blue_foam,
+    red_foam,
 )
 from unitary.examples.quantum_rpg.item import EXAMINE, TALK, Item
 from unitary.examples.quantum_rpg.world import Direction, Location
@@ -83,6 +99,69 @@ LOOPED_PATH = Item(
         )
     ]
 )
+
+
+def _hole(state: GameState, world):
+    raise UntimelyDeathException(
+        "You feel your entire existence dissolve into errors\n"
+        "as you are pulled apart into static and random bitstrings."
+    )
+
+
+HOLE = Item(
+    keyword_actions=[
+        (
+            EXAMINE,
+            ["darkness", "vista", "hole", "static", "piece", "area"],
+            (
+                "It looks like this used to be a path to a room, but now is just an\n"
+                "empty void, filled with pixelated static.  This must be a form of\n"
+                "quantum errors that affect the area.  You think it would be very unwise to\n"
+                "enter this area."
+            ),
+        ),
+        (
+            ["enter", "go", "jump"],
+            ["darkness", "vista", "hole", "static", "piece", "area"],
+            _hole,
+        ),
+    ]
+)
+
+
+def _bridge(state: GameState, world) -> str:
+    has_engineer = any(isinstance(qar, Engineer) for qar in state.party)
+    if not has_engineer:
+        return "You do not have the required skills to fix the bridge."
+    else:
+        print(state.current_location_label)
+        location = world.get(state.current_location_label)
+        if Direction.NORTH in location.exits:
+            return "You have already fixed the bridge."
+        location.exits[Direction.NORTH] = "hadamard1"
+        return "The engineer uses nearby logs to repair the bridge and provide a safe passage."
+
+
+BRIDGE = Item(
+    keyword_actions=[
+        (
+            EXAMINE,
+            ["bridge"],
+            (
+                "It looks as if this bridge has fallen into disrepair.\n"
+                "Parts have decayed and have fallen into the river. However,\n"
+                "there are plenty of logs around, and the supports are intact,\n"
+                "so it should be possible to repair it, for someone with the right skills."
+            ),
+        ),
+        (
+            ["fix", "repair"],
+            ["bridge"],
+            _bridge,
+        ),
+    ]
+)
+
 
 CLASSICAL_FRONTIER = [
     Location(
@@ -173,7 +252,7 @@ CLASSICAL_FRONTIER = [
             "disturbing, and you wonder at the cruel force that may have destroyed the\n"
             "coherence of the landscape in this area."
         ),
-        # TODO: don't enter the hole!
+        items=[HOLE],
         exits={Direction.SOUTH: "classical4"},
     ),
     Location(
@@ -199,7 +278,54 @@ CLASSICAL_FRONTIER = [
             "college campus."
         ),
         encounters=[blue_foam(2, 0.3), green_foam(2, 0.2)],
-        exits={Direction.SOUTH: "classical7"},
-        # TODO: Connect to the next zone.
+        exits={Direction.SOUTH: "classical7", Direction.NORTH: "classical9"},
+    ),
+    Location(
+        label="classical9",
+        title="Ridgeline Path",
+        description=(
+            "The path works its way along a ridge.  Below you, an ominous patch of static\n"
+            "hisses with an awful aperiodic buzz.  To the north, the ground begins to\n"
+            "slope downwards towards a river that winds its way across the frontier lands."
+        ),
+        encounters=[blue_foam(2, 0.2), red_foam(2, 0.2)],
+        exits={Direction.SOUTH: "classical8", Direction.NORTH: "classical10"},
+    ),
+    Location(
+        label="classical10",
+        title="Sloping Path",
+        description=(
+            "The path slopes downward towards a rushing river to the north.\n"
+            "A feeling of exhilaration fills you as you approach the fringes of\n"
+            "the classical realm.  You hope you are prepared for the challenges\n"
+            "that await you."
+        ),
+        encounters=[red_foam(2, 0.3), green_foam(3, 0.2)],
+        exits={Direction.SOUTH: "classical9", Direction.NORTH: "classical11"},
+    ),
+    Location(
+        label="classical11",
+        title="At the Bank of a Rushing River",
+        description=(
+            "You have reached the southern shore of the river which marks the\n"
+            "the border of the quantum realm.  Beyond, you can see the Hadamard Hills\n"
+            "that form the first foothills on the way to your eventual goal to the\n"
+            "north.  There seems to be no immediate way to cross the river."
+        ),
+        encounters=[red_foam(2, 0.3), green_foam(3, 0.2)],
+        exits={Direction.SOUTH: "classical10", Direction.EAST: "classical12"},
+    ),
+    Location(
+        label="classical12",
+        title="At a Broken Bridge",
+        description=(
+            "Here, at the southern shore of the river is a rickety bridge\n"
+            "that leads to the northern side of the river. Pieces of the bridge\n"
+            "have collapsed and fallen apart, and there seems to be no way to\n"
+            "cross safely, given the condition the bridge is in now."
+        ),
+        encounters=[red_foam(2, 0.3), green_foam(3, 0.2)],
+        items=[BRIDGE],
+        exits={Direction.WEST: "classical11"},
     ),
 ]

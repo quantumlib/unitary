@@ -11,15 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Module to combine all the zones of the RPG world into one list."""
-
-import unitary.examples.quantum_rpg.final_state_preparation.classical_frontier as classical_frontier
-import unitary.examples.quantum_rpg.final_state_preparation.oxtail_university as oxtail_university
-import unitary.examples.quantum_rpg.final_state_preparation.hadamard_hills as hadamard_hills
+"""Exceptions used in Quantum RPG."""
 
 
-WORLD = [
-    *classical_frontier.CLASSICAL_FRONTIER,
-    *oxtail_university.OXTAIL_UNIVERSITY,
-    *hadamard_hills.HADAMARD_HILLS,
-]
+class UntimelyDeathException(Exception):
+    pass

@@ -113,3 +113,7 @@ class World:
             self.current_location = self.locations[new_location]
             return self.current_location
         return None
+
+    def get(self, label: str) -> Optional[Location]:
+        """Retrieves a location with a given label."""
+        return self.locations.get(label)
