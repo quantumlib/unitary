@@ -103,7 +103,7 @@ LOOPED_PATH = Item(
 
 def _hole(state: GameState, world):
     raise UntimelyDeathException(
-        "You feel your entire existence dissolve into errors and static\n"
+        "You feel your entire existence dissolve into errors\n"
         "as you are pulled apart into static and random bitstrings."
     )
 
@@ -114,9 +114,9 @@ HOLE = Item(
             EXAMINE,
             ["darkness", "vista", "hole", "static", "piece", "area"],
             (
-                "It looks like this used to be a path to a room, but is now just an\n"
-                "empty void, filled with pixelated static.  This must be a form of the\n"
-                "errors that you have heard about.  You think it would be very unwise to\n"
+                "It looks like this used to be a path to a room, but now is just an\n"
+                "empty void, filled with pixelated static.  This must be a form of\n"
+                "quantum errors that affect the area.  You think it would be very unwise to\n"
                 "enter this area."
             ),
         ),
@@ -148,10 +148,10 @@ BRIDGE = Item(
             EXAMINE,
             ["bridge"],
             (
-                "It looks like as if this bridge has fallen into disrepair.\n"
+                "It looks as if this bridge has fallen into disrepair.\n"
                 "Parts have decayed and have fallen into the river. However,\n"
                 "there are plenty of logs around, and the supports are intact,\n"
-                "so it should be possible to repair with someone with the right skills."
+                "so it should be possible to repair it, for someone with the right skills."
             ),
         ),
         (
@@ -295,7 +295,7 @@ CLASSICAL_FRONTIER = [
         label="classical10",
         title="Sloping Path",
         description=(
-            "The path slopes downward towards a rushingriver to the north.\n"
+            "The path slopes downward towards a rushing river to the north.\n"
             "A feeling of exhilaration fills you as you approach the fringes of\n"
             "the classical realm.  You hope you are prepared for the challenges\n"
             "that await you."
@@ -308,7 +308,7 @@ CLASSICAL_FRONTIER = [
         title="At the Bank of a Rushing River",
         description=(
             "You have reached the southern shore of the river which marks the\n"
-            "the border of the quantum realm.  Beyond, you can see Hadamard hills\n"
+            "the border of the quantum realm.  Beyond, you can see the Hadamard Hills\n"
             "that form the first foothills on the way to your eventual goal to the\n"
             "north.  There seems to be no immediate way to cross the river."
         ),
@@ -322,7 +322,7 @@ CLASSICAL_FRONTIER = [
             "Here, at the southern shore of the river is a rickety bridge\n"
             "that leads to the northern side of the river. Pieces of the bridge\n"
             "have collapsed and fallen apart, and there seems to be no way to\n"
-            "cross safely in the condition the bridge is in now."
+            "cross safely, given the condition the bridge is in now."
         ),
         encounters=[red_foam(2, 0.3), green_foam(3, 0.2)],
         items=[BRIDGE],
