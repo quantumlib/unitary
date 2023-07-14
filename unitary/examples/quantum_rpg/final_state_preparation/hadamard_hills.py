@@ -52,7 +52,7 @@ HADAMARD_HILLS = [
         title="Bottom of Superposition Trail",
         description=(
             "You are at the bottom of a steep slope that leads up to Hadamard Hills\n"
-            "proper.  There seems to be two ways up the slope that you can go up."
+            "proper.  There seem to be two ways that you can go up the slope."
         ),
         encounters=[],
         exits={
@@ -66,7 +66,7 @@ HADAMARD_HILLS = [
         title="Bottom of Superposition Slope",
         description=(
             "You are at the bottom of a steep slope that leads up to Hadamard Hills\n"
-            "proper.  The trails north leads steeply up to the top of the hills.\n"
+            "proper.  The trails north lead steeply up to the top of the hills.\n"
         ),
         encounters=[],
         exits={Direction.NORTH: "hadamard4_0", Direction.WEST: "hadamard2"},
@@ -76,7 +76,7 @@ HADAMARD_HILLS = [
         title="Bottom of Superposition Slope",
         description=(
             "You are at the bottom of a steep slope that leads up to Hadamard Hills\n"
-            "proper.  The trails north leads steeply up to the top of the hills.\n"
+            "proper.  The trails north lead steeply up to the top of the hills.\n"
         ),
         encounters=[],
         exits={Direction.NORTH: "hadamard4_1", Direction.EAST: "hadamard2"},
@@ -107,10 +107,10 @@ HADAMARD_HILLS = [
         label="hadamard5",
         title="Top of Superposition Slope",
         description=(
-            "You have reached the top of the superposition slope.  From here,\n"
+            "You have reached the top of the Superposition Slope.  From here,\n"
             "you can see the river winding its way through the valley from the south,\n"
             "and the path downwards in that direction looks extremely steep and treacherous.\n"
-            "To the north, the foothills continue.  Two prominent peaks to the north-ease\n"
+            "To the north, the foothills continue.  Two prominent peaks to the north-east\n"
             "and north-west are the most obvious features, though the land slopes gradually\n"
             "towards the mountains of error correction in the northernmost distance.\n"
         ),
