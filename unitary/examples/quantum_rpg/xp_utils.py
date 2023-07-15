@@ -47,6 +47,18 @@ class EncounterXp:
         return list(random.choices(self.xp_choices, weights=self.weights)[0])
 
 
+def is_ready_for_next_level(qar: qaracter.Qaracter) -> bool:
+    current_level = qar.level
+    for idx in range(current_level):
+        hp = qar.get_hp(qar.quantum_object_name(idx + 1))
+        if (
+            len(list(qar.circuit.findall_operations(lambda op: hp.qubit in op.qubits)))
+            <= current_level
+        ):
+            return False
+    return True
+
+
 def award_xp(
     state: game_state.GameState,
     xp: Optional[EncounterXp],
@@ -87,4 +99,9 @@ def award_xp(
             )
             qubit_choices.append(qar.get_hp(qubit_list[choice - 1]))
         effect(*qubit_choices)
-        # TODO: level up if # moments > level
+        if is_ready_for_next_level(qar):
+            print(
+                f"{qar.name} has advanced to the next level and gains a HP!",
+                file=state.file,
+            )
+            qar.add_hp()

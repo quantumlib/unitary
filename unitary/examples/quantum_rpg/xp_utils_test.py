@@ -108,3 +108,27 @@ def test_qaracter_not_high_enough():
 Qaracters are not high-enough level for Move!
 """
     )
+
+
+def test_qaracter_levels():
+    c = classes.Analyst("wizard")
+    c.add_quantum_effect(alpha.Superposition(), 1)
+    enc = xp_utils.EncounterXp([[alpha.Superposition()]])
+    state = game_state.GameState(
+        party=[c], user_input=["1", "1", "2"], file=io.StringIO()
+    )
+    xp_utils.award_xp(state, enc)
+    assert (
+        state.file.getvalue()
+        == """You have been awarded XP!
+  Superposition
+
+Choose the qaracter to add the Superposition to:
+1) wizard
+Current qaracter sheet:
+wizard_1: ───H───
+Choose qubit 0 for Superposition:
+1) wizard_1
+wizard has advanced to the next level and gains a HP!
+"""
+    )
