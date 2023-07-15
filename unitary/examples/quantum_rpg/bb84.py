@@ -90,7 +90,7 @@ def solve_bb84(alice: str, bob: str):
 
 
 def _gen_keys(state: GameState):
-    if "akey" not in state.state_dict:
+    if "alice" not in state.state_dict:
         word = random.choice(_WORDS)
         alice, bob = gen_bb84(word)
         state.state_dict["alice"] = alice
