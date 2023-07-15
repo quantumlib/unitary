@@ -13,6 +13,7 @@
 # limitations under the License.
 import unitary.alpha as alpha
 
+from unitary.examples.quantum_rpg.bb84 import ALICE, BOB
 from unitary.examples.quantum_rpg.encounter import Encounter
 from unitary.examples.quantum_rpg.game_state import GameState
 from unitary.examples.quantum_rpg.item import EXAMINE, TALK, Item
@@ -249,7 +250,7 @@ HADAMARD_HILLS = [
         title="East Hill Pavillion",
         description=("Room description forthcoming."),
         encounters=[],
-        items=[],  # TODO: Alice
+        items=[ALICE],
         exits={Direction.SOUTH: "hadamard14_0"},
     ),
     Location(
@@ -257,7 +258,7 @@ HADAMARD_HILLS = [
         title="West Hill Pavillion",
         description=("Room description forthcoming."),
         encounters=[],
-        items=[],  # TODO: Bob
+        items=[BOB],
         exits={Direction.SOUTH: "hadamard14_1"},
     ),
     Location(
@@ -265,7 +266,7 @@ HADAMARD_HILLS = [
         title="Path to the Research Center",  # TODO: What's the next zone?
         description=("Room description forthcoming."),
         encounters=[],
-        items=[],  # TODO: Alice
+        items=[],
         exits={Direction.SOUTH: "hadamard7", Direction.NORTH: "hadamard17"},
     ),
     Location(
@@ -273,7 +274,7 @@ HADAMARD_HILLS = [
         title="Door of the Research Center",
         description=("Room description forthcoming."),
         encounters=[],
-        items=[],  # TODO: Door puzzle
+        items=[],
         exits={
             Direction.SOUTH: "hadamard16",
         },
