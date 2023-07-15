@@ -36,6 +36,7 @@ class GameState:
     ):
         self.party = party
         self.current_location_label = current_location_label
+        self.current_input = ""
         self.state_dict = state_dict or {}
         self.user_input = user_input
         self.get_user_input = input_helpers.get_user_input_function(user_input)

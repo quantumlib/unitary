@@ -1,4 +1,5 @@
 from typing import Any, Callable, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+import re
 
 import unitary.examples.quantum_rpg.game_state as game_state
 
@@ -58,8 +59,12 @@ class Item:
             if isinstance(targets, str):
                 targets = [targets]
             if keyword == keywords or keyword in keywords:
-                if not targets or target in targets:
-                    return action
+                if isinstance(targets, re.Pattern):
+                    if target and re.match(targets, target):
+                        return action
+                else:
+                    if not targets or target in targets:
+                        return action
                 if target is None and targets:
                     return f"{keyword} what?"
         return None

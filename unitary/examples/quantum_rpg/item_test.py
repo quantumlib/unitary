@@ -1,3 +1,4 @@
+import re
 import unitary.examples.quantum_rpg.item as item
 
 
@@ -21,3 +22,13 @@ def test_item_str():
     assert sign.description == "A sign blocks the way forward."
 
     assert sign.get_action("") is None
+
+
+def test_item_re():
+    number_pad = item.Item(
+        keyword_actions=[(["type"], re.compile("[0-9]+"), "valid number")],
+        description="A numeric keypad.",
+    )
+    assert number_pad.get_action("type") == "type what?"
+    assert number_pad.get_action("type abcde") is None
+    assert number_pad.get_action("type 01234") == "valid number"
