@@ -74,6 +74,10 @@ class Qaracter(alpha.QuantumWorld):
         """
         return False
 
+    @property
+    def class_name(self) -> str:
+        return self.__class__.__name__
+
     def quantum_object_name(self, hp_num: int) -> str:
         """Canonical name of a QuantumObject for this Qaracter.
 
@@ -229,7 +233,7 @@ class Qaracter(alpha.QuantumWorld):
         return qar
 
     def to_save_file(self) -> str:
-        s = f"{self.name}{_FIELD_DELIMITER}{self. __class__. __name__ }{_FIELD_DELIMITER}"
+        s = f"{self.name}{_FIELD_DELIMITER}{self.class_name}{_FIELD_DELIMITER}"
         s += f"{self.level}{_FIELD_DELIMITER}"
         prefix = len(self.name) + 1
         for op in self.circuit.all_operations():

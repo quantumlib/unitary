@@ -71,9 +71,7 @@ class Battle:
         for i in range(max(len(self.player_side), len(self.enemy_side))):
             status = ""
             if i < len(self.player_side):
-                status += (
-                    f"{self.player_side[i].name} {type(self.player_side[i]).__name__}"
-                )
+                status += f"{self.player_side[i].name} {self.player_side[i].class_name}"
             else:
                 status += "\t\t"
             status += "\t\t\t"

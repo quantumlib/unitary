@@ -36,6 +36,7 @@ class Command(enum.Enum):
     """
 
     LOAD = "load"
+    STATUS = "status"
     SAVE = "save"
     HELP = "help"
     QUIT = "quit"
@@ -65,6 +66,14 @@ class MainLoop:
     @property
     def file(self):
         return self.game_state.file
+
+    def print_status(self):
+        for idx, qar in enumerate(self.game_state.party):
+            print(
+                f"{idx+1}) {qar.name} {qar.class_name},\tqaracter sheet:",
+                file=self.game_state.file,
+            )
+            print(qar.circuit, file=self.game_state.file)
 
     def loop(self, user_input: Optional[Sequence[str]] = None) -> None:
         """Main loop of Quantum RPG.
@@ -124,6 +133,8 @@ class MainLoop:
                 input_cmd = Command.parse(current_input)
                 if input_cmd == Command.QUIT:
                     return
+                elif input_cmd == Command.STATUS:
+                    self.print_status()
                 elif input_cmd == Command.HELP:
                     print(ascii_art.HELP, file=self.file)
                 elif input_cmd == Command.LOAD:

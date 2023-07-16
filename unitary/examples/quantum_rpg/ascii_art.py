@@ -69,6 +69,8 @@ adventures:
   - NORTH, SOUTH, EAST, WEST, UP, DOWN can be used to move.
   - LOAD and SAVE can be used to get or apply a code to
     go back to a point in the game.
+  - STATUS displays your party's qaracters and their
+    quantum circuits (qaracter sheets).
   - QUIT can be used to exit the game.
 
 Some objects in the game can be interacted with, usually
