@@ -54,17 +54,24 @@ class Item:
         if not words:
             return None
         keyword = words[0]
-        target = words[1] if len(words) > 1 else None
+        user_target = words[1] if len(words) > 1 else None
         for keywords, targets, action in self.keyword_actions:
-            if isinstance(targets, str):
+            if not isinstance(targets, list):
                 targets = [targets]
             if keyword == keywords or keyword in keywords:
-                if isinstance(targets, re.Pattern):
-                    if target and re.match(targets, target):
-                        return action
-                else:
-                    if not targets or target in targets:
-                        return action
-                if target is None and targets:
+                if not targets:
+                    # All targets valid
+                    return action
+                if not user_target:
+                    # No target specified
                     return f"{keyword} what?"
+                for target in targets:
+                    if isinstance(target, re.Pattern):
+                        # REgex
+                        if user_target and re.match(target, user_target):
+                            return action
+                    else:
+                        # String
+                        if user_target == target:
+                            return action
         return None
