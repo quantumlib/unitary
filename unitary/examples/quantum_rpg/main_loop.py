@@ -115,6 +115,7 @@ class MainLoop:
                         print(self.world.current_location, file=self.file)
 
                 current_input = self.game_state.get_user_input(">")
+                self.game_state.current_input = current_input
                 cmd = world.Direction.parse(current_input)
                 if cmd is not None:
                     new_location = self.world.move(cmd)

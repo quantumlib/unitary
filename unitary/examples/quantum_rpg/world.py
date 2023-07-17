@@ -77,10 +77,10 @@ class Location:
         ]
         return "".join(item_descriptions)
 
-    def get_action(self, keyword: str) -> Optional[item.ITEM_ACTION_TYPE]:
+    def get_action(self, user_input: str) -> Optional[item.ITEM_ACTION_TYPE]:
         if self.items:
             for item in self.items:
-                action = item.get_action(keyword)
+                action = item.get_action(user_input)
                 if action:
                     return action
         return None
