@@ -156,6 +156,16 @@ class Qaracter(alpha.QuantumWorld):
         """Returns True if the Qaracter is not down yet and there are HPs left to measure."""
         return not self.is_down() and len(self.health_status) < self.level
 
+    def qar_status(self) -> str:
+        """Prints out the qaracter's name/class/level and circuit.
+
+        Used for the STATUS command.
+        """
+        return (
+            f"{self.name}: Level {self.level} {self.class_name}"
+            f"\nQaracter sheet:\n{self.circuit}"
+        )
+
     def status_line(self) -> str:
         """Returns a one-line string summarizing the Qaracter's HP status."""
         damage = self.damage

@@ -150,9 +150,11 @@ Double doors lead east.
 
 Exits: east.
 
-1) Nova Analyst, qaracter sheet:
+1) Nova: Level 1 Analyst
+Qaracter sheet:
 Nova_1: ───X───
-2) Maxwell Engineer, qaracter sheet:
+2) Maxwell: Level 2 Engineer
+Qaracter sheet:
 Maxwell_1: ───H───────
 
 Maxwell_2: ───X^0.5───
