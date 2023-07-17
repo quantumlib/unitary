@@ -15,6 +15,7 @@ from typing import cast
 
 import copy
 import io
+import unitary.alpha as alpha
 import unitary.examples.quantum_rpg.ascii_art as ascii_art
 import unitary.examples.quantum_rpg.classes as classes
 import unitary.examples.quantum_rpg.encounter as encounter
@@ -117,6 +118,46 @@ def test_simple_main_loop() -> None:
     assert (
         cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
         == r"""
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+""".strip()
+    )
+
+
+def test_status() -> None:
+    c = classes.Analyst("Nova")
+    c.add_quantum_effect(alpha.Flip(), 1)
+    c2 = classes.Engineer("Maxwell")
+    c2.add_hp()
+    c2.add_quantum_effect(alpha.Superposition(), 1)
+    c2.add_quantum_effect(alpha.Flip(effect_fraction=0.5), 2)
+    state = game_state.GameState(
+        party=[c, c2], user_input=["status", "quit"], file=io.StringIO()
+    )
+    loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
+    loop.loop(user_input=["quit"])
+    assert (
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
+        == r"""
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+
+1) Nova: Level 1 Analyst
+Qaracter sheet:
+Nova_1: ───X───
+2) Maxwell: Level 2 Engineer
+Qaracter sheet:
+Maxwell_1: ───H───────
+
+Maxwell_2: ───X^0.5───
 Lab Entrance
 
 You stand before the entrance to the premier quantum lab.
