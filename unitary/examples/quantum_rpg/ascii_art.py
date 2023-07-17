@@ -63,6 +63,11 @@ also has a class that determines what actions they can do
 during battle.  Some qaracters can measure qubits, and
 others can apply gates.
 
+If all enemies are mostly measured as 0, you will gain
+quantum gates as experience that you can add to your
+qaracter sheet.  Once there are more gates on each qubit/HP
+than your level, you will gain a level and a new qubit.
+
 Outside of battle, commands are similar to previous text
 adventures:
 
