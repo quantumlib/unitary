@@ -48,6 +48,11 @@ class EncounterXp:
 
 
 def is_ready_for_next_level(qar: qaracter.Qaracter) -> bool:
+    """Checks if a qaracter is ready to advance to the next level.
+
+    Once the number of operations on each qubit exceeds your level,
+    you will gain another level (and HP).
+    """
     current_level = qar.level
     for idx in range(current_level):
         hp = qar.get_hp(qar.quantum_object_name(idx + 1))
