@@ -1,4 +1,5 @@
 from typing import Any, Callable, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+import re
 
 import unitary.examples.quantum_rpg.game_state as game_state
 
@@ -53,13 +54,24 @@ class Item:
         if not words:
             return None
         keyword = words[0]
-        target = words[1] if len(words) > 1 else None
+        user_target = words[1] if len(words) > 1 else None
         for keywords, targets, action in self.keyword_actions:
-            if isinstance(targets, str):
+            if not isinstance(targets, list):
                 targets = [targets]
             if keyword == keywords or keyword in keywords:
-                if not targets or target in targets:
+                if not targets:
+                    # All targets valid
                     return action
-                if target is None and targets:
+                if not user_target:
+                    # No target specified
                     return f"{keyword} what?"
+                for target in targets:
+                    if isinstance(target, re.Pattern):
+                        # REgex
+                        if user_target and re.match(target, user_target):
+                            return action
+                    else:
+                        # String
+                        if user_target == target:
+                            return action
         return None
