@@ -263,7 +263,7 @@ HADAMARD_HILLS = [
     ),
     Location(
         label="hadamard16",
-        title="Path to the Research Center",  # TODO: What's the next zone?
+        title="Path to the Research Institute",  # TODO: What's the next zone?
         description=("Room description forthcoming."),
         encounters=[],
         items=[],
@@ -271,7 +271,7 @@ HADAMARD_HILLS = [
     ),
     Location(
         label="hadamard17",
-        title="Door of the Research Center",
+        title="Door of the Research Institute",
         description=("Room description forthcoming."),
         encounters=[],
         items=[],

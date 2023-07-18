@@ -16,10 +16,12 @@
 import unitary.examples.quantum_rpg.final_state_preparation.classical_frontier as classical_frontier
 import unitary.examples.quantum_rpg.final_state_preparation.oxtail_university as oxtail_university
 import unitary.examples.quantum_rpg.final_state_preparation.hadamard_hills as hadamard_hills
+import unitary.examples.quantum_rpg.final_state_preparation.quantum_perimeter as quantum_perimeter
 
 
 WORLD = [
     *classical_frontier.CLASSICAL_FRONTIER,
     *oxtail_university.OXTAIL_UNIVERSITY,
     *hadamard_hills.HADAMARD_HILLS,
+    *quantum_perimeter.QUANTUM_PERIMETER,
 ]
