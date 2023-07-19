@@ -48,10 +48,10 @@ def test_encounter():
     assert (
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
 m) Measure enemy qubit.
 h) Help.
