@@ -76,9 +76,7 @@ class Battle:
                 status += "\t\t"
             status += "\t\t\t"
             if i < len(self.enemy_side):
-                status += (
-                    f"{self.enemy_side[i].name} {type(self.enemy_side[i]).__name__}"
-                )
+                status += f"{i+1}) {self.enemy_side[i].name} {type(self.enemy_side[i]).__name__}"
 
             status += "\n"
 
@@ -108,7 +106,7 @@ class Battle:
             self.print_screen()
             print(f"{current_player.name} turn:", file=self.file)
             if not current_player.is_active():
-                print(f"{current_player.name} is DOWN!", file=self.file)
+                print(f"{current_player.name} is DOWNi and cannot act!", file=self.file)
                 continue
             actions = current_player.actions()
             descriptions = current_player.action_descriptions()
@@ -153,7 +151,6 @@ class Battle:
         """
         for npc in self.enemy_side:
             if not npc.is_active():
-                print(f"{npc.name} is DOWN!", file=self.file)
                 continue
             result = npc.npc_action(self)
             print(result, file=self.file)

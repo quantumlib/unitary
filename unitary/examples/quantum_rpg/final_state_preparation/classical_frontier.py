@@ -134,7 +134,6 @@ def _bridge(state: GameState, world) -> str:
     if not has_engineer:
         return "You do not have the required skills to fix the bridge."
     else:
-        print(state.current_location_label)
         location = world.get(state.current_location_label)
         if Direction.NORTH in location.exits:
             return "You have already fixed the bridge."
