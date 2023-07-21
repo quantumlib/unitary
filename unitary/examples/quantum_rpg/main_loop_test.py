@@ -412,7 +412,7 @@ Exits: north.
 
 A weird security guard approaches!
 ------------------------------------------------------------
-Mensing Engineer                        watcher Observer
+Mensing Engineer                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Mensing turn:
