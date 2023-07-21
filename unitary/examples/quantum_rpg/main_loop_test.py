@@ -302,10 +302,10 @@ Rhythmic whirring of a pulse tube can be heard overhead.
 Exits: north.
 
 A weird security guard approaches!
------------------------------------------------
-Mensing Analyst   1) watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Mensing Analyst                         1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Mensing turn:
 m) Measure enemy qubit.
 h) Help.
@@ -356,10 +356,10 @@ Rhythmic whirring of a pulse tube can be heard overhead.
 Exits: north.
 
 A weird security guard approaches!
------------------------------------------------
-Mensing Engineer   1) watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Mensing Engineer                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Mensing turn:
 x) Attack with X gate.
 h) Help.
@@ -370,6 +370,62 @@ You have been defeated!
         + """
 You have been measured and were found wanting.
 Better luck next repetition."""
+    )
+
+
+def test_escaped_battle():
+    c = classes.Engineer("Mensing")
+    c.add_quantum_effect(alpha.Flip(), 1)
+    state = game_state.GameState(
+        party=[c], user_input=["e", "south", "x", "1", "1", "quit"], file=io.StringIO()
+    )
+    assert state.party[0].name == "Mensing"
+    assert len(state.party[0].active_qubits()) == 1
+    loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
+    loop.loop()
+    assert state.party[0].name == "Mensing"
+    assert len(state.party[0].active_qubits()) == 1
+
+    assert (
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
+        == r"""Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+
+Disorganized Lab
+
+Tables are here with tons of electronics.
+The lab continues to the south.
+A helpful sign is here.
+
+Exits: south, west.
+
+Cryostats
+
+Giant aluminum cylinders hang suspended by large frames.
+Rhythmic whirring of a pulse tube can be heard overhead.
+
+Exits: north.
+
+A weird security guard approaches!
+------------------------------------------------------------
+Mensing Engineer                        watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
+Mensing turn:
+x) Attack with X gate.
+h) Help.
+Observer watcher measures Mensing_1 as HEALTHY.
+You have escaped the battle!
+Cryostats
+
+Giant aluminum cylinders hang suspended by large frames.
+Rhythmic whirring of a pulse tube can be heard overhead.
+
+Exits: north."""
     )
 
 

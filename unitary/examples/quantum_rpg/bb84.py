@@ -13,7 +13,7 @@
 # limitations under the License.
 from typing import Tuple
 import random
-
+import re
 
 from unitary.examples.quantum_rpg.game_state import GameState
 from unitary.examples.quantum_rpg.item import EXAMINE, TALK, Item
@@ -147,6 +147,22 @@ def _send_alice(state: GameState, world):
     return "The device chimes again."
 
 
+def _open_door(state: GameState, world):
+    if "alice" not in state.state_dict or "bob" not in state.state_dict:
+        return "The keypad seems to be inactive right now."
+    key = solve_bb84(state.state_dict["alice"], state.state_dict["bob"])
+    fields = state.current_input.split()
+    if len(fields) < 2:
+        return "type what?"
+    if fields[1] == key:
+        location = world.get(state.current_location_label)
+        if Direction.NORTH in location.exits:
+            return "The door has already been opened."
+        location.exits[Direction.NORTH] = "perimeter1"
+        return "A light flashes green and the door unlocks!"
+    return "The keypad beeps and a light flashes red."
+
+
 ALICE = Item(
     keyword_actions=[
         (
@@ -208,4 +224,24 @@ BOB = Item(
         ),
     ],
     description="A strange looking machine is mounted under an awning.",
+)
+
+DOOR = Item(
+    keyword_actions=[
+        (
+            EXAMINE,
+            ["door", "archway", "keyboard", "lock"],
+            (
+                "This seems to be a solid metal security door guarding the entrance\n"
+                "to the research facility.  A lock with a keyboard that you can TYPE\n"
+                "letters into to open the door is on the right side of the entrance."
+            ),
+        ),
+        (
+            ["type"],
+            [re.compile("[A-Za-z]+")],
+            _open_door,
+        ),
+    ],
+    description="An imposing door is here with an alphabetic keyboard lock.",
 )

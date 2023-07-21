@@ -31,10 +31,10 @@ def test_battle():
     assert (
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   1) watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
 m) Measure enemy qubit.
 h) Help.
@@ -53,10 +53,10 @@ def test_bad_monster():
     assert (
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   1) watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
 m) Measure enemy qubit.
 h) Help.
@@ -76,10 +76,10 @@ def test_bad_qubit():
     assert (
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   1) watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
 m) Measure enemy qubit.
 h) Help.
@@ -98,10 +98,10 @@ def test_battle_loop():
     assert (
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   1) watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
 m) Measure enemy qubit.
 h) Help.
@@ -120,10 +120,10 @@ def test_battle_help():
     assert (
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   1) watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
 m) Measure enemy qubit.
 h) Help.

@@ -21,6 +21,12 @@ import unitary.examples.quantum_rpg.input_helpers as input_helpers
 from unitary.examples.quantum_rpg.qaracter import Qaracter
 from unitary.examples.quantum_rpg.xp_utils import EncounterXp
 
+# Size of the player side of battle status,
+# for text alingment
+_PLAYER_LEN = 40
+
+_BATTLE_SEPARATOR = "-" * (_PLAYER_LEN + 20)
+
 
 class BattleResult(enum.Enum):
     UNFINISHED = 0
@@ -67,28 +73,27 @@ class Battle:
 
         Output will be written to the `file` attribute.
         """
-        print("-----------------------------------------------", file=self.file)
+        print(_BATTLE_SEPARATOR, file=self.file)
         for i in range(max(len(self.player_side), len(self.enemy_side))):
             status = ""
             if i < len(self.player_side):
-                status += f"{self.player_side[i].name} {self.player_side[i].class_name}"
+                player_status = f"{self.player_side[i].name} {self.player_side[i].class_name}"
+                status += f"{player_status: <{_PLAYER_LEN}}"
             else:
-                status += "\t\t"
-            status += "\t\t\t"
+                status += " " * (_PLAYER_LEN)
             if i < len(self.enemy_side):
                 status += f"{i+1}) {self.enemy_side[i].name} {type(self.enemy_side[i]).__name__}"
 
             status += "\n"
 
             if i < len(self.player_side):
-                status += self.player_side[i].status_line()
+                status += f"{self.player_side[i].status_line(): <{_PLAYER_LEN}}"
             else:
-                status += "\t\t"
-            status += "\t\t\t"
+                status += " " * (_PLAYER_LEN)
             if i < len(self.enemy_side):
                 status += self.enemy_side[i].status_line()
             print(status, file=self.file)
-        print("-----------------------------------------------", file=self.file)
+        print(_BATTLE_SEPARATOR, file=self.file)
 
     def take_player_turn(self):
         """Take a player's turn and record results in the battle.
