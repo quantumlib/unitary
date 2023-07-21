@@ -17,6 +17,7 @@ import io
 import pytest
 import unitary.examples.quantum_rpg.bb84 as bb84
 import unitary.examples.quantum_rpg.game_state as game_state
+import unitary.examples.quantum_rpg.input_helpers as input_helpers
 import unitary.examples.quantum_rpg.main_loop as main_loop
 import unitary.examples.quantum_rpg.world as world
 
@@ -45,8 +46,15 @@ def test_alice_bob():
                 label="2",
                 title="Quantum Communication Receiving Facility",
                 description="",
-                items=[bb84.BOB],
+                items=[bb84.BOB, bb84.DOOR],
                 exits={world.Direction.EAST: "1"},
+            ),
+            world.Location(
+                label="perimeter1",
+                title="Inside the Perimeter",
+                description="",
+                items=[],
+                exits={world.Direction.SOUTH: "2"},
             ),
         ]
     )
@@ -70,6 +78,8 @@ def test_alice_bob():
             "look display",
             "w",
             "look display",
+            "look keyboard",
+            "type aaaa",
             "quit",
         ],
         file=io.StringIO(),
@@ -91,6 +101,7 @@ Quantum Communication Receiving Facility
 
 
 A strange looking machine is mounted under an awning.
+An imposing door is here with an alphabetic keyboard lock.
 
 Exits: east.
 
@@ -110,6 +121,7 @@ Quantum Communication Receiving Facility
 
 
 A strange looking machine is mounted under an awning.
+An imposing door is here with an alphabetic keyboard lock.
 
 Exits: east.
 
@@ -130,10 +142,50 @@ Quantum Communication Receiving Facility
 
 
 A strange looking machine is mounted under an awning.
+An imposing door is here with an alphabetic keyboard lock.
 
 Exits: east.
 
 The display reads 'Received data:'
 '{state.state_dict['bob']}'
+This seems to be a solid metal security door guarding the entrance
+to the research facility.  A lock with a keyboard that you can TYPE
+letters into to open the door is on the right side of the entrance.
+The keypad beeps and a light flashes red.
+""".strip()
+    )
+    # Reset input and get the keys
+    state.file = file = io.StringIO()
+    key = bb84.solve_bb84(state.state_dict["alice"], state.state_dict["bob"])
+    state.get_user_input = input_helpers.get_user_input_function(
+        [f"type {key}", "north", "south", "quit"]
+    )
+    loop = main_loop.MainLoop(example_world, state)
+    loop.loop()
+    assert (
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
+        == f"""
+Quantum Communication Receiving Facility
+
+
+A strange looking machine is mounted under an awning.
+An imposing door is here with an alphabetic keyboard lock.
+
+Exits: east.
+
+A light flashes green and the door unlocks!
+Inside the Perimeter
+
+
+
+Exits: south.
+
+Quantum Communication Receiving Facility
+
+
+A strange looking machine is mounted under an awning.
+An imposing door is here with an alphabetic keyboard lock.
+
+Exits: east, north.
 """.strip()
     )
