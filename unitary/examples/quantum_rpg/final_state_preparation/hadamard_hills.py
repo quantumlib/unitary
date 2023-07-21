@@ -13,7 +13,7 @@
 # limitations under the License.
 import unitary.alpha as alpha
 
-from unitary.examples.quantum_rpg.bb84 import ALICE, BOB
+from unitary.examples.quantum_rpg.bb84 import ALICE, BOB, DOOR
 from unitary.examples.quantum_rpg.encounter import Encounter
 from unitary.examples.quantum_rpg.game_state import GameState
 from unitary.examples.quantum_rpg.item import EXAMINE, TALK, Item
@@ -274,7 +274,7 @@ HADAMARD_HILLS = [
         title="Door of the Research Institute",
         description=("Room description forthcoming."),
         encounters=[],
-        items=[],
+        items=[DOOR],
         exits={
             Direction.SOUTH: "hadamard16",
         },
