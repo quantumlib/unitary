@@ -16,8 +16,10 @@ import unitary.alpha as alpha
 from unitary.examples.quantum_rpg.bb84 import ALICE, BOB, DOOR
 from unitary.examples.quantum_rpg.encounter import Encounter
 from unitary.examples.quantum_rpg.game_state import GameState
+from unitary.examples.quantum_rpg.npcs import SchrodingerCat
 from unitary.examples.quantum_rpg.item import EXAMINE, TALK, Item
 from unitary.examples.quantum_rpg.world import Direction, Location
+from unitary.examples.quantum_rpg.xp_utils import EncounterXp
 
 CONSTRUCTION_SIGN = Item(
     keyword_actions=[
@@ -273,7 +275,16 @@ HADAMARD_HILLS = [
         label="hadamard17",
         title="Door of the Research Institute",
         description=("Room description forthcoming."),
-        encounters=[],
+        encounters=[
+            Encounter(
+                [
+                    SchrodingerCat("Guard Cat"),
+                ],
+                probability=1.0,
+                description="A cat both alie and dead hisses at you as you approach the door!",
+                xp=EncounterXp([[alpha.Flip()]]),
+            )
+        ],
         items=[DOOR],
         exits={
             Direction.SOUTH: "hadamard16",

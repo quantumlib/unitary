@@ -86,3 +86,23 @@ def test_purple_foam():
     assert msg == "PurpleFoam bubbles measures person_1 as HURT."
     msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.3, slime=0.25)
     assert msg == "PurpleFoam bubbles covers person_1 with foam!"
+
+
+def test_schrodinger_cat():
+    qar = npcs.SchrodingerCat(name="nice_kitty", num_qubits=10)
+
+    # Check that individual qubits seem random
+    for q in range(1, 11):
+        assert any(
+            qar.sample(f"nice_kitty_{q}", False) == enums.HealthPoint.HEALTHY
+            for _ in range(100)
+        )
+        assert any(
+            qar.sample(f"nice_kitty_{q}", False) == enums.HealthPoint.HURT
+            for _ in range(100)
+        )
+    # measure one
+    result = qar.sample(f"nice_kitty_{q}", True)
+    # all qubits are the same
+    for q in range(1, 11):
+        assert all(qar.sample(f"nice_kitty_{q}", False) == result for _ in range(100))

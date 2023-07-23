@@ -153,3 +153,36 @@ class PurpleFoam(Npc):
             return f"{self.display_name} covers {enemy_qubit.name} with foam!"
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
+
+
+#####################
+#
+#  HigherLevel NPCs
+#
+#####################
+
+
+class SchrodingerCat(Npc):
+    """NPC that is an all zero or all one state.
+
+    Can be variable number of qubits.
+
+    Has two actions: will either hadamard a random qubit
+    or will measure an enemy qubit.
+    """
+
+    def __init__(self, name, num_qubits=5):
+        super().__init__(name)
+        first_hp = self.get_hp(self.quantum_object_name(1))
+        alpha.Superposition()(first_hp)
+        for q in range(1, num_qubits):
+            self.add_hp()
+            this_hp = self.get_hp(self.quantum_object_name(q + 1))
+            alpha.quantum_if(first_hp).apply(alpha.Flip())(this_hp)
+
+    def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
+        if action_choice > 0.5:
+            alpha.Superposition()(enemy_qubit)
+            return f"{self.display_name} covers {enemy_qubit.name} with foam!"
+        else:
+            return _sample_qubit(self.display_name, enemy_qubit)
