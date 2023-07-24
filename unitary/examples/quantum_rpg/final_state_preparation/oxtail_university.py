@@ -22,7 +22,13 @@ from unitary.examples.quantum_rpg.final_state_preparation.monsters import (
     blue_foam,
 )
 from unitary.examples.quantum_rpg.item import EXAMINE, TALK, Item
-from unitary.examples.quantum_rpg.npcs import BlueFoam, GreenFoam, Observer
+from unitary.examples.quantum_rpg.npcs import (
+    BlueFoam,
+    GreenFoam,
+    RedFoam,
+    PurpleFoam,
+    Observer,
+)
 from unitary.examples.quantum_rpg.xp_utils import EncounterXp
 from unitary.examples.quantum_rpg.world import Direction, Location
 
@@ -30,13 +36,28 @@ from unitary.examples.quantum_rpg.world import Direction, Location
 def _engineer_joins(state: GameState, world) -> str:
     if len(state.party) > 1:
         return f"The engineer reminisces about his former experiment."
-    print("The engineer looks at the apparatus that dominates the room.")
-    print("'NMR has been a promising technology for quantum computing,'")
-    print("the engineer says.  'And we have learned a lot.  But, ultimately,")
-    print("I can already see that this technology is not scalable and will")
-    print("not solve the problems that plague us today.  I will leave this")
-    print("for the scientists working in other disciplines and join you")
-    print("on the journey towards quantum error correction!")
+    print(
+        "The engineer looks at the apparatus that dominates the room.", file=state.file
+    )
+    print(
+        "'NMR has been a promising technology for quantum computing,'", file=state.file
+    )
+    print(
+        "the engineer says.  'And we have learned a lot.  But, ultimately,",
+        file=state.file,
+    )
+    print(
+        "I can already see that this technology is not scalable and will",
+        file=state.file,
+    )
+    print(
+        "not solve the problems that plague us today.  I will leave this",
+        file=state.file,
+    )
+    print(
+        "for the scientists working in other disciplines and join you", file=state.file
+    )
+    print("on the journey towards quantum error correction!", file=state.file)
 
     name = get_user_input_qaracter_name(
         state.get_user_input, "the engineer", file=state.file
@@ -45,6 +66,15 @@ def _engineer_joins(state: GameState, world) -> str:
     state.party.append(qar)
 
     return f"{name} has joined the group!"
+
+
+def _quantopedia(state: GameState, world) -> str:
+    print(
+        "These books contain information about all the types of quantum foam",
+        file=state.file,
+    )
+    print("You can now type 'q' during a battle to learn about it.", file=state.file)
+    state.set_quantopedia(1)
 
 
 ENGINEER = Item(
@@ -56,6 +86,24 @@ ENGINEER = Item(
         )
     ],
     description="The engineer stands here wondering how to build a better quantum computer.",
+)
+
+QUANTOPEDIA = Item(
+    keyword_actions=[
+        (
+            EXAMINE,
+            [
+                "bookshelves",
+                "bookshelf",
+                "books",
+                "book",
+                "shelf",
+                "quantopedia",
+                "library",
+            ],
+            _quantopedia,
+        )
+    ],
 )
 
 OXTAIL_RUINS = Item(
@@ -205,6 +253,40 @@ SPECTROMETER = Item(
 )
 
 
+BIOLOGIST1 = Item(
+    keyword_actions=[
+        (
+            TALK,
+            ["biologist", "professor", "prof", "scientist"],
+            "'The foam' the professors yells in a panic.  'It has escaped!'",
+        )
+    ]
+)
+
+BIOLOGIST2 = Item(
+    keyword_actions=[
+        (
+            TALK,
+            ["biologist", "professor", "prof", "scientist"],
+            "'What have we done?' one of the biologists laments and puts his head in his hands.",
+        )
+    ]
+)
+
+
+BIO_STUDENT = Item(
+    keyword_actions=[
+        (
+            TALK,
+            ["student", "students"],
+            (
+                "'I am looking for information on how to stop the quantum foam.' the student\n"
+                "explains.  'These bookshelves contain a multitude of information about quantum foam."
+            ),
+        )
+    ]
+)
+
 OXTAIL_UNIVERSITY = [
     Location(
         label="oxtail1",
@@ -337,10 +419,10 @@ OXTAIL_UNIVERSITY = [
         label="quad8",
         title="South end",
         description=(
-            "Here on the south end of campus is the mathematics\n"
+            "Here on the south end of campus is the biology\n"
             "department.  Most of the windows and doors have been\n"
             "boarded up or blocked.  A hastily drawn sign on the\n"
-            "entrance proclaims: 'QUIET PLEASE! THEOREM CREATION IN PROGRESS.'"
+            "entrance proclaims: 'BIOHAZARD!  DO NOT ENTER.'"
         ),
         items=[STUDENT[2]],
         encounters=[blue_foam(2, 0.2)],
@@ -348,6 +430,7 @@ OXTAIL_UNIVERSITY = [
             Direction.WEST: "quad7",
             Direction.NORTH: "quad5",
             Direction.EAST: "quad9",
+            Direction.SOUTH: "bio1",
         },
     ),
     Location(
@@ -459,5 +542,64 @@ OXTAIL_UNIVERSITY = [
         ),
         items=[SPECTROMETER, ENGINEER],
         exits={Direction.DOWN: "nmr_lab2"},
+    ),
+    Location(
+        label="bio1",
+        title="Inside the Biology Laboratory",
+        description=(
+            "The inside of the biology building is a bustle of activity.\n"
+            "Grad students are furiously boarding up classroom doors and\n"
+            "windows, while several biology professors yell orders.\n"
+            "Most of the entrances are now blocked, though one door to the\n"
+            "south has not yet been barred.  To the east is a small library."
+        ),
+        items=[BIOLOGIST1],
+        exits={
+            Direction.NORTH: "quad8",
+            Direction.SOUTH: "bio3",
+            Direction.EAST: "bio2",
+        },
+    ),
+    Location(
+        label="bio2",
+        title="The Biology Library",
+        description=(
+            "A smalll library filled with bookshelves has become a refuge\n"
+            "for exhausted biologists and students.  Several are collapsed\n"
+            "on desks and tables all around the room.  A few students are\n"
+            "furiously paging through thick books in search of solutions."
+        ),
+        items=[BIOLOGIST2, BIO_STUDENT, QUANTOPEDIA],
+        exits={Direction.WEST: "bio1"},
+    ),
+    Location(
+        label="bio3",
+        title="Wrecked Laboratory",
+        description=(
+            "Rows of laboratory tables are covered with broken glass, oozing\n"
+            "foam, and corroded instruments.  A row of tall glass beakers in\n"
+            "the back of the labs have cracked and broken.  Pulsing quantum\n"
+            "foam covers neearly all the surfaces of the lab, and broken pieces\n"
+            "of white and black static noise dot the walls."
+        ),
+        items=[],
+        encounters=[
+            Encounter(
+                [
+                    BlueFoam("Blue Foamy"),
+                    BlueFoam("Blue Slimy"),
+                    GreenFoam("Green Gooey"),
+                    GreenFoam("Green Ooze"),
+                    RedFoam("Red Goo"),
+                    RedFoam("Red Glop"),
+                    PurpleFoam("Pulsing Purple Slime"),
+                    PurpleFoam("Pulsating Purple Foam"),
+                ],
+                probability=1.0,
+                description="Quantum foam engulfs you from all sides!",
+                xp=EncounterXp([[alpha.Flip()]]),
+            )
+        ],
+        exits={Direction.NORTH: "bio1"},
     ),
 ]

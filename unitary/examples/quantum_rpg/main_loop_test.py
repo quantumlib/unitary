@@ -308,6 +308,7 @@ Mensing Analyst                         watcher Observer
 ------------------------------------------------------------
 Mensing turn:
 m) Measure enemy qubit.
+q) Read Quantopedia.
 h) Help.
 Cryostats
 
@@ -362,6 +363,7 @@ Mensing Engineer                        watcher Observer
 ------------------------------------------------------------
 Mensing turn:
 x) Attack with X gate.
+q) Read Quantopedia.
 h) Help.
 Observer watcher measures Mensing_1 as HURT.
 You have been defeated!
@@ -417,6 +419,7 @@ Mensing Engineer                        watcher Observer
 ------------------------------------------------------------
 Mensing turn:
 x) Attack with X gate.
+q) Read Quantopedia.
 h) Help.
 Observer watcher measures Mensing_1 as HEALTHY.
 You have escaped the battle!

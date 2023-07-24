@@ -51,3 +51,17 @@ def test_serialization() -> None:
     assert deserialized_qar2.name == qar2.name
     assert deserialized_qar2.level == qar2.level
     assert deserialized_qar2.circuit == qar2.circuit
+
+
+def test_quantopedia():
+    state = game_state.GameState([])
+    assert not state.has_quantopedia(8)
+    assert not state.has_quantopedia(4)
+    assert not state.has_quantopedia(2)
+    assert not state.has_quantopedia(1)
+    state.set_quantopedia(4)
+    state.set_quantopedia(1)
+    assert not state.has_quantopedia(8)
+    assert state.has_quantopedia(4)
+    assert not state.has_quantopedia(2)
+    assert state.has_quantopedia(1)
