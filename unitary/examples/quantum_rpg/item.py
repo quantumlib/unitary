@@ -56,16 +56,15 @@ class Item:
         keyword = words[0]
         user_target = words[1] if len(words) > 1 else None
         for keywords, targets, action in self.keyword_actions:
-            if not isinstance(targets, list):
-                targets = [targets]
+            target_list = [targets] if not isinstance(targets, list) else targets
             if keyword == keywords or keyword in keywords:
-                if not targets:
+                if not target_list:
                     # All targets valid
                     return action
                 if not user_target:
                     # No target specified
                     return f"{keyword} what?"
-                for target in targets:
+                for target in target_list:
                     if isinstance(target, re.Pattern):
                         # REgex
                         if user_target and re.match(target, user_target):

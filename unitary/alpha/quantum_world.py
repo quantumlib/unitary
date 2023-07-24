@@ -66,9 +66,9 @@ class QuantumWorld:
         This will reset the QuantumWorld to an empty state.
         """
         self.circuit = cirq.Circuit()
-        self.effect_history:List[Tuple[cirq.Circuit, Dict[QuantumObject, int]]] = []
+        self.effect_history: List[Tuple[cirq.Circuit, Dict[QuantumObject, int]]] = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
-        self.ancilla_names:Set[str] = set()
+        self.ancilla_names: Set[str] = set()
         # When `compile_to_qubits` is True, this tracks the mapping of the
         # original qudits to the compiled qubits.
         self.compiled_qubits: Dict[cirq.Qid, List[cirq.Qid]] = {}
@@ -446,7 +446,7 @@ class QuantumWorld:
             histogram.append({state: 0 for state in range(obj.num_states)})
         for result in peek_results:
             for idx in range(len(objects)):
-                histogram[idx][result[idx]] += 1
+                histogram[idx][cast(int, result[idx])] += 1
         return histogram
 
     def get_probabilities(
