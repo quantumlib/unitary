@@ -77,7 +77,9 @@ class Battle:
         for i in range(max(len(self.player_side), len(self.enemy_side))):
             status = ""
             if i < len(self.player_side):
-                player_status = f"{self.player_side[i].name} {self.player_side[i].class_name}"
+                player_status = (
+                    f"{self.player_side[i].name} {self.player_side[i].class_name}"
+                )
                 status += f"{player_status: <{_PLAYER_LEN}}"
             else:
                 status += " " * (_PLAYER_LEN)
