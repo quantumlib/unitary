@@ -32,13 +32,12 @@ def test_battle():
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
 ------------------------------------------------------------
-Aaronson Analyst                        watcher Observer
+Aaronson Analyst                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Aaronson turn:
 m) Measure enemy qubit.
 h) Help.
-watcher is DOWN!
 """.strip()
     )
 
@@ -55,7 +54,7 @@ def test_bad_monster():
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
 ------------------------------------------------------------
-Aaronson Analyst                        watcher Observer
+Aaronson Analyst                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Aaronson turn:
@@ -78,7 +77,7 @@ def test_bad_qubit():
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
 ------------------------------------------------------------
-Aaronson Analyst                        watcher Observer
+Aaronson Analyst                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Aaronson turn:
@@ -100,7 +99,7 @@ def test_battle_loop():
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
 ------------------------------------------------------------
-Aaronson Analyst                        watcher Observer
+Aaronson Analyst                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Aaronson turn:
@@ -122,7 +121,7 @@ def test_battle_help():
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
 ------------------------------------------------------------
-Aaronson Analyst                        watcher Observer
+Aaronson Analyst                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Aaronson turn:
