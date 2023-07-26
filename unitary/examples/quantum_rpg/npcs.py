@@ -20,6 +20,17 @@ import unitary.examples.quantum_rpg.enums as enums
 import unitary.examples.quantum_rpg.qaracter as qaracter
 
 
+# QUANTOPEDIA ENTRIES
+#
+#
+# Entry for quantum foam, found in Oxtail library
+_FOAM_QUANTOPEDIA = 1
+# Entry for cat states, found in Hills huts
+_HILLS_QUANTOPEDIA = 2
+# Reserved for Perimeter institute, to be implemented.
+_PERIMETER_QUANTOPEDIA = 4
+
+
 def _enemy_qubits(party: List[qaracter.Qaracter]) -> List[alpha.QuantumObject]:
     """Determines valid enemy target qubits and returns them with the player."""
     enemy_qubits: List[alpha.QuantumObject] = []
@@ -68,8 +79,16 @@ class Npc(qaracter.Qaracter):
         return self.act_on_enemy_qubit(enemy_qubit, action_choice, **kwargs)
 
     def quantopedia_index(self) -> int:
-        """Bit to use for quantopedia.  Should be power of two."""
-        return 1
+        """Bit to use for quantopedia.  Should be power of two.
+
+        This represents the bit that you need to acquire in order
+        to be able to access the `quantopedia_entry` in the help
+        screen.  This bit is set in the game state and is usually
+        set when finding a library or item that grants the bit.
+
+        By default (set to zero), you cannot learn about the NPC.
+        """
+        return 0
 
     def quantopedia_entry(self) -> str:
         """Explanatory text to the players about the NPC."""
@@ -88,6 +107,9 @@ class Observer(Npc):
 
     def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
         return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
 
     def quantopedia_entry(self) -> str:
         return (
@@ -110,6 +132,9 @@ class BlueFoam(Npc):
             return f"{self.display_name} slimes {enemy_qubit.name} for {slime:0.3f}."
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
 
     def quantopedia_entry(self) -> str:
         return (
@@ -135,6 +160,9 @@ class GreenFoam(Npc):
             )
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
 
     def quantopedia_entry(self) -> str:
         return (
@@ -163,6 +191,9 @@ class RedFoam(Npc):
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
 
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
+
     def quantopedia_entry(self) -> str:
         return (
             "Red foam are a slightly more dangerous type of quantum error.\n"
@@ -188,6 +219,9 @@ class PurpleFoam(Npc):
             return f"{self.display_name} covers {enemy_qubit.name} with foam!"
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
 
     def quantopedia_entry(self) -> str:
         return (

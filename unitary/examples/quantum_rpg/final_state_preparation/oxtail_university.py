@@ -70,7 +70,7 @@ def _engineer_joins(state: GameState, world) -> str:
 
 def _quantopedia(state: GameState, world) -> str:
     print(
-        "These books contain information about all the types of quantum foam",
+        "These books contain information about all the types of quantum foam.",
         file=state.file,
     )
     print("You can now type 'q' during a battle to learn about it.", file=state.file)
