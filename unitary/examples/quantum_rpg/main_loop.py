@@ -103,6 +103,7 @@ class MainLoop:
                             )
 
                             if result == battle.BattleResult.PLAYERS_WON:
+                                print("You have won the battle!", file=self.file)
                                 awarded_xp = current_battle.xp
                                 xp_utils.award_xp(self.game_state, awarded_xp)
                             elif result == battle.BattleResult.PLAYERS_DOWN:

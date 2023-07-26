@@ -13,21 +13,22 @@
 # limitations under the License.
 from unitary.examples.quantum_chinese_chess.enums import Piece
 
+
 def test_piece():
-    assert Piece.type_of('s') == Piece.SOLDIER
-    assert Piece.type_of('S') == Piece.SOLDIER
-    assert Piece.type_of('g') == Piece.GENERAL
-    assert Piece.type_of('G') == Piece.GENERAL
-    assert Piece.type_of('.') == Piece.EMPTY
-    assert Piece.type_of('b') == None
+    assert Piece.type_of("s") == Piece.SOLDIER
+    assert Piece.type_of("S") == Piece.SOLDIER
+    assert Piece.type_of("g") == Piece.GENERAL
+    assert Piece.type_of("G") == Piece.GENERAL
+    assert Piece.type_of(".") == Piece.EMPTY
+    assert Piece.type_of("b") == None
 
-    assert Piece.CANNON.red_symbol() == 'C'
-    assert Piece.CANNON.black_symbol() == 'c'
-    assert Piece.HORSE.red_symbol() == 'H'
-    assert Piece.HORSE.black_symbol() == 'h'
+    assert Piece.CANNON.red_symbol() == "C"
+    assert Piece.CANNON.black_symbol() == "c"
+    assert Piece.HORSE.red_symbol() == "H"
+    assert Piece.HORSE.black_symbol() == "h"
 
-    assert Piece.type_of('r').red_symbol() == 'R'
-    assert Piece.type_of('a').red_symbol() == 'A'
+    assert Piece.type_of("r").red_symbol() == "R"
+    assert Piece.type_of("a").red_symbol() == "A"
 
     assert Piece.type_of(Piece.ELEPHANT.red_symbol()) == Piece.ELEPHANT
     assert Piece.type_of(Piece.ELEPHANT.black_symbol()) == Piece.ELEPHANT

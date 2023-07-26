@@ -23,6 +23,7 @@ import unitary.examples.quantum_rpg.qaracter as qaracter
 
 _SAVE_DELIMITER = ";"
 _DICT_DELIMITER = ":"
+_QUANTOPEDIA_KEY = "qp"
 
 
 class GameState:
@@ -41,6 +42,30 @@ class GameState:
         self.user_input = user_input
         self.get_user_input = input_helpers.get_user_input_function(user_input)
         self.file = file
+
+    def set_quantopedia(self, num: int) -> None:
+        """Convenience method for setting a quantopedia bit.
+
+        The quantopedia is repesented by a bitstring in the
+        state_dict.  During a battle, if the bit for the enemy
+        NPC is set, then the entry for that type of NPC is displayed.
+        """
+        if _QUANTOPEDIA_KEY not in self.state_dict:
+            self.state_dict[_QUANTOPEDIA_KEY] = "0"
+        quantopedia_num = int(self.state_dict[_QUANTOPEDIA_KEY]) | num
+        self.state_dict[_QUANTOPEDIA_KEY] = str(quantopedia_num)
+
+    def has_quantopedia(self, num: int) -> bool:
+        """Convenience method for getting  a quantopedia bit.
+
+        The quantopedia is repesented by a bitstring in the
+        state_dict.  During a battle, if the bit for the enemy
+        NPC is set, then the entry for that type of NPC is displayed.
+        """
+        if _QUANTOPEDIA_KEY not in self.state_dict:
+            return False
+        quantopedia_num = int(self.state_dict[_QUANTOPEDIA_KEY])
+        return quantopedia_num & num != 0
 
     def with_save_file(self, save_file) -> "GameState":
         """Modifies GameState object in place to load info from save file.

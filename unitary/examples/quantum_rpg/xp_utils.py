@@ -56,6 +56,8 @@ def is_ready_for_next_level(qar: qaracter.Qaracter) -> bool:
     current_level = qar.level
     for idx in range(current_level):
         hp = qar.get_hp(qar.quantum_object_name(idx + 1))
+        if not hp:
+            continue
         if (
             len(list(qar.circuit.findall_operations(lambda op: hp.qubit in op.qubits)))
             <= current_level

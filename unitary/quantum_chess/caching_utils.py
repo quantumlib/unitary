@@ -25,7 +25,7 @@ class CacheKey:
 
 
 def cache_key_from_move(m: move.Move, repetitions: int) -> CacheKey:
-    return CacheKey(m.move_type, repetitions)
+    return CacheKey(m.move_type or enums.MoveType.NULL_TYPE, repetitions)
 
 
 @dataclass(frozen=True)

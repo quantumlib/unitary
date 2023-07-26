@@ -14,7 +14,7 @@
 import enum
 import io
 import sys
-from typing import List, Optional
+from typing import List, Optional, Set
 
 import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.input_helpers as input_helpers
@@ -62,6 +62,7 @@ class Battle:
         self.player_side = [qar.copy() for qar in state.party]
         self.enemy_side = enemy_side
         self.file = state.file
+        self.game_state = state
         self.xp = xp
         self.get_user_input = state.get_user_input
 
@@ -84,9 +85,7 @@ class Battle:
             else:
                 status += " " * (_PLAYER_LEN)
             if i < len(self.enemy_side):
-                status += (
-                    f"{self.enemy_side[i].name} {type(self.enemy_side[i]).__name__}"
-                )
+                status += f"{i+1}) {self.enemy_side[i].name} {type(self.enemy_side[i]).__name__}"
 
             status += "\n"
 
@@ -115,18 +114,34 @@ class Battle:
             self.print_screen()
             print(f"{current_player.name} turn:", file=self.file)
             if not current_player.is_active():
-                print(f"{current_player.name} is DOWN!", file=self.file)
+                print(f"{current_player.name} is DOWN and cannot act!", file=self.file)
                 continue
             actions = current_player.actions()
             descriptions = current_player.action_descriptions()
             for key in sorted(actions):
                 print(f"{key}) {descriptions[key]}.", file=self.file)
+            print("q) Read Quantopedia.", file=self.file)
             print("h) Help.", file=self.file)
-            action = "h"
-            while action == "h":
+            while True:
                 action = self.get_user_input("Choose your action: ")
                 if action == "h":
                     print(current_player.help(), file=self.file)
+                elif action == "q":
+                    seen_types: Set[str] = set()
+                    for enemy in self.enemy_side:
+                        enemy_type = type(enemy).__name__
+                        enemy_index = enemy.quantopedia_index()
+                        if enemy_type not in seen_types:
+                            if self.game_state.has_quantopedia(enemy_index):
+                                print(enemy.quantopedia_entry(), file=self.file)
+                            else:
+                                print(
+                                    f"You do not have information on {enemy_type} yet.",
+                                    file=self.file,
+                                )
+                            seen_types.add(enemy_type)
+                else:
+                    break
             if action in current_player.actions():
                 monster = (
                     input_helpers.get_user_input_number(
@@ -160,7 +175,6 @@ class Battle:
         """
         for npc in self.enemy_side:
             if not npc.is_active():
-                print(f"{npc.name} is DOWN!", file=self.file)
                 continue
             result = npc.npc_action(self)
             print(result, file=self.file)

@@ -9,4 +9,4 @@ jobs:
       - uses: actions/checkout@v2
       - uses: psf/black@stable
         with:
-          src: "./unitary/quantum_chess"
+          src: "./unitary"

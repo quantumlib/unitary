@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import copy
-from typing import Dict, List, Optional, Sequence, Set
+from typing import Dict, Iterable, List, Optional, Sequence, Set
 
 import cirq
 import cirq_google as cg
@@ -45,7 +45,7 @@ class ConnectivityHeuristicCircuitTransformer:
     def __init__(self, device: cirq.Device):
         super().__init__()
         self.device = device
-        self.mapping: Optional[Dict] = None
+        self.mapping: Dict[cirq.Qid, cirq.GridQubit] = {}
         self.qubit_list = list(device.metadata.qubit_set or {})
         self.starting_qubit = self.find_start_qubit(self.qubit_list)
 
@@ -53,7 +53,7 @@ class ConnectivityHeuristicCircuitTransformer:
         self,
         depth: int,
         qubit: cirq.GridQubit,
-        qubit_list: Sequence[cirq.GridQubit],
+        qubit_list: Iterable[cirq.GridQubit],
         visited: Set[cirq.GridQubit],
     ) -> int:
         """Returns the number of qubits within `depth` of the input `qubit`.
@@ -77,7 +77,7 @@ class ConnectivityHeuristicCircuitTransformer:
         return c
 
     def find_start_qubit(
-        self, qubit_list: Sequence[cirq.Qid], depth=3
+        self, qubit_list: Iterable[cirq.Qid], depth=3
     ) -> cirq.GridQubit:
         """Finds a reasonable starting qubit to start the mapping.
 
@@ -139,7 +139,7 @@ class ConnectivityHeuristicCircuitTransformer:
         for node in graph:
             if node in mapping:
                 continue
-            visited = set()
+            visited: Set[cirq.Qid] = set()
             c = self.edges_within(3, node, graph, visited)
             if c > best_count:
                 best_count = c
@@ -292,7 +292,7 @@ class ConnectivityHeuristicCircuitTransformer:
 
         # Initialize mappings and available qubits
         start_qubit = self.starting_qubit
-        mapping = {}
+        mapping: Dict[cirq.Qid, cirq.GridQubit] = {}
         start_list = set(copy.copy(self.qubit_list))
         start_list.remove(start_qubit)
 
