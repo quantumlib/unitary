@@ -14,7 +14,7 @@
 import unitary.alpha as alpha
 
 from unitary.examples.quantum_rpg.encounter import Encounter
-from unitary.examples.quantum_rpg.npcs import BlueFoam, GreenFoam, RedFoam
+from unitary.examples.quantum_rpg.npcs import BlueFoam, GreenFoam, RedFoam, PurpleFoam
 from unitary.examples.quantum_rpg.xp_utils import EncounterXp
 
 _BLUE_XP = EncounterXp(
@@ -71,7 +71,7 @@ def red_foam(number: int, prob: float = 0.5, xp=_GREEN_XP):
 
 def purple_foam(number: int, prob: float = 0.5, xp=_GREEN_XP):
     return Encounter(
-        [RedFoam(f"purple foam {idx}") for idx in range(number)],
+        [PurpleFoam(f"purple foam {idx}") for idx in range(number)],
         probability=prob,
         description="Scintillating purple quantum foam drifts towards you!",
         xp=xp,
