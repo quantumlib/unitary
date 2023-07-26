@@ -368,7 +368,8 @@ h) Help.
 Observer watcher measures Mensing_1 as HURT.
 You have been defeated!
 """
-        + ascii_art.RIP_TOP + "\n"
+        + ascii_art.RIP_TOP
+        + "\n"
         + "     |       |     Mensing      |\n"
         + ascii_art.RIP_BOTTOM
         + """

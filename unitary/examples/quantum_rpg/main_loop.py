@@ -173,7 +173,7 @@ class MainLoop:
             print(e, file=self.file)
             print(ascii_art.RIP_TOP, file=self.file)
             for qar in self.game_state.party:
-              print(f"     |       | {qar.name: ^16} |", file=self.file)
+                print(f"     |       | {qar.name: ^16} |", file=self.file)
             print(ascii_art.RIP_BOTTOM, file=self.file)
             print(
                 "You have been measured and were found wanting.",
