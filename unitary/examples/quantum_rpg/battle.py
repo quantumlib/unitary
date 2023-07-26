@@ -111,7 +111,7 @@ class Battle:
             self.print_screen()
             print(f"{current_player.name} turn:", file=self.file)
             if not current_player.is_active():
-                print(f"{current_player.name} is DOWNi and cannot act!", file=self.file)
+                print(f"{current_player.name} is DOWN and cannot act!", file=self.file)
                 continue
             actions = current_player.actions()
             descriptions = current_player.action_descriptions()
