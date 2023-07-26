@@ -151,7 +151,7 @@ def test_read_quantopedia_not_known():
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
 ------------------------------------------------------------
-Aaronson Analyst                        watcher Observer
+Aaronson Analyst                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Aaronson turn:
@@ -176,7 +176,7 @@ def test_read_quantopedia():
         state.file.getvalue().replace("\t", " ").strip()
         == r"""
 ------------------------------------------------------------
-Aaronson Analyst                        watcher Observer
+Aaronson Analyst                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Aaronson turn:
