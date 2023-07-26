@@ -106,3 +106,8 @@ def test_schrodinger_cat():
     # all qubits are the same
     for q in range(1, 11):
         assert all(qar.sample(f"nice_kitty_{q}", False) == result for _ in range(100))
+    c = classes.Analyst("person")
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.4)
+    assert msg == "SchrodingerCat nice_kitty measures person_1 as HURT."
+    msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.6, slime=0.25)
+    assert msg == "SchrodingerCat nice_kitty scratches person_1 into a superposition!"

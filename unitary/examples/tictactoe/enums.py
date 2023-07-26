@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from typing import Union
 import enum
 
 
@@ -25,6 +26,12 @@ class TicTacSquare(enum.Enum):
     EMPTY = 0
     X = 1
     O = 2
+
+    @classmethod
+    def from_result(cls, value: Union[enum.Enum, int]):
+        if isinstance(value, enum.Enum):
+            return cls(value.value)
+        return cls(value)
 
 
 class TicTacResult(enum.Enum):

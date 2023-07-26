@@ -150,7 +150,9 @@ def test_welcome():
     game = tictactoe.GameInterface(board)
     output = game.print_welcome()
 
-    assert output == """
+    assert (
+        output
+        == """
         Welcome to quantum tic tac toe!
         Here is the board:
         
@@ -160,7 +162,7 @@ def test_welcome():
         -----------
         g | h | i
 """
-    
+    )
 
 
 def test_help():
@@ -170,7 +172,9 @@ def test_help():
     game.get_move = MagicMock(return_value="help")
     game.player_move()
 
-    assert output.getvalue() == """
+    assert (
+        output.getvalue()
+        == """
     You can enter:
     - 1 character from [abcdefghi] to place a mark in the corresponding square (eg "a")
     - 2 characters from [abcdefghi] to place a split mark in corresponding squares (eg "bd")
@@ -179,6 +183,7 @@ def test_help():
 
 Still your move.
 """
+    )
     assert game.player == "X"
 
 
@@ -189,7 +194,9 @@ def test_map():
     game.get_move = MagicMock(return_value="map")
     game.player_move()
 
-    assert output.getvalue() == """
+    assert (
+        output.getvalue()
+        == """
         a | b | c
         -----------
         d | e | f
@@ -198,6 +205,7 @@ def test_map():
 
 Still your move.
 """
+    )
     assert game.player == "X"
 
 
@@ -227,7 +235,9 @@ def test_print_board():
     board.move("e", tictactoe.TicTacSquare.O)
     output = game.print_board()
 
-    assert output == """
+    assert (
+        output
+        == """
   .   0 | . 100 | . 100
   X 100 | X   0 | X   0
   O   0 | O   0 | O   0
@@ -240,3 +250,4 @@ def test_print_board():
   X   0 | X   0 | X   0
   O   0 | O   0 | O   0
 """
+    )

@@ -303,11 +303,12 @@ Exits: north.
 
 A weird security guard approaches!
 ------------------------------------------------------------
-Mensing Analyst                         watcher Observer
+Mensing Analyst                         1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Mensing turn:
 m) Measure enemy qubit.
+q) Read Quantopedia.
 h) Help.
 Cryostats
 
@@ -357,11 +358,12 @@ Exits: north.
 
 A weird security guard approaches!
 ------------------------------------------------------------
-Mensing Engineer                        watcher Observer
+Mensing Engineer                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Mensing turn:
 x) Attack with X gate.
+q) Read Quantopedia.
 h) Help.
 Observer watcher measures Mensing_1 as HURT.
 You have been defeated!
@@ -412,11 +414,12 @@ Exits: north.
 
 A weird security guard approaches!
 ------------------------------------------------------------
-Mensing Engineer                        watcher Observer
+Mensing Engineer                        1) watcher Observer
 1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
 ------------------------------------------------------------
 Mensing turn:
 x) Attack with X gate.
+q) Read Quantopedia.
 h) Help.
 Observer watcher measures Mensing_1 as HEALTHY.
 You have escaped the battle!

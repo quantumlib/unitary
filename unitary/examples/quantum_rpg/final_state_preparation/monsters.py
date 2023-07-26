@@ -67,3 +67,12 @@ def red_foam(number: int, prob: float = 0.5, xp=_GREEN_XP):
         description="Some energetic red quantum foam exudes towards you!",
         xp=xp,
     )
+
+
+def purple_foam(number: int, prob: float = 0.5, xp=_GREEN_XP):
+    return Encounter(
+        [RedFoam(f"purple foam {idx}") for idx in range(number)],
+        probability=prob,
+        description="Scintillating purple quantum foam drifts towards you!",
+        xp=xp,
+    )

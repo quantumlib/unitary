@@ -20,6 +20,17 @@ import unitary.examples.quantum_rpg.enums as enums
 import unitary.examples.quantum_rpg.qaracter as qaracter
 
 
+# QUANTOPEDIA ENTRIES
+#
+#
+# Entry for quantum foam, found in Oxtail library
+_FOAM_QUANTOPEDIA = 1
+# Entry for cat states, found in Hills huts
+_HILLS_QUANTOPEDIA = 2
+# Reserved for Perimeter institute, to be implemented.
+_PERIMETER_QUANTOPEDIA = 4
+
+
 def _enemy_qubits(party: List[qaracter.Qaracter]) -> List[alpha.QuantumObject]:
     """Determines valid enemy target qubits and returns them with the player."""
     enemy_qubits: List[alpha.QuantumObject] = []
@@ -67,6 +78,22 @@ class Npc(qaracter.Qaracter):
         action_choice = random.random()
         return self.act_on_enemy_qubit(enemy_qubit, action_choice, **kwargs)
 
+    def quantopedia_index(self) -> int:
+        """Bit to use for quantopedia.  Should be power of two.
+
+        This represents the bit that you need to acquire in order
+        to be able to access the `quantopedia_entry` in the help
+        screen.  This bit is set in the game state and is usually
+        set when finding a library or item that grants the bit.
+
+        By default (set to zero), you cannot learn about the NPC.
+        """
+        return 0
+
+    def quantopedia_entry(self) -> str:
+        """Explanatory text to the players about the NPC."""
+        return "Nothing known about this NPC."
+
 
 #####################
 #
@@ -80,6 +107,15 @@ class Observer(Npc):
 
     def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
         return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
+
+    def quantopedia_entry(self) -> str:
+        return (
+            "Observers are known to frequent quantum events.\n"
+            "They will measure qubits in order to find out their values."
+        )
 
 
 class BlueFoam(Npc):
@@ -96,6 +132,16 @@ class BlueFoam(Npc):
             return f"{self.display_name} slimes {enemy_qubit.name} for {slime:0.3f}."
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
+
+    def quantopedia_entry(self) -> str:
+        return (
+            "Blue foam are the simplest kind of quantum errors.  Blue foam\n"
+            "are usually found in the |0> state and can be measured.\n"
+            "They will often slime their opponents with small fracts of X gates."
+        )
 
 
 class GreenFoam(Npc):
@@ -114,6 +160,16 @@ class GreenFoam(Npc):
             )
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
+
+    def quantopedia_entry(self) -> str:
+        return (
+            "Green foam are a simple kind of quantum error.  Green foam\n"
+            "are usually found in the |0> state and can be measured immediately.\n"
+            "They will often ooze, which will change their opponent's phase"
+        )
 
 
 class RedFoam(Npc):
@@ -135,6 +191,16 @@ class RedFoam(Npc):
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
 
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
+
+    def quantopedia_entry(self) -> str:
+        return (
+            "Red foam are a slightly more dangerous type of quantum error.\n"
+            "They are usually found in the |1> state and must be flipped\n"
+            "before they can be safely measured."
+        )
+
 
 class PurpleFoam(Npc):
     """Introductory NPC that starts in |+> state.
@@ -153,6 +219,17 @@ class PurpleFoam(Npc):
             return f"{self.display_name} covers {enemy_qubit.name} with foam!"
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _FOAM_QUANTOPEDIA
+
+    def quantopedia_entry(self) -> str:
+        return (
+            "Purple foam are a combination of red and blue form.\n"
+            "They are found in a |+> state which is a combination of\n"
+            "the |0> state and |1> state.  They can be safely measured\n"
+            "once a Hadamard gate has been applied."
+        )
 
 
 #####################
@@ -183,6 +260,18 @@ class SchrodingerCat(Npc):
     def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
         if action_choice > 0.5:
             alpha.Superposition()(enemy_qubit)
-            return f"{self.display_name} covers {enemy_qubit.name} with foam!"
+            return f"{self.display_name} scratches {enemy_qubit.name} into a superposition!"
         else:
             return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _HILLS_QUANTOPEDIA
+
+    def quantopedia_entry(self) -> str:
+        return (
+            "Schrödinger's cat are found in a superposition of zero and one.\n"
+            "This cat contains multiple qubits that are entangled so that all\n"
+            "qubits are in the same state.  That is, all qubits are in a superposition\n"
+            "of all ones or all zeros.  These cats have been known to apply\n"
+            "Hadamard gates with their claws and measure opponents."
+        )
