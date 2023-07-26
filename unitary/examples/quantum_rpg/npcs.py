@@ -230,3 +230,48 @@ class PurpleFoam(Npc):
             "the |0> state and |1> state.  They can be safely measured\n"
             "once a Hadamard gate has been applied."
         )
+
+
+#####################
+#
+#  HigherLevel NPCs
+#
+#####################
+
+
+class SchrodingerCat(Npc):
+    """NPC that is an all zero or all one state.
+
+    Can be variable number of qubits.
+
+    Has two actions: will either hadamard a random qubit
+    or will measure an enemy qubit.
+    """
+
+    def __init__(self, name, num_qubits=5):
+        super().__init__(name)
+        first_hp = self.get_hp(self.quantum_object_name(1))
+        alpha.Superposition()(first_hp)
+        for q in range(1, num_qubits):
+            self.add_hp()
+            this_hp = self.get_hp(self.quantum_object_name(q + 1))
+            alpha.quantum_if(first_hp).apply(alpha.Flip())(this_hp)
+
+    def act_on_enemy_qubit(self, enemy_qubit, action_choice, **kwargs) -> str:
+        if action_choice > 0.5:
+            alpha.Superposition()(enemy_qubit)
+            return f"{self.display_name} scratches {enemy_qubit.name} into a superposition!"
+        else:
+            return _sample_qubit(self.display_name, enemy_qubit)
+
+    def quantopedia_index(self) -> int:
+        return _HILLS_QUANTOPEDIA
+
+    def quantopedia_entry(self) -> str:
+        return (
+            "Schrödinger's cat are found in a superposition of zero and one.\n"
+            "This cat contains multiple qubits that are entangled so that all\n"
+            "qubits are in the same state.  That is, all qubits are in a superposition\n"
+            "of all ones or all zeros.  These cats have been known to apply\n"
+            "Hadamard gates with their claws and measure opponents."
+        )

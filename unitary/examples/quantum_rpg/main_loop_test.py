@@ -310,6 +310,7 @@ Mensing turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
 h) Help.
+You have won the battle!
 Cryostats
 
 Giant aluminum cylinders hang suspended by large frames.

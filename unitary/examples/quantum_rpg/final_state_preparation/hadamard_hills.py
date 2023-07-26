@@ -16,13 +16,44 @@ import unitary.alpha as alpha
 from unitary.examples.quantum_rpg.bb84 import ALICE, BOB, DOOR
 from unitary.examples.quantum_rpg.encounter import Encounter
 from unitary.examples.quantum_rpg.game_state import GameState
+from unitary.examples.quantum_rpg.npcs import SchrodingerCat
 from unitary.examples.quantum_rpg.item import EXAMINE, TALK, Item
 from unitary.examples.quantum_rpg.world import Direction, Location
+from unitary.examples.quantum_rpg.xp_utils import EncounterXp
 from unitary.examples.quantum_rpg.final_state_preparation.monsters import (
     blue_foam,
     red_foam,
     purple_foam,
 )
+
+
+def _quantopedia(state: GameState, world) -> str:
+    print(
+        "You examine a book that contains information about the 'cat' state.",
+        file=state.file,
+    )
+    print(
+        "It explains about systems where two coherent but dynamically opposite",
+        file=state.file,
+    )
+    print(
+        "states exist at the same time, such as a superposition of all ones |111> and",
+        file=state.file,
+    )
+    print(
+        "all zeros |000>.  The book details the existance of a cat that occurs in this",
+        file=state.file,
+    )
+    print(
+        "state and then goes on to details some particularly grisly experiments done",
+        file=state.file,
+    )
+    print(
+        "to that cat which have made the species aggressive towards quantum analysts.",
+        file=state.file,
+    )
+    state.set_quantopedia(2)
+
 
 CHARLES = Item(
     keyword_actions=[
@@ -62,6 +93,30 @@ GILLES = Item(
     ],
     description="An elder physicist with long, flowing gray hair sits behind the desk.",
 )
+
+BOOKSHELF = Item(
+    keyword_actions=[
+        (
+            EXAMINE,
+            [
+                "book",
+                "books",
+                "shelf",
+                "bookshelf",
+                "papers",
+                "bookshelves",
+                "cabinets",
+                "specifications",
+                "cabinet",
+                "manuscripts",
+                "manuscript",
+            ],
+            _quantopedia,
+        )
+    ],
+    description="A painting of a colonial mansion hangs on one wall.",
+)
+
 
 EAST_EGG = Item(
     keyword_actions=[
@@ -428,7 +483,16 @@ HADAMARD_HILLS = [
             "into the iridiscent static of quantum errors. Broken windows\n"
             "and pitted walls show signs of disrepair."
         ),
-        encounters=[],
+        encounters=[
+            Encounter(
+                [
+                    SchrodingerCat("Guard Cat"),
+                ],
+                probability=1.0,
+                description="A cat both alive and dead hisses at you as you approach the door!",
+                xp=EncounterXp([[alpha.Flip()]]),
+            )
+        ],
         items=[DOOR],
         exits={
             Direction.SOUTH: "hadamard16",
