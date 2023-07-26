@@ -32,10 +32,10 @@ CHARLES = Item(
             (
                 "The physicist introduces himself as Charles.  'I am working on a\n"
                 "device to communicate in the quantum realm.  I am currently testing\n"
-                "a sensitive receiver detecting a laser beam from across the hills.\n"
+                "a sensitive receiver to detect a laser beam from across the hills.\n"
                 "The communication is immune to eavesdropping, but the receiver has\n"
                 "to measure in either the computational basis (I) or the Hadamard (H)\n"
-                "basis, and it cannot know which basis the laser beam was sent in.\n"
+                "basis. The receiver cannot know which basis the laser beam was sent in.\n"
                 "If I can figure this protocol out, I think it can be used to create\n"
                 "bank notes immune to counterfeiting.' Charles says hopefully."
             ),
@@ -183,8 +183,8 @@ HADAMARD_HILLS = [
         description=(
             "You are entering a cluster of hills that extend to the north.\n"
             "To the east and west, two identical peaks rise from the maze\n"
-            "of foothills.  The mirroring of terrain on both sides of you\n"
-            "gives you a sense of the symmetrical beauty of nature.\n"
+            "of foothills.  The mirroring of terrain on both sides gives you\n"
+            "a sense of the symmetrical beauty of nature.\n"
         ),
         encounters=[purple_foam(3, 0.2), blue_foam(3, 0.1)],
         exits={Direction.SOUTH: "hadamard5", Direction.NORTH: "hadamard7"},
@@ -286,8 +286,8 @@ HADAMARD_HILLS = [
         title="East Hut",
         description=(
             "You have entered an austere room filled with neatly organized\n"
-            "booksheles and filing cabinets.  In one corner, a carefully set\n"
-            "up optical table is set up with some kind of photonics experiment.\n"
+            "booksheles and filing cabinets.  In one corner, an intricate\n"
+            "optical table with many components is ready for a photonics experiment.\n"
             "A clean desk with a reading lamp takes up a large part of the room."
         ),
         encounters=[],
@@ -299,10 +299,10 @@ HADAMARD_HILLS = [
         title="West Hut",
         description=(
             "You have entered a cozy living space filled to the brim with\n"
-            "papers and books stacked all around the room.  A large pile\n"
+            "papers and books stacked all around the room.  A large heap\n"
             "of hastily piled electronics clutters up a corner of the room.\n"
             "A desk with a lamp piled high with manuscripts and technical\n"
-            "specifications takes up a big art of the room."
+            "specifications takes up a big part of the room."
         ),
         encounters=[],
         items=[GILLES, WEST_EGG],
@@ -312,10 +312,10 @@ HADAMARD_HILLS = [
         label="hadamard12_0",
         title="Upward Slope",
         description=(
-            "The trail continues upwards here, towards the top of\n"
-            "of the hill.  Here, the trail begins to get steep, with\n"
-            "large boulders marking the sides of the path.  To the east,\n"
-            "a large scree scramble forms the way forward."
+            "The trail continues upwards towards the top of the hill.\n"
+            "Here, the trail begins to get steep, with large boulders\n"
+            "marking the sides of the path.  To the east, a large scree\n"
+            "scramble forms the way forward."
         ),
         encounters=[purple_foam(3, 0.2)],
         exits={Direction.WEST: "hadamard10_0", Direction.UP: "hadamard13_0"},
@@ -324,10 +324,10 @@ HADAMARD_HILLS = [
         label="hadamard12_1",
         title="Upward Slope",
         description=(
-            "The trail continues upwards here, towards the top of\n"
-            "of the hill.  Here, the trail begins to get steep, with\n"
-            "large boulders marking the sides of the path.  To the west,\n"
-            "a large scree scramble forms the way forward."
+            "The trail continues upwards towards the top of the hill.\n"
+            "Here, the trail begins to get steep, with large boulders\n"
+            "marking the sides of the path.  To the east, a large scree\n"
+            "scramble forms the way forward."
         ),
         encounters=[purple_foam(3, 0.2)],
         exits={Direction.EAST: "hadamard10_1", Direction.UP: "hadamard13_1"},
@@ -384,7 +384,7 @@ HADAMARD_HILLS = [
         description=(
             "At the top of the east hill is a concrete slab.\n"
             "A post at each of the four corners supports a taut piece\n"
-            "of havey fabric that proides some shade for those that\n"
+            "of heavy fabric that proides some shade for those that\n"
             "have made it this far."
         ),
         encounters=[],
@@ -397,7 +397,7 @@ HADAMARD_HILLS = [
         description=(
             "At the top of the west hill is a concrete slab.\n"
             "A post at each of the four corners supports a taut piece\n"
-            "of havey fabric that proides some shade for those that\n"
+            "of heavy fabric that proides some shade for those that\n"
             "have made it this far."
         ),
         encounters=[],
@@ -424,8 +424,8 @@ HADAMARD_HILLS = [
             "As you near the imposing grey buildings, you can see that\n"
             "they form a research outpost.  What must have once been\n"
             "an impressive and state-of-the-art facility now shows\n"
-            "signs of damage Pieces of the building have been turned\n"
-            "into the iridiscent staic of quantum errors. Broken windows\n"
+            "signs of damage. Pieces of the building have been turned\n"
+            "into the iridiscent static of quantum errors. Broken windows\n"
             "and pitted walls show signs of disrepair."
         ),
         encounters=[],
