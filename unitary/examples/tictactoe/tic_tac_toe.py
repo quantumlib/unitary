@@ -13,7 +13,7 @@
 # limitations under the License.
 import io
 import sys
-from typing import Dict, List
+from typing import Dict, List, TextIO
 
 from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.alpha.qudit_effects import QuditFlip
@@ -164,7 +164,9 @@ class TicTacToe:
         that is initialized to the measured state.
         This should happen when no more squares are empty.
         """
-        self.last_result = self.board.pop()
+        self.last_result = [
+            TicTacSquare.from_result(square) for square in self.board.pop()
+        ]
         for idx, name in enumerate(_SQUARE_NAMES):
             if self.last_result[idx] == TicTacSquare.EMPTY:
                 self.empty_squares.add(name)
@@ -250,7 +252,10 @@ class TicTacToe:
 
         would return '.X.XO..OO'.
         """
-        return [_result_to_str(result) for result in self.board.peek(count=count)]
+        return [
+            _result_to_str([TicTacSquare.from_result(square) for square in result])
+            for result in self.board.peek(count=count)
+        ]
 
 
 class GameInterface:
@@ -268,7 +273,7 @@ class GameInterface:
 
     """
 
-    def __init__(self, game: TicTacToe, file: io.IOBase = sys.stdout):
+    def __init__(self, game: TicTacToe, file: TextIO = sys.stdout):
         self.game = game
         self.file = file
         self.player = "X"
@@ -340,7 +345,12 @@ class GameInterface:
     def print_board(self) -> str:
         """Returns the TicTacToe board in ASCII form."""
         results = self.game.board.peek(count=100)
-        hist = _histogram(results)
+        hist = _histogram(
+            [
+                [TicTacSquare.from_result(square) for square in result]
+                for result in results
+            ]
+        )
         output = "\n"
         for row in range(3):
             for mark in TicTacSquare:

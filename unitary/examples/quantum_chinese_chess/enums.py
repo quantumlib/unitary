@@ -14,6 +14,7 @@
 import enum
 from typing import Optional
 
+
 class SquareState(enum.Enum):
     EMPTY = 0
     OCCUPIED = 1
@@ -42,26 +43,30 @@ class MoveVariant(enum.Enum):
 
 
 class Piece(enum.Enum):
-    EMPTY = '.'
-    SOLDIER = 's'
-    CANNON = 'c'
-    ROOK = 'r'
-    HORSE = 'h'
-    ELEPHANT = 'e'
-    ADVISOR = 'a'
-    GENERAL = 'g'
-    def type_of(c: str) -> Optional["Piece"]:
+    EMPTY = "."
+    SOLDIER = "s"
+    CANNON = "c"
+    ROOK = "r"
+    HORSE = "h"
+    ELEPHANT = "e"
+    ADVISOR = "a"
+    GENERAL = "g"
+
+    @classmethod
+    def type_of(cls, c: str) -> Optional["Piece"]:
         return {
-            's': Piece.SOLDIER,
-            'c': Piece.CANNON,
-            'r': Piece.ROOK,
-            'h': Piece.HORSE,
-            'e': Piece.ELEPHANT,
-            'a': Piece.ADVISOR,
-            'g': Piece.GENERAL,
-            '.': Piece.EMPTY
-            }.get(c.lower(), None)
+            "s": Piece.SOLDIER,
+            "c": Piece.CANNON,
+            "r": Piece.ROOK,
+            "h": Piece.HORSE,
+            "e": Piece.ELEPHANT,
+            "a": Piece.ADVISOR,
+            "g": Piece.GENERAL,
+            ".": Piece.EMPTY,
+        }.get(c.lower(), None)
+
     def red_symbol(self) -> str:
         return self.value.upper()
+
     def black_symbol(self) -> str:
         return self.value

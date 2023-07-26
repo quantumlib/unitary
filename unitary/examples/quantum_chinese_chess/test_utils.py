@@ -15,10 +15,11 @@ from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.examples.quantum_chinese_chess.enums import SquareState
 from string import ascii_lowercase, digits
 
+
 # Build quantum objects a0 to i9, and add them to a quantum world.
 def init_board() -> QuantumWorld:
     board = {}
     for col in ascii_lowercase[:9]:
         for row in digits:
             board[col + row] = QuantumObject(col + row, SquareState.EMPTY)
-    return QuantumWorld(board.values())
+    return QuantumWorld(list(board.values()))

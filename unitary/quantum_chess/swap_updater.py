@@ -18,7 +18,17 @@ Look-Ahead Heuristic for the Qubit Mapping Problem of NISQ Computers'
 This transforms circuits by adding additional SWAP gates to ensure that all operations are on adjacent qubits.
 """
 from collections import deque
-from typing import Callable, Dict, Generator, Iterable, List, Optional, Tuple
+from typing import (
+    Callable,
+    Deque,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+)
 
 import cirq
 
@@ -65,7 +75,7 @@ def _pairwise_shortest_distances(
     # to gates with poor calibration metrics).
     shortest = {}
     for starting_qubit in adjacencies:
-        to_be_visited = deque()
+        to_be_visited: Deque[Tuple[cirq.Qid, int]] = deque()
         shortest[(starting_qubit, starting_qubit)] = 0
         to_be_visited.append((starting_qubit, 0))
         while to_be_visited:
@@ -154,15 +164,15 @@ class SwapUpdater:
             [cirq.Qid, cirq.Qid], Iterable[cirq.Operation]
         ] = generate_decomposed_swap,
     ):
-        self.device_qubits = device_qubits
+        self.device_qubits = device_qubits or []
         self.dlists = mcpe.DependencyLists(circuit)
         self.mapping = mcpe.QubitMapping(initial_mapping)
         self.swap_factory = swap_factory
-        self.adjacent = {q: q.neighbors(device_qubits) for q in device_qubits}
+        self.adjacent = {q: q.neighbors(device_qubits) for q in self.device_qubits}
         self.pairwise_distances = _pairwise_shortest_distances(self.adjacent)
         # Tracks swaps that have been made since the last circuit gate was
         # output.
-        self.prev_swaps = set()
+        self.prev_swaps: Set[Tuple[cirq.GridQubit, cirq.GridQubit]] = set()
 
     def _distance_between(self, q1: cirq.GridQubit, q2: cirq.GridQubit) -> int:
         """Returns the precomputed length of the shortest path between two qubits."""
@@ -231,7 +241,7 @@ class SwapUpdater:
             raise ValueError("no swaps founds that will improve the circuit")
         chosen_swap = max(candidates, key=lambda swap: self._mcpe(*swap))
         self.prev_swaps.add(chosen_swap)
-        self.prev_swaps.add(tuple(reversed(chosen_swap)))
+        self.prev_swaps.add((chosen_swap[1], chosen_swap[0]))
         self.mapping.swap_physical(*chosen_swap)
         yield from self.swap_factory(*chosen_swap)
 
