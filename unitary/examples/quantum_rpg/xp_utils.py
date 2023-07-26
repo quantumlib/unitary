@@ -73,8 +73,11 @@ def award_xp(
     """Prompt user to choose a qaracter to award XP to."""
     if not xp:
         return
-    print("You have been awarded XP!", file=state.file)
     effect_list = xp.choose()
+    if not effect_list:
+        # No XP awarded
+        return
+    print("You have been awarded XP!", file=state.file)
     for effect in effect_list:
         print(f"  {effect}", file=state.file)
     print("", file=state.file)
