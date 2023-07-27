@@ -47,6 +47,8 @@ class Command(enum.Enum):
 
         Allows prefixes, like 'e' to be parsed as EAST.
         """
+        if not s:
+            return None
         lower_s = s.lower()
         for cmd in Command:
             if cmd.value.startswith(lower_s):
@@ -153,10 +155,12 @@ class MainLoop:
                         file=self.file,
                     )
                     save_file = self.game_state.get_user_input("")
-                    self.game_state.with_save_file(save_file)
-                    self.world.current_location = self.world.locations[
-                        self.game_state.current_location_label
-                    ]
+                    if self.game_state.with_save_file(save_file) is None:
+                        print("Unrecognized save file.", file=self.file)
+                    else:
+                        self.world.current_location = self.world.locations[
+                            self.game_state.current_location_label
+                        ]
                 elif input_cmd == Command.SAVE:
                     print(
                         "Use this code to return to this point in the game:",
@@ -167,7 +171,7 @@ class MainLoop:
                     print_room_description = False
                 else:
                     print(
-                        f"I did not understand the command {current_input}",
+                        f"I did not understand the command {current_input}.",
                         file=self.file,
                     )
         except exceptions.UntimelyDeathException as e:
@@ -213,8 +217,11 @@ def main(state: game_state.GameState) -> None:
                 file=state.file,
             )
             save_file = state.get_user_input("")
-            state = state.with_save_file(save_file)
-            main_loop = MainLoop(world.World(final_state_world.WORLD), state)
+            new_state = state.with_save_file(save_file)
+            if new_state is None:
+                print("Unrecognized save file.", file=state.file)
+                continue
+            main_loop = MainLoop(world.World(final_state_world.WORLD), new_state)
             main_loop.world.current_location = main_loop.world.locations[
                 state.current_location_label
             ]
