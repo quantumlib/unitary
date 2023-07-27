@@ -114,10 +114,45 @@ def test_simple_main_loop() -> None:
     c = classes.Analyst("Mensing")
     state = game_state.GameState(party=[c], user_input=["quit"], file=io.StringIO())
     loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
-    loop.loop(user_input=["quit"])
+    loop.loop()
     assert (
         cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
         == r"""
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+""".strip()
+    )
+
+
+def test_empty_command() -> None:
+    state = game_state.GameState(
+        party=[], user_input=["", "", "quit"], file=io.StringIO()
+    )
+    loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
+    loop.loop()
+    assert (
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
+        == r"""
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+
+I did not understand the command .
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+
+I did not understand the command .
 Lab Entrance
 
 You stand before the entrance to the premier quantum lab.
@@ -265,6 +300,37 @@ The lab continues to the south.
 A helpful sign is here.
 
 Exits: south, west.
+""".strip()
+    )
+
+
+def test_bad_load() -> None:
+    c = classes.Analyst("Broglie")
+    state = game_state.GameState(
+        party=[c],
+        user_input=["load", "", "quit"],
+        file=io.StringIO(),
+    )
+    loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
+    loop.loop()
+    assert (
+        cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
+        == r"""
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
+
+Paste the save file here to load the game from that point.
+Unrecognized save file.
+Lab Entrance
+
+You stand before the entrance to the premier quantum lab.
+Double doors lead east.
+
+Exits: east.
 """.strip()
     )
 
@@ -530,6 +596,39 @@ def test_main_load():
         state.file.getvalue()
         == _TITLE
         + r"""Paste the save file here to load the game from that point.
+The Classical Frontier
+
+Here, the frontier between the classical and quantum realms begins.
+Farther north, you can see faint undulations, as if the way is blurred
+by some mirage.  To proceed, you will need to move around this strange
+occurance.
+
+Exits: south, east, west.
+
+"""
+    )
+
+
+def test_main_bad_save_file():
+    state = game_state.GameState(
+        party=[],
+        user_input=["2", "", "2", "classical3;1;Doug#Analyst#1", "quit"],
+        file=io.StringIO(),
+    )
+    loop = main_loop.main(state)
+
+    assert (
+        state.file.getvalue()
+        == _TITLE
+        + r"""Paste the save file here to load the game from that point.
+Unrecognized save file.
+-----------------------------------------------
+1) Begin new adventure
+2) Load existing adventure
+3) Help
+4) Quit
+-----------------------------------------------
+Paste the save file here to load the game from that point.
 The Classical Frontier
 
 Here, the frontier between the classical and quantum realms begins.

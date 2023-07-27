@@ -201,8 +201,11 @@ class Qaracter(alpha.QuantumWorld):
     def from_save_file(
         cls,
         save_file: str,
-    ) -> "Qaracter":
+    ) -> "Optional[Qaracter]":
         lines = save_file.split(_FIELD_DELIMITER)
+
+        if len(lines) < 2:
+            return None
         name = lines[0]
         class_name = lines[1]
 
@@ -217,12 +220,17 @@ class Qaracter(alpha.QuantumWorld):
             if cls_name == class_name:
                 new_cls = cls_type
         qar = new_cls(name)
-        level = int(lines[2])
+        try:
+            level = int(lines[2])
+        except ValueError:
+            return None
         for _ in range(level - 1):
             qar.add_hp()
         for line in lines[3:]:
             gate_type = line[0]
             fields = line[1:].split(_GATE_DELIMITER)
+            if len(fields) < 2:
+                continue
             exponent = float(fields[0])
             qubit0 = int(fields[1])
             qubit1 = int(fields[2]) if len(fields) > 2 else None

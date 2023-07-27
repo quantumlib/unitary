@@ -67,7 +67,7 @@ class GameState:
         quantopedia_num = int(self.state_dict[_QUANTOPEDIA_KEY])
         return quantopedia_num & num != 0
 
-    def with_save_file(self, save_file) -> "GameState":
+    def with_save_file(self, save_file) -> "Optional[GameState]":
         """Modifies GameState object in place to load info from save file.
 
         Overwrites the party, state dictionary, and current location.
@@ -77,14 +77,23 @@ class GameState:
         are in parsing the user input.
         """
         lines = save_file.split(_SAVE_DELIMITER)
+        if len(lines) < 2:
+            return None
         self.current_location_label = lines[0]
         party: List[qaracter.Qaracter] = []
-        num_party = int(lines[1])
+        try:
+            num_party = int(lines[1])
+        except ValueError:
+            return None
+        if len(lines) < 2 + num_party:
+            return None
         for party_idx in range(2, 2 + num_party):
             party.append(qaracter.Qaracter.from_save_file(lines[party_idx]))
         state_dict = {}
         for line in lines[2 + num_party :]:
             dict_value = line.split(":")
+            if len(dict_value) < 2:
+                continue
             state_dict[dict_value[0]] = dict_value[1]
         self.state_dict = state_dict
         self.party = party

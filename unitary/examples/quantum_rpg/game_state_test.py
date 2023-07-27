@@ -53,6 +53,12 @@ def test_serialization() -> None:
     assert deserialized_qar2.circuit == qar2.circuit
 
 
+def test_bad_input():
+    assert game_state.GameState.from_save_file("") is None
+    assert game_state.GameState.from_save_file("ding;dong") is None
+    assert game_state.GameState.from_save_file("ding;2;dong") is None
+
+
 def test_quantopedia():
     state = game_state.GameState([])
     assert not state.has_quantopedia(8)
