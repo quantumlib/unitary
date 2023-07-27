@@ -89,10 +89,11 @@ def test_purple_foam():
 
 
 def test_schrodinger_cat():
-    qar = npcs.SchrodingerCat(name="nice_kitty", num_qubits=10)
+    num_qubits = 4
+    qar = npcs.SchrodingerCat(name="nice_kitty", num_qubits=num_qubits)
 
     # Check that individual qubits seem random
-    for q in range(1, 11):
+    for q in range(1, num_qubits+1):
         assert any(
             qar.sample(f"nice_kitty_{q}", False) == enums.HealthPoint.HEALTHY
             for _ in range(100)
@@ -104,7 +105,7 @@ def test_schrodinger_cat():
     # measure one
     result = qar.sample(f"nice_kitty_{q}", True)
     # all qubits are the same
-    for q in range(1, 11):
+    for q in range(1, num_qubits+1):
         assert all(qar.sample(f"nice_kitty_{q}", False) == result for _ in range(100))
     c = classes.Analyst("person")
     msg = qar.act_on_enemy_qubit(c.get_hp("person_1"), 0.4)

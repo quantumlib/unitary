@@ -26,7 +26,8 @@ class Engineer(qaracter.Qaracter):
 
     def action_descriptions(self) -> Dict[str, str]:
         """Descriptions for each player action."""
-        return {"x": "Attack with X gate"}
+        return {"x": "Attack with X gate",
+                "h": "Attack with H gate"}
 
     def help(self) -> str:
         return (
