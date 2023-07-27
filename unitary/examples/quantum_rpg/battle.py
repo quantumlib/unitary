@@ -121,10 +121,10 @@ class Battle:
             for key in sorted(actions):
                 print(f"{key}) {descriptions[key]}.", file=self.file)
             print("q) Read Quantopedia.", file=self.file)
-            print("h) Help.", file=self.file)
+            print("?) Help.", file=self.file)
             while True:
                 action = self.get_user_input("Choose your action: ")
-                if action == "h":
+                if action == "?":
                     print(current_player.help(), file=self.file)
                 elif action == "q":
                     seen_types: Set[str] = set()

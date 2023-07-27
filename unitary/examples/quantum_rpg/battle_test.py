@@ -38,7 +38,7 @@ Aaronson Analyst                        1) watcher Observer
 Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
-h) Help.
+?) Help.
 """.strip()
     )
 
@@ -61,8 +61,52 @@ Aaronson Analyst                        1) watcher Observer
 Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
-h) Help.
+?) Help.
 Invalid number selected.
+""".strip()
+    )
+
+
+def test_higher_level_players():
+    """Tests printing all the class descriptions."""
+    c = classes.Analyst("Aaronson")
+    c.add_hp()
+    c.add_hp()
+    e = classes.Engineer("Preskill")
+    e.add_hp()
+    e.add_hp()
+    w = npcs.Observer("watcher")
+    w2 = npcs.Observer("watcher")
+    state = game_state.GameState(
+        [c, e], user_input=["m", "1", "1", "h", "2", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [w, w2])
+    b.take_player_turn()
+    assert (
+        state.file.getvalue().replace("\t", " ").strip()
+        == r"""
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+3QP (0|1> 0|0> 3?)                      1QP (0|1> 0|0> 1?)
+Preskill Engineer                       2) watcher Observer
+3QP (0|1> 0|0> 3?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
+Aaronson turn:
+m) Measure enemy qubit.
+s) Sample enemy qubit.
+q) Read Quantopedia.
+?) Help.
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+3QP (0|1> 0|0> 3?)                      1QP (0|1> 1|0> 0?) *DOWN* 
+Preskill Engineer                       2) watcher Observer
+3QP (0|1> 0|0> 3?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
+Preskill turn:
+h) Attack with H gate.
+x) Attack with X gate.
+q) Read Quantopedia.
+?) Help.
 """.strip()
     )
 
@@ -85,7 +129,7 @@ Aaronson Analyst                        1) watcher Observer
 Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
-h) Help.
+?) Help.
 """.strip()
     )
 
@@ -108,7 +152,7 @@ Aaronson Analyst                        1) watcher Observer
 Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
-h) Help.
+?) Help.
 """.strip()
     )
 
@@ -117,7 +161,7 @@ def test_battle_help():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["h", "m", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["?", "m", "1", "1"], file=io.StringIO()
     )
     b = battle.Battle(state, [e])
     assert b.loop() == battle.BattleResult.PLAYERS_WON
@@ -131,7 +175,7 @@ Aaronson Analyst                        1) watcher Observer
 Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
-h) Help.
+?) Help.
 The analyst can measure enemy qubits.  This forces an enemy qubit
 into the |0> state or |1> state with a probability based on its
 amplitude. Try to measure the enemy qubits as |0> to defeat them.
@@ -157,7 +201,7 @@ Aaronson Analyst                        1) watcher Observer
 Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
-h) Help.
+?) Help.
 You do not have information on Observer yet.
 """.strip()
     )
@@ -182,7 +226,7 @@ Aaronson Analyst                        1) watcher Observer
 Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
-h) Help.
+?) Help.
 Observers are known to frequent quantum events.
 They will measure qubits in order to find out their values.
 """.strip()

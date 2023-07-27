@@ -55,7 +55,7 @@ Aaronson Analyst                        1) watcher Observer
 Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
-h) Help.
+?) Help.
 """.strip()
     )
 
