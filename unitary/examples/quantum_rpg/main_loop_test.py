@@ -145,20 +145,7 @@ Double doors lead east.
 Exits: east.
 
 I did not understand the command .
-Lab Entrance
-
-You stand before the entrance to the premier quantum lab.
-Double doors lead east.
-
-Exits: east.
-
 I did not understand the command .
-Lab Entrance
-
-You stand before the entrance to the premier quantum lab.
-Double doors lead east.
-
-Exits: east.
 """.strip()
     )
 
@@ -193,12 +180,6 @@ Qaracter sheet:
 Maxwell_1: ───H───────
 
 Maxwell_2: ───X^0.5───
-Lab Entrance
-
-You stand before the entrance to the premier quantum lab.
-Double doors lead east.
-
-Exits: east.
 """.strip()
     )
 

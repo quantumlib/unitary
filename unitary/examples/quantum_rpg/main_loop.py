@@ -88,42 +88,45 @@ class MainLoop:
             while True:
                 if print_room_description:
                     print(self.world.current_location, file=self.file)
-                else:
-                    print_room_description = True
-                if self.world.current_location.encounters:
-                    result = None
-                    # If this location has random encounters, then see if any will
-                    # trigger.  If so, initiate the battle.
-                    for random_encounter in self.world.current_location.encounters:
-                        if random_encounter.will_trigger():
-                            if random_encounter.description:
-                                print(random_encounter.description, file=self.file)
-                            current_battle = random_encounter.initiate(self.game_state)
-                            result = current_battle.loop()
-                            self.world.current_location.remove_encounter(
-                                random_encounter
-                            )
-
-                            if result == battle.BattleResult.PLAYERS_WON:
-                                print("You have won the battle!", file=self.file)
-                                awarded_xp = current_battle.xp
-                                xp_utils.award_xp(self.game_state, awarded_xp)
-                            elif result == battle.BattleResult.PLAYERS_DOWN:
-                                raise exceptions.UntimelyDeathException(
-                                    "You have been defeated!"
+                    if self.world.current_location.encounters:
+                        result = None
+                        # If this location has random encounters, then see if any will
+                        # trigger.  If so, initiate the battle.
+                        for random_encounter in self.world.current_location.encounters:
+                            if random_encounter.will_trigger():
+                                if random_encounter.description:
+                                    print(random_encounter.description, file=self.file)
+                                current_battle = random_encounter.initiate(
+                                    self.game_state
                                 )
-                            elif result == battle.BattleResult.PLAYERS_ESCAPED:
-                                print("You have escaped the battle!", file=self.file)
-                            elif result == battle.BattleResult.ENEMIES_ESCAPED:
-                                print(
-                                    "The enemies have run away and escaped!",
-                                    file=self.file,
+                                result = current_battle.loop()
+                                self.world.current_location.remove_encounter(
+                                    random_encounter
                                 )
-                            break
-                    if result is not None:
-                        # Reprint location description now that encounter is over.
-                        print(self.world.current_location, file=self.file)
 
+                                if result == battle.BattleResult.PLAYERS_WON:
+                                    print("You have won the battle!", file=self.file)
+                                    awarded_xp = current_battle.xp
+                                    xp_utils.award_xp(self.game_state, awarded_xp)
+                                elif result == battle.BattleResult.PLAYERS_DOWN:
+                                    raise exceptions.UntimelyDeathException(
+                                        "You have been defeated!"
+                                    )
+                                elif result == battle.BattleResult.PLAYERS_ESCAPED:
+                                    print(
+                                        "You have escaped the battle!", file=self.file
+                                    )
+                                elif result == battle.BattleResult.ENEMIES_ESCAPED:
+                                    print(
+                                        "The enemies have run away and escaped!",
+                                        file=self.file,
+                                    )
+                                break
+                        if result is not None:
+                            # Reprint location description now that encounter is over.
+                            print(self.world.current_location, file=self.file)
+
+                print_room_description = True
                 current_input = self.game_state.get_user_input(">")
                 self.game_state.current_input = current_input
                 cmd = world.Direction.parse(current_input)
@@ -147,8 +150,10 @@ class MainLoop:
                     return
                 elif input_cmd == Command.STATUS:
                     self.print_status()
+                    print_room_description = False
                 elif input_cmd == Command.HELP:
                     print(ascii_art.HELP, file=self.file)
+                    print_room_description = False
                 elif input_cmd == Command.LOAD:
                     print(
                         "Paste the save file here to load the game from that point.",
@@ -174,6 +179,7 @@ class MainLoop:
                         f"I did not understand the command {current_input}.",
                         file=self.file,
                     )
+                    print_room_description = False
         except exceptions.UntimelyDeathException as e:
             print(e, file=self.file)
             print(ascii_art.RIP_TOP, file=self.file)
