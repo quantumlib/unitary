@@ -77,10 +77,9 @@ def test_higher_level_players():
     e.add_hp()
     w = npcs.Observer("watcher")
     w2 = npcs.Observer("watcher")
-    state = game_state.GameState([c,e],
-                                 user_input=["m", "1", "1",
-                                             "h", "2", "1"],
-                                 file=io.StringIO())
+    state = game_state.GameState(
+        [c, e], user_input=["m", "1", "1", "h", "2", "1"], file=io.StringIO()
+    )
     b = battle.Battle(state, [w, w2])
     b.take_player_turn()
     assert (
@@ -108,9 +107,8 @@ h) Attack with H gate.
 x) Attack with X gate.
 q) Read Quantopedia.
 ?) Help.
-""".strip())
-
-
+""".strip()
+    )
 
 
 def test_bad_qubit():
