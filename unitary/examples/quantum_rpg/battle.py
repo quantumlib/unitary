@@ -29,11 +29,11 @@ _BATTLE_SEPARATOR = "-" * (_PLAYER_LEN + 20)
 
 
 class BattleResult(enum.Enum):
-    UNFINISHED = 0
-    PLAYERS_WON = 1
-    PLAYERS_ESCAPED = 2
-    PLAYERS_DOWN = 3
-    ENEMIES_ESCAPED = 4
+    UNFINISHED = "Battle unfinished"
+    PLAYERS_WON = "You have won the battle!"
+    PLAYERS_ESCAPED = "You have escaped from the battle."
+    PLAYERS_DOWN = "You have lost the battle."
+    ENEMIES_ESCAPED = "Some enemies escaped the battle."
 
 
 class Battle:
@@ -194,6 +194,44 @@ class Battle:
             return BattleResult.ENEMIES_ESCAPED
         return BattleResult.UNFINISHED
 
+    def _print_battle_summary(self):
+        """Prints a two-column output of the battle status.
+
+        Left side includes the players and their qubits.  Right
+        side includes the NPCs and their qubits.
+
+        Output will be written to the `file` attribute.
+        """
+        print(_BATTLE_SEPARATOR, file=self.file)
+        print("                    Battle Summary\n", file=self.file)
+        print(
+            f"The battle is over.  {self._determine_battle_result().value}",
+            file=self.file,
+        )
+
+        for i in range(max(len(self.player_side), len(self.enemy_side))):
+            status = ""
+            if i < len(self.player_side):
+                end_status = "Still up."
+                if self.player_side[i].is_down():
+                    end_status = "DOWN"
+                elif self.player_side[i].is_escaped():
+                    end_status = "ESCAPED"
+                player_status = f"{self.player_side[i].name} {self.player_side[i].class_name}: {end_status}"
+                status += f"{player_status: <{_PLAYER_LEN}}"
+            else:
+                status += " " * (_PLAYER_LEN)
+            if i < len(self.enemy_side):
+                end_status = "Still up."
+                if self.enemy_side[i].is_down():
+                    end_status = "DOWN"
+                elif self.enemy_side[i].is_escaped():
+                    end_status = "ESCAPED"
+                status += f"{self.enemy_side[i].name} {type(self.enemy_side[i]).__name__} {end_status}"
+            print(status, file=self.file)
+
+        print(_BATTLE_SEPARATOR, file=self.file)
+
     def loop(self) -> BattleResult:
         """Full battle loop until one side is defeated.
 
@@ -203,6 +241,8 @@ class Battle:
         while result == BattleResult.UNFINISHED:
             result = self.take_player_turn()
             if result != BattleResult.UNFINISHED:
+                self._print_battle_summary()
                 return result
             result = self.take_npc_turn()
+        self._print_battle_summary()
         return result
