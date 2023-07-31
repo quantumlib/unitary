@@ -153,6 +153,12 @@ Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have won the battle!
+Aaronson Analyst: Still up.             watcher Observer DOWN
+------------------------------------------------------------
 """.strip()
     )
 
@@ -179,6 +185,13 @@ q) Read Quantopedia.
 The analyst can measure enemy qubits.  This forces an enemy qubit
 into the |0> state or |1> state with a probability based on its
 amplitude. Try to measure the enemy qubits as |0> to defeat them.
+
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have won the battle!
+Aaronson Analyst: Still up.             watcher Observer DOWN
+------------------------------------------------------------
 """.strip()
     )
 
@@ -203,6 +216,12 @@ m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
 You do not have information on Observer yet.
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have won the battle!
+Aaronson Analyst: Still up.             watcher Observer DOWN
+------------------------------------------------------------
 """.strip()
     )
 
@@ -229,5 +248,11 @@ q) Read Quantopedia.
 ?) Help.
 Observers are known to frequent quantum events.
 They will measure qubits in order to find out their values.
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have won the battle!
+Aaronson Analyst: Still up.             watcher Observer DOWN
+------------------------------------------------------------
 """.strip()
     )

@@ -105,21 +105,11 @@ class MainLoop:
                                 )
 
                                 if result == battle.BattleResult.PLAYERS_WON:
-                                    print("You have won the battle!", file=self.file)
                                     awarded_xp = current_battle.xp
                                     xp_utils.award_xp(self.game_state, awarded_xp)
                                 elif result == battle.BattleResult.PLAYERS_DOWN:
                                     raise exceptions.UntimelyDeathException(
                                         "You have been defeated!"
-                                    )
-                                elif result == battle.BattleResult.PLAYERS_ESCAPED:
-                                    print(
-                                        "You have escaped the battle!", file=self.file
-                                    )
-                                elif result == battle.BattleResult.ENEMIES_ESCAPED:
-                                    print(
-                                        "The enemies have run away and escaped!",
-                                        file=self.file,
                                     )
                                 break
                         if result is not None:

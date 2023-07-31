@@ -357,7 +357,12 @@ Mensing turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
-You have won the battle!
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have won the battle!
+Mensing Analyst: Still up.              watcher Observer DOWN
+------------------------------------------------------------
 Cryostats
 
 Giant aluminum cylinders hang suspended by large frames.
@@ -414,6 +419,12 @@ x) Attack with X gate.
 q) Read Quantopedia.
 ?) Help.
 Observer watcher measures Mensing_1 as HURT.
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have lost the battle.
+Mensing Engineer: DOWN                  watcher Observer Still up.
+------------------------------------------------------------
 You have been defeated!
 """
         + ascii_art.RIP_TOP
@@ -473,7 +484,12 @@ x) Attack with X gate.
 q) Read Quantopedia.
 ?) Help.
 Observer watcher measures Mensing_1 as HEALTHY.
-You have escaped the battle!
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have escaped from the battle.
+Mensing Engineer: ESCAPED               watcher Observer Still up.
+------------------------------------------------------------
 Cryostats
 
 Giant aluminum cylinders hang suspended by large frames.
