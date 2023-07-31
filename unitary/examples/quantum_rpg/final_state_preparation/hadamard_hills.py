@@ -114,7 +114,6 @@ BOOKSHELF = Item(
             _quantopedia,
         )
     ],
-    description="A painting of a colonial mansion hangs on one wall.",
 )
 
 
@@ -346,7 +345,7 @@ HADAMARD_HILLS = [
             "A clean desk with a reading lamp takes up a large part of the room."
         ),
         encounters=[],
-        items=[CHARLES, EAST_EGG],
+        items=[CHARLES, EAST_EGG, BOOKSHELF],
         exits={Direction.NORTH: "hadamard10_0"},
     ),
     Location(
@@ -360,7 +359,7 @@ HADAMARD_HILLS = [
             "specifications takes up a big part of the room."
         ),
         encounters=[],
-        items=[GILLES, WEST_EGG],
+        items=[GILLES, WEST_EGG, BOOKSHELF],
         exits={Direction.NORTH: "hadamard10_1"},
     ),
     Location(
