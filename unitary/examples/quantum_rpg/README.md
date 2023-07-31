@@ -4,8 +4,8 @@ This directory contains the rules for a Quantum RPG as well
 as a reference game titled "Final State Preparation".
 
 The overall idea is that characters and adversaries are quantum circuits.
-Each character and adversary will have actions that can modify (append)
-onto the circuit or measure the circuit.  The goal will be for the
+Each character and adversary will have actions that can modify (append) to
+the circuit or measure the circuit.  The goal is for the
 party to measure their character's qubits as 1's and the adversaries as 0's.
 
 This game can be used as an educational tool to learn about quantum
@@ -23,9 +23,8 @@ The second part explains the rules and principles behind the Quantum RPG.
 
 In order to run the game, clone the github repo, make sure that any requirements
 are installed with a command such as `pip install -r requirements.txt`
-
 then run `python -m unitary.examples.quantum_rpg.main_loop`
-(you may need to make sure that the unitary library is in your PYTHONPATH).
+(you may need to make sure that the Unitary library is in your PYTHONPATH).
 
 If you do not have a python environment handy or are not familiar with setting
 up python packages, you can use a colaboratory (Google/gmail account needed) that
@@ -94,8 +93,8 @@ For instance, `1QP (0|1> 0|0> 1?)` means that the character has 1 qubit (1QP).
 None of the qubits have been measured in the 1 state (`0|1>`) or the 0 state
 (`0|1>`). 1 qubit is still unmeasured (`1?`).
 
-Once a character (or enemy) has measured half or more qubits in the zero state,
-they are **DOWN**.  If half or more are measured in the one state, they are
+Once a character (or enemy) has measured half or more qubits in the |0> state,
+they are **DOWN**.  If half or more are measured in the |1> state, they
 **ESCAPED**.  If all enemies are **DOWN**, you win the battle!  If some
 enemies have **ESCAPED**, then the battle is over, but you do not get XP.
 If all party members are **DOWN**, you lose the game.
