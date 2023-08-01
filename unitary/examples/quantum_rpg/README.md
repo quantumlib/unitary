@@ -1,11 +1,119 @@
 # Quantum RPG
 
-This is a placeholder information page for the quantum RPG system and
-reference game: "Final State Preparation".  More information will be
-added here as we get closer to the official launch of the game in
-August 2023.
+This directory contains the rules for a Quantum RPG as well
+as a reference game titled "Final State Preparation".
 
-The overall idea is that characters and adversaries will be circuits.  Each character and adversary will have actions that can modify (append) onto the circuit or measure the circuit.  The goal will be for the party to measure their character's qubits as 1's and the adversaries as 0's.
+The overall idea is that characters and adversaries are quantum circuits.
+Each character and adversary will have actions that can modify (append) to
+the circuit or measure the circuit.  The goal is for the
+party to measure their character's qubits as 1's and the adversaries as 0's.
+
+This game can be used as an educational tool to learn about quantum
+effects in a fun way, a base to write your own quantum RPG, or to
+enjoy as a fun throwback to early text adventure games.
+
+This README.md is divided into two parts.  The first describes
+how to run and play the reference game "Final State Preparation".
+The second part explains the rules and principles behind the Quantum RPG.
+
+## Final State Preparation
+
+
+### Running the game
+
+In order to run the game, clone the github repo, make sure that any requirements
+are installed with a command such as `pip install -r requirements.txt`
+then run `python -m unitary.examples.quantum_rpg.main_loop`
+(you may need to make sure that the Unitary library is in your PYTHONPATH).
+
+If you do not have a python environment handy or are not familiar with setting
+up python packages, you can use a colaboratory (Google/gmail account needed) that
+sets it up and runs it for you.  An example can be found
+[here](https://colab.sandbox.google.com/drive/1V5fQLuxrc3Zkx_z0IVDJp-SjkTj9Q2Xq).
+
+
+### Adventure Start
+
+You will start by choosing a name for the first member of your party.
+This first character (or "qaracter") will be an *Analyst* that can
+measure qubits.  As you continue on your journey, others may join your party.
+
+You will start in a hut on the edge of the classical realm on a quest to
+discover a solution to the problem of quantum errors that are destroying the
+terrain.
+
+To move, you can type WEST, EAST, NORTH, SOUTH, UP or DOWN to move to a new room.
+You can also EXAMINE objects in the room or TALK to people who are around.
+
+### Qaracter Sheets
+
+Each character (and each enemy you face) will be composed of a
+[quantum circuit](https://en.wikipedia.org/wiki/Quantum_circuit).
+Initially, your character will start with a single qubit (Level 1)
+in the initial |0〉 state.
+
+As you progress and win battles (see below), you will gain experience
+in the form of [quantum gates](https://en.wikipedia.org/wiki/Quantum_logic_gate).
+These can be added to your circuit (character sheet).  Once each qubit has as
+many gates on it as your level (number of qubits), you will gain a level and
+a new qubit.  For example, a level 3 qaracter needs 4 gates on each of their
+three qubits to advance to level 4.
+
+
+### Battle
+
+While exploring the world of **Final State Preparation**, you will eventually
+chance on a battle with enemies, and text such as the below will be displayed:
+
+
+```
+------------------------------------------------------------
+Doug Analyst                            1) bluey gooey 0 BlueFoam
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+                                        2) bluey gooey 1 BlueFoam
+                                        1QP (0|1> 0|0> 1?)
+                                        3) bluey gooey 2 BlueFoam
+                                        1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
+Doug turn:
+m) Measure enemy qubit.
+h) Help.
+```
+
+Your party will displayed on the left.  In this case, it is a single character
+named Doug of the Analyst class.
+
+The enemies will be displayed on the right.   Here, Doug is facing
+three BlueFoam enemies.
+
+Each of these will have a status line that says how many qubits
+they have and in what state they are in.
+
+For instance, `1QP (0|1> 0|0> 1?)` means that the character has 1 qubit (1QP).
+None of the qubits have been measured in the 1 state (`0|1>`) or the 0 state
+(`0|1>`). 1 qubit is still unmeasured (`1?`).
+
+Once a character (or enemy) has measured half or more qubits in the |0> state,
+they are **DOWN**.  If half or more are measured in the |1> state, they
+**ESCAPED**.  If all enemies are **DOWN**, you win the battle!  If some
+enemies have **ESCAPED**, then the battle is over, but you do not get XP.
+If all party members are **DOWN**, you lose the game.
+
+Each round, each party member can perform an action based on their class
+(such as measure a qubit).  Then, each enemy will get an action.
+
+### Quantum Foam
+
+The first enemies you will meet are quantum foam, representative of the
+quantum errors that have prompted your journey.  Different quantum foam
+begin in different states when battle begins.  A blue foam will start
+in the |0〉 state, a red foam will start in a |1〉 state, and a purple
+foam will start in a superposition of the two states.
+
+Some monsters may have more complicated circuits.  You will need to search
+in the world (try to find libraries) in order to find more information on them.
+
+
 
 
 ## Definitions
