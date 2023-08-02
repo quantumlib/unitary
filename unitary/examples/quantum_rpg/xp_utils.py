@@ -91,7 +91,7 @@ def award_xp(
             continue
         print(f"Choose the qaracter to add the {effect} to:", file=state.file)
         for idx, qar in enumerate(eligible_party):
-            print(f"{idx+1}) {qar.name}", file=state.file)
+            print(f"{idx+1}) {qar.qar_status()}", file=state.file)
         qar_choice = input_helpers.get_user_input_number(
             state.get_user_input, ">", len(eligible_party)
         )

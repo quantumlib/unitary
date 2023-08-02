@@ -53,7 +53,9 @@ def test_award_xp():
   Superposition
 
 Choose the qaracter to add the Superposition to:
-1) wizard
+1) wizard: Level 1 Analyst
+Qaracter sheet:
+
 Current qaracter sheet:
 
 Choose qubit 0 for Superposition:
@@ -79,7 +81,9 @@ def test_award_xp_multi_qubit_gate():
   Move
 
 Choose the qaracter to add the Move to:
-1) wizard
+1) wizard: Level 2 Analyst
+Qaracter sheet:
+
 Current qaracter sheet:
 
 Choose qubit 0 for Move:
@@ -124,7 +128,9 @@ def test_qaracter_levels():
   Superposition
 
 Choose the qaracter to add the Superposition to:
-1) wizard
+1) wizard: Level 1 Analyst
+Qaracter sheet:
+wizard_1: ───H───
 Current qaracter sheet:
 wizard_1: ───H───
 Choose qubit 0 for Superposition:

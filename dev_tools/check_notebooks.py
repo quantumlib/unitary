@@ -38,24 +38,28 @@ def _check_notebook(notebook_fn: str, notebook_id: str, stdout, stderr):
         stdout: A file-like object to redirect stdout
         stderr: A file-like object to redirect stderr
     """
-    print(f'Starting {notebook_id}')
+    print(f"Starting {notebook_id}")
 
     def run(*args, **kwargs):
         return _run(*args, check=True, stdout=stdout, stderr=stderr, **kwargs)
 
     # 1. create venv
-    venv_dir = os.path.abspath(f'./notebook_envs/{notebook_id}')
-    run(['python', '-m', 'venv', '--clear', venv_dir])
+    venv_dir = os.path.abspath(f"./notebook_envs/{notebook_id}")
+    run(["python", "-m", "venv", "--clear", venv_dir])
 
     # 2. basic colab-like environment
-    pip = f'{venv_dir}/bin/pip'
-    run([pip, 'install'] + BASE_PACKAGES)
+    pip = f"{venv_dir}/bin/pip"
+    run([pip, "install"] + BASE_PACKAGES)
 
     # 3. execute
-    jupyter = f'{venv_dir}/bin/jupyter'
+    jupyter = f"{venv_dir}/bin/jupyter"
     env = os.environ.copy()
-    env['PATH'] = f'{venv_dir}/bin:{env["PATH"]}'
-    run([jupyter, 'nbconvert', '--to', 'html', '--execute', notebook_fn], cwd='../', env=env)
+    env["PATH"] = f'{venv_dir}/bin:{env["PATH"]}'
+    run(
+        [jupyter, "nbconvert", "--to", "html", "--execute", notebook_fn],
+        cwd="../",
+        env=env,
+    )
 
     # 4. clean up
     shutil.rmtree(venv_dir)
@@ -78,20 +82,21 @@ def check_notebook(notebook_fn: str):
     Args:
         notebook_fn: The filename of the notebook relative to the repo root.
     """
-    notebook_id = notebook_fn.replace('/', '-')
+    notebook_id = notebook_fn.replace("/", "-")
     start = time.perf_counter()
-    with open(f'./notebook_envs/{notebook_id}.stdout', 'w') as stdout, \
-            open(f'./notebook_envs/{notebook_id}.stderr', 'w') as stderr:
+    with open(f"./notebook_envs/{notebook_id}.stdout", "w") as stdout, open(
+        f"./notebook_envs/{notebook_id}.stderr", "w"
+    ) as stderr:
         try:
             _check_notebook(notebook_fn, notebook_id, stdout, stderr)
         except CalledProcessError:
-            print('ERROR!', notebook_id)
+            print("ERROR!", notebook_id)
     end = time.perf_counter()
-    print(f'{notebook_id} {end - start:.1f}s')
+    print(f"{notebook_id} {end - start:.1f}s")
 
 
 NOTEBOOKS = [
-    'docs/quantum_chess/concepts.ipynb',
+    "docs/quantum_chess/concepts.ipynb",
     # 'docs/quantum_chess/quantum_chess_rest_api.ipynb', # runs a server, never finishes.
     # 'docs/quantum_chess/quantum_chess_client.ipynb',   # uses the server, requires modification.
 ]
@@ -99,11 +104,11 @@ NOTEBOOKS = [
 
 def main():
     os.chdir(os.path.dirname(__file__))
-    os.makedirs('./notebook_envs', exist_ok=True)
+    os.makedirs("./notebook_envs", exist_ok=True)
     with Pool(4) as pool:
         results = pool.map(check_notebook, NOTEBOOKS)
     print(results)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
