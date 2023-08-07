@@ -112,7 +112,9 @@ def test_parse_commands() -> None:
 
 def test_simple_main_loop() -> None:
     c = classes.Analyst("Mensing")
-    state = game_state.GameState(party=[c], user_input=["look", "quit"], file=io.StringIO())
+    state = game_state.GameState(
+        party=[c], user_input=["look", "quit"], file=io.StringIO()
+    )
     loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
     loop.loop()
     assert (
