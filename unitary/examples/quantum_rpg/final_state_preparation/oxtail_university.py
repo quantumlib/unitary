@@ -201,7 +201,7 @@ STUDENT = [
                 ),
             ),
         ],
-        description="A circle of long-haired students are her, drumming on large bongo drums.",
+        description="A circle of long-haired students are here, drumming on large bongo drums.",
     ),
     Item(
         keyword_actions=[
@@ -455,7 +455,7 @@ OXTAIL_UNIVERSITY = [
         label="comms1",
         title="Communication Castle",
         description=(
-            "Though thee outside of this building resembles a castle,\n"
+            "Though the outside of this building resembles a castle,\n"
             "the inside seems to be filled with classrooms, offices, and\n"
             "lab spaces.  Slimy foam drips down from a stairway leading upwards.\n"
         ),
@@ -564,7 +564,7 @@ OXTAIL_UNIVERSITY = [
         label="bio2",
         title="The Biology Library",
         description=(
-            "A smalll library filled with bookshelves has become a refuge\n"
+            "A small library filled with bookshelves has become a refuge\n"
             "for exhausted biologists and students.  Several are collapsed\n"
             "on desks and tables all around the room.  A few students are\n"
             "furiously paging through thick books in search of solutions."
