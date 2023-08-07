@@ -36,6 +36,7 @@ class Command(enum.Enum):
     """
 
     LOAD = "load"
+    LOOK = "look"
     STATUS = "status"
     SAVE = "save"
     HELP = "help"
@@ -163,6 +164,9 @@ class MainLoop:
                     )
                     print(self.game_state.to_save_file(), file=self.file)
                     print("")
+                    print_room_description = False
+                elif input_cmd == Command.LOOK:
+                    print(self.world.current_location, file=self.file)
                     print_room_description = False
                 else:
                     print(
