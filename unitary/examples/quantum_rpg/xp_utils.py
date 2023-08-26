@@ -97,7 +97,7 @@ def award_xp(
         )
         qar = eligible_party[qar_choice - 1]
         print("Current qaracter sheet:", file=state.file)
-        print(qar.circuit, file=state.file)
+        print(qar.qar_sheet(), file=state.file)
         qubit_list = list(qar.active_qubits())
         qubit_choices = []
         for qubit_num in range(num_qubits):

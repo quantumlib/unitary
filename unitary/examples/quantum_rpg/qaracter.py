@@ -156,6 +156,14 @@ class Qaracter(alpha.QuantumWorld):
         """Returns True if the Qaracter is not down yet and there are HPs left to measure."""
         return not self.is_down() and len(self.health_status) < self.level
 
+    def qar_sheet(self) -> str:
+        """Generates a Unicode-art diagram of the qaracter's circuit."""
+        all_qubits = [
+            self.get_object_by_name(self.quantum_object_name(i)).qubit
+            for i in range(1, self.level + 1)
+        ]
+        return self.circuit.to_text_diagram(qubit_order=all_qubits)
+
     def qar_status(self) -> str:
         """Prints out the qaracter's name/class/level and circuit.
 
@@ -163,7 +171,7 @@ class Qaracter(alpha.QuantumWorld):
         """
         return (
             f"{self.name}: Level {self.level} {self.class_name}"
-            f"\nQaracter sheet:\n{self.circuit}"
+            f"\nQaracter sheet:\n{self.qar_sheet()}"
         )
 
     def status_line(self) -> str:
