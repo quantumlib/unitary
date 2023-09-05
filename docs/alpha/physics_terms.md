@@ -9,10 +9,10 @@ The following is a table that connects physics terms to cirq and unitary terms.
 | Physics    | Cirq |  Unitary |
 | -------- | ------- | ----- |
 | Qubit | cirq.Qid | alpha.QuantumObject |
-| Qubtrit | cirq.Qid | alpha.QuantumObject (using an enum with three values) |
+| Qutrit | cirq.Qid | alpha.QuantumObject (using an enum with three values) |
 | Quantum circuit | cirq.Circuit | alpha.QuantumWorld |
 | Generic Unitary | cirq.Gate  | alpha.QuantumEffect |
-| Gate applied to specified qubits | cirq.Operation | QuantumEffect(qubits) |
+| Gate applied to specified qubits | cirq.Operation | alpha.QuantumEffect(qubits) |
 | X gate | cirq.X | alpha.Flip() |
 | $\sqrt{X}$ or square root of NOT | cirq.X ** 0.5 | alpha.Flip(effect_fraction=0.5) |
 | Z gate | cirq.Z | alpha.Phase() |
