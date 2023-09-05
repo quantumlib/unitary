@@ -345,7 +345,7 @@ HADAMARD_HILLS = [
             "A clean desk with a reading lamp takes up a large part of the room."
         ),
         encounters=[],
-        items=[CHARLES, EAST_EGG, BOOKSHELF],
+        items=[GILLES, EAST_EGG, BOOKSHELF],
         exits={Direction.NORTH: "hadamard10_0"},
     ),
     Location(
@@ -359,7 +359,7 @@ HADAMARD_HILLS = [
             "specifications takes up a big part of the room."
         ),
         encounters=[],
-        items=[GILLES, WEST_EGG, BOOKSHELF],
+        items=[CHARLES, WEST_EGG, BOOKSHELF],
         exits={Direction.NORTH: "hadamard10_1"},
     ),
     Location(
