@@ -26,6 +26,7 @@ class TicTacSquare(enum.Enum):
     EMPTY = 0
     X = 1
     O = 2
+    PADDING = 3
 
     @classmethod
     def from_result(cls, value: Union[enum.Enum, int]):

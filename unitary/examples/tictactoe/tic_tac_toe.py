@@ -354,6 +354,8 @@ class GameInterface:
         output = "\n"
         for row in range(3):
             for mark in TicTacSquare:
+                if mark == TicTacSquare.PADDING:
+                    continue
                 output += " "
                 for col in range(3):
                     idx = row * 3 + col
