@@ -1,4 +1,4 @@
-#Overview
+# Overview
 
 Unitary is a library that enables game developers to add quantum behavior to their games. 
 
@@ -7,11 +7,11 @@ The Unitary library is designed for people who have no knowledge of quantum mech
 If this library is successful, anyone with intermediate knowledge of programming should be able to add quantum behavior to their program by making small changes to how they think about their data and algorithms. 
 
 
-##What kinds of games?
+## What kinds of games?
 
 Unitary is written in Python, so the library is best suited to casual games where game actions are not time sensitive. Board games, turn-based games, and simple 2D games would be suitable.
 
-##What are quantum games?
+## What are quantum games?
 
 Quantum games express their core mechanics by using the same maths used in quantum information science. As a result, players experience quantum effects like superposition, entanglement, and interference with no extraordinary effort from the game developer.
 
@@ -19,7 +19,7 @@ Through their actions in the game, players create a quantum state and trigger me
 
 Quantum Chess was the first, truly quantum, commercial game. In fact, Google’s quantum computer was used to run a game of Quantum Chess in 2020. An open-source version of Quantum Chess is included in the Unitary library.
 
-##Why another quantum software library?
+## Why another quantum software library?
 
 Unitary helps game designers and developers create new game mechanics by managing game state transitions and calculations. 
 
@@ -30,7 +30,7 @@ Other quantum software libraries are aimed at researchers who are developing qua
 Unitary aims to make quantum information science accessible (as a design tool) for a much larger group of people.
 
 
-#Core Concepts
+# Core Concepts
 
 Unitary offers an API built around the following concepts.
 
