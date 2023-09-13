@@ -1,4 +1,4 @@
-#Game Design
+# Game Design
 
 This guide explains principles that can help you decide how to implement quantum effects in your game idea.
 
