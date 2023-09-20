@@ -336,7 +336,7 @@ class QuantumWorld:
 
     def peek(
         self,
-        objects: Optional[Sequence[QuantumObject]] = None,
+        objects: Optional[Sequence[Union[QuantumObject, str]]] = None,
         count: int = 1,
         convert_to_enum: bool = True,
         _existing_list: Optional[List[List[Union[enum.Enum, int]]]] = None,
@@ -364,8 +364,13 @@ class QuantumWorld:
 
         measure_circuit = self.circuit.copy()
         if objects is None:
-            objects = self.public_objects
-        measure_set = set(objects)
+            quantum_objects = self.public_objects
+        else:
+            quantum_objects = [
+                self[obj_or_str] if isinstance(obj_or_str, str) else obj_or_str
+                for obj_or_str in objects
+            ]
+        measure_set = set(quantum_objects)
         measure_set.update(self.post_selection.keys())
         measure_circuit.append(
             [
@@ -390,7 +395,7 @@ class QuantumWorld:
                 rtn_list.append(
                     [
                         self._interpret_result(results.measurements[obj.name][rep])
-                        for obj in objects
+                        for obj in quantum_objects
                     ]
                 )
                 if len(rtn_list) == count:
@@ -398,12 +403,16 @@ class QuantumWorld:
         if len(rtn_list) < count:
             # We post-selected too much, get more reps
             return self.peek(
-                objects, count, convert_to_enum, rtn_list, _num_reps=num_reps * 10
+                quantum_objects,
+                count,
+                convert_to_enum,
+                rtn_list,
+                _num_reps=num_reps * 10,
             )
 
         if convert_to_enum:
             rtn_list = [
-                [objects[idx].enum_type(meas) for idx, meas in enumerate(res)]
+                [quantum_objects[idx].enum_type(meas) for idx, meas in enumerate(res)]
                 for res in rtn_list
             ]
 
@@ -411,17 +420,22 @@ class QuantumWorld:
 
     def pop(
         self,
-        objects: Optional[Sequence[QuantumObject]] = None,
+        objects: Optional[Sequence[Union[QuantumObject, str]]] = None,
         convert_to_enum: bool = True,
     ) -> List[Union[enum.Enum, int]]:
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
         )
         if objects is None:
-            objects = self.public_objects
-        results = self.peek(objects, convert_to_enum=convert_to_enum)
+            quantum_objects = self.public_objects
+        else:
+            quantum_objects = [
+                self[obj_or_str] if isinstance(obj_or_str, str) else obj_or_str
+                for obj_or_str in objects
+            ]
+        results = self.peek(quantum_objects, convert_to_enum=convert_to_enum)
         for idx, result in enumerate(results[0]):
-            self.force_measurement(objects[idx], result)
+            self.force_measurement(quantum_objects[idx], result)
 
         return results[0]
 
@@ -490,3 +504,9 @@ class QuantumWorld:
         for one_probs in full_probs:
             binary_probs.append(1 - one_probs[0])
         return binary_probs
+
+    def __getitem__(self, name: str) -> QuantumObject:
+        quantum_object = self.object_name_dict.get(name, None)
+        if not quantum_object:
+            raise KeyError(f"{name} did not exist in this world.")
+        return quantum_object
