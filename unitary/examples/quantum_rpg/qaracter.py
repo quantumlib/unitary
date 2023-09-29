@@ -11,11 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from typing import Callable, Dict, List, Optional, Union
+from typing import cast, Callable, Dict, List, Optional, Union
+import inspect
 import random
+import sys
+
+import cirq
 from unitary import alpha
 from unitary.examples.quantum_rpg import enums
+
+_GATE_DELIMITER = ","
+_FIELD_DELIMITER = "#"
 
 
 class Qaracter(alpha.QuantumWorld):
@@ -48,19 +54,29 @@ class Qaracter(alpha.QuantumWorld):
         name: name of this character as a string.
     """
 
-    def __init__(self, name: str):
-        super().__init__()
+    def __init__(self, name: str = "", **kwargs):
+        super().__init__(**kwargs)
         self.name = name
-        self.health_status: Dict[alpha.QuantumObject, int] = {}
+        self.health_status: Dict[str, int] = {}
         self.level = 0
         self.add_hp()
+        if not self.is_valid_name(self.name):
+            raise ValueError(f"{_FIELD_DELIMITER} is not allowed as part of a name")
+
+    @staticmethod
+    def is_valid_name(name):
+        return _FIELD_DELIMITER not in name
 
     def is_npc(self) -> bool:
-        """Returns Trus if a non-player or False if a player.
+        """Returns True if a non-player or False if a player.
 
         Inheritors of NPCs should override this function.
         """
         return False
+
+    @property
+    def class_name(self) -> str:
+        return self.__class__.__name__
 
     def quantum_object_name(self, hp_num: int) -> str:
         """Canonical name of a QuantumObject for this Qaracter.
@@ -87,11 +103,12 @@ class Qaracter(alpha.QuantumWorld):
         self.add_object(obj)
         return obj
 
-    def get_hp(self, hp_name: str) -> alpha.QuantumObject:
+    def get_hp(self, hp_name: str) -> Optional[alpha.QuantumObject]:
         """Retrieves a QuantumObject with the specified name."""
         for obj in self.objects:
             if hp_name == obj.name:
                 return obj
+        return None
 
     def active_qubits(self) -> List[str]:
         """Returns the names of all active (non-measured) quantum objects (HP)."""
@@ -101,12 +118,21 @@ class Qaracter(alpha.QuantumWorld):
             if self.quantum_object_name(i) not in self.health_status
         ]
 
-    def add_quantum_effect(self, effect, quantum_name: Union[int, str]):
+    def add_quantum_effect(self, effect, *quantum_names: Union[int, str]):
         """Adds a Quantum Effect to a specific quantum object."""
-        if isinstance(quantum_name, int):
-            quantum_name = self.quantum_object_name(quantum_name)
-        hp_obj = self.get_hp(quantum_name)
-        effect(hp_obj)
+        hp_objs = []
+        for quantum_name in quantum_names:
+            if isinstance(quantum_name, int):
+                quantum_name = self.quantum_object_name(quantum_name)
+            hp_objs.append(self.get_hp(quantum_name))
+        effect(*hp_objs)
+
+    def copy(self) -> "Qaracter":
+        new_obj = cast(Qaracter, super().copy())
+        new_obj.name = self.name
+        new_obj.health_status = self.health_status.copy()
+        new_obj.level = self.level
+        return new_obj
 
     @property
     def damage(self) -> int:
@@ -130,6 +156,24 @@ class Qaracter(alpha.QuantumWorld):
         """Returns True if the Qaracter is not down yet and there are HPs left to measure."""
         return not self.is_down() and len(self.health_status) < self.level
 
+    def qar_sheet(self) -> str:
+        """Generates a Unicode-art diagram of the qaracter's circuit."""
+        all_qubits = [
+            self.get_object_by_name(self.quantum_object_name(i)).qubit
+            for i in range(1, self.level + 1)
+        ]
+        return self.circuit.to_text_diagram(qubit_order=all_qubits)
+
+    def qar_status(self) -> str:
+        """Prints out the qaracter's name/class/level and circuit.
+
+        Used for the STATUS command.
+        """
+        return (
+            f"{self.name}: Level {self.level} {self.class_name}"
+            f"\nQaracter sheet:\n{self.qar_sheet()}"
+        )
+
     def status_line(self) -> str:
         """Returns a one-line string summarizing the Qaracter's HP status."""
         damage = self.damage
@@ -151,9 +195,92 @@ class Qaracter(alpha.QuantumWorld):
 
         """
         hp_obj = self.get_hp(hp_name)
+        if not hp_obj:
+            raise ValueError(f"{hp_name} is not a valid hp name")
         if save_result:
             result = self.pop([hp_obj])
-            self.health_status[hp_name] = result[0].value
-            return result[0]
+            hp = cast(enums.HealthPoint, result[0])
+            self.health_status[hp_name] = hp.value
+            return hp
         else:
-            return self.peek([hp_obj], count=1)[0][0]
+            return cast(enums.HealthPoint, self.peek([hp_obj], count=1)[0][0])
+
+    @classmethod
+    def from_save_file(
+        cls,
+        save_file: str,
+    ) -> "Optional[Qaracter]":
+        lines = save_file.split(_FIELD_DELIMITER)
+
+        if len(lines) < 2:
+            return None
+        name = lines[0]
+        class_name = lines[1]
+
+        # Avoid circular import
+        import unitary.examples.quantum_rpg.classes
+
+        class_tuples = inspect.getmembers(
+            sys.modules["unitary.examples.quantum_rpg.classes"], inspect.isclass
+        )
+        new_cls = cls
+        for cls_name, cls_type in class_tuples:
+            if cls_name == class_name:
+                new_cls = cls_type
+        qar = new_cls(name)
+        try:
+            level = int(lines[2])
+        except ValueError:
+            return None
+        for _ in range(level - 1):
+            qar.add_hp()
+        for line in lines[3:]:
+            gate_type = line[0]
+            fields = line[1:].split(_GATE_DELIMITER)
+            if len(fields) < 2:
+                continue
+            exponent = float(fields[0])
+            qubit0 = int(fields[1])
+            qubit1 = int(fields[2]) if len(fields) > 2 else None
+            if gate_type == "X":
+                qar.add_quantum_effect(alpha.Flip(effect_fraction=exponent), qubit0)
+            elif gate_type == "Z":
+                qar.add_quantum_effect(alpha.Phase(effect_fraction=exponent), qubit0)
+            elif gate_type == "H":
+                qar.add_quantum_effect(alpha.Superposition(), qubit0)
+            elif gate_type == "S" and qubit1:
+                qar.add_quantum_effect(
+                    alpha.Move(effect_fraction=exponent), qubit0, qubit1
+                )
+            elif gate_type == "I" and qubit1:
+                qar.add_quantum_effect(
+                    alpha.PhasedMove(effect_fraction=exponent), qubit0, qubit1
+                )
+        return qar
+
+    def to_save_file(self) -> str:
+        s = f"{self.name}{_FIELD_DELIMITER}{self.class_name}{_FIELD_DELIMITER}"
+        s += f"{self.level}{_FIELD_DELIMITER}"
+        prefix = len(self.name) + 1
+        for op in self.circuit.all_operations():
+            qubit0 = int(op.qubits[0].name[prefix:])
+            qubit1 = int(op.qubits[1].name[prefix:]) if len(op.qubits) > 1 else None
+            if isinstance(op.gate, cirq.XPowGate):
+                s += (
+                    f"X{op.gate.exponent:3f}{_GATE_DELIMITER}{qubit0}{_FIELD_DELIMITER}"
+                )
+            elif isinstance(op.gate, cirq.ZPowGate):
+                s += (
+                    f"Z{op.gate.exponent:3f}{_GATE_DELIMITER}{qubit0}{_FIELD_DELIMITER}"
+                )
+            elif isinstance(op.gate, cirq.HPowGate):
+                s += (
+                    f"H{op.gate.exponent:3f}{_GATE_DELIMITER}{qubit0}{_FIELD_DELIMITER}"
+                )
+            elif isinstance(op.gate, cirq.SwapPowGate):
+                s += f"S{op.gate.exponent:3f}{_GATE_DELIMITER}"
+                s += f"{qubit0}{_GATE_DELIMITER}{qubit1}{_FIELD_DELIMITER}"
+            elif isinstance(op.gate, cirq.ISwapPowGate):
+                s += f"I{op.gate.exponent:3f}{_GATE_DELIMITER}"
+                s += f"{qubit0}{_GATE_DELIMITER}{qubit1}{_FIELD_DELIMITER}"
+        return s[:-1]

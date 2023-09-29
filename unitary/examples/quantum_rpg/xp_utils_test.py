@@ -18,6 +18,7 @@ import cirq
 
 import unitary.alpha as alpha
 import unitary.examples.quantum_rpg.classes as classes
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.xp_utils as xp_utils
 
 
@@ -41,20 +42,22 @@ def test_choose():
 
 
 def test_award_xp():
-    output = io.StringIO()
     c = classes.Analyst("wizard")
+    state = game_state.GameState(party=[c], user_input=["1", "1"], file=io.StringIO())
     enc = xp_utils.EncounterXp([[alpha.Superposition()]])
-    xp_utils.award_xp([c], enc, ["1", "1"], output)
+    xp_utils.award_xp(state, enc)
     assert c.circuit == cirq.Circuit(cirq.H(cirq.NamedQubit("wizard_1")))
     assert (
-        output.getvalue()
+        state.file.getvalue()
         == """You have been awarded XP!
   Superposition
 
 Choose the qaracter to add the Superposition to:
-1) wizard
+1) wizard: Level 1 Analyst
+Qaracter sheet:
+wizard_1: ───
 Current qaracter sheet:
-
+wizard_1: ───
 Choose qubit 0 for Superposition:
 1) wizard_1
 """
@@ -62,23 +65,31 @@ Choose qubit 0 for Superposition:
 
 
 def test_award_xp_multi_qubit_gate():
-    output = io.StringIO()
     c = classes.Analyst("wizard")
     c.add_hp()
+    state = game_state.GameState(
+        party=[c], user_input=["1", "1", "2"], file=io.StringIO()
+    )
     enc = xp_utils.EncounterXp([[alpha.Move()]])
-    xp_utils.award_xp([c], enc, ["1", "1", "2"], output)
+    xp_utils.award_xp(state, enc)
     assert c.circuit == cirq.Circuit(
         cirq.SWAP(cirq.NamedQubit("wizard_1"), cirq.NamedQubit("wizard_2"))
     )
     assert (
-        output.getvalue()
+        state.file.getvalue()
         == """You have been awarded XP!
   Move
 
 Choose the qaracter to add the Move to:
-1) wizard
-Current qaracter sheet:
+1) wizard: Level 2 Analyst
+Qaracter sheet:
+wizard_1: ───
 
+wizard_2: ───
+Current qaracter sheet:
+wizard_1: ───
+
+wizard_2: ───
 Choose qubit 0 for Move:
 1) wizard_1
 2) wizard_2
@@ -90,16 +101,44 @@ Choose qubit 1 for Move:
 
 
 def test_qaracter_not_high_enough():
-    output = io.StringIO()
     c = classes.Analyst("wizard")
     enc = xp_utils.EncounterXp([[alpha.Move()]])
-    xp_utils.award_xp([c], enc, ["1", "1", "2"], output)
+    state = game_state.GameState(
+        party=[c], user_input=["1", "1", "2"], file=io.StringIO()
+    )
+    xp_utils.award_xp(state, enc)
     assert c.circuit == cirq.Circuit()
     assert (
-        output.getvalue()
+        state.file.getvalue()
         == """You have been awarded XP!
   Move
 
 Qaracters are not high-enough level for Move!
+"""
+    )
+
+
+def test_qaracter_levels():
+    c = classes.Analyst("wizard")
+    c.add_quantum_effect(alpha.Superposition(), 1)
+    enc = xp_utils.EncounterXp([[alpha.Superposition()]])
+    state = game_state.GameState(
+        party=[c], user_input=["1", "1", "2"], file=io.StringIO()
+    )
+    xp_utils.award_xp(state, enc)
+    assert (
+        state.file.getvalue()
+        == """You have been awarded XP!
+  Superposition
+
+Choose the qaracter to add the Superposition to:
+1) wizard: Level 1 Analyst
+Qaracter sheet:
+wizard_1: ───H───
+Current qaracter sheet:
+wizard_1: ───H───
+Choose qubit 0 for Superposition:
+1) wizard_1
+wizard has advanced to the next level and gains a HP!
 """
     )

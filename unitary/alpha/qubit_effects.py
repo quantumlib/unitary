@@ -125,7 +125,19 @@ class Superposition(QuantumEffect):
 
 
 class Move(QuantumEffect):
-    """Moves a qubit state into another quantum objects."""
+    """Moves a qubit state into another quantum objects.
+
+    Args:
+        effect_fraction: Amount of Move effect to perform.
+            This results in an exponentiation of the move (SWAP)
+            effect.  A fraction of 1.0 corresponds to a full
+            move (this is the default).  A fraction of 0.5
+            corresponds to a half move (square root of SWAP)
+            and a fraction of 0.0 has no effect.
+    """
+
+    def __init__(self, effect_fraction: float = 1.0):
+        self.effect_fraction = effect_fraction
 
     def num_dimension(self) -> Optional[int]:
         return 2
@@ -134,14 +146,25 @@ class Move(QuantumEffect):
         return 2
 
     def effect(self, *objects):
-        yield cirq.SWAP(objects[0].qubit, objects[1].qubit)
+        yield cirq.SWAP(objects[0].qubit, objects[1].qubit) ** self.effect_fraction
 
     def __eq__(self, other):
         return isinstance(other, Move) or NotImplemented
 
 
 class PhasedMove(QuantumEffect):
-    """Moves a qubit state into another quantum objects with phase change."""
+    """Moves a qubit state into another quantum objects with phase change.
+
+    Args:
+        effect_fraction: Amount of Move effect to perform.
+            This results in an exponentiation of the phased move (ISWAP)
+            effect.  A fraction of 1.0 corresponds to a full
+            phased move (this is the default).  A fraction of 0.5
+            corresponds to a half move (square root of ISWAP)
+    """
+
+    def __init__(self, effect_fraction: float = 1.0):
+        self.effect_fraction = effect_fraction
 
     def num_dimension(self) -> Optional[int]:
         return 2
@@ -150,7 +173,7 @@ class PhasedMove(QuantumEffect):
         return 2
 
     def effect(self, *objects):
-        yield cirq.ISWAP(objects[0].qubit, objects[1].qubit)
+        yield cirq.ISWAP(objects[0].qubit, objects[1].qubit) ** self.effect_fraction
 
     def __eq__(self, other):
         return isinstance(other, PhasedMove) or NotImplemented

@@ -15,92 +15,244 @@
 import io
 import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.classes as classes
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.npcs as npcs
 
 
 def test_battle():
-    output = io.StringIO()
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
-    b = battle.Battle([c], [e], file=output)
-    b.take_player_turn(user_input=["s", "1", "1"])
+    state = game_state.GameState(
+        party=[c], user_input=["m", "1", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    b.take_player_turn()
     b.take_npc_turn()
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
-s
-m
-Sample result HealthPoint.HURT
-Observer watcher measures Aaronson at qubit Aaronson_1
+m) Measure enemy qubit.
+q) Read Quantopedia.
+?) Help.
 """.strip()
     )
 
 
 def test_bad_monster():
-    output = io.StringIO()
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
-    b = battle.Battle([c], [e], file=output)
-    b.take_player_turn(user_input=["s", "2", "1", "1"])
+    state = game_state.GameState(
+        party=[c], user_input=["m", "2", "1", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    b.take_player_turn()
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
-s
-m
+m) Measure enemy qubit.
+q) Read Quantopedia.
+?) Help.
 Invalid number selected.
-Sample result HealthPoint.HURT
+""".strip()
+    )
+
+
+def test_higher_level_players():
+    """Tests printing all the class descriptions."""
+    c = classes.Analyst("Aaronson")
+    c.add_hp()
+    c.add_hp()
+    e = classes.Engineer("Preskill")
+    e.add_hp()
+    e.add_hp()
+    w = npcs.Observer("watcher")
+    w2 = npcs.Observer("watcher")
+    state = game_state.GameState(
+        [c, e], user_input=["m", "1", "1", "h", "2", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [w, w2])
+    b.take_player_turn()
+    assert (
+        state.file.getvalue().replace("\t", " ").strip()
+        == r"""
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+3QP (0|1> 0|0> 3?)                      1QP (0|1> 0|0> 1?)
+Preskill Engineer                       2) watcher Observer
+3QP (0|1> 0|0> 3?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
+Aaronson turn:
+m) Measure enemy qubit.
+s) Sample enemy qubit.
+q) Read Quantopedia.
+?) Help.
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+3QP (0|1> 0|0> 3?)                      1QP (0|1> 1|0> 0?) *DOWN* 
+Preskill Engineer                       2) watcher Observer
+3QP (0|1> 0|0> 3?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
+Preskill turn:
+h) Attack with H gate.
+x) Attack with X gate.
+q) Read Quantopedia.
+?) Help.
 """.strip()
     )
 
 
 def test_bad_qubit():
-    output = io.StringIO()
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
-    b = battle.Battle([c], [e], file=output)
-    b.take_player_turn(user_input=["s", "1", "2"])
+    state = game_state.GameState(
+        party=[c], user_input=["s", "1", "2"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    b.take_player_turn()
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
-s
-m
-watcher_2 is not an active qubit
+m) Measure enemy qubit.
+q) Read Quantopedia.
+?) Help.
 """.strip()
     )
 
 
 def test_battle_loop():
-    output = io.StringIO()
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
-    b = battle.Battle([c], [e], file=output)
-    assert b.loop(user_input=["s", "1", "1"]) == battle.BattleResult.PLAYERS_DOWN
+    state = game_state.GameState(
+        party=[c], user_input=["m", "1", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    assert b.loop() == battle.BattleResult.PLAYERS_WON
     assert (
-        output.getvalue().replace("\t", " ").strip()
+        state.file.getvalue().replace("\t", " ").strip()
         == r"""
------------------------------------------------
-Aaronson Analyst   watcher Observer
-1QP (0|1> 0|0> 1?)   1QP (0|1> 0|0> 1?)
------------------------------------------------
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
 Aaronson turn:
-s
-m
-Sample result HealthPoint.HURT
-Observer watcher measures Aaronson at qubit Aaronson_1
+m) Measure enemy qubit.
+q) Read Quantopedia.
+?) Help.
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have won the battle!
+Aaronson Analyst: Still up.             watcher Observer DOWN
+------------------------------------------------------------
+""".strip()
+    )
+
+
+def test_battle_help():
+    c = classes.Analyst("Aaronson")
+    e = npcs.Observer("watcher")
+    state = game_state.GameState(
+        party=[c], user_input=["?", "m", "1", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    assert b.loop() == battle.BattleResult.PLAYERS_WON
+    assert (
+        state.file.getvalue().replace("\t", " ").strip()
+        == r"""
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
+Aaronson turn:
+m) Measure enemy qubit.
+q) Read Quantopedia.
+?) Help.
+The analyst can measure enemy qubits.  This forces an enemy qubit
+into the |0> state or |1> state with a probability based on its
+amplitude. Try to measure the enemy qubits as |0> to defeat them.
+
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have won the battle!
+Aaronson Analyst: Still up.             watcher Observer DOWN
+------------------------------------------------------------
+""".strip()
+    )
+
+
+def test_read_quantopedia_not_known():
+    c = classes.Analyst("Aaronson")
+    e = npcs.Observer("watcher")
+    state = game_state.GameState(
+        party=[c], user_input=["q", "m", "1", "1"], file=io.StringIO()
+    )
+    b = battle.Battle(state, [e])
+    assert b.loop() == battle.BattleResult.PLAYERS_WON
+    assert (
+        state.file.getvalue().replace("\t", " ").strip()
+        == r"""
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
+Aaronson turn:
+m) Measure enemy qubit.
+q) Read Quantopedia.
+?) Help.
+You do not have information on Observer yet.
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have won the battle!
+Aaronson Analyst: Still up.             watcher Observer DOWN
+------------------------------------------------------------
+""".strip()
+    )
+
+
+def test_read_quantopedia():
+    c = classes.Analyst("Aaronson")
+    e = npcs.Observer("watcher")
+    state = game_state.GameState(
+        party=[c], user_input=["q", "m", "1", "1"], file=io.StringIO()
+    )
+    state.set_quantopedia(1)
+    b = battle.Battle(state, [e])
+    assert b.loop() == battle.BattleResult.PLAYERS_WON
+    assert (
+        state.file.getvalue().replace("\t", " ").strip()
+        == r"""
+------------------------------------------------------------
+Aaronson Analyst                        1) watcher Observer
+1QP (0|1> 0|0> 1?)                      1QP (0|1> 0|0> 1?)
+------------------------------------------------------------
+Aaronson turn:
+m) Measure enemy qubit.
+q) Read Quantopedia.
+?) Help.
+Observers are known to frequent quantum events.
+They will measure qubits in order to find out their values.
+------------------------------------------------------------
+                    Battle Summary
+
+The battle is over.  You have won the battle!
+Aaronson Analyst: Still up.             watcher Observer DOWN
+------------------------------------------------------------
 """.strip()
     )

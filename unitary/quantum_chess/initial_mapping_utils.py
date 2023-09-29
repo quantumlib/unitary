@@ -60,7 +60,7 @@ def build_logical_qubits_graph(
     Arg:
       circuit: The circuit from which to build a logical qubits graph.
     """
-    g = defaultdict(list)
+    g: Dict[cirq.Qid, List[Tuple[cirq.Qid, int]]] = defaultdict(list)
     moment_index = 0
 
     # Build an adjacency graph based on the circuit.
@@ -121,7 +121,7 @@ def find_all_pairs_shortest_paths(
         Dict[cirq.GridQubit, List[cirq.GridQubit]],
         Dict[cirq.Qid, List[Tuple[cirq.Qid, int]]],
     ],
-) -> Dict[Tuple[cirq.Qid, cirq.Qid], int]:
+) -> Dict[Tuple[cirq.Qid, cirq.Qid], float]:
     """Returns a dict of the shortest distance between each pair of nodes.
 
     Implements repeated BFS, which is faster than the Floyd–Warshall algorithm
@@ -140,9 +140,9 @@ def find_all_pairs_shortest_paths(
             all_qubits.add(neighbor)
             adjacent[k].append(neighbor)
 
-    shortest = defaultdict(lambda: math.inf)
+    shortest: Dict[Tuple[cirq.Qid, cirq.Qid], float] = defaultdict(lambda: math.inf)
     for starting_qubit in all_qubits:
-        to_be_visited = deque()
+        to_be_visited: Deque[Tuple[cirq.Qid, int]] = deque()
         shortest[(starting_qubit, starting_qubit)] = 0
         to_be_visited.append((starting_qubit, 0))
         while to_be_visited:

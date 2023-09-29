@@ -51,6 +51,10 @@ def test_get_object_by_name(compile_to_qubits):
     assert board.get_object_by_name("test") == light
     assert board.get_object_by_name("test2") == light2
     assert board.get_object_by_name("test3") == None
+    assert board["test"] == light
+    assert board["test2"] == light2
+    with pytest.raises(KeyError):
+        _ = board["test3"]
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -62,10 +66,12 @@ def test_one_qubit(simulator, compile_to_qubits):
     )
     assert board.peek() == [[Light.GREEN]]
     assert board.peek([light], count=2) == [[Light.GREEN], [Light.GREEN]]
+    assert board.peek(["test"], count=2) == [[Light.GREEN], [Light.GREEN]]
     light = alpha.QuantumObject("test", 1)
     board = alpha.QuantumWorld([light], compile_to_qubits=compile_to_qubits)
     assert board.peek() == [[1]]
     assert board.peek([light], count=2) == [[1], [1]]
+    assert board.peek(["test"], count=2) == [[1], [1]]
     assert board.pop() == [1]
 
 
@@ -81,6 +87,8 @@ def test_two_qubits(simulator, compile_to_qubits):
     assert board.peek(convert_to_enum=False) == [[1, 0]]
     assert board.peek([light], count=2) == [[Light.GREEN], [Light.GREEN]]
     assert board.peek([light2], count=2) == [[Light.RED], [Light.RED]]
+    assert board.peek(["green"], count=2) == [[Light.GREEN], [Light.GREEN]]
+    assert board.peek(["red"], count=2) == [[Light.RED], [Light.RED]]
     assert board.peek(count=3) == [
         [Light.GREEN, Light.RED],
         [Light.GREEN, Light.RED],
@@ -173,6 +181,8 @@ def test_pop(simulator, compile_to_qubits):
     assert not all(result[0] == 0 for result in results)
     assert not all(result[0] == 1 for result in results)
     popped = board.pop([light2])[0]
+    popped2 = board.pop(["l2"])[0]
+    assert popped == popped2
     results = board.peek([light2, light3], count=200)
     assert len(results) == 200
     assert all(result[0] == popped for result in results)
@@ -282,6 +292,54 @@ def test_undo(simulator, compile_to_qubits):
     board.undo_last_effect()
     results = board.peek([light], count=200)
     assert all(result[0] == Light.GREEN for result in results)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_copy(simulator, compile_to_qubits):
+    light1 = alpha.QuantumObject("l1", Light.GREEN)
+    light2 = alpha.QuantumObject("l2", Light.RED)
+    board = alpha.QuantumWorld(
+        [light1, light2], sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
+    alpha.Flip()(light1)
+    alpha.Flip()(light2)
+    assert board.pop([light1])[0] == Light.RED
+    assert board.pop([light2])[0] == Light.GREEN
+
+    board2 = board.copy()
+
+    # Assert the board and the copy are equivalent
+    # (but are two distinct objects)
+    assert board.get_object_by_name("l1") is light1
+    assert board.get_object_by_name("l2") is light2
+    light1_copy = board2.get_object_by_name("l1")
+    light2_copy = board2.get_object_by_name("l2")
+    assert light1_copy is not light1
+    assert light2_copy is not light2
+    assert board.peek([light1])[0] == [Light.RED]
+    assert board.peek([light2])[0] == [Light.GREEN]
+    assert board2.peek([light1])[0] == [Light.RED]
+    assert board2.peek([light2])[0] == [Light.GREEN]
+    assert board.circuit == board2.circuit
+    assert board.circuit is not board2.circuit
+    assert board.effect_history == board2.effect_history
+    assert board.effect_history is not board2.effect_history
+    assert board.ancilla_names == board2.ancilla_names
+    assert board.ancilla_names is not board2.ancilla_names
+    assert len(board2.post_selection) == 2
+
+    # Assert that they now evolve independently
+    board2.undo_last_effect()
+    board2.undo_last_effect()
+    assert len(board.post_selection) == 2
+    assert len(board2.post_selection) == 1
+    alpha.Flip()(light1_copy)
+    alpha.Flip()(light2_copy)
+    assert board.peek([light1])[0] == [Light.RED]
+    assert board.peek([light2])[0] == [Light.GREEN]
+    assert board2.peek([light1])[0] == [Light.GREEN]
+    assert board2.peek([light2])[0] == [Light.RED]
 
 
 @pytest.mark.parametrize(

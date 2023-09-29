@@ -49,6 +49,8 @@ def test_engineer_effects():
 
 def test_analyst_effects():
     qar = classes.Analyst(name="a")
+    qar.add_hp()
+    qar.add_hp()
     test_monster = qaracter.Qaracter("t")
 
     # Test sample
@@ -70,7 +72,7 @@ def test_analyst_effects():
 def test_analyst():
     qar = classes.Analyst(name="a")
     assert not qar.is_npc()
-    assert set(qar.actions().keys()) == {"s", "m"}
+    assert set(qar.actions().keys()) == {"m"}
     qar.add_hp()
     qar.add_hp()
     assert set(qar.actions().keys()) == {"s", "m"}

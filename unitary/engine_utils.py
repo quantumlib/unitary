@@ -18,7 +18,7 @@ import math
 import os
 import uuid
 from dataclasses import dataclass, field
-from typing import List, Any, Optional, Callable, Dict, Union, Sequence
+from typing import Any, Optional, Callable, Dict, List, Union, Sequence
 
 import numpy as np
 
@@ -84,12 +84,12 @@ class EngineSampler(work.Sampler):
 
     """
 
-    def __init__(self, processor_id: str, gateset: str):
+    def __init__(self, processor_id: Optional[str], gateset: Optional[str]):
         project_id = os.environ["GOOGLE_CLOUD_PROJECT"]
         engine = cg.Engine(project_id=project_id, proto_version=cg.ProtoVersion.V2)
         self.engine = engine
-        self.processor_id = processor_id
-        if gateset == "sycamore":
+        self.processor_id = processor_id or "unknown"
+        if not gateset or gateset == "sycamore":
             self.gate_set = cg.SYC_GATESET
         elif gateset == "sqrt-iswap":
             self.gate_set = cg.SQRT_ISWAP_GATESET
@@ -131,7 +131,6 @@ class EngineSampler(work.Sampler):
     async def run_async(
         self, program: "cirq.Circuit", *, repetitions: int
     ) -> "cirq.Result":
-
         program_id = _get_program_id(program)
         engine_job = self.engine.run_sweep(
             program=program,
@@ -222,10 +221,10 @@ class QuantumProcessor:
     device_obj: cirq.Device
     processor_id: Optional[str]
     is_simulator: bool
+    _get_sampler_func: Callable[["QuantumProcessor", Optional[str]], cirq.Sampler]
     _cached_samplers: Dict[Union[None, str], cirq.Sampler] = field(default_factory=dict)
-    _get_sampler_func: Callable[["QuantumProcessor", str], cirq.Sampler] = None
 
-    def get_sampler(self, gateset: str = None):
+    def get_sampler(self, gateset: Optional[str] = None):
         """Why must gateset be supplied?
 
         https://github.com/quantumlib/Cirq/issues/2819
@@ -251,7 +250,7 @@ class EngineQuantumProcessor:
             self._engine = engine
         return self._engine
 
-    def get_sampler(self, gateset: str = None):
+    def get_sampler(self, gateset: Optional[str] = None):
         return self.engine.sampler(processor_id=self.processor_id)
 
     @property
@@ -358,7 +357,7 @@ async def execute_in_queue(func, tasks, num_workers: int):
         num_workers: The number of async workers. This corresponds roughly
             to the maintained queue depth.
     """
-    queue = asyncio.Queue()
+    queue: asyncio.Queue[Any] = asyncio.Queue()
 
     async def worker():
         while True:

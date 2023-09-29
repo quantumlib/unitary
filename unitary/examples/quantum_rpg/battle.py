@@ -11,23 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import enum
 import io
 import sys
-from typing import List, Optional
+from typing import List, Optional, Set
 
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.input_helpers as input_helpers
 from unitary.examples.quantum_rpg.qaracter import Qaracter
 from unitary.examples.quantum_rpg.xp_utils import EncounterXp
 
+# Size of the player side of battle status,
+# for text alingment
+_PLAYER_LEN = 40
+
+_BATTLE_SEPARATOR = "-" * (_PLAYER_LEN + 20)
+
 
 class BattleResult(enum.Enum):
-    UNFINISHED = 0
-    PLAYERS_WON = 1
-    PLAYERS_ESCAPED = 2
-    PLAYERS_DOWN = 3
-    ENEMIES_ESCAPED = 4
+    UNFINISHED = "Battle unfinished"
+    PLAYERS_WON = "You have won the battle!"
+    PLAYERS_ESCAPED = "You have escaped from the battle."
+    PLAYERS_DOWN = "You have lost the battle."
+    ENEMIES_ESCAPED = "Some enemies escaped the battle."
 
 
 class Battle:
@@ -41,25 +47,24 @@ class Battle:
     the status.
 
     Args:
-        player_side: a list of player QuantumWorld objects representing
-            their character sheets (initial state).
+        state: a GameState which contains a list of player QuantumWorld
+            objects representing their character sheets (initial state).
+            Includes other information, such as file objects to write ouput to.
         enemy_side: a list of NPC QuantumWorld objects.
-        file:  Optional IOBase file object to write output to.
-            This enables the battle to write status to a file or string
-            for testing.
     """
 
     def __init__(
         self,
-        player_side: List[Qaracter],
+        state: game_state.GameState,
         enemy_side: List[Qaracter],
-        file: io.IOBase = sys.stdout,
         xp: Optional[EncounterXp] = None,
     ):
-        self.player_side = player_side
+        self.player_side = [qar.copy() for qar in state.party]
         self.enemy_side = enemy_side
-        self.file = file
+        self.file = state.file
+        self.game_state = state
         self.xp = xp
+        self.get_user_input = state.get_user_input
 
     def print_screen(self):
         """Prints a two-column output of the battle status.
@@ -69,36 +74,31 @@ class Battle:
 
         Output will be written to the `file` attribute.
         """
-        print("-----------------------------------------------", file=self.file)
+        print(_BATTLE_SEPARATOR, file=self.file)
         for i in range(max(len(self.player_side), len(self.enemy_side))):
             status = ""
             if i < len(self.player_side):
-                status += (
-                    f"{self.player_side[i].name} {type(self.player_side[i]).__name__}"
+                player_status = (
+                    f"{self.player_side[i].name} {self.player_side[i].class_name}"
                 )
+                status += f"{player_status: <{_PLAYER_LEN}}"
             else:
-                status += "\t\t"
-            status += "\t\t\t"
+                status += " " * (_PLAYER_LEN)
             if i < len(self.enemy_side):
-                status += (
-                    f"{self.enemy_side[i].name} {type(self.enemy_side[i]).__name__}"
-                )
+                status += f"{i+1}) {self.enemy_side[i].name} {type(self.enemy_side[i]).__name__}"
 
             status += "\n"
 
             if i < len(self.player_side):
-                status += self.player_side[i].status_line()
+                status += f"{self.player_side[i].status_line(): <{_PLAYER_LEN}}"
             else:
-                status += "\t\t"
-            status += "\t\t\t"
+                status += " " * (_PLAYER_LEN)
             if i < len(self.enemy_side):
                 status += self.enemy_side[i].status_line()
             print(status, file=self.file)
-        print("-----------------------------------------------", file=self.file)
+        print(_BATTLE_SEPARATOR, file=self.file)
 
-    def take_player_turn(
-        self, user_input: Optional[List[str]] = None, get_user_input=input
-    ):
+    def take_player_turn(self):
         """Take a player's turn and record results in the battle.
 
         1) Retrieve the possible actions from the player.
@@ -110,26 +110,42 @@ class Battle:
             user_input: List of strings that substitute for the user's
                 raw input.
         """
-
-        # If user input is provided as an argument, then use that.
-        # Otherwise, prompt from raw input.
-        if user_input is not None:
-            get_user_input = input_helpers.get_user_input_function(user_input)
-
         for current_player in self.player_side:
             self.print_screen()
             print(f"{current_player.name} turn:", file=self.file)
             if not current_player.is_active():
-                print(f"{current_player.name} is DOWN!", file=self.file)
+                print(f"{current_player.name} is DOWN and cannot act!", file=self.file)
                 continue
             actions = current_player.actions()
-            for key in actions:
-                print(key, file=self.file)
-            action = get_user_input("Choose your action: ")
+            descriptions = current_player.action_descriptions()
+            for key in sorted(actions):
+                print(f"{key}) {descriptions[key]}.", file=self.file)
+            print("q) Read Quantopedia.", file=self.file)
+            print("?) Help.", file=self.file)
+            while True:
+                action = self.get_user_input("Choose your action: ")
+                if action == "?":
+                    print(current_player.help(), file=self.file)
+                elif action == "q":
+                    seen_types: Set[str] = set()
+                    for enemy in self.enemy_side:
+                        enemy_type = type(enemy).__name__
+                        enemy_index = enemy.quantopedia_index()
+                        if enemy_type not in seen_types:
+                            if self.game_state.has_quantopedia(enemy_index):
+                                print(enemy.quantopedia_entry(), file=self.file)
+                            else:
+                                print(
+                                    f"You do not have information on {enemy_type} yet.",
+                                    file=self.file,
+                                )
+                            seen_types.add(enemy_type)
+                else:
+                    break
             if action in current_player.actions():
                 monster = (
                     input_helpers.get_user_input_number(
-                        get_user_input,
+                        self.get_user_input,
                         "Which enemy number: ",
                         max_number=len(self.enemy_side),
                         file=self.file,
@@ -138,7 +154,7 @@ class Battle:
                 )
                 selected_monster = self.enemy_side[monster]
                 qubit = input_helpers.get_user_input_number(
-                    get_user_input, "Which enemy qubit number: ", file=self.file
+                    self.get_user_input, "Which enemy qubit number: ", file=self.file
                 )
                 qubit_name = selected_monster.quantum_object_name(qubit)
                 if qubit_name in selected_monster.active_qubits():
@@ -159,7 +175,6 @@ class Battle:
         """
         for npc in self.enemy_side:
             if not npc.is_active():
-                print(f"{npc.name} is DOWN!", file=self.file)
                 continue
             result = npc.npc_action(self)
             print(result, file=self.file)
@@ -179,19 +194,55 @@ class Battle:
             return BattleResult.ENEMIES_ESCAPED
         return BattleResult.UNFINISHED
 
-    def loop(
-        self, user_input: Optional[List[str]] = None, get_user_input=input
-    ) -> BattleResult:
+    def _print_battle_summary(self):
+        """Prints a two-column output of the battle status.
+
+        Left side includes the players and their qubits.  Right
+        side includes the NPCs and their qubits.
+
+        Output will be written to the `file` attribute.
+        """
+        print(_BATTLE_SEPARATOR, file=self.file)
+        print("                    Battle Summary\n", file=self.file)
+        print(
+            f"The battle is over.  {self._determine_battle_result().value}",
+            file=self.file,
+        )
+
+        for i in range(max(len(self.player_side), len(self.enemy_side))):
+            status = ""
+            if i < len(self.player_side):
+                end_status = "Still up."
+                if self.player_side[i].is_down():
+                    end_status = "DOWN"
+                elif self.player_side[i].is_escaped():
+                    end_status = "ESCAPED"
+                player_status = f"{self.player_side[i].name} {self.player_side[i].class_name}: {end_status}"
+                status += f"{player_status: <{_PLAYER_LEN}}"
+            else:
+                status += " " * (_PLAYER_LEN)
+            if i < len(self.enemy_side):
+                end_status = "Still up."
+                if self.enemy_side[i].is_down():
+                    end_status = "DOWN"
+                elif self.enemy_side[i].is_escaped():
+                    end_status = "ESCAPED"
+                status += f"{self.enemy_side[i].name} {type(self.enemy_side[i]).__name__} {end_status}"
+            print(status, file=self.file)
+
+        print(_BATTLE_SEPARATOR, file=self.file)
+
+    def loop(self) -> BattleResult:
         """Full battle loop until one side is defeated.
 
         Returns the result of a battle as an enum.
         """
-        if user_input is not None:
-            get_user_input = input_helpers.get_user_input_function(user_input)
         result = self._determine_battle_result()
         while result == BattleResult.UNFINISHED:
-            result = self.take_player_turn(get_user_input=get_user_input)
+            result = self.take_player_turn()
             if result != BattleResult.UNFINISHED:
+                self._print_battle_summary()
                 return result
             result = self.take_npc_turn()
+        self._print_battle_summary()
         return result

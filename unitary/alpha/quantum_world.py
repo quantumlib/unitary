@@ -13,7 +13,7 @@
 # limitations under the License.
 import copy
 import enum
-from typing import Dict, Iterable, List, Optional, Sequence, Union
+from typing import cast, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 import cirq
 
 from unitary.alpha.quantum_object import QuantumObject
@@ -60,19 +60,41 @@ class QuantumWorld:
             for obj in objects:
                 self.add_object(obj)
 
-    def clear(self):
+    def clear(self) -> None:
         """Removes all objects and effects from this QuantumWorld.
 
         This will reset the QuantumWorld to an empty state.
         """
         self.circuit = cirq.Circuit()
-        self.effect_history = []
+        self.effect_history: List[Tuple[cirq.Circuit, Dict[QuantumObject, int]]] = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
-        self.ancilla_names = set()
+        self.ancilla_names: Set[str] = set()
         # When `compile_to_qubits` is True, this tracks the mapping of the
         # original qudits to the compiled qubits.
         self.compiled_qubits: Dict[cirq.Qid, List[cirq.Qid]] = {}
         self.post_selection: Dict[QuantumObject, int] = {}
+
+    def copy(self) -> "QuantumWorld":
+        new_objects = []
+        new_post_selection: Dict[QuantumObject, int] = {}
+        for obj in self.object_name_dict.values():
+            new_obj = copy.copy(obj)
+            new_objects.append(new_obj)
+            if obj in self.post_selection:
+                new_post_selection[new_obj] = self.post_selection[obj]
+        new_world = self.__class__(
+            objects=new_objects,
+            sampler=self.sampler,
+            compile_to_qubits=self.compile_to_qubits,
+        )
+        new_world.circuit = self.circuit.copy()
+        new_world.ancilla_names = self.ancilla_names.copy()
+        new_world.effect_history = [
+            (circuit.copy(), copy.copy(post_selection))
+            for circuit, post_selection in self.effect_history
+        ]
+        new_world.post_selection = new_post_selection
+        return new_world
 
     def add_object(self, obj: QuantumObject):
         """Adds a QuantumObject to the QuantumWorld.
@@ -274,17 +296,18 @@ class QuantumWorld:
             return cirq.big_endian_bits_to_int(result)
         if isinstance(result, Iterable):
             # If it is a single-element iterable, return the first element.
-            if len(result) != 1:
+            result_list = list(result)
+            if len(result_list) != 1:
                 raise ValueError(
                     f"Cannot interpret a multivalued iterable {result} as a "
                     "single result for a non-compiled world."
                 )
-            return result[0]
+            return result_list[0]
         return result
 
     def force_measurement(
         self, obj: QuantumObject, result: Union[enum.Enum, int]
-    ) -> str:
+    ) -> None:
         """Measures a QuantumObject with a defined outcome.
 
         This function will move the qubit to an ancilla and set
@@ -313,10 +336,10 @@ class QuantumWorld:
 
     def peek(
         self,
-        objects: Optional[Sequence[QuantumObject]] = None,
+        objects: Optional[Sequence[Union[QuantumObject, str]]] = None,
         count: int = 1,
         convert_to_enum: bool = True,
-        _existing_list: List[List[Union[enum.Enum, int]]] = None,
+        _existing_list: Optional[List[List[Union[enum.Enum, int]]]] = None,
         _num_reps: Optional[int] = None,
     ) -> List[List[Union[enum.Enum, int]]]:
         """Measures the state of the system 'non-destructively'.
@@ -341,8 +364,14 @@ class QuantumWorld:
 
         measure_circuit = self.circuit.copy()
         if objects is None:
-            objects = self.public_objects
-        measure_set = set(objects + list(self.post_selection.keys()))
+            quantum_objects = self.public_objects
+        else:
+            quantum_objects = [
+                self[obj_or_str] if isinstance(obj_or_str, str) else obj_or_str
+                for obj_or_str in objects
+            ]
+        measure_set = set(quantum_objects)
+        measure_set.update(self.post_selection.keys())
         measure_circuit.append(
             [
                 cirq.measure(
@@ -366,7 +395,7 @@ class QuantumWorld:
                 rtn_list.append(
                     [
                         self._interpret_result(results.measurements[obj.name][rep])
-                        for obj in objects
+                        for obj in quantum_objects
                     ]
                 )
                 if len(rtn_list) == count:
@@ -374,12 +403,16 @@ class QuantumWorld:
         if len(rtn_list) < count:
             # We post-selected too much, get more reps
             return self.peek(
-                objects, count, convert_to_enum, rtn_list, _num_reps=num_reps * 10
+                quantum_objects,
+                count,
+                convert_to_enum,
+                rtn_list,
+                _num_reps=num_reps * 10,
             )
 
         if convert_to_enum:
             rtn_list = [
-                [objects[idx].enum_type(meas) for idx, meas in enumerate(res)]
+                [quantum_objects[idx].enum_type(meas) for idx, meas in enumerate(res)]
                 for res in rtn_list
             ]
 
@@ -387,17 +420,22 @@ class QuantumWorld:
 
     def pop(
         self,
-        objects: Optional[Sequence[QuantumObject]] = None,
+        objects: Optional[Sequence[Union[QuantumObject, str]]] = None,
         convert_to_enum: bool = True,
     ) -> List[Union[enum.Enum, int]]:
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
         )
         if objects is None:
-            objects = self.public_objects
-        results = self.peek(objects, convert_to_enum=convert_to_enum)
+            quantum_objects = self.public_objects
+        else:
+            quantum_objects = [
+                self[obj_or_str] if isinstance(obj_or_str, str) else obj_or_str
+                for obj_or_str in objects
+            ]
+        results = self.peek(quantum_objects, convert_to_enum=convert_to_enum)
         for idx, result in enumerate(results[0]):
-            self.force_measurement(objects[idx], result)
+            self.force_measurement(quantum_objects[idx], result)
 
         return results[0]
 
@@ -422,7 +460,7 @@ class QuantumWorld:
             histogram.append({state: 0 for state in range(obj.num_states)})
         for result in peek_results:
             for idx in range(len(objects)):
-                histogram[idx][result[idx]] += 1
+                histogram[idx][cast(int, result[idx])] += 1
         return histogram
 
     def get_probabilities(
@@ -466,3 +504,9 @@ class QuantumWorld:
         for one_probs in full_probs:
             binary_probs.append(1 - one_probs[0])
         return binary_probs
+
+    def __getitem__(self, name: str) -> QuantumObject:
+        quantum_object = self.object_name_dict.get(name, None)
+        if not quantum_object:
+            raise KeyError(f"{name} did not exist in this world.")
+        return quantum_object

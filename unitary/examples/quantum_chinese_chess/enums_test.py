@@ -13,7 +13,6 @@
 # limitations under the License.
 from unitary.examples.quantum_chinese_chess.enums import Piece, Language
 
-
 def test_piece_type_of():
     assert Piece.type_of("s") == Piece.Type.SOLDIER
     assert Piece.type_of("S") == Piece.Type.SOLDIER
@@ -22,7 +21,7 @@ def test_piece_type_of():
     assert Piece.type_of(".") == Piece.Type.EMPTY
     assert Piece.type_of("b") == None
 
-
+    
 def test_piece_symbol():
     p0 = Piece(Piece.Type.CANNON, Piece.Color.RED)
     assert p0.red_symbol() == "C"

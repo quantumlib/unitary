@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import copy
-from typing import Dict, Iterable, List, Optional, Set
+from typing import Dict, Iterable, List, Optional, Sequence, Set
 
 import cirq
 import cirq_google as cg
@@ -45,7 +45,7 @@ class ConnectivityHeuristicCircuitTransformer:
     def __init__(self, device: cirq.Device):
         super().__init__()
         self.device = device
-        self.mapping = None
+        self.mapping: Dict[cirq.Qid, cirq.GridQubit] = {}
         self.qubit_list = list(device.metadata.qubit_set or {})
         self.starting_qubit = self.find_start_qubit(self.qubit_list)
 
@@ -76,7 +76,9 @@ class ConnectivityHeuristicCircuitTransformer:
             c += self.qubits_within(depth - 1, qubit + diff, qubit_list, visited)
         return c
 
-    def find_start_qubit(self, qubit_list: List[cirq.Qid], depth=3) -> cirq.GridQubit:
+    def find_start_qubit(
+        self, qubit_list: Iterable[cirq.Qid], depth=3
+    ) -> cirq.GridQubit:
         """Finds a reasonable starting qubit to start the mapping.
 
         Uses the heuristic of the most connected qubit.
@@ -98,7 +100,7 @@ class ConnectivityHeuristicCircuitTransformer:
         self,
         depth: int,
         node: cirq.Qid,
-        graph: Dict[cirq.Qid, Iterable[cirq.Qid]],
+        graph: Dict[cirq.Qid, Sequence[cirq.Qid]],
         visited: Set[cirq.Qid],
     ) -> int:
         """Returns the number of qubits within `depth` of the specified `node`.
@@ -122,7 +124,7 @@ class ConnectivityHeuristicCircuitTransformer:
 
     def find_start_node(
         self,
-        graph: Dict[cirq.Qid, Iterable[cirq.Qid]],
+        graph: Dict[cirq.Qid, Sequence[cirq.Qid]],
         mapping: Dict[cirq.Qid, cirq.GridQubit],
     ) -> cirq.Qid:
         """Finds a reasonable starting qubit from an adjacency graph.
@@ -137,7 +139,7 @@ class ConnectivityHeuristicCircuitTransformer:
         for node in graph:
             if node in mapping:
                 continue
-            visited = set()
+            visited: Set[cirq.Qid] = set()
             c = self.edges_within(3, node, graph, visited)
             if c > best_count:
                 best_count = c
@@ -149,7 +151,7 @@ class ConnectivityHeuristicCircuitTransformer:
         cur_node: cirq.Qid,
         mapping: Dict[cirq.Qid, cirq.GridQubit],
         available_qubits: Set[cirq.GridQubit],
-        graph: Dict[cirq.Qid, Iterable[cirq.Qid]],
+        graph: Dict[cirq.Qid, Sequence[cirq.Qid]],
         nodes_trying: List[cirq.Qid],
         print_debug: bool = False,
     ) -> bool:
@@ -290,7 +292,7 @@ class ConnectivityHeuristicCircuitTransformer:
 
         # Initialize mappings and available qubits
         start_qubit = self.starting_qubit
-        mapping = {}
+        mapping: Dict[cirq.Qid, cirq.GridQubit] = {}
         start_list = set(copy.copy(self.qubit_list))
         start_list.remove(start_qubit)
 

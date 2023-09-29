@@ -278,7 +278,7 @@ if __name__ == "__main__":
 
     print(f"---------------------------------")
     if args.is_quantum or (args.qprob is not None and args.qprob > 0.0):
-        game = QuantumGame(qprob=args.qprob, iswap=args.use_iswap)
+        game: Game = QuantumGame(qprob=args.qprob, iswap=args.use_iswap)
         print(f"Quantum Fox-in-a-hole game.")
         print(f"Probability of quantum move: {args.qprob}.")
         if args.use_iswap:
