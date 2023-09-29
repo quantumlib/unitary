@@ -14,9 +14,10 @@
 import enum
 from typing import Optional
 
+
 class Language(enum.Enum):
-    EN = 0 # English
-    ZH = 1 # Chinese
+    EN = 0  # English
+    ZH = 1  # Chinese
 
 
 class SquareState(enum.Enum):
@@ -48,14 +49,14 @@ class MoveVariant(enum.Enum):
 
 class Piece:
     class Type(enum.Enum):
-        EMPTY = '.'
-        SOLDIER = 's'
-        CANNON = 'c'
-        ROOK = 'r'
-        HORSE = 'h'
-        ELEPHANT = 'e'
-        ADVISOR = 'a'
-        GENERAL = 'g'
+        EMPTY = "."
+        SOLDIER = "s"
+        CANNON = "c"
+        ROOK = "r"
+        HORSE = "h"
+        ELEPHANT = "e"
+        ADVISOR = "a"
+        GENERAL = "g"
 
     class Color(enum.Enum):
         NA = 0
@@ -68,29 +69,29 @@ class Piece:
 
     def type_of(c: str) -> Optional["Type"]:
         return {
-            's': Piece.Type.SOLDIER,
-            'c': Piece.Type.CANNON,
-            'r': Piece.Type.ROOK,
-            'h': Piece.Type.HORSE,
-            'e': Piece.Type.ELEPHANT,
-            'a': Piece.Type.ADVISOR,
-            'g': Piece.Type.GENERAL,
-            '.': Piece.Type.EMPTY
-            }.get(c.lower(), None)
+            "s": Piece.Type.SOLDIER,
+            "c": Piece.Type.CANNON,
+            "r": Piece.Type.ROOK,
+            "h": Piece.Type.HORSE,
+            "e": Piece.Type.ELEPHANT,
+            "a": Piece.Type.ADVISOR,
+            "g": Piece.Type.GENERAL,
+            ".": Piece.Type.EMPTY,
+        }.get(c.lower(), None)
 
     def red_symbol(self, lang: Language = Language.EN) -> str:
         if lang == Language.EN:  # Return English symbols
             return self.type_.value.upper()
         else:  # Return Chinese symbols
             return {
-                Piece.Type.SOLDIER: '兵',
-                Piece.Type.CANNON: '炮',
-                Piece.Type.ROOK: '车',
-                Piece.Type.HORSE: '马',
-                Piece.Type.ELEPHANT: '象',
-                Piece.Type.ADVISOR: '士',
-                Piece.Type.GENERAL: '将',
-                Piece.Type.EMPTY: '.'
+                Piece.Type.SOLDIER: "兵",
+                Piece.Type.CANNON: "炮",
+                Piece.Type.ROOK: "车",
+                Piece.Type.HORSE: "马",
+                Piece.Type.ELEPHANT: "象",
+                Piece.Type.ADVISOR: "士",
+                Piece.Type.GENERAL: "将",
+                Piece.Type.EMPTY: ".",
             }.get(self.type_)
 
     def black_symbol(self, lang: Language = Language.EN) -> str:
@@ -98,19 +99,19 @@ class Piece:
             return self.type_.value
         else:  # Return Chinese symbols
             return {
-                Piece.Type.SOLDIER: '卒',
-                Piece.Type.CANNON: '砲',
-                Piece.Type.ROOK: '車',
-                Piece.Type.HORSE: '馬',
-                Piece.Type.ELEPHANT: '相',
-                Piece.Type.ADVISOR: '仕',
-                Piece.Type.GENERAL: '帥',
-                Piece.Type.EMPTY: '.'
+                Piece.Type.SOLDIER: "卒",
+                Piece.Type.CANNON: "砲",
+                Piece.Type.ROOK: "車",
+                Piece.Type.HORSE: "馬",
+                Piece.Type.ELEPHANT: "相",
+                Piece.Type.ADVISOR: "仕",
+                Piece.Type.GENERAL: "帥",
+                Piece.Type.EMPTY: ".",
             }.get(self.type_)
 
     def symbol(self, lang: Language = Language.EN) -> str:
         return {
             Piece.Color.RED: self.red_symbol(lang),
             Piece.Color.BLACK: self.black_symbol(lang),
-            Piece.Color.NA: '.'
+            Piece.Color.NA: ".",
         }.get(self.color_)
