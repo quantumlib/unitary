@@ -11,23 +11,38 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.examples.quantum_chinese_chess.enums import Piece
+from unitary.examples.quantum_chinese_chess.enums import Piece, Language
 
-def test_piece():
-    assert Piece.type_of('s') == Piece.SOLDIER
-    assert Piece.type_of('S') == Piece.SOLDIER
-    assert Piece.type_of('g') == Piece.GENERAL
-    assert Piece.type_of('G') == Piece.GENERAL
-    assert Piece.type_of('.') == Piece.EMPTY
+def test_piece_type_of():
+    assert Piece.type_of('s') == Piece.Type.SOLDIER
+    assert Piece.type_of('S') == Piece.Type.SOLDIER
+    assert Piece.type_of('g') == Piece.Type.GENERAL
+    assert Piece.type_of('G') == Piece.Type.GENERAL
+    assert Piece.type_of('.') == Piece.Type.EMPTY
     assert Piece.type_of('b') == None
 
-    assert Piece.CANNON.red_symbol() == 'C'
-    assert Piece.CANNON.black_symbol() == 'c'
-    assert Piece.HORSE.red_symbol() == 'H'
-    assert Piece.HORSE.black_symbol() == 'h'
 
-    assert Piece.type_of('r').red_symbol() == 'R'
-    assert Piece.type_of('a').red_symbol() == 'A'
+def test_piece_symbol():
+    p0 = Piece(Piece.Type.CANNON, Piece.Color.RED)
+    assert p0.red_symbol() == 'C'
+    assert p0.black_symbol() == 'c'
+    assert p0.symbol() == 'C'
+    assert p0.red_symbol(Language.ZH) == '炮'
+    assert p0.black_symbol(Language.ZH) == '砲'
+    assert p0.symbol(Language.ZH) == '炮'
 
-    assert Piece.type_of(Piece.ELEPHANT.red_symbol()) == Piece.ELEPHANT
-    assert Piece.type_of(Piece.ELEPHANT.black_symbol()) == Piece.ELEPHANT
+    p1 = Piece(Piece.Type.HORSE, Piece.Color.BLACK)
+    assert p1.red_symbol() == 'H'
+    assert p1.black_symbol() == 'h'
+    assert p1.symbol() == 'h'
+    assert p1.red_symbol(Language.ZH) == '马'
+    assert p1.black_symbol(Language.ZH) == '馬'
+    assert p1.symbol(Language.ZH) == '馬'
+
+    p2 = Piece(Piece.Type.EMPTY, Piece.Color.NA)
+    assert p2.red_symbol() == '.'
+    assert p2.black_symbol() == '.'
+    assert p2.symbol() == '.'
+    assert p2.red_symbol(Language.ZH) == '.'
+    assert p2.black_symbol(Language.ZH) == '.'
+    assert p2.symbol(Language.ZH) == '.'
