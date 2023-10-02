@@ -11,12 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.alpha import QuantumObject
+from unitary.alpha import (
+    QuantumObject
+)
 from unitary.examples.quantum_chinese_chess.enums import (
     SquareState,
     Language,
     Color,
-    Type,
+    Type
 )
 
 
@@ -27,19 +29,7 @@ class Piece(QuantumObject):
         self.color = color
 
     def symbol(self, lang: Language = Language.EN) -> str:
-        if self.type_ == Type.EMPTY:
-            return "."
-        if lang == Language.EN:  # Return English symbols
-            if self.color == Color.RED:
-                return self.type_.value[0]
-            elif self.color == Color.BLACK:
-                return self.type_.value[1]
-        elif lang == Language.ZH:  # Return Chinese symbols
-            if self.color == Color.RED:
-                return self.type_.value[2]
-            elif self.color == Color.BLACK:
-                return self.type_.value[3]
-        return "Unexpected combinations"
+        return Type.symbol(self.type_, self.color, lang)
 
     def __str__(self):
         return self.symbol()

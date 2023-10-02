@@ -54,31 +54,49 @@ class Color(enum.Enum):
 
 
 class Type(enum.Enum):
-    """The four values are symbols corresponding to
-    English red
-    English black
-    Chinese red
-    Chinese black
+    """
+    The names are from FEN for Xiangqi.
+    The four values are symbols corresponding to
+    - English red
+    - English black
+    - Chinese red
+    - Chinese black
     """
 
-    EMPTY = [".", ".", ".", "."]
-    SOLDIER = ["s", "S", "兵", "卒"]
-    CANNON = ["c", "C", "炮", "砲"]
-    ROOK = ["r", "R", "车", "車"]
-    HORSE = ["h", "H", "马", "馬"]
-    ELEPHANT = ["e", "E", "象", "相"]
-    ADVISOR = ["a", "A", "士", "仕"]
-    GENERAL = ["g", "G", "将", "帥"]
+    EMPTY = (".", ".", ".", ".")
+    PAWN = ("P", "p", "兵", "卒")
+    CANNON = ("C", "c", "炮", "砲")
+    ROOK = ("R", "r", "车", "車")
+    HORSE = ("H", "h", "马", "馬")
+    ELEPHANT = ("E", "e", "象", "相")
+    ADVISOR = ("A", "a", "士", "仕")
+    KING = ("K", "k", "将", "帥")
 
     @staticmethod
     def type_of(c: str) -> Optional["Type"]:
         return {
-            "s": Type.SOLDIER,
+            "p": Type.PAWN,
             "c": Type.CANNON,
             "r": Type.ROOK,
             "h": Type.HORSE,
             "e": Type.ELEPHANT,
             "a": Type.ADVISOR,
-            "g": Type.GENERAL,
+            "k": Type.KING,
             ".": Type.EMPTY,
         }.get(c.lower(), None)
+
+    @staticmethod
+    def symbol(type_: "Type", color: Color, lang: Language = Language.EN) -> str:
+        if type_ == Type.EMPTY:
+            return "."
+        if lang == Language.EN:  # Return English symbols
+            if color == Color.RED:
+                return type_.value[0]
+            elif color == Color.BLACK:
+                return type_.value[1]
+        elif lang == Language.ZH:  # Return Chinese symbols
+            if color == Color.RED:
+                return type_.value[2]
+            elif color == Color.BLACK:
+                return type_.value[3]
+        return "Unexpected combinations"

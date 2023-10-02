@@ -24,13 +24,13 @@ from unitary.alpha import QuantumWorld
 
 def test_symbol():
     p0 = Piece("a0", SquareState.OCCUPIED, Type.CANNON, Color.RED)
-    assert p0.symbol() == "c"
-    assert p0.__str__() == "c"
+    assert p0.symbol() == "C"
+    assert p0.__str__() == "C"
     assert p0.symbol(Language.ZH) == "炮"
 
     p1 = Piece("b1", SquareState.OCCUPIED, Type.HORSE, Color.BLACK)
-    assert p1.symbol() == "H"
-    assert p1.__str__() == "H"
+    assert p1.symbol() == "h"
+    assert p1.__str__() == "h"
     assert p1.symbol(Language.ZH) == "馬"
 
     p2 = Piece("c2", SquareState.EMPTY, Type.EMPTY, Color.NA)

@@ -14,10 +14,27 @@
 from unitary.examples.quantum_chinese_chess.enums import Type, Color, Language
 
 
-def test_type_type_of():
-    assert Type.type_of("s") == Type.SOLDIER
-    assert Type.type_of("S") == Type.SOLDIER
-    assert Type.type_of("g") == Type.GENERAL
-    assert Type.type_of("G") == Type.GENERAL
+def test_type_of():
+    assert Type.type_of("p") == Type.PAWN
+    assert Type.type_of("P") == Type.PAWN
+    assert Type.type_of("k") == Type.KING
+    assert Type.type_of("K") == Type.KING
     assert Type.type_of(".") == Type.EMPTY
     assert Type.type_of("b") == None
+
+
+def test_symbol():
+    assert Type.symbol(Type.CANNON, Color.RED) == "C"
+    assert Type.symbol(Type.CANNON, Color.BLACK) == "c"
+    assert Type.symbol(Type.CANNON, Color.RED, Language.ZH) == "炮"
+    assert Type.symbol(Type.CANNON, Color.BLACK, Language.ZH) == "砲"
+
+    assert Type.symbol(Type.HORSE, Color.RED) == "H"
+    assert Type.symbol(Type.HORSE, Color.BLACK) == "h"
+    assert Type.symbol(Type.HORSE, Color.RED, Language.ZH) == "马"
+    assert Type.symbol(Type.HORSE, Color.BLACK, Language.ZH) == "馬"
+
+    assert Type.symbol(Type.EMPTY, Color.RED) == "."
+    assert Type.symbol(Type.EMPTY, Color.BLACK) == "."
+    assert Type.symbol(Type.EMPTY, Color.RED, Language.ZH) == "."
+    assert Type.symbol(Type.EMPTY, Color.BLACK, Language.ZH) == "."
