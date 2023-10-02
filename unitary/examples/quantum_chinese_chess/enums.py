@@ -54,20 +54,21 @@ class Color(enum.Enum):
 
 
 class Type(enum.Enum):
-    """ The four values are symbols corresponding to
-            English red
-            English black
-            Chinese red
-            Chinese black
-    """    
-    EMPTY    = [".", ".", ".", "."]
-    SOLDIER  = ["s", "S", "兵", "卒"]
-    CANNON   = ["c", "C", "炮", "砲"]
-    ROOK     = ["r", "R", "车", "車"]
-    HORSE    = ["h", "H", "马", "馬"]
+    """The four values are symbols corresponding to
+    English red
+    English black
+    Chinese red
+    Chinese black
+    """
+
+    EMPTY = [".", ".", ".", "."]
+    SOLDIER = ["s", "S", "兵", "卒"]
+    CANNON = ["c", "C", "炮", "砲"]
+    ROOK = ["r", "R", "车", "車"]
+    HORSE = ["h", "H", "马", "馬"]
     ELEPHANT = ["e", "E", "象", "相"]
-    ADVISOR  = ["a", "A", "士", "仕"]
-    GENERAL  = ["g", "G", "将", "帥"]
+    ADVISOR = ["a", "A", "士", "仕"]
+    GENERAL = ["g", "G", "将", "帥"]
 
     @staticmethod
     def type_of(c: str) -> Optional["Type"]:

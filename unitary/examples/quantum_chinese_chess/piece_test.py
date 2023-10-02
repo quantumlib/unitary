@@ -16,7 +16,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     SquareState,
     Language,
     Color,
-    Type
+    Type,
 )
 from unitary.examples.quantum_chinese_chess.piece import Piece
 from unitary.alpha import QuantumWorld
@@ -44,4 +44,6 @@ def test_enum():
     p1 = Piece("b1", SquareState.OCCUPIED, Type.HORSE, Color.BLACK)
     p2 = Piece("c2", SquareState.EMPTY, Type.EMPTY, Color.NA)
     board = QuantumWorld([p0, p1, p2])
-    assert board.peek() == [[SquareState.OCCUPIED,SquareState.OCCUPIED,SquareState.EMPTY]]
+    assert board.peek() == [
+        [SquareState.OCCUPIED, SquareState.OCCUPIED, SquareState.EMPTY]
+    ]
