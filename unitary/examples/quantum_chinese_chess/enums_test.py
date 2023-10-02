@@ -11,39 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.examples.quantum_chinese_chess.enums import Piece, Language
+from unitary.examples.quantum_chinese_chess.enums import Type, Color, Language
 
 
-def test_piece_type_of():
-    assert Piece.type_of("s") == Piece.Type.SOLDIER
-    assert Piece.type_of("S") == Piece.Type.SOLDIER
-    assert Piece.type_of("g") == Piece.Type.GENERAL
-    assert Piece.type_of("G") == Piece.Type.GENERAL
-    assert Piece.type_of(".") == Piece.Type.EMPTY
-    assert Piece.type_of("b") == None
-
-
-def test_piece_symbol():
-    p0 = Piece(Piece.Type.CANNON, Piece.Color.RED)
-    assert p0.red_symbol() == "C"
-    assert p0.black_symbol() == "c"
-    assert p0.symbol() == "C"
-    assert p0.red_symbol(Language.ZH) == "炮"
-    assert p0.black_symbol(Language.ZH) == "砲"
-    assert p0.symbol(Language.ZH) == "炮"
-
-    p1 = Piece(Piece.Type.HORSE, Piece.Color.BLACK)
-    assert p1.red_symbol() == "H"
-    assert p1.black_symbol() == "h"
-    assert p1.symbol() == "h"
-    assert p1.red_symbol(Language.ZH) == "马"
-    assert p1.black_symbol(Language.ZH) == "馬"
-    assert p1.symbol(Language.ZH) == "馬"
-
-    p2 = Piece(Piece.Type.EMPTY, Piece.Color.NA)
-    assert p2.red_symbol() == "."
-    assert p2.black_symbol() == "."
-    assert p2.symbol() == "."
-    assert p2.red_symbol(Language.ZH) == "."
-    assert p2.black_symbol(Language.ZH) == "."
-    assert p2.symbol(Language.ZH) == "."
+def test_type_type_of():
+    assert Type.type_of("s") == Type.SOLDIER
+    assert Type.type_of("S") == Type.SOLDIER
+    assert Type.type_of("g") == Type.GENERAL
+    assert Type.type_of("G") == Type.GENERAL
+    assert Type.type_of(".") == Type.EMPTY
+    assert Type.type_of("b") == None

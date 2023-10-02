@@ -47,71 +47,37 @@ class MoveVariant(enum.Enum):
     CAPTURE = 3
 
 
-class Piece:
-    class Type(enum.Enum):
-        EMPTY = "."
-        SOLDIER = "s"
-        CANNON = "c"
-        ROOK = "r"
-        HORSE = "h"
-        ELEPHANT = "e"
-        ADVISOR = "a"
-        GENERAL = "g"
+class Color(enum.Enum):
+    NA = 0
+    RED = 1
+    BLACK = 2
 
-    class Color(enum.Enum):
-        NA = 0
-        RED = 1
-        BLACK = 2
 
-    def __init__(self, type_: Type, color_: Color):
-        self.type_ = type_
-        self.color_ = color_
+class Type(enum.Enum):
+    """ The four values are symbols corresponding to
+            English red
+            English black
+            Chinese red
+            Chinese black
+    """    
+    EMPTY    = [".", ".", ".", "."]
+    SOLDIER  = ["s", "S", "兵", "卒"]
+    CANNON   = ["c", "C", "炮", "砲"]
+    ROOK     = ["r", "R", "车", "車"]
+    HORSE    = ["h", "H", "马", "馬"]
+    ELEPHANT = ["e", "E", "象", "相"]
+    ADVISOR  = ["a", "A", "士", "仕"]
+    GENERAL  = ["g", "G", "将", "帥"]
 
+    @staticmethod
     def type_of(c: str) -> Optional["Type"]:
         return {
-            "s": Piece.Type.SOLDIER,
-            "c": Piece.Type.CANNON,
-            "r": Piece.Type.ROOK,
-            "h": Piece.Type.HORSE,
-            "e": Piece.Type.ELEPHANT,
-            "a": Piece.Type.ADVISOR,
-            "g": Piece.Type.GENERAL,
-            ".": Piece.Type.EMPTY,
+            "s": Type.SOLDIER,
+            "c": Type.CANNON,
+            "r": Type.ROOK,
+            "h": Type.HORSE,
+            "e": Type.ELEPHANT,
+            "a": Type.ADVISOR,
+            "g": Type.GENERAL,
+            ".": Type.EMPTY,
         }.get(c.lower(), None)
-
-    def red_symbol(self, lang: Language = Language.EN) -> str:
-        if lang == Language.EN:  # Return English symbols
-            return self.type_.value.upper()
-        else:  # Return Chinese symbols
-            return {
-                Piece.Type.SOLDIER: "兵",
-                Piece.Type.CANNON: "炮",
-                Piece.Type.ROOK: "车",
-                Piece.Type.HORSE: "马",
-                Piece.Type.ELEPHANT: "象",
-                Piece.Type.ADVISOR: "士",
-                Piece.Type.GENERAL: "将",
-                Piece.Type.EMPTY: ".",
-            }.get(self.type_)
-
-    def black_symbol(self, lang: Language = Language.EN) -> str:
-        if lang == Language.EN:  # Return English symbols
-            return self.type_.value
-        else:  # Return Chinese symbols
-            return {
-                Piece.Type.SOLDIER: "卒",
-                Piece.Type.CANNON: "砲",
-                Piece.Type.ROOK: "車",
-                Piece.Type.HORSE: "馬",
-                Piece.Type.ELEPHANT: "相",
-                Piece.Type.ADVISOR: "仕",
-                Piece.Type.GENERAL: "帥",
-                Piece.Type.EMPTY: ".",
-            }.get(self.type_)
-
-    def symbol(self, lang: Language = Language.EN) -> str:
-        return {
-            Piece.Color.RED: self.red_symbol(lang),
-            Piece.Color.BLACK: self.black_symbol(lang),
-            Piece.Color.NA: ".",
-        }.get(self.color_)
