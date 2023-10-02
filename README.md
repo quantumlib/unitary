@@ -31,6 +31,7 @@ You can then clone the repository into your development environment by
 using (substitute USER with your github username)
 
     git clone https://github.com/USER/unitary.git
+	cd unitary
     git remote add upstream https://github.com/quantumlib/unitary.git
 
 This will clone your fork so that you can work on it, while marking the

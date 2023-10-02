@@ -11,24 +11,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.examples.quantum_chinese_chess.enums import Piece
+from unitary.examples.quantum_chinese_chess.enums import Type, Color, Language
 
 
-def test_piece():
-    assert Piece.type_of("s") == Piece.SOLDIER
-    assert Piece.type_of("S") == Piece.SOLDIER
-    assert Piece.type_of("g") == Piece.GENERAL
-    assert Piece.type_of("G") == Piece.GENERAL
-    assert Piece.type_of(".") == Piece.EMPTY
-    assert Piece.type_of("b") == None
+def test_type_of():
+    assert Type.type_of("p") == Type.PAWN
+    assert Type.type_of("P") == Type.PAWN
+    assert Type.type_of("k") == Type.KING
+    assert Type.type_of("K") == Type.KING
+    assert Type.type_of(".") == Type.EMPTY
+    assert Type.type_of("b") == None
 
-    assert Piece.CANNON.red_symbol() == "C"
-    assert Piece.CANNON.black_symbol() == "c"
-    assert Piece.HORSE.red_symbol() == "H"
-    assert Piece.HORSE.black_symbol() == "h"
 
-    assert Piece.type_of("r").red_symbol() == "R"
-    assert Piece.type_of("a").red_symbol() == "A"
+def test_symbol():
+    assert Type.symbol(Type.CANNON, Color.RED) == "C"
+    assert Type.symbol(Type.CANNON, Color.BLACK) == "c"
+    assert Type.symbol(Type.CANNON, Color.RED, Language.ZH) == "炮"
+    assert Type.symbol(Type.CANNON, Color.BLACK, Language.ZH) == "砲"
 
-    assert Piece.type_of(Piece.ELEPHANT.red_symbol()) == Piece.ELEPHANT
-    assert Piece.type_of(Piece.ELEPHANT.black_symbol()) == Piece.ELEPHANT
+    assert Type.symbol(Type.HORSE, Color.RED) == "H"
+    assert Type.symbol(Type.HORSE, Color.BLACK) == "h"
+    assert Type.symbol(Type.HORSE, Color.RED, Language.ZH) == "马"
+    assert Type.symbol(Type.HORSE, Color.BLACK, Language.ZH) == "馬"
+
+    assert Type.symbol(Type.EMPTY, Color.RED) == "."
+    assert Type.symbol(Type.EMPTY, Color.BLACK) == "."
+    assert Type.symbol(Type.EMPTY, Color.RED, Language.ZH) == "."
+    assert Type.symbol(Type.EMPTY, Color.BLACK, Language.ZH) == "."

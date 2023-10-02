@@ -15,6 +15,11 @@ import enum
 from typing import Optional
 
 
+class Language(enum.Enum):
+    EN = 0  # English
+    ZH = 1  # Chinese
+
+
 class SquareState(enum.Enum):
     EMPTY = 0
     OCCUPIED = 1
@@ -42,31 +47,56 @@ class MoveVariant(enum.Enum):
     CAPTURE = 3
 
 
-class Piece(enum.Enum):
-    EMPTY = "."
-    SOLDIER = "s"
-    CANNON = "c"
-    ROOK = "r"
-    HORSE = "h"
-    ELEPHANT = "e"
-    ADVISOR = "a"
-    GENERAL = "g"
+class Color(enum.Enum):
+    NA = 0
+    RED = 1
+    BLACK = 2
 
-    @classmethod
-    def type_of(cls, c: str) -> Optional["Piece"]:
+
+class Type(enum.Enum):
+    """
+    The names are from FEN for Xiangqi.
+    The four values are symbols corresponding to
+    - English red
+    - English black
+    - Chinese red
+    - Chinese black
+    """
+
+    EMPTY = (".", ".", ".", ".")
+    PAWN = ("P", "p", "兵", "卒")
+    CANNON = ("C", "c", "炮", "砲")
+    ROOK = ("R", "r", "车", "車")
+    HORSE = ("H", "h", "马", "馬")
+    ELEPHANT = ("E", "e", "象", "相")
+    ADVISOR = ("A", "a", "士", "仕")
+    KING = ("K", "k", "将", "帥")
+
+    @staticmethod
+    def type_of(c: str) -> Optional["Type"]:
         return {
-            "s": Piece.SOLDIER,
-            "c": Piece.CANNON,
-            "r": Piece.ROOK,
-            "h": Piece.HORSE,
-            "e": Piece.ELEPHANT,
-            "a": Piece.ADVISOR,
-            "g": Piece.GENERAL,
-            ".": Piece.EMPTY,
+            "p": Type.PAWN,
+            "c": Type.CANNON,
+            "r": Type.ROOK,
+            "h": Type.HORSE,
+            "e": Type.ELEPHANT,
+            "a": Type.ADVISOR,
+            "k": Type.KING,
+            ".": Type.EMPTY,
         }.get(c.lower(), None)
 
-    def red_symbol(self) -> str:
-        return self.value.upper()
-
-    def black_symbol(self) -> str:
-        return self.value
+    @staticmethod
+    def symbol(type_: "Type", color: Color, lang: Language = Language.EN) -> str:
+        if type_ == Type.EMPTY:
+            return "."
+        if lang == Language.EN:  # Return English symbols
+            if color == Color.RED:
+                return type_.value[0]
+            elif color == Color.BLACK:
+                return type_.value[1]
+        elif lang == Language.ZH:  # Return Chinese symbols
+            if color == Color.RED:
+                return type_.value[2]
+            elif color == Color.BLACK:
+                return type_.value[3]
+        raise ValueError("Unexpected combinations of language and color.")
