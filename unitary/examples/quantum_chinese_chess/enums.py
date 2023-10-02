@@ -99,4 +99,4 @@ class Type(enum.Enum):
                 return type_.value[2]
             elif color == Color.BLACK:
                 return type_.value[3]
-        return "Unexpected combinations"
+        raise ValueError("Unexpected combinations of language and color.")
