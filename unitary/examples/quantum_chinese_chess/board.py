@@ -85,6 +85,7 @@ class Board:
 
 
 board = Board()
-board.print()
+board.print() >> abc
 
 board.print(Language.ZH)
+print(abc)
