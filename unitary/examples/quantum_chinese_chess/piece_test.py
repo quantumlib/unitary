@@ -24,19 +24,19 @@ from unitary.alpha import QuantumWorld
 
 def test_symbol():
     p0 = Piece("a0", SquareState.OCCUPIED, Type.CANNON, Color.RED)
-    assert p0.symbol() == "C"
+    assert p0.symbol(False) == "C"
     assert p0.__str__() == "C"
-    assert p0.symbol(Language.ZH) == "炮"
+    assert p0.symbol(False, Language.ZH) == "炮"
 
     p1 = Piece("b1", SquareState.OCCUPIED, Type.HORSE, Color.BLACK)
-    assert p1.symbol() == "h"
+    assert p1.symbol(False) == "h"
     assert p1.__str__() == "h"
-    assert p1.symbol(Language.ZH) == "馬"
+    assert p1.symbol(False, Language.ZH) == "馬"
 
     p2 = Piece("c2", SquareState.EMPTY, Type.EMPTY, Color.NA)
-    assert p2.symbol() == "."
+    assert p2.symbol(False) == "."
     assert p2.__str__() == "."
-    assert p2.symbol(Language.ZH) == "."
+    assert p2.symbol(False, Language.ZH) == "."
 
 
 def test_enum():

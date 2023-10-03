@@ -13,7 +13,7 @@
 # limitations under the License.
 from colorama import Fore
 from unitary.alpha import QuantumObject
-from enums import (
+from unitary.examples.quantum_chinese_chess.enums import (
     SquareState,
     Language,
     Color,
@@ -35,4 +35,4 @@ class Piece(QuantumObject):
         return Fore.RED + Type.symbol(self.type_, self.color, lang) + Fore.RESET
 
     def __str__(self):
-        return self.symbol()
+        return self.symbol(False)
