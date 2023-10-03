@@ -12,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import unitary.alpha as alpha
-from unitary.examples.quantum_chinese_chess.enums import SquareState, GameState, Color, Type, Language
+from unitary.examples.quantum_chinese_chess.enums import (
+    SquareState,
+    GameState,
+    Color,
+    Type,
+    Language,
+)
 from unitary.examples.quantum_chinese_chess.piece import Piece
-from colorama import Fore, Back, Style
-
 
 class Board:
     def __init__(self):
