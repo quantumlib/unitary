@@ -25,5 +25,16 @@ def test_init(capsys):
     board = Board()
     board.print()
     output = capsys.readouterr()
-    assert output == """
-    """
+    assert (
+        output
+        == """
+        """
+    )
+
+    board.print(Language.ZH)
+    output = capsys.readouterr()
+    assert (
+        output
+        == """
+        """
+    )
