@@ -11,8 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from colorama import Fore
 from unitary.alpha import QuantumObject
-from unitary.examples.quantum_chinese_chess.enums import (
+from enums import (
     SquareState,
     Language,
     Color,
@@ -26,8 +27,12 @@ class Piece(QuantumObject):
         self.type_ = type_
         self.color = color
 
-    def symbol(self, lang: Language = Language.EN) -> str:
-        return Type.symbol(self.type_, self.color, lang)
+    def symbol(self, print_color: bool = True, lang: Language = Language.EN) -> str:
+        if not print_color:
+            return Type.symbol(self.type_, self.color, lang)
+        if self.color != Color.RED:
+            return Fore.WHITE + Type.symbol(self.type_, self.color, lang)
+        return Fore.RED + Type.symbol(self.type_, self.color, lang) + Fore.RESET
 
     def __str__(self):
         return self.symbol()
