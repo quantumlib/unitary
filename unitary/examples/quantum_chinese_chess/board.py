@@ -21,6 +21,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
 )
 from unitary.examples.quantum_chinese_chess.piece import Piece
 
+
 class Board:
     def __init__(self):
         self.load_fen()
@@ -68,7 +69,7 @@ class Board:
             board_string += "%d " % row
             for col in "abcdefghi":
                 piece = self.board[col + "%d" % row]
-                board_string += piece.symbol(True, lang)
+                board_string += piece.symbol(lang)
                 if lang == Language.EN or piece.type_ == Type.EMPTY:
                     board_string += " "
             # Print the row index on the right.
@@ -82,10 +83,3 @@ class Board:
     def flying_general(self) -> bool:
         print("### flying general rule check to be implemented")
         return False
-
-
-board = Board()
-board.print() >> abc
-
-board.print(Language.ZH)
-print(abc)
