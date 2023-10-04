@@ -54,6 +54,8 @@ def test_init_with_default_fen():
 """
     )
 
+    assert board.king_locations == ["e9", "e0"]
+
 
 def test_init_with_specified_fen():
     board = Board("4kaR2/4a4/3hR4/7H1/9/9/9/9/4Ap1r1/3AK3c w---1 ")
@@ -93,3 +95,5 @@ def test_init_with_specified_fen():
 　ａｂｃｄｅｆｇｈｉ
 """
     )
+
+    assert board.king_locations == ["e9", "e0"]

@@ -29,8 +29,8 @@ class Board:
     """Board holds the assemble of all pieces. Each piece could be either in classical or quantum state."""
 
     def __init__(self, fen: str = _INITIAL_FEN):
+        self.king_locations = []
         self.load_fen(fen)
-        self.king_locations = {"e0", "e9"}
 
     def load_fen(self, fen: str):
         """
@@ -55,6 +55,8 @@ class Board:
                 else:
                     name = f"{chr(col)}{row_index}"
                     piece_type = Type.type_of(char)
+                    if piece_type == Type.KING:
+                        self.king_locations.append(name)
                     color = Color.RED if char.isupper() else Color.BLACK
                     chess_board[name] = Piece(
                         name, SquareState.OCCUPIED, piece_type, color
