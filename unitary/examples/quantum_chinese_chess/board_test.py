@@ -27,9 +27,7 @@ def test_init(capsys):
     output = capsys.readouterr()
     assert (
         output
-        == """
-          a b c d e f g h i\n0 r h e a k a e h r  0\n1 . . . . . . . . .  1\n2 . c . . . . . c .  2\n3 p . p . p . p . p  3\n4 . . . . . . . . .  4\n5 . . . . . . . . .  5\n6 P . P . P . P . P  6\n7 . C . . . . . C .  7\n8 . . . . . . . . .  8\n9 R H E A K A E H R  9\n  a b c d e f g h i\n
-        """
+        == "  a b c d e f g h i\n0 r h e a k a e h r  0\n1 . . . . . . . . .  1\n2 . c . . . . . c .  2\n3 p . p . p . p . p  3\n4 . . . . . . . . .  4\n5 . . . . . . . . .  5\n6 P . P . P . P . P  6\n7 . C . . . . . C .  7\n8 . . . . . . . . .  8\n9 R H E A K A E H R  9\n  a b c d e f g h i\n"
     )
 
     board.print(Language.ZH)
