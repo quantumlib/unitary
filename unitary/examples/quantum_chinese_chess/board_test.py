@@ -34,6 +34,5 @@ def test_init(capsys):
     output = capsys.readouterr()
     assert (
         output.out
-        == """
-        """
+        == "  a b c d e f g h i\n0 車馬相仕帥仕相馬車 0\n1 . . . . . . . . .  1\n2 . 砲. . . . . 砲.  2\n3 卒. 卒. 卒. 卒. 卒 3\n4 . . . . . . . . .  4\n5 . . . . . . . . .  5\n6 兵. 兵. 兵. 兵. 兵 6\n7 . 炮. . . . . 炮.  7\n8 . . . . . . . . .  8\n9 车马象士将士象马车 9\n  a b c d e f g h i\n"
     )
