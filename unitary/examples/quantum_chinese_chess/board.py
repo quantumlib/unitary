@@ -14,7 +14,6 @@
 import unitary.alpha as alpha
 from unitary.examples.quantum_chinese_chess.enums import (
     SquareState,
-    GameState,
     Color,
     Type,
     Language,
@@ -22,30 +21,37 @@ from unitary.examples.quantum_chinese_chess.enums import (
 from unitary.examples.quantum_chinese_chess.piece import Piece
 
 
+# The default initial state of the game.
+_INITIAL_FEN = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr w---1"
+
+
 class Board:
-    def __init__(
-        self, fen: str = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr"
-    ):
+    def __init__(self, fen: str = _INITIAL_FEN):
         self.load_fen(fen)
         self.king_locations = {"e0", "e9"}
 
     def load_fen(self, fen: str):
+        """
+        Translates FEN (Forsyth-Edwards Notation) symbols into the whole QuantumWorld board.
+        FEN rule for Chinese Chess could be found at https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
+        """
         chess_board = {}
         row_index = 9
-        for row in fen.split("/"):
+        pieces, turns = fen.split(" ", 1)
+        for row in pieces.split("/"):
             col = ord("a")
             for char in row:
                 # Add empty board pieces.
                 if "1" <= char <= "9":
                     for i in range(int(char)):
-                        name = chr(col) + "%i" % row_index
+                        name = f"{chr(col)}{row_index}"
                         chess_board[name] = Piece(
                             name, SquareState.EMPTY, Type.EMPTY, Color.NA
                         )
                         col += 1
                 # Add occupied board pieces.
                 else:
-                    name = chr(col) + "%i" % row_index
+                    name = f"{chr(col)}{row_index}"
                     piece_type = Type.type_of(char)
                     color = Color.RED if char.isupper() else Color.BLACK
                     chess_board[name] = Piece(
@@ -54,6 +60,7 @@ class Board:
                     col += 1
             row_index -= 1
         self.board = alpha.QuantumWorld(chess_board.values())
+        self.current_player = 0 if "w" in turns else 1
 
     def to_str(self, lang: Language = Language.EN):
         num_rows = 10
