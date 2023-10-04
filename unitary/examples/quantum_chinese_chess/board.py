@@ -26,6 +26,8 @@ _INITIAL_FEN = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr w---
 
 
 class Board:
+    """Board holds the assemble of all pieces. Each piece could be either in classical or quantum state."""
+
     def __init__(self, fen: str = _INITIAL_FEN):
         self.load_fen(fen)
         self.king_locations = {"e0", "e9"}
