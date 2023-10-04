@@ -23,14 +23,13 @@ from unitary.examples.quantum_chinese_chess.piece import Piece
 
 
 class Board:
-    def __init__(self):
-        self.load_fen()
-        self.king_locations = {"e0", "e9"}
-        self.current_state = GameState.CONTINUE
-
-    def load_fen(
+    def __init__(
         self, fen: str = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr"
     ):
+        self.load_fen(fen)
+        self.king_locations = {"e0", "e9"}
+
+    def load_fen(self, fen: str):
         chess_board = {}
         row_index = 9
         for row in fen.split("/"):
@@ -56,30 +55,26 @@ class Board:
             row_index -= 1
         self.board = alpha.QuantumWorld(chess_board.values())
 
-    def print(self, lang: Language = Language.EN):
+    def to_str(self, lang: Language = Language.EN):
         num_rows = 10
-        board_string = ""
-        board_string += " "
+        board_string = ["\n "]
         # Print the top line of col letters.
         for col in "abcdefghi":
-            board_string += " %c" % col
-        board_string += "\n"
+            board_string.append(f" {col}")
+        board_string.append("\n")
         for row in range(num_rows):
             # Print the row index on the left.
-            board_string += "%d " % row
+            board_string.append(f"{row} ")
             for col in "abcdefghi":
-                piece = self.board[col + "%d" % row]
+                piece = self.board[f"{col}{row}"]
                 board_string += piece.symbol(lang)
                 if lang == Language.EN or piece.type_ == Type.EMPTY:
-                    board_string += " "
+                    board_string.append(" ")
             # Print the row index on the right.
-            board_string += " %d\n" % row
-        board_string += " "
+            board_string.append(f" {row}\n")
+        board_string.append(" ")
         # Print the bottom line of col letters.
         for col in "abcdefghi":
-            board_string += " %c" % col
-        print(board_string)
-
-    def flying_general(self) -> bool:
-        print("### flying general rule check to be implemented")
-        return False
+            board_string.append(f" {col}")
+        board_string.append("\n")
+        return "".join(board_string)
