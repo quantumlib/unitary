@@ -36,7 +36,6 @@ def test_init_with_default_fen():
 """
     )
 
-    print(board.to_str(Language.ZH))
     assert (
         board.to_str(Language.ZH)
         == """
