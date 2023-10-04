@@ -12,12 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from unitary.examples.quantum_chinese_chess.enums import (
-    SquareState,
-    Language,
-    Color,
-    Type,
-)
+from unitary.examples.quantum_chinese_chess.enums import Language
 from unitary.examples.quantum_chinese_chess.board import Board
 
 
