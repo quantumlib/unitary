@@ -29,11 +29,13 @@ _INITIAL_FEN = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr w---
 class Board:
     """Board holds the assemble of all pieces. Each piece could be either in classical or quantum state."""
 
-    def __init__(self, board: alpha.QuantumWorld, current_player: int, king_locations: List[str]):
+    def __init__(
+        self, board: alpha.QuantumWorld, current_player: int, king_locations: List[str]
+    ):
         self.board = board
         self.current_player = current_player
         self.king_locations = king_locations
-        self.lang = Language.EN # The default language is English.
+        self.lang = Language.EN  # The default language is English.
 
     def set_language(self, lang: Language):
         self.lang = lang
