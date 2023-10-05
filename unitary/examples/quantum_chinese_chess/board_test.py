@@ -17,9 +17,9 @@ from unitary.examples.quantum_chinese_chess.board import Board
 
 
 def test_init_with_default_fen():
-    board = Board()
+    board = Board.from_fen()
     assert (
-        board.to_str()
+        board.__str__()
         == """
   a b c d e f g h i
 0 r h e a k a e h r  0
@@ -36,8 +36,9 @@ def test_init_with_default_fen():
 """
     )
 
+    board.set_language(Language.ZH)
     assert (
-        board.to_str(Language.ZH)
+        board.__str__()
         == """
 　ａｂｃｄｅｆｇｈｉ
 ０車馬相仕帥仕相馬車０
@@ -58,10 +59,10 @@ def test_init_with_default_fen():
 
 
 def test_init_with_specified_fen():
-    board = Board("4kaR2/4a4/3hR4/7H1/9/9/9/9/4Ap1r1/3AK3c w---1 ")
+    board = Board.from_fen("4kaR2/4a4/3hR4/7H1/9/9/9/9/4Ap1r1/3AK3c w---1 ")
 
     assert (
-        board.to_str()
+        board.__str__()
         == """
   a b c d e f g h i
 0 . . . A K . . . c  0
@@ -78,8 +79,9 @@ def test_init_with_specified_fen():
 """
     )
 
+    board.set_language(Language.ZH)
     assert (
-        board.to_str(Language.ZH)
+        board.__str__()
         == """
 　ａｂｃｄｅｆｇｈｉ
 ０．．．士将．．．砲０

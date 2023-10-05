@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import List
 import unitary.alpha as alpha
 from unitary.examples.quantum_chinese_chess.enums import (
     SquareState,
@@ -28,17 +29,24 @@ _INITIAL_FEN = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr w---
 class Board:
     """Board holds the assemble of all pieces. Each piece could be either in classical or quantum state."""
 
-    def __init__(self, fen: str = _INITIAL_FEN):
-        self.king_locations = []
-        self.load_fen(fen)
+    def __init__(self, board: alpha.QuantumWorld, current_player: int, king_locations: List[str]):
+        self.board = board
+        self.current_player = current_player
+        self.king_locations = king_locations
+        self.lang = Language.EN # The default language is English.
 
-    def load_fen(self, fen: str):
+    def set_language(self, lang: Language):
+        self.lang = lang
+
+    @classmethod
+    def from_fen(cls, fen: str = _INITIAL_FEN) -> "Board":
         """
         Translates FEN (Forsyth-Edwards Notation) symbols into the whole QuantumWorld board.
         FEN rule for Chinese Chess could be found at https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
         """
         chess_board = {}
         row_index = 9
+        king_locations = []
         pieces, turns = fen.split(" ", 1)
         for row in pieces.split("/"):
             col = ord("a")
@@ -56,17 +64,19 @@ class Board:
                     name = f"{chr(col)}{row_index}"
                     piece_type = Type.type_of(char)
                     if piece_type == Type.KING:
-                        self.king_locations.append(name)
+                        king_locations.append(name)
                     color = Color.RED if char.isupper() else Color.BLACK
                     chess_board[name] = Piece(
                         name, SquareState.OCCUPIED, piece_type, color
                     )
                     col += 1
             row_index -= 1
-        self.board = alpha.QuantumWorld(chess_board.values())
-        self.current_player = 0 if "w" in turns else 1
+        board = alpha.QuantumWorld(chess_board.values())
+        # Here 0 means the player RED while 1 the player BLACK.
+        current_player = 0 if "w" in turns else 1
+        return cls(board, current_player, king_locations)
 
-    def to_str(self, lang: Language = Language.EN):
+    def __str__(self):
         num_rows = 10
         board_string = ["\n "]
         # Print the top line of col letters.
@@ -78,8 +88,8 @@ class Board:
             board_string.append(f"{row} ")
             for col in "abcdefghi":
                 piece = self.board[f"{col}{row}"]
-                board_string += piece.symbol(lang)
-                if lang == Language.EN:
+                board_string += piece.symbol(self.lang)
+                if self.lang == Language.EN:
                     board_string.append(" ")
             # Print the row index on the right.
             board_string.append(f" {row}\n")
@@ -88,7 +98,7 @@ class Board:
         for col in "abcdefghi":
             board_string.append(f" {col}")
         board_string.append("\n")
-        if lang == Language.EN:
+        if self.lang == Language.EN:
             return "".join(board_string)
         # We need to turn letters into their full-width counterparts to align
         # a mix of letters + Chinese characters.
