@@ -11,35 +11,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional, List
+from typing import Optional, List, Tuple
 from unitary.alpha.quantum_effect import QuantumEffect
 from unitary.examples.quantum_chinese_chess.board import Board
-from unitary.examples.quantum_chinese_chess.enums import (
-    MoveType,
-    MoveVariant
-)
+from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant
 
 
-
-def parse_input_string(str_to_parse: str) -> tuple[List[str], List[str]]:
+def parse_input_string(str_to_parse: str) -> Tuple[List[str], List[str]]:
     """Check if the input string could be turned into a valid move.
     Returns the sources and targets if it is valid.
     The input needs to be:
         - s1t1 for slide/jump move; or
         - s1^t1t2 for split moves; or
         - s1s2^t1 for merge moves.
-    Examples:                    
-       'a1a2'                                                               
-       'b1^a3c3'                                                      
+    Examples:
+       'a1a2'
+       'b1^a3c3'
        'a3b1^c3'
     """
     sources = None
     targets = None
 
     if "^" in str_to_parse:
-        sources_str, targets_str = str_to_parse.split("^", maxsplit = 1)
+        sources_str, targets_str = str_to_parse.split("^", maxsplit=1)
         # The only two allowed cases here are s1^t1t2 and s1s2^t1.
-        if str_to_parse.count("^") > 1 or len(str_to_parse) != 7 or len(sources_str) not in [2, 4]:
+        if (
+            str_to_parse.count("^") > 1
+            or len(str_to_parse) != 7
+            or len(sources_str) not in [2, 4]
+        ):
             raise ValueError(f"Invalid sources/targets string {str_to_parse}.")
         sources = [sources_str[i : i + 2] for i in range(0, len(sources_str), 2)]
         targets = [targets_str[i : i + 2] for i in range(0, len(targets_str), 2)]
@@ -60,13 +60,14 @@ def parse_input_string(str_to_parse: str) -> tuple[List[str], List[str]]:
     # Make sure all the locations are valid.
     for location in sources + targets:
         if location[0].lower() not in "abcdefghi" or not location[1].isdigit():
-            raise ValueError(f"Invalid location string. Make sure they are from a0 to i9.")
+            raise ValueError(
+                f"Invalid location string. Make sure they are from a0 to i9."
+            )
     return sources, targets
 
 
 def get_move_from_string(str_to_parse: str, board: Board) -> "Move":
-    """ Check if the input string is valid. If it is, determine the move type and variant and return the move.
-    """
+    """Check if the input string is valid. If it is, determine the move type and variant and return the move."""
     try:
         sources, targets = parse_input_string(str_to_parse)
     except ValueError as e:
@@ -77,9 +78,9 @@ def get_move_from_string(str_to_parse: str, board: Board) -> "Move":
     return Move(
         sources[0],
         targets[0],
-        board = board,
-        move_type = move_type,
-        move_variant = move_variant,
+        board=board,
+        move_type=move_type,
+        move_variant=move_variant,
     )
 
 
@@ -140,7 +141,7 @@ class Move(QuantumEffect):
         elif self.is_merge_move():
             move_str = [self.source + str(self.source2) + "^" + self.target]
         else:
-            move_str =  [self.source + self.target]
+            move_str = [self.source + self.target]
 
         if verbose_level > 1:
             move_str.append(self.move_type.name)
@@ -149,7 +150,15 @@ class Move(QuantumEffect):
         if verbose_level > 2:
             source = self.board.board[self.source]
             target = self.board.board[self.target]
-            move_str.append(source.color.name + "_" + source.type_.name + "->" + target.color.name + "_" + target.type_.name)
+            move_str.append(
+                source.color.name
+                + "_"
+                + source.type_.name
+                + "->"
+                + target.color.name
+                + "_"
+                + target.type_.name
+            )
         return ":".join(move_str)
 
     def __str__(self):

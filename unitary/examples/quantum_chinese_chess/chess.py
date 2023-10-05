@@ -26,9 +26,9 @@ _HELP_TEXT = """
     - "help": to see this message again
 """
 
+
 class QuantumChineseChess:
-    """A class that implements Quantum Chinese Chess using the unitary API.
-    """
+    """A class that implements Quantum Chinese Chess using the unitary API."""
 
     def __init__(self):
         self.players_name = []
@@ -60,7 +60,9 @@ class QuantumChineseChess:
         # - If player 0 made N repeatd back-and_forth moves in a row.
 
     def get_move(self) -> Move:
-        input_str = input(f'\nIt is {self.players_name[self.current_player]}\'s turn to move: ')
+        input_str = input(
+            f"\nIt is {self.players_name[self.current_player]}'s turn to move: "
+        )
         if input_str.lower() == "help":
             print(_HELP_TEXT)
             raise ValueError("")
@@ -74,8 +76,7 @@ class QuantumChineseChess:
             raise e
 
     def play(self) -> None:
-        """ The loop where each player takes turn to play.
-        """
+        """The loop where each player takes turn to play."""
         while True:
             try:
                 move = self.get_move()
@@ -89,19 +90,18 @@ class QuantumChineseChess:
                     print("\nPlease re-enter your move.")
                     continue
             # Check if the game is over.
-            match self.game_over():
-                # If the game continues, switch the player.
-                case -1:
-                    self.current_player = 1 - self.current_player
-                    continue
-                case 0:
-                    print(f'{self.players_name[0]} wins! Game is over.')
-                    break;
-                case 1:
-                    print(f'{self.players_name[1]} wins! Game is over.')
-                    break;
-                case 2:
-                    print('Draw! Game is over.')
+            game_over = self.game_over()
+            # If the game continues, switch the player.
+            if game_over == -1:
+                self.current_player = 1 - self.current_player
+                continue
+            elif game_over == 0:
+                print(f"{self.players_name[0]} wins! Game is over.")
+            elif game_over == 1:
+                print(f"{self.players_name[1]} wins! Game is over.")
+            elif game_over == 2:
+                print("Draw! Game is over.")
+            break
 
     def print_welcome(self) -> None:
         """
@@ -113,15 +113,18 @@ class QuantumChineseChess:
         print(welcome_message)
         print(_HELP_TEXT)
         # TODO(): add whole set of Chinese interface support.
-        lang = input("Switch to Chinese board characters? (y/n) (default to be English)  ")
-        if lang.lower() == 'y':
-            self.lang = Language.ZH 
+        lang = input(
+            "Switch to Chinese board characters? (y/n) (default to be English)  "
+        )
+        if lang.lower() == "y":
+            self.lang = Language.ZH
         else:
             self.lang = Language.EN
-        name_0 = input("Player 0's name (default to be Player_0):  ");
+        name_0 = input("Player 0's name (default to be Player_0):  ")
         self.players_name.append("Player_0" if len(name_0) == 0 else name_0)
-        name_1 = input("Player 1's name (default to be Player_1):  ");
+        name_1 = input("Player 1's name (default to be Player_1):  ")
         self.players_name.append("Player_1" if len(name_1) == 0 else name_1)
+
 
 def main():
     game = QuantumChineseChess()
