@@ -48,9 +48,9 @@ class MoveVariant(enum.Enum):
 
 
 class Color(enum.Enum):
-    NA = 0
-    RED = 1
-    BLACK = 2
+    NA = -1
+    RED = 0
+    BLACK = 1
 
 
 class Type(enum.Enum):

@@ -94,6 +94,7 @@ class QuantumChineseChess:
             # If the game continues, switch the player.
             if game_over == -1:
                 self.current_player = 1 - self.current_player
+                self.board.current_player = self.current_player
                 continue
             elif game_over == 0:
                 print(f"{self.players_name[0]} wins! Game is over.")

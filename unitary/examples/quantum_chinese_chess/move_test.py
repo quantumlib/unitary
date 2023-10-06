@@ -21,13 +21,13 @@ from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant
 import pytest
 
 
-def test_parse_success():
+def test_parse_input_string_success():
     assert parse_input_string("a1b1") == (["a1"], ["b1"])
     assert parse_input_string("a1b1^c2") == (["a1", "b1"], ["c2"])
     assert parse_input_string("a1^b1c2") == (["a1"], ["b1", "c2"])
 
 
-def test_parse_fail():
+def test_parse_input_string_fail():
     with pytest.raises(ValueError, match="Invalid sources/targets string "):
         parse_input_string("a1^b1")
     with pytest.raises(ValueError, match="Invalid sources/targets string "):
@@ -42,6 +42,14 @@ def test_parse_fail():
         parse_input_string("a1a1")
     with pytest.raises(ValueError, match="Invalid location string."):
         parse_input_string("a1n1")
+
+
+def test_get_move_from_string_fail():
+    board = Board.from_fen()
+    with pytest.raises(ValueError, match="Could not move empty piece."):
+        get_move_from_string("a1b1", board)
+    with pytest.raises(ValueError, match="Could not move the other player's piece."):
+        get_move_from_string("a0b1", board)
 
 
 def test_move_eq():

@@ -14,7 +14,7 @@
 from typing import Optional, List, Tuple
 from unitary.alpha.quantum_effect import QuantumEffect
 from unitary.examples.quantum_chinese_chess.board import Board
-from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant
+from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant, Type
 
 
 def parse_input_string(str_to_parse: str) -> Tuple[List[str], List[str]]:
@@ -72,6 +72,12 @@ def get_move_from_string(str_to_parse: str, board: Board) -> "Move":
         sources, targets = parse_input_string(str_to_parse)
     except ValueError as e:
         raise e
+    # Additional checks based on the current board.
+    for source in sources:
+        if board.board[source].type_ == Type.EMPTY:
+            raise ValueError("Could not move empty piece.")
+        if board.board[source].color.value != board.current_player:
+            raise ValueError("Could not move the other player's piece.")
     # TODO(): add analysis to determine move type and variant.
     move_type = MoveType.UNSPECIFIED_STANDARD
     move_variant = MoveVariant.UNSPECIFIED
