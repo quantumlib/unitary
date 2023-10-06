@@ -60,6 +60,7 @@ class QuantumChineseChess:
         # - If player 0 made N repeatd back-and_forth moves in a row.
 
     def get_move(self) -> Move:
+        """Check if the player wants to exit or needs help message. Otherwise parse and return the move."""
         input_str = input(
             f"\nIt is {self.players_name[self.current_player]}'s turn to move: "
         )
@@ -68,7 +69,7 @@ class QuantumChineseChess:
             raise ValueError("")
         if input_str.lower() == "exit":
             self.player_quit = self.current_player
-            raise ValueError("Existing.")
+            raise ValueError("Exiting.")
         try:
             move = get_move_from_string(input_str.lower(), self.board)
             return move

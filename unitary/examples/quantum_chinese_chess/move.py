@@ -91,6 +91,8 @@ def get_move_from_string(str_to_parse: str, board: Board) -> "Move":
 
 
 class Move(QuantumEffect):
+    """The base class of all chess moves."""
+
     def __init__(
         self,
         source: str,
