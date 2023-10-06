@@ -55,7 +55,7 @@ def parse_input_string(str_to_parse: str) -> Tuple[List[str], List[str]]:
         sources = [str_to_parse[0:2]]
         targets = [str_to_parse[2:4]]
         if sources[0] == targets[0]:
-            raise ValueError("source and target should not be the same.")
+            raise ValueError("Source and target should not be the same.")
 
     # Make sure all the locations are valid.
     for location in sources + targets:
@@ -114,6 +114,10 @@ class Move(QuantumEffect):
                 and self.move_variant == other.move_variant
             )
         return False
+
+    def _verify_objects(self, *objects):
+        # TODO(): add checks that apply to all move types
+        return
 
     def effect(self, *objects):
         # TODO(): add effects according to move_type and move_variant
