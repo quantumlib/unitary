@@ -32,7 +32,6 @@ from unitary.alpha.quantum_effect import (
 )
 
 from unitary.alpha.qubit_effects import (
-    Flip,
     Move,
     Phase,
     PhasedMove,
@@ -42,6 +41,8 @@ from unitary.alpha.qubit_effects import (
 )
 
 from unitary.alpha.qudit_effects import (
+    Cycle,
+    Flip,
     QuditCycle,
     QuditFlip,
 )
