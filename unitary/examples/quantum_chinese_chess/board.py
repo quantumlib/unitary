@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
+import numpy as np
+from typing import List, Tuple
 import unitary.alpha as alpha
 from unitary.examples.quantum_chinese_chess.enums import (
     SquareState,
@@ -119,3 +120,47 @@ class Board:
             .replace("abcdefghi", " abcdefghi")
             .translate(translation)
         )
+
+    def path_pieces(self, source: str, target: str) -> Tuple[List[str], List[str]]:
+        """Returns the nonempty classical and quantum pieces from source to target."""
+        x0 = ord(source[0])
+        x1 = ord(target[0])
+        dx = x1 - x0
+        y0 = int(source[1])
+        y1 = int(target[1])
+        dy = y1 - y0
+        # In case of only moving one step, return empty path pieces.
+        if abs(dx) + abs(dy) <= 1:
+            return [], []
+        # In case of advisor moving, return empty path pieces.
+        # TODO(): maybe move this to the advisor move check.
+        if abs(dx) == 1 and abs(dy) == 1:
+            return [], []
+        pieces = []
+        classical_pieces = []
+        quantum_pieces = []
+        dx_sign = np.sign(dx)
+        dy_sign = np.sign(dy)
+        # In case of elephant move, there should only be one path piece.
+        if abs(dx) == abs(dy):
+            pieces.append(f"{chr(x0 + dx_sign)}{y0 + dy_sign}")
+        elif dx == 0:
+            for i in range(1, abs(dy)):
+                pieces.append(f"{chr(x0)}{y0 + dy_sign * i}")
+        elif dy == 0:
+            for i in range(1, abs(dx)):
+                pieces.append(f"{chr(x0 + dx_sign * i)}{y0}")
+        # This covers four possible directions of horse move.
+        elif abs(dx) == 2 and abs(dy) == 1:
+            pieces.append(f"{chr(x0 + dx_sign)}{y0}")
+        # This covers the other four possible directions of horse move.
+        elif abs(dy) == 2 and abs(dx) == 1:
+            pieces.append(f"{chr(x0)}{y0 + dy_sign}")
+        else:
+            raise ValueError("Unexpected input to path_pieces().")
+        for piece in pieces:
+            if self.board[piece].is_entangled():
+                quantum_pieces.append(piece)
+            elif self.board[piece].type_ != Type.EMPTY:
+                classical_pieces.append(piece)
+        return classical_pieces, quantum_pieces

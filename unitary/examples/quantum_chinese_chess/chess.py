@@ -117,7 +117,28 @@ class QuantumChineseChess:
                 raise ValueError("Could not move empty piece.")
             if self.board.board[source].color.value != self.board.current_player:
                 raise ValueError("Could not move the other player's piece.")
-        # TODO(): add analysis to determine move type and variant.
+        if len(sources) == 1 and len(targets) == 1:
+            # Chances are normal/excluded/capture slide/jump or cannon fire.
+            classical_pieces, quantum_pieces = board.path_pieces(sources[0], targets[0])
+            source = board[sources[0]]
+            target = board[targets[0]]
+            if len(classical_pieces) > 0:
+                if sources.type_ != Type.CANNON:
+                    # The path is blocked by classical pieces.
+                    raise ValueError("Invalid move. The path is blocked.")
+                elif len(classical_pieces) > 1:
+                    # Invalid cannon move, since there could only be at most one classical piece between
+                    # the source (i.e. the cannon) and the target.
+                    raise ValueError("Invalid move. Cannon cannot fire like this.")
+
+            # Such move is jump, but needs further check.
+            if len(quantum_pieces) == 0:
+                # Classical case.
+                if not source.is_entangled() and not target.type_ == Type.EMPTY:
+                    target.reset(source)
+                    source.reset()
+                    print("Classical jump.")
+                    return
 
     def next_move(self) -> bool:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
