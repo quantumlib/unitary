@@ -13,7 +13,7 @@
 # limitations under the License.
 from unitary.examples.quantum_chinese_chess.move import (
     Move,
-    get_move_from_string,
+    apply_move,
     parse_input_string,
 )
 from unitary.examples.quantum_chinese_chess.board import Board
@@ -44,12 +44,12 @@ def test_parse_input_string_fail():
         parse_input_string("a1n1")
 
 
-def test_get_move_from_string_fail():
+def test_apply_move_fail():
     board = Board.from_fen()
     with pytest.raises(ValueError, match="Could not move empty piece."):
-        get_move_from_string("a1b1", board)
+        apply_move("a1b1", board)
     with pytest.raises(ValueError, match="Could not move the other player's piece."):
-        get_move_from_string("a0b1", board)
+        apply_move("a0b1", board)
 
 
 def test_move_eq():

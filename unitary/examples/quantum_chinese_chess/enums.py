@@ -25,6 +25,13 @@ class SquareState(enum.Enum):
     OCCUPIED = 1
 
 
+class GameState(enum.Enum):
+    CONTINUES = -1
+    RED_WINS = 0
+    BLACK_WINS = 1
+    DRAW = 2
+
+
 class MoveType(enum.Enum):
     NULL_TYPE = 0
     UNSPECIFIED_STANDARD = 1

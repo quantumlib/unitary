@@ -66,7 +66,7 @@ def parse_input_string(str_to_parse: str) -> Tuple[List[str], List[str]]:
     return sources, targets
 
 
-def get_move_from_string(str_to_parse: str, board: Board) -> "Move":
+def apply_move(str_to_parse: str, board: Board) -> None:
     """Check if the input string is valid. If it is, determine the move type and variant and return the move."""
     try:
         sources, targets = parse_input_string(str_to_parse)
@@ -138,8 +138,7 @@ class Move(QuantumEffect):
         return self.source2 is not None
 
     def to_str(self, verbose_level: int = 1) -> str:
-        """
-        Constructs the string representation of the move.
+        """Constructs the string representation of the move.
         According to the value of verbose_level:
         - 1: only returns the move source(s) and target(s);
         - 2: additionally returns the move type and variant;
