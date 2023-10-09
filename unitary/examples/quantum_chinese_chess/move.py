@@ -79,15 +79,6 @@ def apply_move(str_to_parse: str, board: Board) -> None:
         if board.board[source].color.value != board.current_player:
             raise ValueError("Could not move the other player's piece.")
     # TODO(): add analysis to determine move type and variant.
-    move_type = MoveType.UNSPECIFIED_STANDARD
-    move_variant = MoveVariant.UNSPECIFIED
-    return Move(
-        sources[0],
-        targets[0],
-        board=board,
-        move_type=move_type,
-        move_variant=move_variant,
-    )
 
 
 class Move(QuantumEffect):
