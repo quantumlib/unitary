@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import mock
+import pytest
 import io
 import sys
 from unitary.examples.quantum_chinese_chess.chess import QuantumChineseChess
@@ -27,6 +28,55 @@ def test_game_init():
         assert game.players_name == ["Bob", "Ben"]
         assert game.current_player == 0
         assert "Welcome" in output.getvalue()
+    sys.stdout = sys.__stdout__
+
+
+def test_parse_input_string_success():
+    output = io.StringIO()
+    sys.stdout = output
+    with mock.patch("builtins.input", side_effect=["y", "Bob", "Ben"]):
+        game = QuantumChineseChess()
+        assert game.parse_input_string("a1b1") == (["a1"], ["b1"])
+        assert game.parse_input_string("a1b1^c2") == (["a1", "b1"], ["c2"])
+        assert game.parse_input_string("a1^b1c2") == (["a1"], ["b1", "c2"])
+    sys.stdout = sys.__stdout__
+
+
+def test_parse_input_string_fail():
+    output = io.StringIO()
+    sys.stdout = output
+    with mock.patch("builtins.input", side_effect=["y", "Bob", "Ben"]):
+        game = QuantumChineseChess()
+        with pytest.raises(ValueError, match="Invalid sources/targets string "):
+            game.parse_input_string("a1^b1")
+        with pytest.raises(ValueError, match="Invalid sources/targets string "):
+            game.parse_input_string("a^1b1c2")
+        with pytest.raises(ValueError, match="Two sources should not be the same."):
+            game.parse_input_string("a1a1^c2")
+        with pytest.raises(ValueError, match="Two targets should not be the same."):
+            game.parse_input_string("a1^c2c2")
+        with pytest.raises(ValueError, match="Invalid sources/targets string "):
+            game.parse_input_string("a1b")
+        with pytest.raises(
+            ValueError, match="Source and target should not be the same."
+        ):
+            game.parse_input_string("a1a1")
+        with pytest.raises(ValueError, match="Invalid location string."):
+            game.parse_input_string("a1n1")
+    sys.stdout = sys.__stdout__
+
+
+def test_apply_move_fail():
+    output = io.StringIO()
+    sys.stdout = output
+    with mock.patch("builtins.input", side_effect=["y", "Bob", "Ben"]):
+        game = QuantumChineseChess()
+        with pytest.raises(ValueError, match="Could not move empty piece."):
+            game.apply_move("a1b1")
+        with pytest.raises(
+            ValueError, match="Could not move the other player's piece."
+        ):
+            game.apply_move("a0b1")
     sys.stdout = sys.__stdout__
 
 

@@ -11,9 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Tuple, List
 from unitary.examples.quantum_chinese_chess.board import Board
-from unitary.examples.quantum_chinese_chess.enums import Language, GameState
-from unitary.examples.quantum_chinese_chess.move import Move, apply_move
+from unitary.examples.quantum_chinese_chess.enums import Language, GameState, Type
+from unitary.examples.quantum_chinese_chess.move import Move
 
 # List of accepable commands.
 _HELP_TEXT = """
@@ -55,6 +56,69 @@ class QuantumChineseChess:
         # (after measurement) between two generals.
         # - If player 0 made N repeatd back-and_forth moves in a row.
 
+    @staticmethod
+    def parse_input_string(str_to_parse: str) -> Tuple[List[str], List[str]]:
+        """Check if the input string could be turned into a valid move.
+        Returns the sources and targets if it is valid.
+        The input needs to be:
+            - s1t1 for slide/jump move; or
+            - s1^t1t2 for split moves; or
+            - s1s2^t1 for merge moves.
+        Examples:
+           'a1a2'
+           'b1^a3c3'
+           'a3b1^c3'
+        """
+        sources = None
+        targets = None
+
+        if "^" in str_to_parse:
+            sources_str, targets_str = str_to_parse.split("^", maxsplit=1)
+            # The only two allowed cases here are s1^t1t2 and s1s2^t1.
+            if (
+                str_to_parse.count("^") > 1
+                or len(str_to_parse) != 7
+                or len(sources_str) not in [2, 4]
+            ):
+                raise ValueError(f"Invalid sources/targets string {str_to_parse}.")
+            sources = [sources_str[i : i + 2] for i in range(0, len(sources_str), 2)]
+            targets = [targets_str[i : i + 2] for i in range(0, len(targets_str), 2)]
+            if len(sources) == 2:
+                if sources[0] == sources[1]:
+                    raise ValueError("Two sources should not be the same.")
+            elif targets[0] == targets[1]:
+                raise ValueError("Two targets should not be the same.")
+        else:
+            # The only allowed case here is s1t1.
+            if len(str_to_parse) != 4:
+                raise ValueError(f"Invalid sources/targets string {str_to_parse}.")
+            sources = [str_to_parse[0:2]]
+            targets = [str_to_parse[2:4]]
+            if sources[0] == targets[0]:
+                raise ValueError("Source and target should not be the same.")
+
+        # Make sure all the locations are valid.
+        for location in sources + targets:
+            if location[0].lower() not in "abcdefghi" or not location[1].isdigit():
+                raise ValueError(
+                    f"Invalid location string. Make sure they are from a0 to i9."
+                )
+        return sources, targets
+
+    def apply_move(self, str_to_parse: str) -> None:
+        """Check if the input string is valid. If it is, determine the move type and variant and return the move."""
+        try:
+            sources, targets = self.parse_input_string(str_to_parse)
+        except ValueError as e:
+            raise e
+        # Additional checks based on the current board.
+        for source in sources:
+            if self.board.board[source].type_ == Type.EMPTY:
+                raise ValueError("Could not move empty piece.")
+            if self.board.board[source].color.value != self.board.current_player:
+                raise ValueError("Could not move the other player's piece.")
+        # TODO(): add analysis to determine move type and variant.
+
     def next_move(self) -> bool:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
         Returns True if the move was made, otherwise returns False.
@@ -71,7 +135,7 @@ class QuantumChineseChess:
         else:
             try:
                 # The move is success if no ValueError is raised.
-                apply_move(input_str.lower(), self.board)
+                self.apply_move(input_str.lower())
                 return True
             except ValueError as e:
                 print(e)

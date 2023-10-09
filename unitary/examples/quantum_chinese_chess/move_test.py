@@ -11,45 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.examples.quantum_chinese_chess.move import (
-    Move,
-    apply_move,
-    parse_input_string,
-)
+from unitary.examples.quantum_chinese_chess.move import Move
 from unitary.examples.quantum_chinese_chess.board import Board
 from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant
 import pytest
-
-
-def test_parse_input_string_success():
-    assert parse_input_string("a1b1") == (["a1"], ["b1"])
-    assert parse_input_string("a1b1^c2") == (["a1", "b1"], ["c2"])
-    assert parse_input_string("a1^b1c2") == (["a1"], ["b1", "c2"])
-
-
-def test_parse_input_string_fail():
-    with pytest.raises(ValueError, match="Invalid sources/targets string "):
-        parse_input_string("a1^b1")
-    with pytest.raises(ValueError, match="Invalid sources/targets string "):
-        parse_input_string("a^1b1c2")
-    with pytest.raises(ValueError, match="Two sources should not be the same."):
-        parse_input_string("a1a1^c2")
-    with pytest.raises(ValueError, match="Two targets should not be the same."):
-        parse_input_string("a1^c2c2")
-    with pytest.raises(ValueError, match="Invalid sources/targets string "):
-        parse_input_string("a1b")
-    with pytest.raises(ValueError, match="Source and target should not be the same."):
-        parse_input_string("a1a1")
-    with pytest.raises(ValueError, match="Invalid location string."):
-        parse_input_string("a1n1")
-
-
-def test_apply_move_fail():
-    board = Board.from_fen()
-    with pytest.raises(ValueError, match="Could not move empty piece."):
-        apply_move("a1b1", board)
-    with pytest.raises(ValueError, match="Could not move the other player's piece."):
-        apply_move("a0b1", board)
 
 
 def test_move_eq():
@@ -120,7 +85,7 @@ def test_move_type():
 
 
 def test_to_str():
-    # TODO(): change to real senarios
+    # TODO(): change to real scenarios
     board = Board.from_fen()
     move1 = Move(
         "a0",
