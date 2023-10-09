@@ -45,10 +45,10 @@ class QuantumChineseChess:
         self.debug_level = 3
 
     def game_over(self) -> None:
-        """Checks if the game is over."""
+        """Checks if the game is over, and update self.game_state accordingly."""
         if self.game_state != GameState.CONTINUES:
             return
-        return GameState.CONTINUES
+        return
         # TODO(): add the following checks
         # - The current player wins if general is captured in the current move.
         # - The other player wins if the flying general rule is satisfied, i.e. there is no piece
@@ -70,6 +70,7 @@ class QuantumChineseChess:
             print("Exiting.")
         else:
             try:
+                # The move is success if no ValueError is raised.
                 apply_move(input_str.lower(), self.board)
                 return True
             except ValueError as e:
