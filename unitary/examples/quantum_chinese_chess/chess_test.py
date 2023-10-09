@@ -20,7 +20,7 @@ from unitary.examples.quantum_chinese_chess.enums import Language
 
 def test_game_init(monkeypatch):
     inputs = iter(["y", "Bob", "Ben"])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     output = io.StringIO()
     sys.stdout = output
     game = QuantumChineseChess()
@@ -33,7 +33,7 @@ def test_game_init(monkeypatch):
 
 def test_parse_input_string_success(monkeypatch):
     inputs = iter(["y", "Bob", "Ben"])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     assert game.parse_input_string("a1b1") == (["a1"], ["b1"])
     assert game.parse_input_string("a1b1^c2") == (["a1", "b1"], ["c2"])
@@ -42,7 +42,7 @@ def test_parse_input_string_success(monkeypatch):
 
 def test_parse_input_string_fail(monkeypatch):
     inputs = iter(["y", "Bob", "Ben"])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     with pytest.raises(ValueError, match="Invalid sources/targets string "):
         game.parse_input_string("a1^b1")
@@ -54,9 +54,7 @@ def test_parse_input_string_fail(monkeypatch):
         game.parse_input_string("a1^c2c2")
     with pytest.raises(ValueError, match="Invalid sources/targets string "):
         game.parse_input_string("a1b")
-    with pytest.raises(
-        ValueError, match="Source and target should not be the same."
-    ):
+    with pytest.raises(ValueError, match="Source and target should not be the same."):
         game.parse_input_string("a1a1")
     with pytest.raises(ValueError, match="Invalid location string."):
         game.parse_input_string("a1n1")
@@ -64,13 +62,11 @@ def test_parse_input_string_fail(monkeypatch):
 
 def test_apply_move_fail(monkeypatch):
     inputs = iter(["y", "Bob", "Ben"])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     with pytest.raises(ValueError, match="Could not move empty piece."):
         game.apply_move("a1b1")
-    with pytest.raises(
-        ValueError, match="Could not move the other player's piece."
-    ):
+    with pytest.raises(ValueError, match="Could not move the other player's piece."):
         game.apply_move("a0b1")
 
 
@@ -78,7 +74,7 @@ def test_game_invalid_move(monkeypatch):
     output = io.StringIO()
     sys.stdout = output
     inputs = iter(["y", "Bob", "Ben", "a1n1", "exit"])
-    monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     game.play()
     assert (
