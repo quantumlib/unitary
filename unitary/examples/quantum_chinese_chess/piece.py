@@ -26,15 +26,22 @@ class Piece(QuantumObject):
         QuantumObject.__init__(self, name, state)
         self.type_ = type_
         self.color = color
+        # TODO(): maybe modify QuantumObject to allow it to:
+        # - not create qubit at initialization;
+        # - add qubit and set it to the current classical state when needed.
         self.is_entangled = False
 
     def symbol(self, lang: Language = Language.EN) -> str:
+        """Returns the symbol of this piece according to its type, color and language."""
         return Type.symbol(self.type_, self.color, lang)
 
     def __str__(self):
         return self.symbol()
 
     def reset(self, piece: "Piece" = None) -> None:
+        """Modifies the classical attributes of the piece.
+        If piece is provided, then its type_ and color is copied, otherwise set the current piece to be an empty piece.
+        """
         if piece is not None:
             self.type_ = piece.type_
             self.color = piece.color

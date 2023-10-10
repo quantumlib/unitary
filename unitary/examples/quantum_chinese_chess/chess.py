@@ -41,6 +41,23 @@ _WELCOME_MESSAGE = """
 class QuantumChineseChess:
     """A class that implements Quantum Chinese Chess using the unitary API."""
 
+    def print_welcome(self) -> None:
+        """Prints the welcome message. Gets board language and players' name."""
+        print(_WELCOME_MESSAGE)
+        print(_HELP_TEXT)
+        # TODO(): add the whole set of Chinese interface support.
+        lang = input(
+            "Switch to Chinese board characters? (y/n) (default to be English)  "
+        )
+        if lang.lower() == "y":
+            self.lang = Language.ZH
+        else:
+            self.lang = Language.EN
+        name_0 = input("Player 0's name (default to be Player_0):  ")
+        self.players_name.append("Player_0" if len(name_0) == 0 else name_0)
+        name_1 = input("Player 1's name (default to be Player_1):  ")
+        self.players_name.append("Player_1" if len(name_1) == 0 else name_1)
+
     def __init__(self):
         self.players_name = []
         self.print_welcome()
@@ -378,23 +395,6 @@ class QuantumChineseChess:
             elif self.game_state == GameState.DRAW:
                 print("Draw! Game is over.")
             break
-
-    def print_welcome(self) -> None:
-        """Prints the welcome message. Gets board language and players' name."""
-        print(_WELCOME_MESSAGE)
-        print(_HELP_TEXT)
-        # TODO(): add whole set of Chinese interface support.
-        lang = input(
-            "Switch to Chinese board characters? (y/n) (default to be English)  "
-        )
-        if lang.lower() == "y":
-            self.lang = Language.ZH
-        else:
-            self.lang = Language.EN
-        name_0 = input("Player 0's name (default to be Player_0):  ")
-        self.players_name.append("Player_0" if len(name_0) == 0 else name_0)
-        name_1 = input("Player 1's name (default to be Player_1):  ")
-        self.players_name.append("Player_1" if len(name_1) == 0 else name_1)
 
 
 def main():
