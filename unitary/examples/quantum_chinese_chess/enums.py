@@ -40,6 +40,8 @@ class GameState(enum.Enum):
     DRAW = 2
 
 
+# TODO(): consider if we could allow split/merge + excluded/capture,
+# and cannon_split_fire/cannon_merge_fire + capture
 class MoveType(enum.Enum):
     """Each valid move will be classfied into one of the following MoveTypes."""
 

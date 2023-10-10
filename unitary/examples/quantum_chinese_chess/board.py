@@ -165,7 +165,7 @@ class Board:
         else:
             raise ValueError("Unexpected input to path_pieces().")
         for piece in pieces:
-            if self.board[piece].is_entangled():
+            if self.board[piece].is_entangled:
                 quantum_pieces.append(piece)
             elif self.board[piece].type_ != Type.EMPTY:
                 classical_pieces.append(piece)

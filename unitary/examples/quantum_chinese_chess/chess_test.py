@@ -15,7 +15,13 @@ import pytest
 import io
 import sys
 from unitary.examples.quantum_chinese_chess.chess import QuantumChineseChess
-from unitary.examples.quantum_chinese_chess.enums import Language
+from unitary.examples.quantum_chinese_chess.piece import Piece
+from unitary.examples.quantum_chinese_chess.enums import (
+    Language,
+    Color,
+    Type,
+    SquareState,
+)
 
 
 def test_game_init(monkeypatch):
@@ -82,3 +88,123 @@ def test_game_invalid_move(monkeypatch):
         in output.getvalue()
     )
     sys.stdout = sys.__stdout__
+
+
+def test_check_classical_rule(monkeypatch):
+    output = io.StringIO()
+    sys.stdout = output
+    inputs = iter(["y", "Bob", "Ben"])
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+    game = QuantumChineseChess()
+    # The move is blocked by classical path piece.
+    with pytest.raises(ValueError, match="The path is blocked."):
+        game.check_classical_rule("a0", "a4", ["a3"])
+
+    # Cannon could jump across exactly one piece.
+    game.check_classical_rule("b2", "b9", ["b7"])
+    with pytest.raises(ValueError, match="Cannon cannot fire like this."):
+        game.check_classical_rule("b2", "b9", ["b5", "b7"])
+    # Cannon cannot fire to a piece with same color.
+    game.board.board["b3"].reset(game.board.board["b2"])
+    game.board.board["b2"].reset()
+    with pytest.raises(
+        ValueError, match="Cannon cannot fire to a piece with same color."
+    ):
+        game.check_classical_rule("b3", "e3", ["c3"])
+    with pytest.raises(ValueError, match="Cannon cannot fire to an empty piece."):
+        game.check_classical_rule("b3", "d3", ["c3"])
+
+    # Target should not be a classical piece of the same color.
+    with pytest.raises(
+        ValueError, match="The target place has classical piece with the same color."
+    ):
+        game.check_classical_rule("a0", "a3", [])
+
+    # ROOK
+    game.check_classical_rule("a0", "a2", [])
+    with pytest.raises(ValueError, match="ROOK cannot move like this."):
+        game.check_classical_rule("a0", "b1", [])
+
+    # HORSE
+    game.check_classical_rule("b0", "c2", [])
+    with pytest.raises(ValueError, match="HORSE cannot move like this."):
+        game.check_classical_rule("b0", "c1", [])
+
+    # ELEPHANT
+    game.check_classical_rule("c0", "e2", [])
+    with pytest.raises(ValueError, match="ELEPHANT cannot move like this."):
+        game.check_classical_rule("c0", "e1", [])
+    game.board.board["g4"].reset(
+        Piece("g4", SquareState.OCCUPIED, Type.ELEPHANT, Color.BLACK)
+    )
+    with pytest.raises(ValueError, match="ELEPHANT cannot cross the river"):
+        game.check_classical_rule("g4", "i6", [])
+    game.board.board["c5"].reset(
+        Piece("c5", SquareState.OCCUPIED, Type.ELEPHANT, Color.RED)
+    )
+    with pytest.raises(ValueError, match="ELEPHANT cannot cross the river"):
+        game.check_classical_rule("c5", "e3", [])
+
+    # ADVISOR
+    game.check_classical_rule("d9", "e8", [])
+    with pytest.raises(ValueError, match="ADVISOR cannot move like this."):
+        game.check_classical_rule("d9", "d8", [])
+    with pytest.raises(ValueError, match="ADVISOR cannot leave the palace."):
+        game.check_classical_rule("d0", "c1", [])
+    with pytest.raises(ValueError, match="ADVISOR cannot leave the palace."):
+        game.check_classical_rule("f9", "g8", [])
+
+    # KING
+    game.check_classical_rule("e9", "e8", [])
+    with pytest.raises(ValueError, match="KING cannot move like this."):
+        game.check_classical_rule("e9", "d8", [])
+    game.board.board["c9"].reset()
+    game.board.board["d9"].reset(game.board.board["e9"])
+    game.board.board["e9"].reset()
+    with pytest.raises(ValueError, match="KING cannot leave the palace."):
+        game.check_classical_rule("d9", "c9", [])
+
+    # CANNON
+    game.check_classical_rule("b7", "b4", [])
+    with pytest.raises(ValueError, match="CANNON cannot move like this."):
+        game.check_classical_rule("b7", "a8", [])
+
+    # PAWN
+    game.check_classical_rule("a6", "a5", [])
+    with pytest.raises(ValueError, match="PAWN cannot move like this."):
+        game.check_classical_rule("a6", "a4", [])
+    with pytest.raises(
+        ValueError, match="PAWN can only go forward before crossing the river"
+    ):
+        game.check_classical_rule("a6", "b6", [])
+    with pytest.raises(
+        ValueError, match="PAWN can only go forward before crossing the river"
+    ):
+        game.check_classical_rule("g3", "h3", [])
+    with pytest.raises(ValueError, match="PAWN can not move backward."):
+        game.check_classical_rule("a6", "a7", [])
+    with pytest.raises(ValueError, match="PAWN can not move backward."):
+        game.check_classical_rule("g3", "g2", [])
+    # After crossing the rive the pawn could move horizontally.
+    game.board.board["c4"].reset(game.board.board["c6"])
+    game.board.board["c6"].reset()
+    game.check_classical_rule("c4", "b4", [])
+    game.check_classical_rule("c4", "d4", [])
+
+
+def test_classify_move():
+    # classical basic
+    # classical excluded
+    # classical capture
+    # jump basic
+    # jump excluded
+    # jump capture
+    # slide basic
+    # slide excluded
+    # slide capture
+    # split_jump basic
+    # split_slide basic
+    # merge_jump basic
+    # merge_slide basic
+    # cannon_fire capture
+    pass

@@ -126,19 +126,20 @@ class QuantumChineseChess:
         target_piece = self.board.board[target]
         # Check if the move is blocked by classical path piece.
         if len(classical_path_pieces) > 0:
-            if source.type_ != Type.CANNON:
+            if source_piece.type_ != Type.CANNON:
                 # The path is blocked by classical pieces.
                 raise ValueError("The path is blocked.")
             elif len(classical_path_pieces) > 1:
                 # Invalid cannon move, since there could only be at most one classical piece between
                 # the source (i.e. the cannon) and the target.
                 raise ValueError("Cannon cannot fire like this.")
+            elif source_piece.color == target_piece.color:
+                raise ValueError("Cannon cannot fire to a piece with same color.")
+            elif target_piece.color == Color.NA:
+                raise ValueError("Cannon cannot fire to an empty piece.")
 
         # Check if the target has classical piece of the same color.
-        if (
-            not target_piece.is_entanngled()
-            and source_piece.color == target_piece.color
-        ):
+        if not target_piece.is_entangled and source_piece.color == target_piece.color:
             raise ValueError(
                 "The target place has classical piece with the same color."
             )
@@ -193,19 +194,19 @@ class QuantumChineseChess:
             if abs(dx) + abs(dy) != 1:
                 raise ValueError("PAWN cannot move like this.")
             if source_piece.color == Color.RED:
+                if dy == 1:
+                    raise ValueError("PAWN can not move backward.")
                 if y0 > 4 and dy != -1:
                     raise ValueError(
-                        "PAWN can only go forward before crossing the rive (i.e. the middle line)."
+                        "PAWN can only go forward before crossing the river (i.e. the middle line)."
                     )
-                if y0 <= 4 and dy == 1:
-                    raise ValueError("PAWN can not move backward.")
             else:
+                if dy == -1:
+                    raise ValueError("PAWN can not move backward.")
                 if y0 <= 4 and dy != 1:
                     raise ValueError(
-                        "PAWN can only go forward before crossing the rive (i.e. the middle line)."
+                        "PAWN can only go forward before crossing the river (i.e. the middle line)."
                     )
-                if y0 > 4 and dy == -1:
-                    raise ValueError("PAWN can not move backward.")
 
     def classify_move(
         self,
@@ -223,18 +224,42 @@ class QuantumChineseChess:
         source = self.board.board[sources[0]]
         target = self.board.board[targets[0]]
 
-        # Determine MoveType.
         if len(sources) == 1 and len(targets) == 1:
             if len(quantum_path_pieces_0) == 0:
                 if not source.is_entangled() and not target.is_entangled():
                     if target.color == source.color:
-                        raise ValueError("The ")
+                        raise ValueError(
+                            "The target piece is classical with the same color as the source piece."
+                        )
                     move_type = MoveType.CLASSICAL
                 else:
                     move_type = MoveType.JUMP
             else:
                 move_type = MoveType.SLIDE
+
+            if move_type != MoveType.CLASSICAL and len(classical_path_pieces_0) == 1:
+                # Special checks when source is cannon.
+                if target.color == source.color:
+                    raise ValueError(
+                        "Cannon cannot capture a piece with the same color."
+                    )
+                elif target.color == Color.NA:
+                    raise ValueError("Cannon cannot capture an empty piece.")
+                else:
+                    return MoveType.CANNON_NORMAL_FIRE, MoveVariant.CAPTURE
+            # Determine MoveVariant.
+            if target.color == Color.NA:
+                move_variant = MoveVariant.BASIC
+            elif target.color == source.color:
+                move_variant = MoveVariant.EXCLUDED
+            else:
+                move_variant = MoveVariant.CAPTURE
+
         elif len(sources) == 2:
+            if target.type_ != Type.EMPTY:
+                raise ValueError("Currently we could only merge into an empty piece.")
+            if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
+                raise ValueError("Currently Cannon could not merge while fire.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
                 move_type = Type.MERGE_JUMP
             else:
@@ -246,14 +271,7 @@ class QuantumChineseChess:
                 move_type = Type.SPLIT_JUMP
             else:
                 move_type = Type.SPLIT_SLIDE
-
-        # Determine MoveVariant.
-        if target.color == Color.NA:
-            move_variant = MoveVariant.BASIC
-        elif target.color == source.color:
-            move_variant = MoveVariant.EXCLUDED
-        else:
-            move_variant = MoveVariant.CAPTURE
+        return move_type, move_variant
 
     def apply_move(self, str_to_parse: str) -> None:
         """Check if the input string is valid. If it is, determine the move type and variant and return the move."""

@@ -12,8 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from unitary.examples.quantum_chinese_chess.enums import Language
+from unitary.examples.quantum_chinese_chess.enums import (
+    Language,
+    Color,
+    Type,
+    SquareState,
+)
 from unitary.examples.quantum_chinese_chess.board import Board
+from unitary.examples.quantum_chinese_chess.piece import Piece
 
 
 def test_init_with_default_fen():
@@ -99,3 +105,53 @@ def test_init_with_specified_fen():
     )
 
     assert board.king_locations == ["e9", "e0"]
+
+
+def test_path_pieces():
+    board = Board.from_fen()
+    # In case of only moving one step, return empty path pieces.
+    assert board.path_pieces("a0", "a1") == ([], [])
+
+    # In case of advisor moving, return empty path pieces.
+    assert board.path_pieces("d0", "e1") == ([], [])
+
+    # In case of elephant move, there should be at most one path piece.
+    assert board.path_pieces("c0", "e2") == ([], [])
+    # Add one classical piece in the path.
+    board.board["d1"].reset(Piece("d1", SquareState.OCCUPIED, Type.ROOK, Color.RED))
+    assert board.path_pieces("c0", "e2") == (["d1"], [])
+    # Add one quantum piece in the path.
+    board.board["d1"].is_entangled = True
+    assert board.path_pieces("c0", "e2") == ([], ["d1"])
+
+    # Horizontal move
+    board.board["c7"].reset(Piece("c7", SquareState.OCCUPIED, Type.ROOK, Color.RED))
+    board.board["c7"].is_entangled = True
+    assert board.path_pieces("a7", "i7") == (["b7", "h7"], ["c7"])
+
+    # Vertical move
+    assert board.path_pieces("c0", "c9") == (["c3", "c6"], ["c7"])
+
+    # In case of horse move, there should be at most one path piece.
+    assert board.path_pieces("b9", "a7") == ([], [])
+    assert board.path_pieces("b9", "c7") == ([], [])
+    # One classical piece in path.
+    assert board.path_pieces("b9", "d8") == (["c9"], [])
+    # One quantum piece in path.
+    assert board.path_pieces("c8", "d6") == ([], ["c7"])
+
+
+def test_flying_general_check():
+    board = Board.from_fen()
+    # If they are in different columns, the check fails.
+    board.king_locations = ["d0", "e9"]
+    assert board.flying_general_check() == False
+
+    # If there are classical pieces between two KINGs, the check fails.
+    board.king_locations = ["e0", "e9"]
+    assert board.flying_general_check() == False
+
+    # If there are no pieces between two KINGs, the check successes.
+    board.board["e3"].reset()
+    board.board["e6"].reset()
+    assert board.flying_general_check() == True
