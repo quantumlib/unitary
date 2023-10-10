@@ -17,6 +17,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     Language,
     GameState,
     Type,
+    Color,
     MoveType,
     MoveVariant,
 )
@@ -124,11 +125,11 @@ class QuantumChineseChess:
         source_piece = self.board.board[source]
         target_piece = self.board.board[target]
         # Check if the move is blocked by classical path piece.
-        if len(classical_pieces) > 0:
-            if sources.type_ != Type.CANNON:
+        if len(classical_path_pieces) > 0:
+            if source.type_ != Type.CANNON:
                 # The path is blocked by classical pieces.
                 raise ValueError("The path is blocked.")
-            elif len(classical_pieces) > 1:
+            elif len(classical_path_pieces) > 1:
                 # Invalid cannon move, since there could only be at most one classical piece between
                 # the source (i.e. the cannon) and the target.
                 raise ValueError("Cannon cannot fire like this.")
@@ -159,8 +160,8 @@ class QuantumChineseChess:
         elif source_piece.type_ == Type.ELEPHANT:
             if not (abs(dx) == 2 and abs(dy) == 2):
                 raise ValueError("ELEPHANT cannot move like this.")
-            if (source_piece.color == color.RED and y1 < 5) or (
-                source_piece.color == color.BLACK and y1 > 4
+            if (source_piece.color == Color.RED and y1 < 5) or (
+                source_piece.color == Color.BLACK and y1 > 4
             ):
                 raise ValueError(
                     "ELEPHANT cannot cross the river (i.e. the middle line)."
@@ -171,8 +172,8 @@ class QuantumChineseChess:
             if (
                 x1 > ord("f")
                 or x1 < ord("d")
-                or (source_piece.color == color.RED and y1 < 7)
-                or (source_piece.color == color.BLACK and y1 > 2)
+                or (source_piece.color == Color.RED and y1 < 7)
+                or (source_piece.color == Color.BLACK and y1 > 2)
             ):
                 raise ValueError("ADVISOR cannot leave the palace.")
         elif source_piece.type_ == Type.KING:
@@ -181,8 +182,8 @@ class QuantumChineseChess:
             if (
                 x1 > ord("f")
                 or x1 < ord("d")
-                or (source_piece.color == color.RED and y1 < 7)
-                or (source_piece.color == color.BLACK and y1 > 2)
+                or (source_piece.color == Color.RED and y1 < 7)
+                or (source_piece.color == Color.BLACK and y1 > 2)
             ):
                 raise ValueError("KING cannot leave the palace.")
         elif source_piece.type_ == Type.CANNON:
@@ -191,7 +192,7 @@ class QuantumChineseChess:
         elif source_piece.type_ == Type.PAWN:
             if abs(dx) + abs(dy) != 1:
                 raise ValueError("PAWN cannot move like this.")
-            if source_piece.color == color.RED:
+            if source_piece.color == Color.RED:
                 if y0 > 4 and dy != -1:
                     raise ValueError(
                         "PAWN can only go forward before crossing the rive (i.e. the middle line)."
@@ -239,7 +240,7 @@ class QuantumChineseChess:
             else:
                 move_type = Type.MERGE_SLIDE
         elif len(targets) == 2:
-            if souce.type_ == Type.KING:
+            if source.type_ == Type.KING:
                 raise ValueError("King split is not supported currently.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
                 move_type = Type.SPLIT_JUMP
@@ -267,13 +268,13 @@ class QuantumChineseChess:
                 raise ValueError("Could not move empty piece.")
             if self.board.board[source].color.value != self.board.current_player:
                 raise ValueError("Could not move the other player's piece.")
+        source_0 = self.board.board[sources[0]]
+        target_0 = self.board.board[targets[0]]
         if len(sources) == 2:
-            source_0 = self.board.board[sources[0]]
             source_1 = self.board.board[sources[1]]
             if source_0.type_ != source_1.type_:
                 raise ValueError("Two sources need to be the same type.")
         if len(targets) == 2:
-            target_0 = self.board.board[targets[0]]
             target_1 = self.board.board[targets[1]]
             if target_0.type_ != target_1.type_:
                 raise ValueError("Two targets need to be the same type.")
@@ -281,9 +282,11 @@ class QuantumChineseChess:
                 raise ValueError("Two targets need to be the same color.")
 
         # Check if the first path satisfies the classical rule.
-        classical_pieces_0, quantum_pieces_0 = board.path_pieces(sources[0], targets[0])
+        classical_pieces_0, quantum_pieces_0 = self.board.path_pieces(
+            sources[0], targets[0]
+        )
         try:
-            check_classical_rule(sources[0], targets[0], classical_pieces_0)
+            self.check_classical_rule(sources[0], targets[0], classical_pieces_0)
         except ValueError as e:
             raise e
 
@@ -292,19 +295,19 @@ class QuantumChineseChess:
         quantum_pieces_1 = None
 
         if len(sources) == 2:
-            classical_pieces_1, quantum_pieces_1 = board.path_pieces(
+            classical_pieces_1, quantum_pieces_1 = self.board.path_pieces(
                 sources[1], targets[0]
             )
             try:
-                check_classical_rule(sources[1], targets[0], classical_pieces_1)
+                self.check_classical_rule(sources[1], targets[0], classical_pieces_1)
             except ValueError as e:
                 raise e
         elif len(targets) == 2:
-            classical_pieces_1, quantum_pieces_1 = board.path_pieces(
+            classical_pieces_1, quantum_pieces_1 = self.board.path_pieces(
                 sources[0], targets[1]
             )
             try:
-                check_classical_rule(sources[0], targets[1], classical_pieces_1)
+                self.check_classical_rule(sources[0], targets[1], classical_pieces_1)
             except ValueError as e:
                 raise e
         # Classify the move type and move variant.
@@ -322,14 +325,14 @@ class QuantumChineseChess:
 
         if move_type == MoveType.CLASSICAL:
             if move_variant == MoveVariant.BASIC or move_variant == MoveVariant.CAPTURE:
-                if souce.type_ == Type.KING:
+                if source_0.type_ == Type.KING:
                     # Update the locations of KING.
                     self.board.king_locations[self.current_player] = targets[0]
-                if target.type_ == Type.KING:
+                if target_0.type_ == Type.KING:
                     # King is captured, then the game is over.
                     self.game_state = GameState(self.current_player)
-                target.reset(source)
-                source.reset()
+                target_0.reset(source_0)
+                source_0.reset()
                 # TODO(): only make such prints for a certain debug level.
                 print("Classical move.")
             else:
