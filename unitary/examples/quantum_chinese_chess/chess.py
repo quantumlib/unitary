@@ -51,17 +51,6 @@ class QuantumChineseChess:
         self.current_player = self.board.current_player
         self.debug_level = 3
 
-    def game_over(self) -> None:
-        """Checks if the game is over, and update self.game_state accordingly."""
-        if self.game_state != GameState.CONTINUES:
-            return
-        return
-        # TODO(): add the following checks
-        # - The current player wins if general is captured in the current move.
-        # - The other player wins if the flying general rule is satisfied, i.e. there is no piece
-        # (after measurement) between two generals.
-        # - If player 0 made N repeatd back-and_forth moves in a row.
-
     @staticmethod
     def parse_input_string(str_to_parse: str) -> Tuple[List[str], List[str]]:
         """Check if the input string could be turned into a valid move.
@@ -113,18 +102,19 @@ class QuantumChineseChess:
 
     def check_classical_rule(
         self, source: str, target: str, classical_path_pieces: List[str]
-    ):
+    ) -> None:
+        """Check if the proposed move satisfies classical rules, and raises ValueError if not."""
         source_piece = self.board.board[source]
         target_piece = self.board.board[target]
         # Check if the move is blocked by classical path piece.
         if len(classical_pieces) > 0:
             if sources.type_ != Type.CANNON:
                 # The path is blocked by classical pieces.
-                raise ValueError("Invalid move. The path is blocked.")
+                raise ValueError("The path is blocked.")
             elif len(classical_pieces) > 1:
                 # Invalid cannon move, since there could only be at most one classical piece between
                 # the source (i.e. the cannon) and the target.
-                raise ValueError("Invalid move. Cannon cannot fire like this.")
+                raise ValueError("Cannon cannot fire like this.")
 
         # Check if the target has classical piece of the same color.
         if (
@@ -132,7 +122,7 @@ class QuantumChineseChess:
             and source_piece.color == target_piece.color
         ):
             raise ValueError(
-                "Invalid move. The target place has classical piece with the same color."
+                "The target place has classical piece with the same color."
             )
 
         # Check if the move violates any classical rule.
@@ -219,6 +209,8 @@ class QuantumChineseChess:
         if len(sources) == 1 and len(targets) == 1:
             if len(quantum_path_pieces_0) == 0:
                 if not source.is_entangled() and not target.is_entangled():
+                    if target.color == source.color:
+                        raise ValueError("The ")
                     move_type = MoveType.CLASSICAL
                 else:
                     move_type = MoveType.JUMP
@@ -230,6 +222,8 @@ class QuantumChineseChess:
             else:
                 move_type = Type.MERGE_SLIDE
         elif len(targets) == 2:
+            if souce.type_ == Type.KING:
+                raise ValueError("King split is not supported currently.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
                 move_type = Type.SPLIT_JUMP
             else:
@@ -296,7 +290,7 @@ class QuantumChineseChess:
                 check_classical_rule(sources[0], targets[1], classical_pieces_1)
             except ValueError as e:
                 raise e
-
+        # Classify the move type and move variant.
         try:
             move_type, move_variant = self.classify_move(
                 sources,
@@ -309,18 +303,22 @@ class QuantumChineseChess:
         except ValueError as e:
             raise e
 
-        # if len(sources) == 1 and len(targets) == 1:
-        #     # Chances are normal/excluded/capture slide/jump or cannon fire.
-        #     source = self.board.board[sources[0]]
-        #     target = self.board.board[targets[0]]
-        #     # Such move is jump, but needs further check.
-        #     if len(quantum_pieces) == 0:
-        #         # Classical case.
-        #         if not source.is_entangled() and not target.type_ == Type.EMPTY:
-        #             target.reset(source)
-        #             source.reset()
-        #             print("Classical jump.")
-        #             return
+        if move_type == MoveType.CLASSICAL:
+            if move_variant == MoveVariant.BASIC or move_variant == MoveVariant.CAPTURE:
+                if souce.type_ == Type.KING:
+                    # Update the locations of KING.
+                    self.board.king_locations[self.current_player] = targets[0]
+                if target.type_ == Type.KING:
+                    # King is captured, then the game is over.
+                    self.game_state = GameState(self.current_player)
+                target.reset(source)
+                source.reset()
+                # TODO(): only make such prints for a certain debug level.
+                print("Classical move.")
+            else:
+                raise ValueError(
+                    "Unspecifed/excluded classical move. This should never happen."
+                )
 
     def next_move(self) -> bool:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
@@ -341,8 +339,20 @@ class QuantumChineseChess:
                 self.apply_move(input_str.lower())
                 return True
             except ValueError as e:
+                print("Invalid move.")
                 print(e)
         return False
+
+    def game_over(self) -> None:
+        """Checks if the game is over, and update self.game_state accordingly."""
+        if self.game_state != GameState.CONTINUES:
+            return
+        if self.board.flying_general_check():
+            # If two KINGs are directly facing each other (i.e. in the same column) without any pieces in between, then the game ends. The other player wins.
+            self.game_state = GameState(1 - self.current_player)
+        return
+        # TODO(): add the following checks
+        # - If player 0 made N repeatd back-and_forth moves in a row.
 
     def play(self) -> None:
         """The loop where each player takes turn to play."""
@@ -356,8 +366,8 @@ class QuantumChineseChess:
                     continue
             # Check if the game is over.
             self.game_over()
-            # If the game continues, switch the player.
             if self.game_state == GameState.CONTINUES:
+                # If the game continues, switch the player.
                 self.current_player = 1 - self.current_player
                 self.board.current_player = self.current_player
                 continue

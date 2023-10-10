@@ -35,6 +35,7 @@ class Board:
     ):
         self.board = board
         self.current_player = current_player
+        # This saves the locations of KINGs in the order of [RED_KING_LOCATION, BLACK_KING_LOCATION].
         self.king_locations = king_locations
         self.lang = Language.EN  # The default language is English.
 
@@ -77,6 +78,11 @@ class Board:
         board = alpha.QuantumWorld(chess_board.values())
         # Here 0 means the player RED while 1 the player BLACK.
         current_player = 0 if "w" in turns else 1
+        # TODO(): maybe add check to make sure the input fen itself is correct.
+        if len(king_locations) != 2:
+            raise ValueError(
+                f"We expect two KINGs on the board, but got {len(king_locations)}."
+            )
         return cls(board, current_player, king_locations)
 
     def __str__(self):
@@ -164,3 +170,19 @@ class Board:
             elif self.board[piece].type_ != Type.EMPTY:
                 classical_pieces.append(piece)
         return classical_pieces, quantum_pieces
+
+    def flying_general_check(self) -> bool:
+        """Check and return if the two KINGs are directly facing each other (i.e. in the same column) without any pieces in between."""
+        king_0 = self.king_locations[0]
+        king_1 = self.king_locations[1]
+        if king_0[0] != king_1[0]:
+            # If they are in different columns, the check fails. Game continues.
+            return False
+        classical_pieces, quantum_pieces = self.path_pieces(king_0, king_1)
+        if len(classical_pieces) > 0:
+            # If there are classical pieces between two KINGs, the check fails. Game continues.
+            return False
+        if len(quantum_pieces) == 0:
+            # If there are no pieces between two KINGs, the check successes. Game ends.
+            return True
+        # TODO(): add check when there are quantum pieces in between.
