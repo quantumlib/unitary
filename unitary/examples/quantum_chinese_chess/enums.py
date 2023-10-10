@@ -43,7 +43,7 @@ class GameState(enum.Enum):
 class MoveType(enum.Enum):
     """Each valid move will be classfied into one of the following MoveTypes."""
 
-    NULL_TYPE = 0
+    CLASSICAL = 0
     UNSPECIFIED_STANDARD = 1
     JUMP = 2
     SLIDE = 3
@@ -51,14 +51,11 @@ class MoveType(enum.Enum):
     SPLIT_SLIDE = 5
     MERGE_JUMP = 6
     MERGE_SLIDE = 7
-    HORSE_MOVE = 8
-    HORSE_SPLIT_MOVE = 9
-    HORSE_MERGE_MOVE = 10
-    CANNON_FIRE = 11
+    CANNON_FIRE = 8
 
 
 class MoveVariant(enum.Enum):
-    """Each valid move will be classfied into one of the following MoveVariat, in addition to
+    """Each valid move will be classfied into one of the following MoveVariant, in addition to
     the MoveType above.
     """
 

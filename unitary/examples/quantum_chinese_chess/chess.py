@@ -13,7 +13,13 @@
 # limitations under the License.
 from typing import Tuple, List
 from unitary.examples.quantum_chinese_chess.board import Board
-from unitary.examples.quantum_chinese_chess.enums import Language, GameState, Type
+from unitary.examples.quantum_chinese_chess.enums import (
+    Language,
+    GameState,
+    Type,
+    MoveType,
+    MoveVariant,
+)
 from unitary.examples.quantum_chinese_chess.move import Move
 
 # List of accepable commands.
@@ -105,40 +111,216 @@ class QuantumChineseChess:
                 )
         return sources, targets
 
+    def check_classical_rule(
+        self, source: str, target: str, classical_path_pieces: List[str]
+    ):
+        source_piece = self.board.board[source]
+        target_piece = self.board.board[target]
+        # Check if the move is blocked by classical path piece.
+        if len(classical_pieces) > 0:
+            if sources.type_ != Type.CANNON:
+                # The path is blocked by classical pieces.
+                raise ValueError("Invalid move. The path is blocked.")
+            elif len(classical_pieces) > 1:
+                # Invalid cannon move, since there could only be at most one classical piece between
+                # the source (i.e. the cannon) and the target.
+                raise ValueError("Invalid move. Cannon cannot fire like this.")
+
+        # Check if the target has classical piece of the same color.
+        if (
+            not target_piece.is_entanngled()
+            and source_piece.color == target_piece.color
+        ):
+            raise ValueError(
+                "Invalid move. The target place has classical piece with the same color."
+            )
+
+        # Check if the move violates any classical rule.
+        x0 = ord(source[0])
+        x1 = ord(target[0])
+        dx = x1 - x0
+        y0 = int(source[1])
+        y1 = int(target[1])
+        dy = y1 - y0
+
+        if source_piece.type_ == Type.ROOK:
+            if dx != 0 and dy != 0:
+                raise ValueError("ROOK cannot move like this.")
+        elif source_piece.type_ == Type.HORSE:
+            if not ((abs(dx) == 2 and abs(dy) == 1) or (abs(dx) == 1 and abs(dy) == 2)):
+                raise ValueError("HORSE cannot move like this.")
+        elif source_piece.type_ == Type.ELEPHANT:
+            if not (abs(dx) == 2 and abs(dy) == 2):
+                raise ValueError("ELEPHANT cannot move like this.")
+            if (source_piece.color == color.RED and y1 < 5) or (
+                source_piece.color == color.BLACK and y1 > 4
+            ):
+                raise ValueError(
+                    "ELEPHANT cannot cross the river (i.e. the middle line)."
+                )
+        elif source_piece.type_ == Type.ADVISOR:
+            if not (abs(dx) == 1 and abs(dy) == 1):
+                raise ValueError("ADVISOR cannot move like this.")
+            if (
+                x1 > ord("f")
+                or x1 < ord("d")
+                or (source_piece.color == color.RED and y1 < 7)
+                or (source_piece.color == color.BLACK and y1 > 2)
+            ):
+                raise ValueError("ADVISOR cannot leave the palace.")
+        elif source_piece.type_ == Type.KING:
+            if abs(dx) + abs(dy) != 1:
+                raise ValueError("KING cannot move like this.")
+            if (
+                x1 > ord("f")
+                or x1 < ord("d")
+                or (source_piece.color == color.RED and y1 < 7)
+                or (source_piece.color == color.BLACK and y1 > 2)
+            ):
+                raise ValueError("KING cannot leave the palace.")
+        elif source_piece.type_ == Type.CANNON:
+            if dx != 0 and dy != 0:
+                raise ValueError("CANNON cannot move like this.")
+        elif source_piece.type_ == Type.PAWN:
+            if abs(dx) + abs(dy) != 1:
+                raise ValueError("PAWN cannot move like this.")
+            if source_piece.color == color.RED:
+                if y0 > 4 and dy != -1:
+                    raise ValueError(
+                        "PAWN can only go forward before crossing the rive (i.e. the middle line)."
+                    )
+                if y0 <= 4 and dy == 1:
+                    raise ValueError("PAWN can not move backward.")
+            else:
+                if y0 <= 4 and dy != 1:
+                    raise ValueError(
+                        "PAWN can only go forward before crossing the rive (i.e. the middle line)."
+                    )
+                if y0 > 4 and dy == -1:
+                    raise ValueError("PAWN can not move backward.")
+
+    def classify_move(
+        self,
+        sources: List[str],
+        targets: List[str],
+        classical_path_pieces_0: List[str],
+        quantum_path_pieces_0: List[str],
+        classical_path_pieces_1: List[str],
+        quantum_path_pieces_1: List[str],
+    ) -> Tuple[MoveType, MoveVariant]:
+        """Determines the MoveType and MoveVariant."""
+        move_type = MoveType.UNSPECIFIED_STANDARD
+        move_variant = MoveVariant.UNSPECIFIED
+
+        source = self.board.board[sources[0]]
+        target = self.board.board[targets[0]]
+
+        # Determine MoveType.
+        if len(sources) == 1 and len(targets) == 1:
+            if len(quantum_path_pieces_0) == 0:
+                if not source.is_entangled() and not target.is_entangled():
+                    move_type = MoveType.CLASSICAL
+                else:
+                    move_type = MoveType.JUMP
+            else:
+                move_type = MoveType.SLIDE
+        elif len(sources) == 2:
+            if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
+                move_type = Type.MERGE_JUMP
+            else:
+                move_type = Type.MERGE_SLIDE
+        elif len(targets) == 2:
+            if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
+                move_type = Type.SPLIT_JUMP
+            else:
+                move_type = Type.SPLIT_SLIDE
+
+        # Determine MoveVariant.
+        if target.color == Color.NA:
+            move_variant = MoveVariant.BASIC
+        elif target.color == source.color:
+            move_variant = MoveVariant.EXCLUDED
+        else:
+            move_variant = MoveVariant.CAPTURE
+
     def apply_move(self, str_to_parse: str) -> None:
         """Check if the input string is valid. If it is, determine the move type and variant and return the move."""
         try:
             sources, targets = self.parse_input_string(str_to_parse)
         except ValueError as e:
             raise e
+
         # Additional checks based on the current board.
         for source in sources:
             if self.board.board[source].type_ == Type.EMPTY:
                 raise ValueError("Could not move empty piece.")
             if self.board.board[source].color.value != self.board.current_player:
                 raise ValueError("Could not move the other player's piece.")
-        if len(sources) == 1 and len(targets) == 1:
-            # Chances are normal/excluded/capture slide/jump or cannon fire.
-            classical_pieces, quantum_pieces = board.path_pieces(sources[0], targets[0])
-            source = board[sources[0]]
-            target = board[targets[0]]
-            if len(classical_pieces) > 0:
-                if sources.type_ != Type.CANNON:
-                    # The path is blocked by classical pieces.
-                    raise ValueError("Invalid move. The path is blocked.")
-                elif len(classical_pieces) > 1:
-                    # Invalid cannon move, since there could only be at most one classical piece between
-                    # the source (i.e. the cannon) and the target.
-                    raise ValueError("Invalid move. Cannon cannot fire like this.")
+        if len(sources) == 2:
+            source_0 = self.board.board[sources[0]]
+            source_1 = self.board.board[sources[1]]
+            if source_0.type_ != source_1.type_:
+                raise ValueError("Two sources need to be the same type.")
+        if len(targets) == 2:
+            target_0 = self.board.board[targets[0]]
+            target_1 = self.board.board[targets[1]]
+            if target_0.type_ != target_1.type_:
+                raise ValueError("Two targets need to be the same type.")
+            if target_0.color != target_1.color:
+                raise ValueError("Two targets need to be the same color.")
 
-            # Such move is jump, but needs further check.
-            if len(quantum_pieces) == 0:
-                # Classical case.
-                if not source.is_entangled() and not target.type_ == Type.EMPTY:
-                    target.reset(source)
-                    source.reset()
-                    print("Classical jump.")
-                    return
+        # Check if the first path satisfies the classical rule.
+        classical_pieces_0, quantum_pieces_0 = board.path_pieces(sources[0], targets[0])
+        try:
+            check_classical_rule(sources[0], targets[0], classical_pieces_0)
+        except ValueError as e:
+            raise e
+
+        # Check if the second path (if exists) satisfies the classical rule.
+        classical_pieces_1 = None
+        quantum_pieces_1 = None
+
+        if len(sources) == 2:
+            classical_pieces_1, quantum_pieces_1 = board.path_pieces(
+                sources[1], targets[0]
+            )
+            try:
+                check_classical_rule(sources[1], targets[0], classical_pieces_1)
+            except ValueError as e:
+                raise e
+        elif len(targets) == 2:
+            classical_pieces_1, quantum_pieces_1 = board.path_pieces(
+                sources[0], targets[1]
+            )
+            try:
+                check_classical_rule(sources[0], targets[1], classical_pieces_1)
+            except ValueError as e:
+                raise e
+
+        try:
+            move_type, move_variant = self.classify_move(
+                sources,
+                targets,
+                classical_pieces_0,
+                quantum_pieces_0,
+                classical_pieces_1,
+                quantum_pieces_1,
+            )
+        except ValueError as e:
+            raise e
+
+        # if len(sources) == 1 and len(targets) == 1:
+        #     # Chances are normal/excluded/capture slide/jump or cannon fire.
+        #     source = self.board.board[sources[0]]
+        #     target = self.board.board[targets[0]]
+        #     # Such move is jump, but needs further check.
+        #     if len(quantum_pieces) == 0:
+        #         # Classical case.
+        #         if not source.is_entangled() and not target.type_ == Type.EMPTY:
+        #             target.reset(source)
+        #             source.reset()
+        #             print("Classical jump.")
+        #             return
 
     def next_move(self) -> bool:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
