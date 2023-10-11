@@ -125,18 +125,9 @@ class QuantumChineseChess:
         source_piece = self.board.board[source]
         target_piece = self.board.board[target]
         # Check if the move is blocked by classical path piece.
-        if len(classical_path_pieces) > 0:
-            if source_piece.type_ != Type.CANNON:
-                # The path is blocked by classical pieces.
-                raise ValueError("The path is blocked.")
-            elif len(classical_path_pieces) > 1:
-                # Invalid cannon move, since there could only be at most one classical piece between
-                # the source (i.e. the cannon) and the target.
-                raise ValueError("Cannon cannot fire like this.")
-            elif source_piece.color == target_piece.color:
-                raise ValueError("Cannon cannot fire to a piece with same color.")
-            elif target_piece.color == Color.NA:
-                raise ValueError("Cannon cannot fire to an empty piece.")
+        if len(classical_path_pieces) > 0 and source_piece.type_ != Type.CANNON:
+            # The path is blocked by classical pieces.
+            raise ValueError("The path is blocked.")
 
         # Check if the target has classical piece of the same color.
         if not target_piece.is_entangled and source_piece.color == target_piece.color:
@@ -190,6 +181,15 @@ class QuantumChineseChess:
         elif source_piece.type_ == Type.CANNON:
             if dx != 0 and dy != 0:
                 raise ValueError("CANNON cannot move like this.")
+            if len(classical_path_pieces) > 0:
+                if len(classical_path_pieces) > 1:
+                    # Invalid cannon move, since there could only be at most one classical piece between
+                    # the source (i.e. the cannon) and the target.
+                    raise ValueError("CANNON cannot fire like this.")
+                elif source_piece.color == target_piece.color:
+                    raise ValueError("CANNON cannot fire to a piece with same color.")
+                elif target_piece.color == Color.NA:
+                    raise ValueError("CANNON cannot fire to an empty piece.")
         elif source_piece.type_ == Type.PAWN:
             if abs(dx) + abs(dy) != 1:
                 raise ValueError("PAWN cannot move like this.")
@@ -226,51 +226,71 @@ class QuantumChineseChess:
 
         if len(sources) == 1 and len(targets) == 1:
             if len(quantum_path_pieces_0) == 0:
-                if not source.is_entangled() and not target.is_entangled():
-                    if target.color == source.color:
-                        raise ValueError(
-                            "The target piece is classical with the same color as the source piece."
-                        )
-                    move_type = MoveType.CLASSICAL
+                if (
+                    len(classical_path_pieces_0) == 0
+                    and source.type_ == Type.CANNON
+                    and target.color.value == 1 - source.color.value
+                ):
+                    raise ValueError(
+                        "CANNON could not fire/capture without a cannon platform."
+                    )
+                if not source.is_entangled and not target.is_entangled:
+                    return MoveType.CLASSICAL, MoveVariant.UNSPECIFIED
                 else:
                     move_type = MoveType.JUMP
             else:
                 move_type = MoveType.SLIDE
 
-            if move_type != MoveType.CLASSICAL and len(classical_path_pieces_0) == 1:
-                # Special checks when source is cannon.
-                if target.color == source.color:
-                    raise ValueError(
-                        "Cannon cannot capture a piece with the same color."
-                    )
-                elif target.color == Color.NA:
-                    raise ValueError("Cannon cannot capture an empty piece.")
-                else:
-                    return MoveType.CANNON_NORMAL_FIRE, MoveVariant.CAPTURE
+            if (
+                move_type != MoveType.CLASSICAL
+                and source.type_ == Type.CANNON
+                and (
+                    len(classical_path_pieces_0) == 1 or len(quantum_path_pieces_0) > 0
+                )
+            ):
+                # By this time the classical cannon fire has been identified as CLASSICAL JUMP.
+                return MoveType.CANNON_FIRE, MoveVariant.CAPTURE
             # Determine MoveVariant.
             if target.color == Color.NA:
                 move_variant = MoveVariant.BASIC
+            # TODO(): such move could be a merge. Take care of such cases later.
             elif target.color == source.color:
                 move_variant = MoveVariant.EXCLUDED
             else:
                 move_variant = MoveVariant.CAPTURE
 
         elif len(sources) == 2:
+            source_1 = self.board.board[sources[1]]
+            if not source.is_entangled or not source_1.is_entangled:
+                raise ValueError(
+                    "Both sources need to be in quantum state in order to merge."
+                )
             if target.type_ != Type.EMPTY:
+                # TODO(): Currently we don't support merge + excluded/capture, or cannon_merge_fire + capture. Maybe add support later.
+                if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
+                    raise ValueError("Currently CANNON could not merge while fire.")
                 raise ValueError("Currently we could only merge into an empty piece.")
-            if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
-                raise ValueError("Currently Cannon could not merge while fire.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
-                move_type = Type.MERGE_JUMP
+                move_type = MoveType.MERGE_JUMP
             else:
-                move_type = Type.MERGE_SLIDE
+                move_type = MoveType.MERGE_SLIDE
+            move_variant = MoveVariant.BASIC
+
         elif len(targets) == 2:
+            target_1 = self.board.board[targets[1]]
+            if target.type_ != Type.EMPTY or target_1.type_ != Type.EMPTY:
+                # TODO(): Currently we don't support split + excluded/capture, or cannon_split_fire + capture. Maybee add support later.
+                if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
+                    raise ValueError("Currently CANNON could not split while fire.")
+                raise ValueError("Currently we could only split into empty pieces.")
             if source.type_ == Type.KING:
+                # TODO(): Currently we don't support KING split. Maybe add support later.
                 raise ValueError("King split is not supported currently.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
-                move_type = Type.SPLIT_JUMP
+                move_type = MoveType.SPLIT_JUMP
             else:
-                move_type = Type.SPLIT_SLIDE
+                move_type = MoveType.SPLIT_SLIDE
+            move_variant = MoveVariant.BASIC
         return move_type, move_variant
 
     def apply_move(self, str_to_parse: str) -> None:

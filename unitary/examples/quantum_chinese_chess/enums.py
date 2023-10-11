@@ -61,10 +61,10 @@ class MoveVariant(enum.Enum):
     the MoveType above.
     """
 
-    UNSPECIFIED = 0
-    BASIC = 1
-    EXCLUDED = 2
-    CAPTURE = 3
+    UNSPECIFIED = 0  # Used together with MoveType = CLASSICAL.
+    BASIC = 1  # The target piece is empty.
+    EXCLUDED = 2  # The target piece has the same color.
+    CAPTURE = 3  # The target piece has the opposite color.
 
 
 class Color(enum.Enum):
