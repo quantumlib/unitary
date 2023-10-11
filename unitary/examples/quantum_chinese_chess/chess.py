@@ -265,10 +265,10 @@ class QuantumChineseChess:
                 raise ValueError(
                     "Both sources need to be in quantum state in order to merge."
                 )
+            # TODO(): Currently we don't support merge + excluded/capture, or cannon_merge_fire + capture. Maybe add support later.
+            if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
+                raise ValueError("Currently CANNON could not merge while fire.")
             if target.type_ != Type.EMPTY:
-                # TODO(): Currently we don't support merge + excluded/capture, or cannon_merge_fire + capture. Maybe add support later.
-                if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
-                    raise ValueError("Currently CANNON could not merge while fire.")
                 raise ValueError("Currently we could only merge into an empty piece.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
                 move_type = MoveType.MERGE_JUMP
@@ -278,10 +278,10 @@ class QuantumChineseChess:
 
         elif len(targets) == 2:
             target_1 = self.board.board[targets[1]]
+            # TODO(): Currently we don't support split + excluded/capture, or cannon_split_fire + capture. Maybee add support later.
+            if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
+                raise ValueError("Currently CANNON could not split while fire.")
             if target.type_ != Type.EMPTY or target_1.type_ != Type.EMPTY:
-                # TODO(): Currently we don't support split + excluded/capture, or cannon_split_fire + capture. Maybee add support later.
-                if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
-                    raise ValueError("Currently CANNON could not split while fire.")
                 raise ValueError("Currently we could only split into empty pieces.")
             if source.type_ == Type.KING:
                 # TODO(): Currently we don't support KING split. Maybe add support later.
@@ -314,6 +314,7 @@ class QuantumChineseChess:
                 raise ValueError("Two sources need to be the same type.")
         if len(targets) == 2:
             target_1 = self.board.board[targets[1]]
+            # TODO(): handle the case where a piece is split into the current piece and another piece, in which case two targets are different.
             if target_0.type_ != target_1.type_:
                 raise ValueError("Two targets need to be the same type.")
             if target_0.color != target_1.color:
@@ -362,21 +363,18 @@ class QuantumChineseChess:
             raise e
 
         if move_type == MoveType.CLASSICAL:
-            if move_variant == MoveVariant.BASIC or move_variant == MoveVariant.CAPTURE:
-                if source_0.type_ == Type.KING:
-                    # Update the locations of KING.
-                    self.board.king_locations[self.current_player] = targets[0]
-                if target_0.type_ == Type.KING:
-                    # King is captured, then the game is over.
-                    self.game_state = GameState(self.current_player)
-                target_0.reset(source_0)
-                source_0.reset()
+            if source_0.type_ == Type.KING:
+                # Update the locations of KING.
+                self.board.king_locations[self.current_player] = targets[0]
                 # TODO(): only make such prints for a certain debug level.
-                print("Classical move.")
-            else:
-                raise ValueError(
-                    "Unspecifed/excluded classical move. This should never happen."
-                )
+                print(f"Updated king locations: {self.board.king_locations}.")
+            if target_0.type_ == Type.KING:
+                # King is captured, then the game is over.
+                self.game_state = GameState(self.current_player)
+            target_0.reset(source_0)
+            source_0.reset()
+            # TODO(): only make such prints for a certain debug level.
+            print("Classical move.")
 
     def next_move(self) -> bool:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.

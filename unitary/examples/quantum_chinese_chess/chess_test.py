@@ -76,6 +76,12 @@ def test_apply_move_fail(monkeypatch):
         game.apply_move("a1b1")
     with pytest.raises(ValueError, match="Could not move the other player's piece."):
         game.apply_move("a0b1")
+    with pytest.raises(ValueError, match="Two sources need to be the same type."):
+        game.apply_move("a9a6^a5")
+    with pytest.raises(ValueError, match="Two targets need to be the same type."):
+        game.apply_move("b7^a7h7")
+    with pytest.raises(ValueError, match="Two targets need to be the same color."):
+        game.apply_move("b7^b2h7")
 
 
 def test_game_invalid_move(monkeypatch):
