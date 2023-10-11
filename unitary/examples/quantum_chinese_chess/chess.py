@@ -295,10 +295,7 @@ class QuantumChineseChess:
 
     def apply_move(self, str_to_parse: str) -> None:
         """Check if the input string is valid. If it is, determine the move type and variant and return the move."""
-        try:
-            sources, targets = self.parse_input_string(str_to_parse)
-        except ValueError as e:
-            raise e
+        sources, targets = self.parse_input_string(str_to_parse)
 
         # Additional checks based on the current board.
         for source in sources:
@@ -324,10 +321,7 @@ class QuantumChineseChess:
         classical_pieces_0, quantum_pieces_0 = self.board.path_pieces(
             sources[0], targets[0]
         )
-        try:
-            self.check_classical_rule(sources[0], targets[0], classical_pieces_0)
-        except ValueError as e:
-            raise e
+        self.check_classical_rule(sources[0], targets[0], classical_pieces_0)
 
         # Check if the second path (if exists) satisfies the classical rule.
         classical_pieces_1 = None
@@ -337,30 +331,21 @@ class QuantumChineseChess:
             classical_pieces_1, quantum_pieces_1 = self.board.path_pieces(
                 sources[1], targets[0]
             )
-            try:
-                self.check_classical_rule(sources[1], targets[0], classical_pieces_1)
-            except ValueError as e:
-                raise e
+            self.check_classical_rule(sources[1], targets[0], classical_pieces_1)
         elif len(targets) == 2:
             classical_pieces_1, quantum_pieces_1 = self.board.path_pieces(
                 sources[0], targets[1]
             )
-            try:
-                self.check_classical_rule(sources[0], targets[1], classical_pieces_1)
-            except ValueError as e:
-                raise e
+            self.check_classical_rule(sources[0], targets[1], classical_pieces_1)
         # Classify the move type and move variant.
-        try:
-            move_type, move_variant = self.classify_move(
-                sources,
-                targets,
-                classical_pieces_0,
-                quantum_pieces_0,
-                classical_pieces_1,
-                quantum_pieces_1,
-            )
-        except ValueError as e:
-            raise e
+        move_type, move_variant = self.classify_move(
+            sources,
+            targets,
+            classical_pieces_0,
+            quantum_pieces_0,
+            classical_pieces_1,
+            quantum_pieces_1,
+        )
 
         if move_type == MoveType.CLASSICAL:
             if source_0.type_ == Type.KING:
