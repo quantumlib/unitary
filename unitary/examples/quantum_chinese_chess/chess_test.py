@@ -222,9 +222,7 @@ def test_classify_move_fail(monkeypatch):
     game.board.board["g0"].reset(game.board.board["h7"])
     game.board.board["g0"].is_entangled = True
     game.board.board["h7"].reset()
-    with pytest.raises(
-        ValueError, match="Currently CANNON could not merge while fire."
-    ):
+    with pytest.raises(ValueError, match="Currently CANNON cannot merge while firing."):
         game.classify_move(["c0", "g0"], ["e0"], ["d0"], [], ["f0"], [])
 
     game.board.board["b3"].reset(game.board.board["b2"])

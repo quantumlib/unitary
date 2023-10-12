@@ -128,7 +128,7 @@ class Board:
         )
 
     def path_pieces(self, source: str, target: str) -> Tuple[List[str], List[str]]:
-        """Returns the nonempty classical and quantum pieces from source to target."""
+        """Returns the nonempty classical and quantum pieces from source to target (excluded)."""
         x0 = ord(source[0])
         x1 = ord(target[0])
         dx = x1 - x0
@@ -150,9 +150,11 @@ class Board:
         # In case of elephant move, there should only be one path piece.
         if abs(dx) == abs(dy):
             pieces.append(f"{chr(x0 + dx_sign)}{y0 + dy_sign}")
+        # This could be move of rook, king, pawn or cannon.
         elif dx == 0:
             for i in range(1, abs(dy)):
                 pieces.append(f"{chr(x0)}{y0 + dy_sign * i}")
+        # This could be move of rook, king, pawn or cannon.
         elif dy == 0:
             for i in range(1, abs(dx)):
                 pieces.append(f"{chr(x0 + dx_sign * i)}{y0}")

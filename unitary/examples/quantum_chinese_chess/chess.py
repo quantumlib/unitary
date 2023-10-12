@@ -121,7 +121,13 @@ class QuantumChineseChess:
     def check_classical_rule(
         self, source: str, target: str, classical_path_pieces: List[str]
     ) -> None:
-        """Check if the proposed move satisfies classical rules, and raises ValueError if not."""
+        """Check if the proposed move satisfies classical rules, and raises ValueError if not.
+
+        Args:
+            source: the name of the source piece
+            target: the name of the target piece
+            classical_path_pieces: the names of the path pieces from source to target (excluded)
+        """
         source_piece = self.board.board[source]
         target_piece = self.board.board[target]
         # Check if the move is blocked by classical path piece.
@@ -241,12 +247,8 @@ class QuantumChineseChess:
             else:
                 move_type = MoveType.SLIDE
 
-            if (
-                move_type != MoveType.CLASSICAL
-                and source.type_ == Type.CANNON
-                and (
-                    len(classical_path_pieces_0) == 1 or len(quantum_path_pieces_0) > 0
-                )
+            if source.type_ == Type.CANNON and (
+                len(classical_path_pieces_0) == 1 or len(quantum_path_pieces_0) > 0
             ):
                 # By this time the classical cannon fire has been identified as CLASSICAL JUMP.
                 return MoveType.CANNON_FIRE, MoveVariant.CAPTURE
@@ -267,7 +269,7 @@ class QuantumChineseChess:
                 )
             # TODO(): Currently we don't support merge + excluded/capture, or cannon_merge_fire + capture. Maybe add support later.
             if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
-                raise ValueError("Currently CANNON could not merge while fire.")
+                raise ValueError("Currently CANNON cannot merge while firing.")
             if target.type_ != Type.EMPTY:
                 raise ValueError("Currently we could only merge into an empty piece.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
@@ -278,7 +280,7 @@ class QuantumChineseChess:
 
         elif len(targets) == 2:
             target_1 = self.board.board[targets[1]]
-            # TODO(): Currently we don't support split + excluded/capture, or cannon_split_fire + capture. Maybee add support later.
+            # TODO(): Currently we don't support split + excluded/capture, or cannon_split_fire + capture. Maybe add support later.
             if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
                 raise ValueError("Currently CANNON could not split while fire.")
             if target.type_ != Type.EMPTY or target_1.type_ != Type.EMPTY:
