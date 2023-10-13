@@ -361,9 +361,19 @@ class QuantumChineseChess:
             # TODO(): only make such prints for a certain debug level.
             print("Classical move.")
         elif move_type == MoveType.JUMP:
-            # TODO(): maybe we could refactor to do
-            # Jump()(source_0, target_0)
-            Jump(move_variant).effect(source_0, target_0)
+            Jump(move_variant)(source_0, target_0)
+        elif move_type == MoveType.SLIDE:
+            Slide(quantum_pieces_0, move_variant)(source_0, target_0)
+        elif move_type == MoveType.SPLIT_JUMP:
+            SplitJump()(source_0, target_0, target_1)
+        elif move_type == MoveType.SPLIT_SLIDE:
+            SplitSlide(quantum_pieces_0, quantum_pieces_1)(source_0, target_0, target_1)
+        elif move_type == MoveType.MERGE_JUMP:
+            MergeJump()(source_0, source_1, target_0)
+        elif move_type == MoveType.MERGE_SLIDE:
+            MergeSlide(quantum_pieces_0, quantum_pieces_1)(source_0, source_1, target_0)
+        elif move_type == MoveType.CANNON_FIRE:
+            CannonFire(classical_pieces_0, quantum_pieces_0)(source_0, target_0)
 
     def next_move(self) -> bool:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
@@ -394,6 +404,8 @@ class QuantumChineseChess:
             return
         if self.board.flying_general_check():
             # If two KINGs are directly facing each other (i.e. in the same column) without any pieces in between, then the game ends. The other player wins.
+            print("==== FLYING GENERAL ! ====")
+            print(self.board)
             self.game_state = GameState(1 - self.current_player)
         return
         # TODO(): add the following checks
