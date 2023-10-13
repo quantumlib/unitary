@@ -236,9 +236,7 @@ def test_classify_move_fail(monkeypatch):
     ):
         game.classify_move(["b3", "d3"], ["c3"], [], [], [], [])
 
-    with pytest.raises(
-        ValueError, match="Currently CANNON could not split while fire."
-    ):
+    with pytest.raises(ValueError, match="Currently CANNON cannot split while firing."):
         game.classify_move(["g0"], ["e0", "i0"], ["f0"], [], ["h0"], [])
 
     game.board.board["d0"].is_entangled = True

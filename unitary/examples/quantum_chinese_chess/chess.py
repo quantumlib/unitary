@@ -118,6 +118,15 @@ class QuantumChineseChess:
                 )
         return sources, targets
 
+    @classmethod
+    def _is_in_palace(self, color: Color, x: int, y: int) -> bool:
+        """Check if the given location is within palace. This check will be applied to all KING ans ADVISOR moves."""
+        return (
+            x <= ord("f")
+            and x >= ord("d")
+            and ((color == Color.RED and y >= 7) or (color == Color.BLACK and y <= 2))
+        )
+
     def check_classical_rule(
         self, source: str, target: str, classical_path_pieces: List[str]
     ) -> None:
@@ -167,22 +176,12 @@ class QuantumChineseChess:
         elif source_piece.type_ == Type.ADVISOR:
             if not (abs(dx) == 1 and abs(dy) == 1):
                 raise ValueError("ADVISOR cannot move like this.")
-            if (
-                x1 > ord("f")
-                or x1 < ord("d")
-                or (source_piece.color == Color.RED and y1 < 7)
-                or (source_piece.color == Color.BLACK and y1 > 2)
-            ):
+            if not self._is_in_palace(source_piece.color, x1, y1):
                 raise ValueError("ADVISOR cannot leave the palace.")
         elif source_piece.type_ == Type.KING:
             if abs(dx) + abs(dy) != 1:
                 raise ValueError("KING cannot move like this.")
-            if (
-                x1 > ord("f")
-                or x1 < ord("d")
-                or (source_piece.color == Color.RED and y1 < 7)
-                or (source_piece.color == Color.BLACK and y1 > 2)
-            ):
+            if not self._is_in_palace(source_piece.color, x1, y1):
                 raise ValueError("KING cannot leave the palace.")
         elif source_piece.type_ == Type.CANNON:
             if dx != 0 and dy != 0:
@@ -223,7 +222,19 @@ class QuantumChineseChess:
         classical_path_pieces_1: List[str],
         quantum_path_pieces_1: List[str],
     ) -> Tuple[MoveType, MoveVariant]:
-        """Determines the MoveType and MoveVariant."""
+        """Determines and returns the MoveType and MoveVariant. This function assumes that check_classical_rule()
+        has been called before this.
+
+        Args:
+            sources: the list of names of the source pieces
+            targets: the list of names of the target pieces
+            classical_path_pieces_0: the list of names of classical pieces from source_0 to target_0 (excluded)
+            quantum_path_pieces_0: the list of names of quantum pieces from source_0 to target_0 (excluded)
+            classical_path_pieces_1: the list of names of classical pieces from source_0 to target_1 (for split)
+                                     or from source_1 to target_0 (for merge) (excluded)
+            quantum_path_pieces_1: the list of names of quantum pieces from source_0 to target_1 (for split) or
+                                     from source_1 to target_0 (for merge) (excluded)
+        """
         move_type = MoveType.UNSPECIFIED_STANDARD
         move_variant = MoveVariant.UNSPECIFIED
 
@@ -237,31 +248,44 @@ class QuantumChineseChess:
                     and source.type_ == Type.CANNON
                     and target.color.value == 1 - source.color.value
                 ):
+                    # CANNON is special in that there has to be a platform between itself and the target
+                    # to capture.
                     raise ValueError(
                         "CANNON could not fire/capture without a cannon platform."
                     )
                 if not source.is_entangled and not target.is_entangled:
+                    # This handles all classical cases, where no quantum piece is envolved.
+                    # We don't need to further classify MoveVariant types since all classical cases
+                    # will be handled in a similar way.
                     return MoveType.CLASSICAL, MoveVariant.UNSPECIFIED
                 else:
+                    # If any of the source or target is entangled, this move is a JUMP.
                     move_type = MoveType.JUMP
             else:
+                # If there is any quantum path pieces, this move is a SLIDE.
                 move_type = MoveType.SLIDE
 
             if source.type_ == Type.CANNON and (
                 len(classical_path_pieces_0) == 1 or len(quantum_path_pieces_0) > 0
             ):
-                # By this time the classical cannon fire has been identified as CLASSICAL JUMP.
+                # By this time the classical cannon fire has been identified as CLASSICAL move,
+                # so the current case has quantum piece(s) envolved.
                 return MoveType.CANNON_FIRE, MoveVariant.CAPTURE
+
             # Determine MoveVariant.
             if target.color == Color.NA:
+                # If the target piece is classical empty => BASIC.
                 move_variant = MoveVariant.BASIC
-            # TODO(): such move could be a merge. Take care of such cases later.
             elif target.color == source.color:
+                # If the target has the same color as the source => EXCLUDED.
+                # TODO(): such move could be a merge. Take care of such cases later.
                 move_variant = MoveVariant.EXCLUDED
             else:
+                # If the target is on the opposite side => CAPTURE.
                 move_variant = MoveVariant.CAPTURE
 
         elif len(sources) == 2:
+            # Determine types for merge cases.
             source_1 = self.board.board[sources[1]]
             if not source.is_entangled or not source_1.is_entangled:
                 raise ValueError(
@@ -273,25 +297,32 @@ class QuantumChineseChess:
             if target.type_ != Type.EMPTY:
                 raise ValueError("Currently we could only merge into an empty piece.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
+                # The move is MERGE_JUMP if there are no quantum pieces in either path.
                 move_type = MoveType.MERGE_JUMP
             else:
+                # The move is MERGE_SLIDE if there is quantum piece in any path.
                 move_type = MoveType.MERGE_SLIDE
+            # Currently we don't support EXCLUDE or CAPTURE typed merge moves.
             move_variant = MoveVariant.BASIC
 
         elif len(targets) == 2:
+            # Determine types for split cases.
             target_1 = self.board.board[targets[1]]
             # TODO(): Currently we don't support split + excluded/capture, or cannon_split_fire + capture. Maybe add support later.
             if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
-                raise ValueError("Currently CANNON could not split while fire.")
+                raise ValueError("Currently CANNON cannot split while firing.")
             if target.type_ != Type.EMPTY or target_1.type_ != Type.EMPTY:
                 raise ValueError("Currently we could only split into empty pieces.")
             if source.type_ == Type.KING:
                 # TODO(): Currently we don't support KING split. Maybe add support later.
                 raise ValueError("King split is not supported currently.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
+                # The move is SPLIT_JUMP if there are no quantum pieces in either path.
                 move_type = MoveType.SPLIT_JUMP
             else:
+                # The move is SPLIT_SLIDE if there is quantum piece in any path.
                 move_type = MoveType.SPLIT_SLIDE
+            # Currently we don't support EXCLUDE or CAPTURE typed split moves.
             move_variant = MoveVariant.BASIC
         return move_type, move_variant
 
@@ -339,6 +370,7 @@ class QuantumChineseChess:
                 sources[0], targets[1]
             )
             self.check_classical_rule(sources[0], targets[1], classical_pieces_1)
+
         # Classify the move type and move variant.
         move_type, move_variant = self.classify_move(
             sources,
@@ -362,6 +394,7 @@ class QuantumChineseChess:
             source_0.reset()
             # TODO(): only make such prints for a certain debug level.
             print("Classical move.")
+        # TODO(): apply other move types.
 
     def next_move(self) -> bool:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
