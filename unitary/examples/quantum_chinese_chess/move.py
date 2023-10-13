@@ -109,138 +109,203 @@ class Move(QuantumEffect):
         return self.to_str()
 
 
-class Jump(Move):
+class Jump(QuantumEffect):
     def __init__(
         self,
-        source_0: Piece,
-        target_0: Piece,
-        board: Board,
+        # source_0: Piece,
+        # target_0: Piece,
+        # board: Board,
         move_variant: MoveVariant,
     ):
-        super().__init__(source_0, target_0, board, move_type=MoveType.JUMP, move_variant=move_variant)
+        # super().__init__(source_0, target_0, board, move_type=MoveType.JUMP, move_variant=move_variant)
+        self.move_variant = move_variant
+
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self) -> Optional[int]:
+        return 2
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
         # TODO(): currently pawn capture is a same as jump capture, while in quantum chess it's different,
         # i.e. pawn would only move if the source is there, i.e. CNOT(t, s), and an entanglement could be 
         # created. This could be a general game setting, i.e. we could allow players to choose if they 
         # want the source piece to move (in case of capture) if the target piece is not there.
+        source_0, target_0 = objects
+        world = source_0.world
         if self.move_variant == MoveVariant.CAPTURE:
-            source_is_occupied = self.board.board.pop(self.source_0)
+            source_is_occupied = world.pop(source_0)
             if not source_is_occupied:
-                self.source_0.reset()
+                source_0.reset()
                 print("Jump move: source turns out to be empty.")
                 return
-            self.source_0.is_entangled = False
-            # TODO(): we should implement and do unhook instead of force_measurement.
-            if self.target_0.is_entangled:
-                self.board.board.force_measurement(self.target_0, 0)
-            self.target_0.reset()
-        elif move_variant == MoveVariant.EXCLUDED:
-            target_is_occupied = self.board.board.pop(self.target_0)
+            source_0.is_entangled = False
+            # TODO(): we should implement and do unhook instead of force_measurement,
+            # since there could be cases where target could be almost |1>.
+            if target_0.is_entangled:
+                world.force_measurement(target_0, 0)
+            target_0.reset()
+        elif self.move_variant == MoveVariant.EXCLUDED:
+            target_is_occupied = world.pop(target_0)
             if target_is_occupied:
                 print("Jump move: target turns out to be occupied.")
-                self.target_0.is_entangled = False
+                target_0.is_entangled = False
                 return
-            self.target_0.reset()
-        alpha.PhasedMove().effect(self.source_0, self.target_0)
-        self.target_0.reset(self.source_0)
-        self.source_0.reset()
+            target_0.reset()
+        alpha.PhasedMove().effect(source_0, target_0)
+        target_0.reset(source_0)
+        source_0.reset()
 
 
 class SplitJump(Move):
     def __init__(self,
-        source_0: Piece,
-        target_0: Piece,
-        target_1: Piece,
-        board: Board,
+        # source_0: Piece,
+        # target_0: Piece,
+        # target_1: Piece,
+        # board: Board,
     ):
-        super().__init__(source_0, target_0, board, move_type=MoveType.SPLIT_JUMP, move_variant=MoveVariant.BASIC, target_1 = target_1)
+        # super().__init__(source_0, target_0, board, move_type=MoveType.SPLIT_JUMP, move_variant=MoveVariant.BASIC, target_1 = target_1)
+        pass
+
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self) -> Optional[int]:
+        return 3
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
-        self.source_0.is_entangled() = True
-        alpha.PhasedSplit().effect(self.source_0, self.target_0, self.target_1)
-        self.target_0.reset(self.source_0)
-        self.target_1.reset(self.source_0)
-        self.source_0.reset()
+        source_0, target_0, target_1 = objects
+        source_0.is_entangled() = True
+        alpha.PhasedSplit().effect(source_0, target_0, target_1)
+        # Pass the classical properties of the source piece to the target pieces.
+        target_0.reset(source_0)
+        target_1.reset(source_0)
+        source_0.reset()
 
 
 class MergeJump(Move):
     def __init__(self,
-        source_0: Piece,
-        source_1: Piece,
-        target_0: Piece,
-        board: Board,
+        # source_0: Piece,
+        # source_1: Piece,
+        # target_0: Piece,
+        # board: Board,
     ):
-        super().__init__(source_0, target_0, board, move_type=MoveType.MERGE_JUMP, move_variant=MoveVariant.BASIC, source_1)
+        # super().__init__(source_0, target_0, board, move_type=MoveType.MERGE_JUMP, move_variant=MoveVariant.BASIC, source_1)
+        pass
+
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self) -> Optional[int]:
+        return 3
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
-        yield cirq.ISWAP(self.source_0, self.target_0) ** -0.5
-        yield cirq.ISWAP(self.source_0, self.target_0) ** -0.5
-        yield cirq.ISWAP(self.source_1, self.target_0) ** -0.5
-        self.target_0.reset(self.source_0)
+        source_0, source_1, target_0 = objects
+        yield cirq.ISWAP(source_0, target_0) ** -0.5
+        yield cirq.ISWAP(source_0, target_0) ** -0.5
+        yield cirq.ISWAP(source_1, target_0) ** -0.5
+        # Pass the classical properties of the source pieces to the target piece.
+        target_0.reset(source_0)
         # TODO(): double check if we should do the following reset().
-        self.source_1.reset()
-        self.source_0.reset()
+        source_1.reset()
+        source_0.reset()
+
 
 class Slide(Move):
     def __init__(self,
-        source_0: Piece,
-        target_0: Piece,
+        # source_0: Piece,
+        # target_0: Piece,
         quantum_path_pieces_0: List[str],
-        board: Board,
+        # board: Board,
         move_variant:MoveVariant
     ):
-        super().__init__(source_0, target_0, board, move_type=MoveType.SLIDE, move_variant=move_variant)
-        self.quantum_path_pieces_0 = [self.board.board[path] for path in quantum_path_pieces_0]
+        # super().__init__(source_0, target_0, board, move_type=MoveType.SLIDE, move_variant=move_variant)
+        self.quantum_path_pieces_0 = quantum_path_pieces_0
+        self.move_variant = move_variant
+
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self) -> Optional[int]:
+        return 2
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
-        if move_variant == MoveVariant.EXCLUDED:
-            target_is_occupied = self.board.board.pop(self.target_0)
+        source_0, target_0 = objects
+        world = source_0.world
+        quantum_path_pieces_0 = [world[path] for path in self.quantum_path_pieces_0]
+        if self.move_variant == MoveVariant.EXCLUDED:
+            target_is_occupied = world.pop(target_0)
             if target_is_occupied:
                 print("Slide move not applied: target turns out to be occupied.")
-                self.target_0.is_entangled = False
+                target_0.is_entangled = False
                 return
-            self.target_0.reset()
-        elif move_variant == MoveVariant.CAPTURE:
+            # If the target is measured to be empty, then we reset its classical properties to be empty.
+            target_0.reset()
+        elif self.move_variant == MoveVariant.CAPTURE:
             could_capture = False
             if not source_0.is_entangled and len(quantum_path_pieces_0) == 1:
-                could_capture = 1 - self.board.board.pop(quantum_path_pieces_0[0])
+                if not world.pop(quantum_path_pieces_0[0]):
+                    quantum_path_pieces_0[0].reset()
+                    could_capture = True
             else:
                 source_0.is_entangled = True
-                capture_ancilla = self.board.board._add_ancilla(f"{source_0.name}{target_0.name}")
-                alpha.quantum_if([source_0] + quantum_path_pieces_0).equals([1] + [0] * len(quantum_path_pieces_0)).apply(alpha.Flip())(capture_ancilla)
-                could_capture = self.board.board.pop(capture_ancilla)
+                capture_ancilla = world._add_ancilla(f"{source_0.name}{target_0.name}")
+                alpha.quantum_if([source_0] + quantum_path_pieces_0).equals([1] + [0] * len(quantum_path_pieces_0)).apply(alpha.Flip()).effect(capture_ancilla)
+                could_capture = world.pop(capture_ancilla)
             if not could_capture:
                 # TODO(): in this case non of the path qubits are popped, i.e. the pieces are still entangled and the player
                 # could try to do this move again. Is this desired?
                 print("Slide move not applied: either the source turns out be empty, or the path turns out to be blocked.")
                 return
-            self.target_0.reset(self.source_0)
-            self.source_0.reset()
-            alpha.PhasedMove().effect(self.source_0, self.target_0)
-
-
-
+            # Apply the capture.
+            # TODO(): we should implement and do unhook instead of force_measurement,
+            # since there are cases where target could be |1>.
+            if target_0.is_entangled:
+                world.force_measurement(target_0, 0)
+            target_0.reset()
+            alpha.PhasedMove().effect(source_0, target_0)
+            # Pass the classical properties of source piece to the target piece.
+            target_0.reset(source_0)
+            source_0.reset()
+            # Force measure the whole path to be empty.
+            for path_piece in quantum_path_pieces_0:
+                world.force_measurement(path_piece, 0)
+                path_piece.reset()
+        # For BASIC or EXCLUDED cases
+        source_0.is_entangled = True
+        alpha.quantum_if(quantum_path_pieces_0).equals([0] * len(quantum_path_pieces_0)).apply(alpha.PhasedMove()).effect(source_0, target_0)
+        # Copy the classical properties of the source piece to the target piece.
+        target_0.reset(source_0)
 
 
 class SplitSlide(Move):
     def __init__(self,
-        source_0: Piece,
-        target_0: Piece,
-        target_1: Piece,
+        # source_0: Piece,
+        # target_0: Piece,
+        # target_1: Piece,
         quantum_path_pieces_0: List[str],
         quantum_path_pieces_1: List[str],
-        board: Board,
+        # board: Board,
     ):
-        super().__init__(source_0, target_0, board, move_type=MoveType.SPLIT_SLIDE, move_variant=MoveVariant.BASIC, target_1=target_1)
-        self.quantum_path_pieces_0 = [self.board.board[path] for path in quantum_path_pieces_0 if path != target_1.name]
-        self.quantum_path_pieces_1 = [self.board.board[path] for path in quantum_path_pieces_1 if path != target_0.name]
+        # super().__init__(source_0, target_0, board, move_type=MoveType.SPLIT_SLIDE, move_variant=MoveVariant.BASIC, target_1=target_1)
+        self.quantum_path_pieces_0 = quantum_path_pieces_0
+        self.quantum_path_pieces_1 = quantum_path_pieces_1
+
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self) -> Optional[int]:
+        return 3
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
-        if len(self.quantum_path_pieces_0) ==0 and len(self.quantum_path_pieces_1) == 0:
+        source_0, target_0, target_1 = objects
+        world = source_0.world
+        quantum_path_pieces_0 = [world[path] for path in self.quantum_path_pieces_0 if path != target_1.name]
+        quantum_path_pieces_1 = [world[path] for path in self.quantum_path_pieces_1 if path != target_0.name]
+        if len(quantum_path_pieces_0) ==0 and len(self.quantum_path_pieces_1) == 0:
             # If both paths are empty, do split jump instead.
             # TODO(): maybe move the above checks (if any path piece is one of the target pieces) and
             # into classify_move().
-            SplitJump(self.source_0, self.target_0, self.target_1, self.board).effect()
+            SplitJump().effect(source_0, target_0, target_1)
             return
 

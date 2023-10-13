@@ -361,7 +361,9 @@ class QuantumChineseChess:
             # TODO(): only make such prints for a certain debug level.
             print("Classical move.")
         elif move_type == MoveType.JUMP:
-            Jump(source_0, target_0, self.board).effect()
+            # TODO(): maybe we could refactor to do
+            # Jump()(source_0, target_0)
+            Jump(move_variant).effect(source_0, target_0)
 
     def next_move(self) -> bool:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.

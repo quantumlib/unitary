@@ -424,11 +424,11 @@ class QuantumWorld:
         objects: Optional[Sequence[Union[QuantumObject, str]]] = None,
         convert_to_enum: bool = True,
     ) -> List[Union[enum.Enum, int]]:
-        """Peek the given objects (or all public objects if none is supplied) once and force measure them 
+        """Peek the given objects (or all public objects if none is supplied) once and force measure them
         with the peeked result.
 
         Returns:
-            A list of measurement results with one for each object.  
+            A list of measurement results with one for each object.
         """
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
