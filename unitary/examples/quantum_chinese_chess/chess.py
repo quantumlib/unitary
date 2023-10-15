@@ -21,7 +21,15 @@ from unitary.examples.quantum_chinese_chess.enums import (
     MoveType,
     MoveVariant,
 )
-from unitary.examples.quantum_chinese_chess.move import Move, Jump
+from unitary.examples.quantum_chinese_chess.move import (
+    Jump,
+    Slide,
+    SplitJump,
+    SplitSlide,
+    MergeJump,
+    MergeSlide,
+    CannonFire,
+)
 
 # List of accepable commands.
 _HELP_TEXT = """
@@ -356,10 +364,11 @@ class QuantumChineseChess:
             if target_0.type_ == Type.KING:
                 # King is captured, then the game is over.
                 self.game_state = GameState(self.current_player)
-            target_0.reset(source_0)
-            source_0.reset()
+            Jump(move_variant.CAPTURE)(source_0, target_0)
+            # target_0.reset(source_0)
+            # source_0.reset()
             # TODO(): only make such prints for a certain debug level.
-            print("Classical move.")
+            # print("Classical move.")
         elif move_type == MoveType.JUMP:
             Jump(move_variant)(source_0, target_0)
         elif move_type == MoveType.SLIDE:
@@ -388,6 +397,21 @@ class QuantumChineseChess:
             # The other player wins if the current player quits.
             self.game_state = GameState(1 - self.current_player)
             print("Exiting.")
+        elif input_str.lower() == "peek":
+            # TODO(): make it look like the normal board. Right now it's only for debugging purposes.
+            print(self.board.board.peek(convert_to_enum=False))
+        elif input_str.lower() == "undo":
+            print("Undo last quantum effect.")
+            # Right now it's only for debugging purposes, since it has following problems:
+            # TODO(): there are several problems here:
+            # 1) last move is quantum but classical piece information is not reversed back.
+            # ==> we may need to save the change of classical piece information of each step.
+            # 2) last move might not be quantum.
+            # ==> we may need to save all classical moves and figure out how to undo each kind of move;
+            # 3) last move is quantum but involved multiple effects.
+            # ==> we may need to save number of effects per move, and undo that number of times.
+            self.board.board.undo_last_effect()
+            return True
         else:
             try:
                 # The move is success if no ValueError is raised.
@@ -398,6 +422,23 @@ class QuantumChineseChess:
                 print(e)
         return False
 
+    def update_board_by_sampling(self) -> None:
+        probs = self.board.board.get_binary_probabilities()
+        num_rows = 10
+        num_cols = 9
+        for row in range(num_rows):
+            for col in "abcdefghi":
+                piece = self.board.board[f"{col}{row}"]
+                # We need to do the following range() conversion since the sequence of
+                # qubits returned from get_binary_probabilities() is
+                # a9 b9 ... i9, a8 b8 ... i8, ..., a0 b0 ... i0
+                prob = probs[(num_rows - row - 1) * num_cols + ord(col) - ord("a")]
+                # TODO(): set more accurate threshold
+                if prob < 1e-3:
+                    piece.reset()
+                elif prob > 1 - 1e-3:
+                    piece.is_entangled = False
+
     def game_over(self) -> None:
         """Checks if the game is over, and update self.game_state accordingly."""
         if self.game_state != GameState.CONTINUES:
@@ -405,7 +446,6 @@ class QuantumChineseChess:
         if self.board.flying_general_check():
             # If two KINGs are directly facing each other (i.e. in the same column) without any pieces in between, then the game ends. The other player wins.
             print("==== FLYING GENERAL ! ====")
-            print(self.board)
             self.game_state = GameState(1 - self.current_player)
         return
         # TODO(): add the following checks
@@ -415,14 +455,17 @@ class QuantumChineseChess:
         """The loop where each player takes turn to play."""
         while True:
             move_success = self.next_move()
-            print(self.board)
             if not move_success:
                 # Continue if the player does not quit.
                 if self.game_state == GameState.CONTINUES:
+                    print(self.board)
                     print("\nPlease re-enter your move.")
                     continue
             # Check if the game is over.
+            # TODO(): maybe we should not check game_over() when an undo is made.
+            self.update_board_by_sampling()
             self.game_over()
+            print(self.board)
             if self.game_state == GameState.CONTINUES:
                 # If the game continues, switch the player.
                 self.current_player = 1 - self.current_player
