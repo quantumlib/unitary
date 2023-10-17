@@ -449,7 +449,9 @@ class QuantumChineseChess:
         to identify and fix those cases.
         """
         # TODO(): return the sampled probabilities and pass it into the print method
-        # of the board to print it together with the board.
+        # of the board to print it together with the board, or better use mathemetical
+        # matrix calculations to determine the probability, and use it (with some error
+        # threshold) to update the piece infos.
         probs = self.board.board.get_binary_probabilities()
         num_rows = 10
         num_cols = 9

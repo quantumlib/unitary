@@ -306,11 +306,14 @@ class QuantumWorld:
         return result
 
     def unhook(self, object: QuantumObject) -> None:
-        """Replaces all usages of the given object in the circuit with a new ancilla with value=0.
-        """
+        """Replaces all usages of the given object in the circuit with a new ancilla with value=0."""
+        # Creates a new ancilla.
         new_ancilla = self._add_ancilla(object.name)
         # Replace operations using the qubit of the given object with the new ancilla.
-        qubit_remapping_dict = {object.qubit: new_ancilla.qubit, new_ancilla.qubit: object.qubit}
+        qubit_remapping_dict = {
+            object.qubit: new_ancilla.qubit,
+            new_ancilla.qubit: object.qubit,
+        }
         self.circuit = self.circuit.transform_qubits(
             lambda q: qubit_remapping_dict.get(q, q)
         )
