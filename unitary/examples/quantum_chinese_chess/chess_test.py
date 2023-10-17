@@ -260,11 +260,11 @@ def test_classify_move_success(monkeypatch):
     # classical
     assert game.classify_move(["h9"], ["g7"], [], [], [], []) == (
         MoveType.CLASSICAL,
-        MoveVariant.UNSPECIFIED,
+        MoveVariant.CLASSICAL,
     )
     assert game.classify_move(["b2"], ["b9"], ["b7"], [], [], []) == (
         MoveType.CLASSICAL,
-        MoveVariant.UNSPECIFIED,
+        MoveVariant.CLASSICAL,
     )
 
     # jump basic

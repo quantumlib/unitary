@@ -165,7 +165,7 @@ class Board:
         elif abs(dy) == 2 and abs(dx) == 1:
             pieces.append(f"{chr(x0)}{y0 + dy_sign}")
         else:
-            raise ValueError("Unexpected input to path_pieces().")
+            raise ValueError("The input move is illegal.")
         for piece in pieces:
             if self.board[piece].is_entangled:
                 quantum_pieces.append(piece)

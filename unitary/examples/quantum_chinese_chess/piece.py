@@ -40,11 +40,14 @@ class Piece(QuantumObject):
 
     def reset(self, piece: "Piece" = None) -> None:
         """Modifies the classical attributes of the piece.
-        If piece is provided, then its type_ and color is copied, otherwise set the current piece to be an empty piece.
+        If piece is provided, then its type_, color, and is_entangled is copied,
+        otherwise set the current piece to be a classically empty piece.
         """
         if piece is not None:
             self.type_ = piece.type_
             self.color = piece.color
+            self.is_entangled = piece.is_entangled
         else:
             self.type_ = Type.EMPTY
             self.color = Color.NA
+            self.is_entangled = False

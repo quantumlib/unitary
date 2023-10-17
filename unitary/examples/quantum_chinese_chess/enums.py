@@ -45,8 +45,8 @@ class GameState(enum.Enum):
 class MoveType(enum.Enum):
     """Each valid move will be classfied into one of the following MoveTypes."""
 
-    CLASSICAL = 0
-    UNSPECIFIED_STANDARD = 1
+    UNSPECIFIED = 0
+    CLASSICAL = 1
     JUMP = 2
     SLIDE = 3
     SPLIT_JUMP = 4
@@ -61,10 +61,11 @@ class MoveVariant(enum.Enum):
     the MoveType above.
     """
 
-    UNSPECIFIED = 0  # Used together with MoveType = CLASSICAL.
-    BASIC = 1  # The target piece is empty.
-    EXCLUDED = 2  # The target piece has the same color.
-    CAPTURE = 3  # The target piece has the opposite color.
+    UNSPECIFIED = 0
+    CLASSICAL = 1  # Used together with MoveType = CLASSICAL.
+    BASIC = 2  # The target piece is empty.
+    EXCLUDED = 3  # The target piece has the same color.
+    CAPTURE = 4  # The target piece has the opposite color.
 
 
 class Color(enum.Enum):
@@ -110,7 +111,7 @@ class Type(enum.Enum):
     def symbol(type_: "Type", color: Color, lang: Language = Language.EN) -> str:
         """Returns symbol of the given piece according to its color and desired language."""
         if type_ == Type.EMPTY:
-            return "."
+            return type_.value[0]
         if lang == Language.EN:  # Return English symbols
             if color == Color.RED:
                 return type_.value[0]
