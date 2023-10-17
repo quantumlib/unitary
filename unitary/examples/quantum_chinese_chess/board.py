@@ -25,6 +25,10 @@ from unitary.examples.quantum_chinese_chess.piece import Piece
 reset = "\033[0m"
 bold = "\033[01m"
 dim = "\033[02m"
+negative = "\033[03m"
+underline = "\033[04m"
+blink = "\033[05m"
+invisible = "\033[08m"
 
 # background
 grey = "\033[47m"
@@ -103,22 +107,32 @@ class Board:
             probs = self.board.get_binary_probabilities()
         # Print the top line of col letters.
         for col in "abcdefghi":
-            board_string.append(f" {col}  ")
+            if self.lang == Language.EN:
+                board_string.append(f" {col}  ")
+            else:
+                board_string.append(f"{col}  ")
         board_string.append("\n")
         for row in range(num_rows):
             # Print the row index on the left.
-            board_string.append(f"{row}   ")
+            if self.lang == Language.EN:
+                board_string.append(f"{row}   ")
+            else:
+                board_string.append(f"{row}  ")
             for col in "abcdefghi":
                 piece = self.board[f"{col}{row}"]
+                board_string += grey
                 if piece.is_entangled:
                     board_string += dim
                 if piece.color == Color.RED:
                     board_string += red
                 else:
                     board_string += black
-                board_string += grey + bold + piece.symbol(self.lang)
-                if self.lang == Language.EN and col != "i":
-                    board_string.append("   ")
+                board_string += piece.symbol(self.lang)
+                if col != "i":
+                    if self.lang == Language.EN:
+                        board_string.append("   ")
+                    else:
+                        board_string.append("  ")
                 board_string += reset
             # Print the row index on the right.
             board_string.append(f" {row}\n   ")
@@ -132,27 +146,39 @@ class Board:
         board_string.append("   ")
         # Print the bottom line of col letters.
         for col in "abcdefghi":
-            board_string.append(f" {col}  ")
+            if self.lang == Language.EN:
+                board_string.append(f" {col}  ")
+            else:
+                board_string.append(f"{col}  ")
         board_string.append("\n")
         if self.lang == Language.EN:
             return "".join(board_string)
         # We need to turn letters into their full-width counterparts to align
         # a mix of letters + Chinese characters.
-        chars = "".join(chr(c) for c in range(ord(" "), ord("z")))
-        full_width_chars = "\N{IDEOGRAPHIC SPACE}" + "".join(
-            chr(c)
-            for c in range(
-                ord("\N{FULLWIDTH EXCLAMATION MARK}"),
-                ord("\N{FULLWIDTH LATIN SMALL LETTER Z}"),
-            )
+        half_width_chars = "".join(
+            [" ", "\uFF65"]
+            + [chr(c) for c in range(ord("A"), ord("Z"))]
+            + [chr(c) for c in range(ord("a"), ord("z"))]
         )
-        translation = str.maketrans(chars, full_width_chars)
-        return (
-            "".join(board_string)
-            .replace(" ", "")
-            .replace("abcdefghi", " abcdefghi")
-            .translate(translation)
+        full_width_chars = "".join(
+            ["\N{IDEOGRAPHIC SPACE}", "\u30FB"]
+            + [
+                chr(c)
+                for c in range(
+                    ord("\N{FULLWIDTH LATIN CAPITAL LETTER A}"),
+                    ord("\N{FULLWIDTH LATIN CAPITAL LETTER Z}"),
+                )
+            ]
+            + [
+                chr(c)
+                for c in range(
+                    ord("\N{FULLWIDTH LATIN SMALL LETTER A}"),
+                    ord("\N{FULLWIDTH LATIN SMALL LETTER Z}"),
+                )
+            ]
         )
+        translation = str.maketrans(half_width_chars, full_width_chars)
+        return "".join(board_string).translate(translation)
 
     def path_pieces(self, source: str, target: str) -> Tuple[List[str], List[str]]:
         """Returns the nonempty classical and quantum pieces from source to target (excluded)."""

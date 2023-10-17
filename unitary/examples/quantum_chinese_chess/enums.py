@@ -85,7 +85,7 @@ class Type(enum.Enum):
     - Chinese black
     """
 
-    EMPTY = (".", ".", ".", ".")
+    EMPTY = ("\uFF65", "\uFF65", "\uFF65", "\uFF65")
     PAWN = ("P", "p", "兵", "卒")
     CANNON = ("C", "c", "炮", "砲")
     ROOK = ("R", "r", "车", "車")
@@ -111,7 +111,7 @@ class Type(enum.Enum):
     def symbol(type_: "Type", color: Color, lang: Language = Language.EN) -> str:
         """Returns symbol of the given piece according to its color and desired language."""
         if type_ == Type.EMPTY:
-            return "."
+            return type_.value[0]
         if lang == Language.EN:  # Return English symbols
             if color == Color.RED:
                 return type_.value[0]
