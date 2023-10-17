@@ -20,6 +20,8 @@ from unitary.examples.quantum_chinese_chess.piece import Piece
 from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant, Type
 
 
+# TODO(): now the class is no longer the base class of all chess moves. Maybe convert this class
+# to a helper class to save each move (with its pop results) in a string form into move history.
 class Move(QuantumEffect):
     """The base class of all chess moves."""
 
@@ -105,12 +107,8 @@ class Move(QuantumEffect):
 class Jump(QuantumEffect):
     def __init__(
         self,
-        # source_0: Piece,
-        # target_0: Piece,
-        # board: Board,
         move_variant: MoveVariant,
     ):
-        # super().__init__(source_0, target_0, board, move_type=MoveType.JUMP, move_variant=move_variant)
         self.move_variant = move_variant
 
     def num_dimension(self) -> Optional[int]:
@@ -121,7 +119,7 @@ class Jump(QuantumEffect):
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
         # TODO(): currently pawn capture is a same as jump capture, while in quantum chess it's different,
-        # i.e. pawn would only move if the source is there, i.e. CNOT(t, s), and an entanglement could be
+        # i.e. pawn would move only if the target is there, i.e. CNOT(t, s), and an entanglement could be
         # created. This could be a general game setting, i.e. we could allow players to choose if they
         # want the source piece to move (in case of capture) if the target piece is not there.
         source_0, target_0 = objects
@@ -132,13 +130,8 @@ class Jump(QuantumEffect):
                 source_0.reset()
                 print("Jump move: source turns out to be empty.")
                 return iter(())
-            # TODO(): Note: pop and force_measurement could cause other pieces to actually
-            # turn back to classical piece or to empty, which is not checked/implemented currently.
             source_0.is_entangled = False
-            # TODO(): we should implement and do unhook instead of force_measurement,
-            # since there could be cases where target could be almost |1>.
-            if target_0.is_entangled:
-                world.force_measurement(target_0, 0)
+            world.unhook(target_0)
             target_0.reset()
         elif self.move_variant == MoveVariant.EXCLUDED:
             target_is_occupied = world.pop([target_0])[0]
@@ -147,7 +140,12 @@ class Jump(QuantumEffect):
                 target_0.is_entangled = False
                 return iter(())
             target_0.reset()
-        yield alpha.PhasedMove().effect(source_0, target_0)
+        elif self.move_variant == MoveVariant.CLASSICAL:
+            world.unhook(target_0)
+            target_0.reset()
+
+        alpha.PhasedMove()(source_0, target_0)
+        # Move the classical properties of the source piece to the target piece.
         target_0.reset(source_0)
         source_0.reset()
         return iter(())
@@ -156,13 +154,8 @@ class Jump(QuantumEffect):
 class SplitJump(QuantumEffect):
     def __init__(
         self,
-        # source_0: Piece,
-        # target_0: Piece,
-        # target_1: Piece,
-        # board: Board,
     ):
-        # super().__init__(source_0, target_0, board, move_type=MoveType.SPLIT_JUMP, move_variant=MoveVariant.BASIC, target_1 = target_1)
-        pass
+        return
 
     def num_dimension(self) -> Optional[int]:
         return 2
@@ -172,8 +165,9 @@ class SplitJump(QuantumEffect):
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
         source_0, target_0, target_1 = objects
+        # Make the split jump.
         source_0.is_entangled = True
-        yield alpha.PhasedSplit().effect(source_0, target_0, target_1)
+        alpha.PhasedSplit()(source_0, target_0, target_1)
         # Pass the classical properties of the source piece to the target pieces.
         target_0.reset(source_0)
         target_1.reset(source_0)
@@ -184,13 +178,8 @@ class SplitJump(QuantumEffect):
 class MergeJump(QuantumEffect):
     def __init__(
         self,
-        # source_0: Piece,
-        # source_1: Piece,
-        # target_0: Piece,
-        # board: Board,
     ):
-        # super().__init__(source_0, target_0, board, move_type=MoveType.MERGE_JUMP, move_variant=MoveVariant.BASIC, source_1)
-        pass
+        return
 
     def num_dimension(self) -> Optional[int]:
         return 2
@@ -200,27 +189,21 @@ class MergeJump(QuantumEffect):
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
         source_0, source_1, target_0 = objects
-        yield cirq.ISWAP(source_0, target_0) ** -0.5
-        yield cirq.ISWAP(source_0, target_0) ** -0.5
-        yield cirq.ISWAP(source_1, target_0) ** -0.5
+        # Make the merge jump.
+        cirq.ISWAP(source_0.qubit, target_0.qubit) ** -0.5
+        cirq.ISWAP(source_0.qubit, target_0.qubit) ** -0.5
+        cirq.ISWAP(source_1.qubit, target_0.qubit) ** -0.5
         # Pass the classical properties of the source pieces to the target piece.
         target_0.reset(source_0)
-        # TODO(): double check if we should do the following reset().
-        source_1.reset()
-        source_0.reset()
         return iter(())
 
 
 class Slide(QuantumEffect):
     def __init__(
         self,
-        # source_0: Piece,
-        # target_0: Piece,
         quantum_path_pieces_0: List[str],
-        # board: Board,
         move_variant: MoveVariant,
     ):
-        # super().__init__(source_0, target_0, board, move_type=MoveType.SLIDE, move_variant=move_variant)
         self.quantum_path_pieces_0 = quantum_path_pieces_0
         self.move_variant = move_variant
 
@@ -252,9 +235,10 @@ class Slide(QuantumEffect):
                 source_0.is_entangled = True
                 capture_ancilla = world._add_ancilla(f"{source_0.name}{target_0.name}")
                 control_qubits = [source_0] + quantum_path_pieces_0
-                yield alpha.quantum_if(*control_qubits).equals(
-                    [1] + [0] * len(quantum_path_pieces_0)
-                ).apply(alpha.Flip()).effect(capture_ancilla)
+                conditions = [1] + [0] * len(quantum_path_pieces_0)
+                alpha.quantum_if(*control_qubits).equals(*conditions).apply(
+                    alpha.Flip()
+                )(capture_ancilla)
                 could_capture = world.pop([capture_ancilla])[0]
             if not could_capture:
                 # TODO(): in this case non of the path qubits are popped, i.e. the pieces are still entangled and the player
@@ -264,10 +248,7 @@ class Slide(QuantumEffect):
                 )
                 return iter(())
             # Apply the capture.
-            # TODO(): we should implement and do unhook instead of force_measurement,
-            # since there are cases where target could be |1>.
-            if target_0.is_entangled:
-                world.force_measurement(target_0, 0)
+            world.unhook(target_0)
             target_0.reset()
             alpha.PhasedMove()(source_0, target_0)
             # Move the classical properties of the source piece to the target piece.
@@ -279,25 +260,23 @@ class Slide(QuantumEffect):
                 path_piece.reset()
         # For BASIC or EXCLUDED cases
         source_0.is_entangled = True
-        alpha.quantum_if(*quantum_path_pieces_0).equals(
-            [0] * len(quantum_path_pieces_0)
-        ).apply(alpha.PhasedMove())(source_0, target_0)
+        conditions = [0] * len(quantum_path_pieces_0)
+        alpha.quantum_if(*quantum_path_pieces_0).equals(*conditions).apply(
+            alpha.PhasedMove()
+        )(source_0, target_0)
         # Copy the classical properties of the source piece to the target piece.
         target_0.reset(source_0)
+        # Note that we should not reset source_0 (to be empty) here since there is a non-zero probability
+        # that the source is not moved.
         return iter(())
 
 
 class SplitSlide(QuantumEffect):
     def __init__(
         self,
-        # source_0: Piece,
-        # target_0: Piece,
-        # target_1: Piece,
         quantum_path_pieces_0: List[str],
         quantum_path_pieces_1: List[str],
-        # board: Board,
     ):
-        # super().__init__(source_0, target_0, board, move_type=MoveType.SPLIT_SLIDE, move_variant=MoveVariant.BASIC, target_1=target_1)
         self.quantum_path_pieces_0 = quantum_path_pieces_0
         self.quantum_path_pieces_1 = quantum_path_pieces_1
 
@@ -321,41 +300,51 @@ class SplitSlide(QuantumEffect):
             # If both paths are empty, do split jump instead.
             # TODO(): maybe move the above checks (if any path piece is one of the target pieces)
             # into classify_move().
-            SplitJump().effect(source_0, target_0, target_1)
+            SplitJump()(source_0, target_0, target_1)
             return iter(())
         # TODO(): save ancillas for some specific scenarios.
         path_0_clear_ancilla = world._add_ancilla(f"{source_0.name}{target_0.name}")
-        yield alpha.quantum_if(*quantum_path_pieces_0).equals(
-            [0] * len(quantum_path_pieces_0)
-        ).apply(alpha.Flip()).effect(path_0_clear_ancilla)
+        if len(quantum_path_pieces_0) == 0:
+            alpha.Flip()(path_0_clear_ancilla)
+        else:
+            conditions = [0] * len(quantum_path_pieces_0)
+            alpha.quantum_if(*quantum_path_pieces_0).equals(*conditions).apply(
+                alpha.Flip()
+            )(path_0_clear_ancilla)
         path_1_clear_ancilla = world._add_ancilla(f"{source_0.name}{target_1.name}")
-        yield alpha.quantum_if(*quantum_path_pieces_1).equals(
-            [0] * len(quantum_path_pieces_1)
-        ).apply(alpha.Flip()).effect(path_1_clear_ancilla)
+
+        if len(quantum_path_pieces_1) == 0:
+            alpha.Flip()(path_1_clear_ancilla)
+        else:
+            conditions = [0] * len(quantum_path_pieces_1)
+            alpha.quantum_if(*quantum_path_pieces_1).equals(*conditions).apply(
+                alpha.Flip()
+            )(path_1_clear_ancilla)
 
         # We do the normal split if both paths are clear.
-        yield alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(
-            [1, 1]
-        ).apply(alpha.PhasedMove(0.5)).effect(source_0, target_0)
-        yield alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(
-            [1, 1]
-        ).apply(alpha.PhasedMove()).effect(source_0, target_1)
+        alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(1, 1).apply(
+            alpha.PhasedMove(0.5)
+        )(source_0, target_0)
+        alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(1, 1).apply(
+            alpha.PhasedMove()
+        )(source_0, target_1)
 
         # Else if only path 0 is clear, we ISWAP source_0 and target_0.
-        yield alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(
-            [1, 0]
-        ).apply(alpha.PhasedMove()).effect(source_0, target_0)
+        alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(1, 0).apply(
+            alpha.PhasedMove()
+        )(source_0, target_0)
 
         # Else if only path 1 is clear, we ISWAP source_0 and target_1.
-        yield alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(
-            [0, 1]
-        ).apply(alpha.PhasedMove()).effect(source_0, target_1)
+        alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(0, 1).apply(
+            alpha.PhasedMove()
+        )(source_0, target_1)
 
         # TODO(): Do we need to zero-out, i.e. reverse those ancillas?
         # Move the classical properties of the source piece to the target pieces.
         target_0.reset(source_0)
         target_1.reset(source_0)
-        source_0.reset()
+        # Note that we should not reset source_0 (to be empty) here since either slide arm could have
+        # entangled piece in the path which results in a non-zero probability that the source is not moved.
         return iter(())
 
 
@@ -388,41 +377,44 @@ class MergeSlide(QuantumEffect):
             # If both paths are empty, do split slide instead.
             # TODO(): maybe move the above checks (if any path piece is one of the source pieces)
             # into classify_move().
-            MergeJump().effect(source_0, source_1, target_0)
+            MergeJump()(source_0, source_1, target_0)
             return iter(())
         # TODO(): save ancillas for some specific scenarios.
         path_0_clear_ancilla = world._add_ancilla(f"{source_0.name}{target_0.name}")
-        yield alpha.quantum_if(*quantum_path_pieces_0).equals(
-            [0] * len(quantum_path_pieces_0)
-        ).apply(alpha.Flip()).effect(path_0_clear_ancilla)
+        path_0_conditions = [0] * len(quantum_path_pieces_0)
+        alpha.quantum_if(*quantum_path_pieces_0).equals(*path_0_conditions).apply(
+            alpha.Flip()
+        )(path_0_clear_ancilla)
+
         path_1_clear_ancilla = world._add_ancilla(f"{source_1.name}{target_0.name}")
-        yield alpha.quantum_if(*quantum_path_pieces_1).equals(
-            [0] * len(quantum_path_pieces_1)
-        ).apply(alpha.Flip()).effect(path_1_clear_ancilla)
+        path_1_conditions = [0] * len(quantum_path_pieces_1)
+        alpha.quantum_if(*quantum_path_pieces_1).equals(*path_1_conditions).apply(
+            alpha.Flip()
+        )(path_1_clear_ancilla)
 
         # We do the normal merge if both paths are clear.
-        yield alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(
-            [1, 1]
-        ).apply(alpha.PhasedMove(-1.0)).effect(source_0, target_0)
-        yield alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(
-            [1, 1]
-        ).apply(alpha.PhasedMove(-0.5)).effect(source_1, target_0)
+        alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(1, 1).apply(
+            alpha.PhasedMove(-1.0)
+        )(source_0, target_0)
+        alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(1, 1).apply(
+            alpha.PhasedMove(-0.5)
+        )(source_1, target_0)
 
         # Else if only path 0 is clear, we ISWAP source_0 and target_0.
-        yield alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(
-            [1, 0]
-        ).apply(alpha.PhasedMove(-1.0)).effect(source_0, target_0)
+        alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(1, 0).apply(
+            alpha.PhasedMove(-1.0)
+        )(source_0, target_0)
 
         # Else if only path 1 is clear, we ISWAP source_1 and target_0.
-        yield alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(
-            [0, 1]
-        ).apply(alpha.PhasedMove(-1.0)).effect(source_0, target_1)
+        alpha.quantum_if(path_0_clear_ancilla, path_1_clear_ancilla).equals(0, 1).apply(
+            alpha.PhasedMove(-1.0)
+        )(source_1, target_0)
 
         # TODO(): Do we need to zero-out, i.e. reverse those ancillas?
         # Move the classical properties of the source pieces to the target piece.
         target_0.reset(source_0)
-        source_0.reset()
-        source_1.reset()
+        # Note that we should not reset source_0 or source_1 (to be empty) here since either slide arm could have
+        # entangled piece in the path which results in a non-zero probability that the source is not moved.
         return iter(())
 
 
@@ -446,7 +438,6 @@ class CannonFire(QuantumEffect):
         world = source_0.world
         quantum_path_pieces_0 = [world[path] for path in self.quantum_path_pieces_0]
         # Source has to be there to fire.
-        print(world.get_binary_probabilities())
         if not world.pop([source_0])[0]:
             source_0.reset()
             print("Cannonn fire not applied: source turns out to be empty.")
@@ -456,7 +447,6 @@ class CannonFire(QuantumEffect):
             target_0.reset()
             print("Cannonn fire not applied: target turns out to be empty.")
             return iter(())
-        print(world.get_binary_probabilities())
         if len(self.classical_path_pieces_0) == 1:
             # In the case where there already is a cannon platform, the cannon could
             # fire and capture only if quantum_path_pieces_0 are all empty.
@@ -469,15 +459,11 @@ class CannonFire(QuantumEffect):
             else:
                 source_0.is_entangled = True
                 capture_ancilla = world._add_ancilla(f"{source_0.name}{target_0.name}")
-                # yield alpha.quantum_if(*control_qubits).equals(
-                #     [1] + [0] * len(quantum_path_pieces_0)
-                # ).apply(alpha.Flip()).effect(capture_ancilla)
-
-                # Note: test not use yield and effect
                 control_objects = [source_0] + quantum_path_pieces_0
-                alpha.quantum_if(*control_objects).equals(
-                    [1] + [0] * len(quantum_path_pieces_0)
-                ).apply(alpha.Flip())(capture_ancilla)
+                conditions = [1] + [0] * len(quantum_path_pieces_0)
+                alpha.quantum_if(*control_objects).equals(*conditions).apply(
+                    alpha.Flip()
+                )(capture_ancilla)
                 could_capture = world.pop([capture_ancilla])[0]
             if not could_capture:
                 # TODO(): in this case non of the path qubits are popped, i.e. the pieces are still entangled and the player
@@ -487,11 +473,6 @@ class CannonFire(QuantumEffect):
                 )
                 return iter(())
             # Apply the capture.
-            # MUST TODO
-            # TODO(): we should implement and do unhook instead of force_measurement,
-            # since there are cases where target could be |1>.
-            # if target_0.is_entangled:
-            #     world.force_measurement(target_0, 0)
             world.unhook(target_0)
             target_0.reset()
             alpha.PhasedMove()(source_0, target_0)
@@ -523,18 +504,16 @@ class CannonFire(QuantumEffect):
                     source_0,
                     expect_occupied_path_piece,
                 ] + expected_empty_pieces
-                yield alpha.quantum_if(*control_qubits).equals(
-                    [1, 1] + [0] * len(expected_empty_pieces)
-                ).apply(alpha.Flip()).effect(capture_ancilla)
+                conditions = [1, 1] + [0] * len(expected_empty_pieces)
+                alpha.quantum_if(*control_qubits).equals(*conditions).apply(
+                    alpha.Flip()
+                )(capture_ancilla)
                 could_capture = world.pop([capture_ancilla])[0]
                 if could_capture:
                     # Apply the capture.
-                    # TODO(): we should implement and do unhook instead of force_measurement,
-                    # since there are cases where target could be |1>.
-                    if target_0.is_entangled:
-                        world.force_measurement(target_0, 0)
+                    world.unhook(target_0)
                     target_0.reset()
-                    yield alpha.PhasedMove().effect(source_0, target_0)
+                    alpha.PhasedMove()(source_0, target_0)
                     # Move the classical properties of the source piece to the target piece.
                     target_0.reset(source_0)
                     source_0.reset()

@@ -22,6 +22,16 @@ from unitary.examples.quantum_chinese_chess.enums import (
 )
 from unitary.examples.quantum_chinese_chess.piece import Piece
 
+reset = "\033[0m"
+bold = "\033[01m"
+dim = "\033[02m"
+
+# background
+grey = "\033[47m"
+
+# foreground
+black = "\033[30m"
+red = "\033[31m"
 
 # The default initial state of the game.
 _INITIAL_FEN = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr w---1"
@@ -85,10 +95,12 @@ class Board:
             )
         return cls(board, current_player, king_locations)
 
-    def __str__(self):
+    def to_str(self, probs: List[float] = None):
+        # TODO(): print players' names in their corresponding side of the board.
         num_rows = 10
         board_string = ["\n   "]
-        probs = self.board.get_binary_probabilities()
+        if probs is None:
+            probs = self.board.get_binary_probabilities()
         # Print the top line of col letters.
         for col in "abcdefghi":
             board_string.append(f" {col}  ")
@@ -98,9 +110,16 @@ class Board:
             board_string.append(f"{row}   ")
             for col in "abcdefghi":
                 piece = self.board[f"{col}{row}"]
-                board_string += piece.symbol(self.lang)
-                if self.lang == Language.EN:
+                if piece.is_entangled:
+                    board_string += dim
+                if piece.color == Color.RED:
+                    board_string += red
+                else:
+                    board_string += black
+                board_string += grey + bold + piece.symbol(self.lang)
+                if self.lang == Language.EN and col != "i":
                     board_string.append("   ")
+                board_string += reset
             # Print the row index on the right.
             board_string.append(f" {row}\n   ")
             # Print the sampled prob. of the pieces in the above row.
@@ -173,7 +192,7 @@ class Board:
         elif abs(dy) == 2 and abs(dx) == 1:
             pieces.append(f"{chr(x0)}{y0 + dy_sign}")
         else:
-            raise ValueError("Unexpected input to path_pieces().")
+            raise ValueError("The input move is illegal.")
         for piece in pieces:
             if self.board[piece].is_entangled:
                 quantum_pieces.append(piece)
@@ -198,13 +217,15 @@ class Board:
         # When there are quantum pieces in between, the check successes (and game ends)
         # if there are at lease one occupied path piece.
         capture_ancilla = self.board._add_ancilla("flying_general_check")
-        alpha.quantum_if(quantum_pieces).equals([0] * len(quantum_pieces)).apply(
-            alpha.Flip()
-        ).effect(capture_ancilla)
-        could_capture = self.board.pop(capture_ancilla)
+        control_objects = [self.board[path] for path in quantum_pieces]
+        conditions = [0] * len(control_objects)
+        alpha.quantum_if(*control_objects).equals(*conditions).apply(alpha.Flip())(
+            capture_ancilla
+        )
+        could_capture = self.board.pop([capture_ancilla])[0]
         if could_capture:
             # Force measure all path pieces to be empty.
-            for path_piece in quantum_pieces:
+            for path_piece in control_objects:
                 self.board.force_measurement(path_piece, 0)
                 path_piece.reset()
 
@@ -214,10 +235,10 @@ class Board:
             current_king.reset(oppsite_king)
             oppsite_king.reset()
             print("==== FLYING GENERAL ! ====")
-            print(self)
             return True
         else:
             # TODO(): we are leaving the path pieces unchanged in entangled state. Maybe
             # better to force measure them? One option is to randomly chosing one path piece
             # and force measure it to be occupied.
+            print("==== General not flies yet ! ====")
             return False
