@@ -14,6 +14,10 @@
 from unitary.examples.quantum_chinese_chess.move import Move, Jump
 from unitary.examples.quantum_chinese_chess.board import Board
 from unitary.examples.quantum_chinese_chess.piece import Piece
+import pytest
+from unitary import alpha
+from typing import List
+from string import ascii_lowercase, digits
 from unitary.examples.quantum_chinese_chess.enums import (
     MoveType,
     MoveVariant,
@@ -31,35 +35,8 @@ from unitary.examples.quantum_chinese_chess.test_utils import (
     sample_board,
     get_board_probability_distribution,
     print_samples,
+    set_board,
 )
-import pytest
-from unitary import alpha
-from typing import List
-from string import ascii_lowercase, digits
-
-
-_EMPTY_FEN = "9/9/9/9/9/9/9/9/9/9 w---1"
-
-
-def global_names():
-    pass
-
-
-# global board
-# board = Board.from_fen(_EMPTY_FEN)
-
-
-def set_board(positions: List[str]):
-    global board
-    board = Board.from_fen(_EMPTY_FEN)
-    for col in ascii_lowercase[:9]:
-        for row in digits:
-            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
-    for position in positions:
-        board.board[position].reset(
-            Piece(position, SquareState.OCCUPIED, Type.ROOK, Color.RED)
-        )
-        alpha.Flip()(board.board[position])
 
 
 def test_move_eq():
@@ -168,10 +145,12 @@ def test_to_str():
 
 
 def test_jump_classical():
-    global_names()
-
     # Target is empty.
-    set_board(["a1", "b1"])
+    board = set_board(["a1", "b1"])
+    # TODO(): try move the following varaibles declarations into a function.
+    for col in ascii_lowercase[:9]:
+        for row in digits:
+            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
     Jump(MoveVariant.CLASSICAL)(a1, b2)
     assert_samples_in(board, [locations_to_bitboard(["b2", "b1"])])
 
@@ -182,8 +161,10 @@ def test_jump_classical():
 
 def test_jump_capture():
     # Source is in quantum state.
-    global_names()
-    set_board(["a1", "b1"])
+    board = set_board(["a1", "b1"])
+    for col in ascii_lowercase[:9]:
+        for row in digits:
+            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
     alpha.PhasedSplit()(a1, a2, a3)
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
@@ -199,8 +180,10 @@ def test_jump_capture():
         assert_samples_in(board, [locations_to_bitboard(["a3", "b1"])])
 
     # Target is in quantum state.
-    global_names()
-    set_board(["a1", "b1"])
+    board = set_board(["a1", "b1"])
+    for col in ascii_lowercase[:9]:
+        for row in digits:
+            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
     alpha.PhasedSplit()(b1, b2, b3)
     Jump(MoveVariant.CAPTURE)(a1, b2)
     board_probabilities = get_board_probability_distribution(board, 1000)
@@ -209,8 +192,10 @@ def test_jump_capture():
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2", "b3"]))
 
     # Both source and target are in quantum state.
-    global_names()
-    set_board(["a1", "b1"])
+    board = set_board(["a1", "b1"])
+    for col in ascii_lowercase[:9]:
+        for row in digits:
+            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
     alpha.PhasedSplit()(a1, a2, a3)
     alpha.PhasedSplit()(b1, b2, b3)
     assert_sample_distribution(
@@ -238,8 +223,10 @@ def test_jump_capture():
 
 def test_jump_excluded():
     # Target is in quantum state.
-    global_names()
-    set_board(["a1", "b1"])
+    board = set_board(["a1", "b1"])
+    for col in ascii_lowercase[:9]:
+        for row in digits:
+            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
     alpha.PhasedSplit()(b1, b2, b3)
     Jump(MoveVariant.EXCLUDED)(a1, b2)
     # pop() will break the supersition and only one of the following two states are possible.
@@ -252,8 +239,10 @@ def test_jump_excluded():
         assert_samples_in(board, [locations_to_bitboard(["b2", "b3"])])
 
     # Both source and target are in quantum state.
-    global_names()
-    set_board(["a1", "b1"])
+    board = set_board(["a1", "b1"])
+    for col in ascii_lowercase[:9]:
+        for row in digits:
+            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
     alpha.PhasedSplit()(a1, a2, a3)
     alpha.PhasedSplit()(b1, b2, b3)
     Jump(MoveVariant.EXCLUDED)(a2, b2)
@@ -272,8 +261,10 @@ def test_jump_excluded():
 
 def test_jump_basic():
     # Souce is in quantum state.
-    global_names()
-    set_board(["a1"])
+    board = set_board(["a1"])
+    for col in ascii_lowercase[:9]:
+        for row in digits:
+            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
     alpha.PhasedSplit()(a1, a2, a3)
     Jump(MoveVariant.BASIC)(a2, d1)
     board_probabilities = get_board_probability_distribution(board, 1000)
