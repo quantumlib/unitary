@@ -145,7 +145,7 @@ class Jump(QuantumEffect):
                 # If source_0 turns out to be not there, we clear set it to be EMPTY, and the jump
                 # could not be made.
                 source_0.reset()
-                print("Jump move: source turns out to be empty.")
+                print("Jump move not applied: source turns out to be empty.")
                 return iter(())
             source_0.is_entangled = False
             # We replace the qubit of target_0 with a new ancilla, and set its classical properties to be EMPTY.
@@ -159,7 +159,7 @@ class Jump(QuantumEffect):
             if target_is_occupied:
                 # If target_0 turns out to be there, we set it to be a classically OCCUPIED, and
                 # the jump could not be made.
-                print("Jump move: target turns out to be occupied.")
+                print("Jump move not applied: target turns out to be occupied.")
                 target_0.is_entangled = False
                 return iter(())
             # Otherwise we set target_0 to be classically EMPTY.

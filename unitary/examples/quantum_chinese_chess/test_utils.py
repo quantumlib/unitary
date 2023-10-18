@@ -164,10 +164,11 @@ def assert_this_or_that(samples, this, that):
 
 def assert_prob_about(probs, that, expected, atol=0.04):
     """Checks that the probability is within atol of the expected value."""
-    assert probs[that] > expected - atol, print_samples([that])
-    assert probs[that] < expected + atol, print_samples([that])
+    assert that in probs, print_samples(list(probs.keys()))
+    assert probs[that] > expected - atol, print_samples(list(probs.keys()))
+    assert probs[that] < expected + atol, print_samples(list(probs.keys()))
 
 
 def assert_fifty_fifty(probs, that):
     """Checks that the probability is close to 50%."""
-    assert_prob_about(probs, that, 0.5), print_samples([that])
+    assert_prob_about(probs, that, 0.5), print_samples(list(probs.keys()))

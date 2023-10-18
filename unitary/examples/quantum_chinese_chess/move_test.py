@@ -176,10 +176,11 @@ def test_jump_classical():
 
 
 def test_jump_capture():
+    # Source is in quantum state
     global_names()
     set_board(["a1", "a3"])
     alpha.PhasedSplit()(a1, b1, b2)
-    board_probabilities = get_board_probability_distribution(board, 5000)
+    board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b1", "a3"]))
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2", "a3"]))
@@ -191,3 +192,61 @@ def test_jump_capture():
     assert_this_or_that(
         samples, locations_to_bitboard(["a3"]), locations_to_bitboard(["b2", "a3"])
     )
+
+    # Target is in quantum state
+    global_names()
+    set_board(["a1", "a3"])
+    alpha.PhasedSplit()(a1, b1, b2)
+    Jump(MoveVariant.CAPTURE)(a3, b1)
+    board_probabilities = get_board_probability_distribution(board, 1000)
+    assert len(board_probabilities) == 2
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b1"]))
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b1", "b2"]))
+
+    # Both source and target are in quantum state
+    global_names()
+    set_board(["a1", "b1"])
+    alpha.PhasedSplit()(a1, a2, a3)
+    alpha.PhasedSplit()(b1, b2, b3)
+    assert_sample_distribution(
+        board,
+        {
+            locations_to_bitboard(["a2", "b2"]): 1 / 4.0,
+            locations_to_bitboard(["a2", "b3"]): 1 / 4.0,
+            locations_to_bitboard(["a3", "b2"]): 1 / 4.0,
+            locations_to_bitboard(["a3", "b3"]): 1 / 4.0,
+        },
+    )
+    Jump(MoveVariant.CAPTURE)(a2, b2)
+    board_probabilities = get_board_probability_distribution(board, 1000)
+    assert len(board_probabilities) == 2
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b2"]))
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b3"]))
+
+
+def test_jump_excluded():
+    global_names()
+    set_board(["a1", "a3"])
+    alpha.PhasedSplit()(a1, b1, b2)
+
+    Jump(MoveVariant.EXCLUDED)(a3, b1)
+    # pop() will break the supersition and only one of the following two states are possible.
+    samples = sample_board(board, 100)
+    assert len(set(samples)) == 1
+    assert_this_or_that(
+        samples,
+        locations_to_bitboard(["a3", "b1"]),
+        locations_to_bitboard(["b1", "b2"]),
+    )
+
+
+def test_jump_basic():
+    global_names()
+    set_board(["a1"])
+    alpha.PhasedSplit()(a1, b1, b2)
+
+    Jump(MoveVariant.BASIC)(b1, d1)
+    board_probabilities = get_board_probability_distribution(board, 1000)
+    assert len(board_probabilities) == 2
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2"]))
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["d1"]))
