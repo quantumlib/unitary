@@ -17,7 +17,6 @@ from unitary.examples.quantum_chinese_chess.piece import Piece
 import pytest
 from unitary import alpha
 from typing import List
-from string import ascii_lowercase, digits
 from unitary.examples.quantum_chinese_chess.enums import (
     MoveType,
     MoveVariant,
@@ -147,33 +146,29 @@ def test_to_str():
 def test_jump_classical():
     # Target is empty.
     board = set_board(["a1", "b1"])
-    # TODO(): try move the following varaibles declarations into a function.
-    for col in ascii_lowercase[:9]:
-        for row in digits:
-            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
-    Jump(MoveVariant.CLASSICAL)(a1, b2)
+    world = board.board
+    # TODO(): try move all varaibles declarations of a1 = world["a1"] into a function.
+    Jump(MoveVariant.CLASSICAL)(world["a1"], world["b2"])
     assert_samples_in(board, [locations_to_bitboard(["b2", "b1"])])
 
     # Target is occupied.
-    Jump(MoveVariant.CLASSICAL)(b2, b1)
+    Jump(MoveVariant.CLASSICAL)(world["b2"], world["b1"])
     assert_samples_in(board, [locations_to_bitboard(["b1"])])
 
 
 def test_jump_capture():
     # Source is in quantum state.
     board = set_board(["a1", "b1"])
-    for col in ascii_lowercase[:9]:
-        for row in digits:
-            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
-    alpha.PhasedSplit()(a1, a2, a3)
+    world = board.board
+    alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a2", "b1"]))
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b1"]))
-    Jump(MoveVariant.CAPTURE)(a2, b1)
+    Jump(MoveVariant.CAPTURE)(world["a2"], world["b1"])
     # pop() will break the supersition and only one of the following two states are possible.
     # We check the ancilla to learn if the jump was applied or not.
-    source_is_occupied = board.board.post_selection[board.board["ancilla_a2_0"]]
+    source_is_occupied = world.post_selection[world["ancilla_a2_0"]]
     if source_is_occupied:
         assert_samples_in(board, [locations_to_bitboard(["b1"])])
     else:
@@ -181,11 +176,9 @@ def test_jump_capture():
 
     # Target is in quantum state.
     board = set_board(["a1", "b1"])
-    for col in ascii_lowercase[:9]:
-        for row in digits:
-            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
-    alpha.PhasedSplit()(b1, b2, b3)
-    Jump(MoveVariant.CAPTURE)(a1, b2)
+    world = board.board
+    alpha.PhasedSplit()(world["b1"], world["b2"], world["b3"])
+    Jump(MoveVariant.CAPTURE)(world["a1"], world["b2"])
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2"]))
@@ -193,11 +186,9 @@ def test_jump_capture():
 
     # Both source and target are in quantum state.
     board = set_board(["a1", "b1"])
-    for col in ascii_lowercase[:9]:
-        for row in digits:
-            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
-    alpha.PhasedSplit()(a1, a2, a3)
-    alpha.PhasedSplit()(b1, b2, b3)
+    world = board.board
+    alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
+    alpha.PhasedSplit()(world["b1"], world["b2"], world["b3"])
     assert_sample_distribution(
         board,
         {
@@ -207,11 +198,11 @@ def test_jump_capture():
             locations_to_bitboard(["a3", "b3"]): 1 / 4.0,
         },
     )
-    Jump(MoveVariant.CAPTURE)(a2, b2)
+    Jump(MoveVariant.CAPTURE)(world["a2"], world["b2"])
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
     # We check the ancilla to learn if the jump was applied or not.
-    source_is_occupied = board.board.post_selection[board.board["ancilla_a2_0"]]
+    source_is_occupied = world.post_selection[world["ancilla_a2_0"]]
     print(source_is_occupied)
     if source_is_occupied:
         assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2"]))
@@ -224,14 +215,12 @@ def test_jump_capture():
 def test_jump_excluded():
     # Target is in quantum state.
     board = set_board(["a1", "b1"])
-    for col in ascii_lowercase[:9]:
-        for row in digits:
-            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
-    alpha.PhasedSplit()(b1, b2, b3)
-    Jump(MoveVariant.EXCLUDED)(a1, b2)
+    world = board.board
+    alpha.PhasedSplit()(world["b1"], world["b2"], world["b3"])
+    Jump(MoveVariant.EXCLUDED)(world["a1"], world["b2"])
     # pop() will break the supersition and only one of the following two states are possible.
     # We check the ancilla to learn if the jump was applied or not.
-    target_is_occupied = board.board.post_selection[board.board["ancilla_b2_0"]]
+    target_is_occupied = world.post_selection[world["ancilla_b2_0"]]
     print(target_is_occupied)
     if target_is_occupied:
         assert_samples_in(board, [locations_to_bitboard(["a1", "b2"])])
@@ -240,16 +229,14 @@ def test_jump_excluded():
 
     # Both source and target are in quantum state.
     board = set_board(["a1", "b1"])
-    for col in ascii_lowercase[:9]:
-        for row in digits:
-            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
-    alpha.PhasedSplit()(a1, a2, a3)
-    alpha.PhasedSplit()(b1, b2, b3)
-    Jump(MoveVariant.EXCLUDED)(a2, b2)
+    world = board.board
+    alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
+    alpha.PhasedSplit()(world["b1"], world["b2"], world["b3"])
+    Jump(MoveVariant.EXCLUDED)(world["a2"], world["b2"])
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
     # We check the ancilla to learn if the jump was applied or not.
-    target_is_occupied = board.board.post_selection[board.board["ancilla_b2_0"]]
+    target_is_occupied = world.post_selection[world["ancilla_b2_0"]]
     print(target_is_occupied)
     if target_is_occupied:
         assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a2", "b2"]))
@@ -262,11 +249,9 @@ def test_jump_excluded():
 def test_jump_basic():
     # Souce is in quantum state.
     board = set_board(["a1"])
-    for col in ascii_lowercase[:9]:
-        for row in digits:
-            globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
-    alpha.PhasedSplit()(a1, a2, a3)
-    Jump(MoveVariant.BASIC)(a2, d1)
+    world = board.board
+    alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
+    Jump(MoveVariant.BASIC)(world["a2"], world["d1"])
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["d1"]))
