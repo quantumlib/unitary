@@ -125,7 +125,7 @@ class Jump(QuantumEffect):
         source_0, target_0 = objects
         world = source_0.world
         if self.move_variant == MoveVariant.CAPTURE:
-            source_is_occupied = world.pop([source_0])[0]
+            source_is_occupied = world.pop([source_0])[0].value
             if not source_is_occupied:
                 source_0.reset()
                 print("Jump move: source turns out to be empty.")
@@ -134,7 +134,7 @@ class Jump(QuantumEffect):
             world.unhook(target_0)
             target_0.reset()
         elif self.move_variant == MoveVariant.EXCLUDED:
-            target_is_occupied = world.pop([target_0])[0]
+            target_is_occupied = world.pop([target_0])[0].value
             if target_is_occupied:
                 print("Jump move: target turns out to be occupied.")
                 target_0.is_entangled = False
@@ -218,7 +218,7 @@ class Slide(QuantumEffect):
         world = source_0.world
         quantum_path_pieces_0 = [world[path] for path in self.quantum_path_pieces_0]
         if self.move_variant == MoveVariant.EXCLUDED:
-            target_is_occupied = world.pop([target_0])[0]
+            target_is_occupied = world.pop([target_0])[0].value
             if target_is_occupied:
                 print("Slide move not applied: target turns out to be occupied.")
                 target_0.is_entangled = False
@@ -228,7 +228,7 @@ class Slide(QuantumEffect):
         elif self.move_variant == MoveVariant.CAPTURE:
             could_capture = False
             if not source_0.is_entangled and len(quantum_path_pieces_0) == 1:
-                if not world.pop(quantum_path_pieces_0)[0]:
+                if not world.pop(quantum_path_pieces_0)[0].value:
                     quantum_path_pieces_0[0].reset()
                     could_capture = True
             else:
@@ -239,7 +239,7 @@ class Slide(QuantumEffect):
                 alpha.quantum_if(*control_qubits).equals(*conditions).apply(
                     alpha.Flip()
                 )(capture_ancilla)
-                could_capture = world.pop([capture_ancilla])[0]
+                could_capture = world.pop([capture_ancilla])[0].value
             if not could_capture:
                 # TODO(): in this case non of the path qubits are popped, i.e. the pieces are still entangled and the player
                 # could try to do this move again. Is this desired?
@@ -438,12 +438,12 @@ class CannonFire(QuantumEffect):
         world = source_0.world
         quantum_path_pieces_0 = [world[path] for path in self.quantum_path_pieces_0]
         # Source has to be there to fire.
-        if not world.pop([source_0])[0]:
+        if not world.pop([source_0])[0].value:
             source_0.reset()
             print("Cannonn fire not applied: source turns out to be empty.")
             return iter(())
         # Target has to be there to fire.
-        if not world.pop([target_0])[0]:
+        if not world.pop([target_0])[0].value:
             target_0.reset()
             print("Cannonn fire not applied: target turns out to be empty.")
             return iter(())
@@ -453,7 +453,7 @@ class CannonFire(QuantumEffect):
             could_capture = False
             if not source_0.is_entangled and len(quantum_path_pieces_0) == 1:
                 # Consider this special case to save an ancilla.
-                if not world.pop(quantum_path_pieces_0)[0]:
+                if not world.pop(quantum_path_pieces_0)[0].value:
                     quantum_path_pieces_0[0].reset()
                     could_capture = True
             else:
@@ -464,7 +464,7 @@ class CannonFire(QuantumEffect):
                 alpha.quantum_if(*control_objects).equals(*conditions).apply(
                     alpha.Flip()
                 )(capture_ancilla)
-                could_capture = world.pop([capture_ancilla])[0]
+                could_capture = world.pop([capture_ancilla])[0].value
             if not could_capture:
                 # TODO(): in this case non of the path qubits are popped, i.e. the pieces are still entangled and the player
                 # could try to do this move again. Is this desired?
@@ -508,7 +508,7 @@ class CannonFire(QuantumEffect):
                 alpha.quantum_if(*control_qubits).equals(*conditions).apply(
                     alpha.Flip()
                 )(capture_ancilla)
-                could_capture = world.pop([capture_ancilla])[0]
+                could_capture = world.pop([capture_ancilla])[0].value
                 if could_capture:
                     # Apply the capture.
                     world.unhook(target_0)

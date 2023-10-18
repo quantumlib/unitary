@@ -248,7 +248,7 @@ class Board:
         alpha.quantum_if(*control_objects).equals(*conditions).apply(alpha.Flip())(
             capture_ancilla
         )
-        could_capture = self.board.pop([capture_ancilla])[0]
+        could_capture = self.board.pop([capture_ancilla])[0].value
         if could_capture:
             # Force measure all path pieces to be empty.
             for path_piece in control_objects:
