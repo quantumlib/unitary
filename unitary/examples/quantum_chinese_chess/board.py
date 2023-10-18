@@ -49,7 +49,7 @@ class Board:
         FEN rule for Chinese Chess could be found at https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
         """
         chess_board = {}
-        row_index = 9
+        row_index = 0
         king_locations = []
         pieces, turns = fen.split(" ", 1)
         for row in pieces.split("/"):
@@ -74,15 +74,11 @@ class Board:
                         name, SquareState.OCCUPIED, piece_type, color
                     )
                     col += 1
-            row_index -= 1
+            row_index += 1
         board = alpha.QuantumWorld(chess_board.values())
         # Here 0 means the player RED while 1 the player BLACK.
         current_player = 0 if "w" in turns else 1
         # TODO(): maybe add check to make sure the input fen itself is correct.
-        if len(king_locations) != 2:
-            raise ValueError(
-                f"We expect two KINGs on the board, but got {len(king_locations)}."
-            )
         return cls(board, current_player, king_locations)
 
     def __str__(self):
@@ -92,7 +88,7 @@ class Board:
         for col in "abcdefghi":
             board_string.append(f" {col}")
         board_string.append("\n")
-        for row in range(num_rows):
+        for row in range(num_rows - 1, -1, -1):
             # Print the row index on the left.
             board_string.append(f"{row} ")
             for col in "abcdefghi":

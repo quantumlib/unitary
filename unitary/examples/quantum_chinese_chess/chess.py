@@ -125,7 +125,7 @@ class QuantumChineseChess:
         return (
             x <= ord("f")
             and x >= ord("d")
-            and ((color == Color.RED and y >= 7) or (color == Color.BLACK and y <= 2))
+            and ((color == Color.RED and y <= 2) or (color == Color.BLACK and y >= 7))
         )
 
     def check_classical_rule(
@@ -168,8 +168,8 @@ class QuantumChineseChess:
         elif source_piece.type_ == Type.ELEPHANT:
             if not (abs(dx) == 2 and abs(dy) == 2):
                 raise ValueError("ELEPHANT cannot move like this.")
-            if (source_piece.color == Color.RED and y1 < 5) or (
-                source_piece.color == Color.BLACK and y1 > 4
+            if (source_piece.color == Color.RED and y1 > 4) or (
+                source_piece.color == Color.BLACK and y1 < 5
             ):
                 raise ValueError(
                     "ELEPHANT cannot cross the river (i.e. the middle line)."
@@ -200,16 +200,16 @@ class QuantumChineseChess:
             if abs(dx) + abs(dy) != 1:
                 raise ValueError("PAWN cannot move like this.")
             if source_piece.color == Color.RED:
-                if dy == 1:
+                if dy == -1:
                     raise ValueError("PAWN can not move backward.")
-                if y0 > 4 and dy != -1:
+                if y0 <= 4 and dy != 1:
                     raise ValueError(
                         "PAWN can only go forward before crossing the river (i.e. the middle line)."
                     )
             else:
-                if dy == -1:
+                if dy == 1:
                     raise ValueError("PAWN can not move backward.")
-                if y0 <= 4 and dy != 1:
+                if y0 > 4 and dy != -1:
                     raise ValueError(
                         "PAWN can only go forward before crossing the river (i.e. the middle line)."
                     )
