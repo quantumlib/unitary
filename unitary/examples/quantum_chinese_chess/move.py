@@ -137,13 +137,11 @@ class Jump(QuantumEffect):
         world = source_0.world
         if self.move_variant == MoveVariant.CAPTURE:
             # We peek and force measure source_0.
-            print("Here 1 ")
             source_is_occupied = world.pop([source_0])[0].value
             print(source_is_occupied)
             # For move_variant==CAPTURE, we require source_0 to be occupied before further actions.
             # This is to prevent a piece of the board containing two types of different pieces.
             if not source_is_occupied:
-                print("Here 2 ")
                 # If source_0 turns out to be not there, we clear set it to be EMPTY, and the jump
                 # could not be made.
                 source_0.reset()
@@ -174,7 +172,6 @@ class Jump(QuantumEffect):
                 target_0.reset()
 
         # Make the jump move.
-        print("Here 3 ")        
         alpha.PhasedMove()(source_0, target_0)
         # Move the classical properties of the source piece to the target piece.
         target_0.reset(source_0)

@@ -185,11 +185,9 @@ def test_jump_capture():
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2", "a3"]))
 
     Jump(MoveVariant.CAPTURE)(b1, a3)
+    # pop() will break the supersition and only one of the following two states are possible.
     samples = sample_board(board, 100)
+    assert len(set(samples)) == 1
     assert_this_or_that(
         samples, locations_to_bitboard(["a3"]), locations_to_bitboard(["b2", "a3"])
     )
-    board_probabilities = get_board_probability_distribution(board, 5000)
-    assert len(board_probabilities) == 2
-    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3"]))
-    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2", "a3"]))
