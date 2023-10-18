@@ -42,14 +42,19 @@ _EMPTY_FEN = "9/9/9/9/9/9/9/9/9/9 w---1"
 
 
 def global_names():
+    pass
+
+
+# global board
+# board = Board.from_fen(_EMPTY_FEN)
+
+
+def set_board(positions: List[str]):
     global board
     board = Board.from_fen(_EMPTY_FEN)
     for col in ascii_lowercase[:9]:
         for row in digits:
             globals()[f"{col}{row}"] = board.board[f"{col}{row}"]
-
-
-def set_board(positions: List[str]):
     for position in positions:
         board.board[position].reset(
             Piece(position, SquareState.OCCUPIED, Type.ROOK, Color.RED)
