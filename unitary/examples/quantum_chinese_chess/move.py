@@ -138,7 +138,6 @@ class Jump(QuantumEffect):
         if self.move_variant == MoveVariant.CAPTURE:
             # We peek and force measure source_0.
             source_is_occupied = world.pop([source_0])[0].value
-            print(source_is_occupied)
             # For move_variant==CAPTURE, we require source_0 to be occupied before further actions.
             # This is to prevent a piece of the board containing two types of different pieces.
             if not source_is_occupied:

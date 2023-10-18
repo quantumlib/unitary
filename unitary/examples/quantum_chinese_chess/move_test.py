@@ -165,45 +165,45 @@ def test_to_str():
 def test_jump_classical():
     global_names()
 
-    # basic case
-    set_board(["a1", "a3"])
+    # Target is empty.
+    set_board(["a1", "b1"])
     Jump(MoveVariant.CLASSICAL)(a1, b2)
-    assert_samples_in(board, [locations_to_bitboard(["b2", "a3"])])
+    assert_samples_in(board, [locations_to_bitboard(["b2", "b1"])])
 
-    # capture case
-    Jump(MoveVariant.CLASSICAL)(b2, a3)
-    assert_samples_in(board, [locations_to_bitboard(["a3"])])
+    # Target is occupied.
+    Jump(MoveVariant.CLASSICAL)(b2, b1)
+    assert_samples_in(board, [locations_to_bitboard(["b1"])])
 
 
 def test_jump_capture():
-    # Source is in quantum state
+    # Source is in quantum state.
     global_names()
-    set_board(["a1", "a3"])
-    alpha.PhasedSplit()(a1, b1, b2)
+    set_board(["a1", "b1"])
+    alpha.PhasedSplit()(a1, a2, a3)
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
-    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b1", "a3"]))
-    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2", "a3"]))
-
-    Jump(MoveVariant.CAPTURE)(b1, a3)
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a2", "b1"]))
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b1"]))
+    Jump(MoveVariant.CAPTURE)(a2, b1)
     # pop() will break the supersition and only one of the following two states are possible.
-    samples = sample_board(board, 100)
-    assert len(set(samples)) == 1
-    assert_this_or_that(
-        samples, locations_to_bitboard(["a3"]), locations_to_bitboard(["b2", "a3"])
-    )
+    # We check the ancilla to learn if the jump was applied or not.
+    source_is_occupied = board.board.post_selection[board.board["ancilla_a2_0"]]
+    if source_is_occupied:
+        assert_samples_in(board, [locations_to_bitboard(["b1"])])
+    else:
+        assert_samples_in(board, [locations_to_bitboard(["a3", "b1"])])
 
-    # Target is in quantum state
+    # Target is in quantum state.
     global_names()
-    set_board(["a1", "a3"])
-    alpha.PhasedSplit()(a1, b1, b2)
-    Jump(MoveVariant.CAPTURE)(a3, b1)
+    set_board(["a1", "b1"])
+    alpha.PhasedSplit()(b1, b2, b3)
+    Jump(MoveVariant.CAPTURE)(a1, b2)
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
-    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b1"]))
-    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b1", "b2"]))
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2"]))
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2", "b3"]))
 
-    # Both source and target are in quantum state
+    # Both source and target are in quantum state.
     global_names()
     set_board(["a1", "b1"])
     alpha.PhasedSplit()(a1, a2, a3)
@@ -220,33 +220,58 @@ def test_jump_capture():
     Jump(MoveVariant.CAPTURE)(a2, b2)
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
-    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b2"]))
-    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b3"]))
+    # We check the ancilla to learn if the jump was applied or not.
+    source_is_occupied = board.board.post_selection[board.board["ancilla_a2_0"]]
+    print(source_is_occupied)
+    if source_is_occupied:
+        assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2"]))
+        assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2", "b3"]))
+    else:
+        assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b2"]))
+        assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b3"]))
 
 
 def test_jump_excluded():
+    # Target is in quantum state.
     global_names()
-    set_board(["a1", "a3"])
-    alpha.PhasedSplit()(a1, b1, b2)
-
-    Jump(MoveVariant.EXCLUDED)(a3, b1)
+    set_board(["a1", "b1"])
+    alpha.PhasedSplit()(b1, b2, b3)
+    Jump(MoveVariant.EXCLUDED)(a1, b2)
     # pop() will break the supersition and only one of the following two states are possible.
-    samples = sample_board(board, 100)
-    assert len(set(samples)) == 1
-    assert_this_or_that(
-        samples,
-        locations_to_bitboard(["a3", "b1"]),
-        locations_to_bitboard(["b1", "b2"]),
-    )
+    # We check the ancilla to learn if the jump was applied or not.
+    target_is_occupied = board.board.post_selection[board.board["ancilla_b2_0"]]
+    print(target_is_occupied)
+    if target_is_occupied:
+        assert_samples_in(board, [locations_to_bitboard(["a1", "b2"])])
+    else:
+        assert_samples_in(board, [locations_to_bitboard(["b2", "b3"])])
+
+    # Both source and target are in quantum state.
+    global_names()
+    set_board(["a1", "b1"])
+    alpha.PhasedSplit()(a1, a2, a3)
+    alpha.PhasedSplit()(b1, b2, b3)
+    Jump(MoveVariant.EXCLUDED)(a2, b2)
+    board_probabilities = get_board_probability_distribution(board, 1000)
+    assert len(board_probabilities) == 2
+    # We check the ancilla to learn if the jump was applied or not.
+    target_is_occupied = board.board.post_selection[board.board["ancilla_b2_0"]]
+    print(target_is_occupied)
+    if target_is_occupied:
+        assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a2", "b2"]))
+        assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b2"]))
+    else:
+        assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2", "b3"]))
+        assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b3"]))
 
 
 def test_jump_basic():
+    # Souce is in quantum state.
     global_names()
     set_board(["a1"])
-    alpha.PhasedSplit()(a1, b1, b2)
-
-    Jump(MoveVariant.BASIC)(b1, d1)
+    alpha.PhasedSplit()(a1, a2, a3)
+    Jump(MoveVariant.BASIC)(a2, d1)
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
-    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2"]))
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["d1"]))
+    assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3"]))

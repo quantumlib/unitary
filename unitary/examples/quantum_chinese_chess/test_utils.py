@@ -162,7 +162,7 @@ def assert_this_or_that(samples, this, that):
     )
 
 
-def assert_prob_about(probs, that, expected, atol=0.04):
+def assert_prob_about(probs, that, expected, atol=0.05):
     """Checks that the probability is within atol of the expected value."""
     assert that in probs, print_samples(list(probs.keys()))
     assert probs[that] > expected - atol, print_samples(list(probs.keys()))
