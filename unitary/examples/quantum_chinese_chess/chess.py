@@ -424,11 +424,9 @@ class QuantumChineseChess:
             output = "Undo last quantum effect."
             # Right now it's only for debugging purposes, since it has following problems:
             # TODO(): there are several problems here:
-            # 1) last move is quantum but classical piece information is not reversed back.
+            # 1) the classical piece information is not reversed back.
             # ==> we may need to save the change of classical piece information of each step.
-            # 2) last move might not be quantum.
-            # ==> we may need to save all classical moves and figure out how to undo each kind of move;
-            # 3) last move is quantum but involved multiple effects.
+            # 2) last move involved multiple effects.
             # ==> we may need to save number of effects per move, and undo that number of times.
             self.board.board.undo_last_effect()
             return True, output
@@ -458,10 +456,7 @@ class QuantumChineseChess:
         for row in range(num_rows):
             for col in "abcdefghi":
                 piece = self.board.board[f"{col}{row}"]
-                # We need to do the following range() conversion since the sequence of
-                # qubits returned from get_binary_probabilities() is
-                # a9 b9 ... i9, a8 b8 ... i8, ..., a0 b0 ... i0
-                prob = probs[(num_rows - row - 1) * num_cols + ord(col) - ord("a")]
+                prob = probs[row * num_cols + ord(col) - ord("a")]
                 # TODO(): This threshold does not actually work right now since we have 100 sampling.
                 # Change it to be more meaningful values maybe when we do error mitigation.
                 if prob < 1e-3:

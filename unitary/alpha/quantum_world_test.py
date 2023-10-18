@@ -176,7 +176,7 @@ def test_pop(simulator, compile_to_qubits):
         compile_to_qubits=compile_to_qubits,
     )
     alpha.Split()(light, light2, light3)
-    results = board.peek([light2, light3], count=200)
+    results = board.peek([light2, light3], count=200, convert_to_enum=False)
     assert all(result[0] != result[1] for result in results)
     assert not all(result[0] == 0 for result in results)
     assert not all(result[0] == 1 for result in results)
@@ -187,6 +187,26 @@ def test_pop(simulator, compile_to_qubits):
     assert len(results) == 200
     assert all(result[0] == popped for result in results)
     assert all(result[1] != popped for result in results)
+
+
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
+def test_unhook(simulator, compile_to_qubits):
+    light = alpha.QuantumObject("l1", Light.GREEN)
+    light2 = alpha.QuantumObject("l2", Light.RED)
+    light3 = alpha.QuantumObject("l3", Light.RED)
+    board = alpha.QuantumWorld(
+        [light, light2, light3],
+        sampler=simulator(),
+        compile_to_qubits=compile_to_qubits,
+    )
+    alpha.Split()(light, light2, light3)
+    board.unhook(light2)
+    results = board.peek([light2, light3], count=200, convert_to_enum=False)
+    print(results)
+    assert all(result[0] == 0 for result in results)
+    assert not all(result[1] == 0 for result in results)
+    assert not all(result[1] == 1 for result in results)
 
 
 # TODO: Consider moving to qudit_effects.py if this can be broadly useful.

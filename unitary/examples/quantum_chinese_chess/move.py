@@ -129,7 +129,7 @@ class Jump(QuantumEffect):
         return 2
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
-        # TODO(): currently pawn capture is a same as jump capture, while in quantum chess it's different,
+        # TODO(): currently pawn capture is the same as jump capture, while in quantum chess it's different,
         # i.e. pawn would move only if the target is there, i.e. CNOT(t, s), and an entanglement could be
         # created. This could be a general game setting, i.e. we could allow players to choose if they
         # want the source piece to move (in case of capture) if the target piece is not there.
@@ -141,7 +141,7 @@ class Jump(QuantumEffect):
             # For move_variant==CAPTURE, we require source_0 to be occupied before further actions.
             # This is to prevent a piece of the board containing two types of different pieces.
             if not source_is_occupied:
-                # If source_0 turns out to be not there, we clear set it to be EMPTY, and the jump
+                # If source_0 turns out to be not there, we set it to be EMPTY, and the jump
                 # could not be made.
                 source_0.reset()
                 print("Jump move not applied: source turns out to be empty.")
@@ -156,7 +156,7 @@ class Jump(QuantumEffect):
             # For move_variant==EXCLUDED, we require target_0 to be empty before further actions.
             # This is to prevent a piece of the board containing two types of different pieces.
             if target_is_occupied:
-                # If target_0 turns out to be there, we set it to be a classically OCCUPIED, and
+                # If target_0 turns out to be there, we set it to be classically OCCUPIED, and
                 # the jump could not be made.
                 print("Jump move not applied: target turns out to be occupied.")
                 target_0.is_entangled = False

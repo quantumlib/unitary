@@ -20,15 +20,6 @@ from collections import defaultdict
 from scipy.stats import chisquare
 
 
-# Build quantum objects a0 to i9, and add them to a quantum world.
-def init_board() -> QuantumWorld:
-    board = {}
-    for col in ascii_lowercase[:9]:
-        for row in digits:
-            board[col + row] = QuantumObject(col + row, SquareState.EMPTY)
-    return QuantumWorld(list(board.values()))
-
-
 def location_to_bit(location: str) -> int:
     """Transform location notation (e.g. "a3") into a bitboard bit number."""
     x = ord(location[0]) - ord("a")
