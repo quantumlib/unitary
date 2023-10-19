@@ -368,10 +368,6 @@ class QuantumChineseChess:
                 # King is captured, then the game is over.
                 self.game_state = GameState(self.current_player)
             Jump(move_variant)(source_0, target_0)
-            # target_0.reset(source_0)
-            # source_0.reset()
-            # TODO(): only make such prints for a certain debug level.
-            # print("Classical move.")
         elif move_type == MoveType.JUMP:
             Jump(move_variant)(source_0, target_0)
         elif move_type == MoveType.SLIDE:
