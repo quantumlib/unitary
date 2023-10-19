@@ -289,7 +289,7 @@ class Slide(QuantumEffect):
                     alpha.Flip()
                 )(capture_ancilla)
                 # We measure the ancilla to dertermine whether the slide could be made.
-                could_capture = world.pop([capture_ancilla])[0].value
+                could_capture = world.pop([capture_ancilla])[0]
             if not could_capture:
                 # TODO(): in this case non of the path qubits are popped, i.e. the pieces are still entangled and the player
                 # could try to do this move again. Is this desired?
@@ -298,6 +298,9 @@ class Slide(QuantumEffect):
                 )
                 return iter(())
             # Apply the capture.
+            # Force measure the source to be there.
+            world.force_measurement(source_0, 1)
+            source_0.is_entangled = False
             # Target qubit is unhooked, i.e. replaced with a new ancilla with value = 0.
             world.unhook(target_0)
             target_0.reset()

@@ -151,7 +151,7 @@ def assert_sample_distribution(
     samples = sample_board(board, n_samples)
     counts = defaultdict(int)
     for sample in samples:
-        assert sample in probabilities, bitboard_to_locations(sample)
+        assert sample in probabilities, print_samples(samples)
         counts[sample] += 1
     observed = []
     expected = []

@@ -316,6 +316,7 @@ class QuantumWorld:
         state of the result.
         """
         new_obj = self._add_ancilla(namespace=obj.name, value=result)
+        print(new_obj.name)
         # Swap the input and ancilla qubits using a remapping dict.
         qubit_remapping_dict = {obj.qubit: new_obj.qubit, new_obj.qubit: obj.qubit}
         if self.compile_to_qubits:
@@ -506,10 +507,14 @@ class QuantumWorld:
         return binary_probs
 
     def __getitem__(self, name: str) -> QuantumObject:
-        quantum_object = self.object_name_dict.get(name, None)
-        if not quantum_object:
+        try:
+            quantum_object = self.object_name_dict.get(name, None)
+            return quantum_object
+        except:
+            print("exsiting")
+            for obj in self.object_name_dict.keys():
+                print(obj)
             raise KeyError(f"{name} did not exist in this world.")
-        return quantum_object
 
     def unhook(self, object: QuantumObject) -> None:
         new_ancilla = self._add_ancilla(object.name)
