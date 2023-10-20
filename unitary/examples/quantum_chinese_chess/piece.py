@@ -22,6 +22,11 @@ from unitary.examples.quantum_chinese_chess.enums import (
 
 
 class Piece(QuantumObject):
+    """Each Piece stands for a position in the board, it could hold different types/colors
+    of chess pieces either in quantum state or classical state. It could also be classically
+    EMPTY.
+    """
+
     def __init__(self, name: str, state: SquareState, type_: Type, color: Color):
         QuantumObject.__init__(self, name, state)
         self.type_ = type_
@@ -40,7 +45,7 @@ class Piece(QuantumObject):
 
     def reset(self, piece: "Piece" = None) -> None:
         """Modifies the classical attributes of the piece.
-        If piece is provided, then its type_, color, and is_entangled is copied,
+        If `piece` is provided, then its type_, color, and is_entangled is copied,
         otherwise set the current piece to be a classically empty piece.
         """
         if piece is not None:

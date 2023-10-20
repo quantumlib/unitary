@@ -247,7 +247,7 @@ def test_jump_excluded():
 
 
 def test_jump_basic():
-    # Souce is in quantum state.
+    # Source is in quantum state.
     board = set_board(["a1"])
     world = board.board
     alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
