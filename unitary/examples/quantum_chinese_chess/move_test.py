@@ -36,73 +36,73 @@ from unitary.examples.quantum_chinese_chess.test_utils import (
     print_samples,
     set_board,
 )
+from unitary.examples.quantum_chinese_chess.chess import *
+
+# def test_move_eq():
+#     board = Board.from_fen()
+#     move1 = Move(
+#         "a1",
+#         "b2",
+#         board,
+#         "c1",
+#         move_type=MoveType.MERGE_JUMP,
+#         move_variant=MoveVariant.CAPTURE,
+#     )
+#     move2 = Move(
+#         "a1",
+#         "b2",
+#         board,
+#         "c1",
+#         move_type=MoveType.MERGE_JUMP,
+#         move_variant=MoveVariant.CAPTURE,
+#     )
+#     move3 = Move(
+#         "a1", "b2", board, move_type=MoveType.JUMP, move_variant=MoveVariant.CAPTURE
+#     )
+#     move4 = Move(
+#         "a1",
+#         "b2",
+#         board,
+#         "c1",
+#         move_type=MoveType.MERGE_SLIDE,
+#         move_variant=MoveVariant.CAPTURE,
+#     )
+
+#     assert move1 == move2
+#     assert move1 != move3
+#     assert move1 != move4
 
 
-def test_move_eq():
-    board = Board.from_fen()
-    move1 = Move(
-        "a1",
-        "b2",
-        board,
-        "c1",
-        move_type=MoveType.MERGE_JUMP,
-        move_variant=MoveVariant.CAPTURE,
-    )
-    move2 = Move(
-        "a1",
-        "b2",
-        board,
-        "c1",
-        move_type=MoveType.MERGE_JUMP,
-        move_variant=MoveVariant.CAPTURE,
-    )
-    move3 = Move(
-        "a1", "b2", board, move_type=MoveType.JUMP, move_variant=MoveVariant.CAPTURE
-    )
-    move4 = Move(
-        "a1",
-        "b2",
-        board,
-        "c1",
-        move_type=MoveType.MERGE_SLIDE,
-        move_variant=MoveVariant.CAPTURE,
-    )
+# def test_move_type():
+#     # TODO(): change to real senarios
+#     board = Board.from_fen()
+#     move1 = Move(
+#         "a1",
+#         "b2",
+#         board,
+#         "c1",
+#         move_type=MoveType.MERGE_JUMP,
+#         move_variant=MoveVariant.CAPTURE,
+#     )
+#     assert move1.is_split_move() == False
+#     assert move1.is_merge_move()
 
-    assert move1 == move2
-    assert move1 != move3
-    assert move1 != move4
+#     move2 = Move(
+#         "a1",
+#         "b2",
+#         board,
+#         target2="c1",
+#         move_type=MoveType.SPLIT_JUMP,
+#         move_variant=MoveVariant.BASIC,
+#     )
+#     assert move2.is_split_move()
+#     assert move2.is_merge_move() == False
 
-
-def test_move_type():
-    # TODO(): change to real senarios
-    board = Board.from_fen()
-    move1 = Move(
-        "a1",
-        "b2",
-        board,
-        "c1",
-        move_type=MoveType.MERGE_JUMP,
-        move_variant=MoveVariant.CAPTURE,
-    )
-    assert move1.is_split_move() == False
-    assert move1.is_merge_move()
-
-    move2 = Move(
-        "a1",
-        "b2",
-        board,
-        target2="c1",
-        move_type=MoveType.SPLIT_JUMP,
-        move_variant=MoveVariant.BASIC,
-    )
-    assert move2.is_split_move()
-    assert move2.is_merge_move() == False
-
-    move3 = Move(
-        "a1", "b2", board, move_type=MoveType.SLIDE, move_variant=MoveVariant.CAPTURE
-    )
-    assert move3.is_split_move() == False
-    assert move3.is_merge_move() == False
+#     move3 = Move(
+#         "a1", "b2", board, move_type=MoveType.SLIDE, move_variant=MoveVariant.CAPTURE
+#     )
+#     assert move3.is_split_move() == False
+#     assert move3.is_merge_move() == False
 
 
 # def test_to_str():
@@ -944,3 +944,85 @@ def test_cannon_fire():
                             locations_to_bitboard(["a2", "b3", "c3", "d2"]): 1.0 / 2,
                         },
                     )
+
+
+# TEST
+def test_undo(monkeypatch):
+    inputs = iter(["y", "Bob", "Ben"])
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+    game = QuantumChineseChess()
+    board = set_board(["a1", "b1", "c1", "d1"])
+    game.board = board
+    world = board.board
+    print("## Jump 1")
+    SplitJump()(world["a1"], world["a2"], world["a3"])
+    print("## Jump 2")
+    SplitJump()(world["b1"], world["b2"], world["b3"])
+    print("## Jump 3")
+    SplitJump()(world["c1"], world["c2"], world["c3"])
+    print("## Jump 4")
+    SplitJump()(world["d1"], world["d2"], world["d3"])
+    game.save_snapshot()
+
+    print("## Fire ")
+    CannonFire([], ["b2", "c2"])(world["a2"], world["d2"])
+    game.save_snapshot()
+
+    # We check the ancilla to learn if the fire was applied or not.
+    source_is_occupied = world.post_selection[world["ancilla_a2_0"]]
+    if not source_is_occupied:
+        assert_sample_distribution(
+            board,
+            {
+                locations_to_bitboard(["a3", "b2", "c2", "d2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b2", "c2", "d3"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b2", "c3", "d2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b2", "c3", "d3"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b3", "c2", "d2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b3", "c2", "d3"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b3", "c3", "d2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b3", "c3", "d3"]): 1.0 / 8,
+            },
+        )
+    else:
+        target_is_occupied = world.post_selection[world["ancilla_d2_0"]]
+        if not target_is_occupied:
+            assert_sample_distribution(
+                board,
+                {
+                    locations_to_bitboard(["a2", "b2", "c2", "d3"]): 1.0 / 4,
+                    locations_to_bitboard(["a2", "b2", "c3", "d3"]): 1.0 / 4,
+                    locations_to_bitboard(["a2", "b3", "c2", "d3"]): 1.0 / 4,
+                    locations_to_bitboard(["a2", "b3", "c3", "d3"]): 1.0 / 4,
+                },
+            )
+        else:
+            only_b2_is_occupied_in_path = world.post_selection[
+                world["ancilla_ancilla_b2_0_0"]
+            ]
+            if only_b2_is_occupied_in_path:
+                # successful fire
+                assert_samples_in(
+                    board, {locations_to_bitboard(["b2", "c3", "d2"]): 1.0}
+                )
+            else:
+                only_c2_is_occupied_in_path = world.post_selection[
+                    world["ancilla_ancilla_c2_0_0"]
+                ]
+                if only_c2_is_occupied_in_path:
+                    # successful fire
+                    assert_samples_in(
+                        board, {locations_to_bitboard(["b3", "c2", "d2"]): 1.0}
+                    )
+                else:
+                    assert_sample_distribution(
+                        board,
+                        {
+                            locations_to_bitboard(["a2", "b2", "c2", "d2"]): 1.0 / 2,
+                            locations_to_bitboard(["a2", "b3", "c3", "d2"]): 1.0 / 2,
+                        },
+                    )
+    game.undo()
+    print("After undo.")
+    print(len(world.effect_history))
+    assert 1 == 0

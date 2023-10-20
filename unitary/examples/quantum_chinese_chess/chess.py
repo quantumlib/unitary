@@ -77,6 +77,12 @@ class QuantumChineseChess:
         self.game_state = GameState.CONTINUES
         self.current_player = self.board.current_player
         self.debug_level = 3
+        # This variable is used to save the length of current effect history before each move is made,
+        # so that if we later undo we know how many effects we need to pop out.
+        self.effect_history_length = []
+        # This variable is used to save the classical properties of the whole board before each move is
+        # made, so that if we later undo we could recover the earlier classical state.
+        self.classical_properties_history = []
 
     @staticmethod
     def parse_input_string(str_to_parse: str) -> Tuple[List[str], List[str]]:
@@ -401,17 +407,11 @@ class QuantumChineseChess:
             # TODO(): make it look like the normal board. Right now it's only for debugging purposes.
             print(self.board.board.peek(convert_to_enum=False))
         elif input_str.lower() == "undo":
-            output = "Undo last quantum effect."
-            # Right now it's only for debugging purposes, since it has following problems:
-            # TODO(): there are several problems here:
-            # 1) last move is quantum but classical piece information is not reversed back.
-            # ==> we may need to save the change of classical piece information of each step.
-            # 2) last move might not be quantum.
-            # ==> we may need to save all classical moves and figure out how to undo each kind of move;
-            # 3) last move is quantum but involved multiple effects.
-            # ==> we may need to save number of effects per move, and undo that number of times.
-            self.board.board.undo_last_effect()
-            return True, output
+            if len(self.effect_history_length) <= 1:
+                # length == 1 corresponds to the initial state, and no more undo could be made.
+                return False, "Unable to undo any more."
+            self.undo()
+            return True, "Undoing."
         else:
             try:
                 # The move is success if no ValueError is raised.
@@ -425,13 +425,10 @@ class QuantumChineseChess:
         probs = self.board.board.get_binary_probabilities()
         num_rows = 10
         num_cols = 9
-        for row in range(num_rows):
+        for row in range(num_rows - 1, -1, -1):
             for col in "abcdefghi":
                 piece = self.board.board[f"{col}{row}"]
-                # We need to do the following range() conversion since the sequence of
-                # qubits returned from get_binary_probabilities() is
-                # a9 b9 ... i9, a8 b8 ... i8, ..., a0 b0 ... i0
-                prob = probs[(num_rows - row - 1) * num_cols + ord(col) - ord("a")]
+                prob = probs[row * num_cols + ord(col) - ord("a")]
                 # TODO(): set more accurate threshold
                 if prob < 1e-3:
                     piece.reset()
@@ -449,8 +446,52 @@ class QuantumChineseChess:
         # TODO(): add the following checks
         # - If player 0 made N repeatd back-and_forth moves in a row.
 
+    def save_snapshot(self) -> None:
+        """Saves the current length of the effect history, and the current classical states of all pieces."""
+        # Save the current length of the effect history.
+        self.effect_history_length.append(len(self.board.board.effect_history))
+        # Save the classical states of all pieces.
+        snapshot = []
+        for row in range(10):
+            for col in "abcdefghi":
+                piece = self.board.board[f"{col}{row}"]
+                snapshot.append(
+                    [piece.type_.value, piece.color.value, piece.is_entangled]
+                )
+        self.classical_properties_history.append(snapshot)
+
+    def undo(self) -> None:
+        """Undo the last move, which includes reset quantum effects and classical properties."""
+        if (
+            len(self.effect_history_length) <= 1
+            or len(self.classical_properties_history) <= 1
+        ):
+            # length == 1 corresponds to the initial state, and no more undo could be made.
+            raise ValueError("Unable to undo any more.")
+
+        # Recover the effects up to the last snapshot (which was done after the last move finished) by
+        # popping effects out of the effect history of the board until its length equals the last
+        # snapshot's length.
+        self.effect_history_length.pop()
+        last_length = self.effect_history_length[-1]
+        while len(self.board.board.effect_history) > last_length:
+            self.board.board.undo_last_effect()
+
+        # Recover the classical properties of all pieces to the last snapshot.
+        self.classical_properties_history.pop()
+        snapshot = self.classical_properties_history[-1]
+        index = 0
+        for row in range(10):
+            for col in "abcdefghi":
+                piece = self.board.board[f"{col}{row}"]
+                piece.type_ = Type(snapshot[index][0])
+                piece.color = Color(snapshot[index][1])
+                piece.is_entangled = snapshot[index][2]
+                index += 1
+
     def play(self) -> None:
         """The loop where each player takes turn to play."""
+        self.save_snapshot()
         while True:
             move_success, output = self.next_move()
             if not move_success:
@@ -460,10 +501,13 @@ class QuantumChineseChess:
                     print("\nPlease re-enter your move.")
                     continue
             print(output)
-            # Check if the game is over.
-            # TODO(): maybe we should not check game_over() when an undo is made.
-            self.game_over()
-            probs = self.update_board_by_sampling()
+            if output != "Undoing.":
+                # Check if the game is over.
+                self.game_over()
+                # Update any empty or occupied pieces' classical state.
+                probs = self.update_board_by_sampling()
+                # Save the classical states and the current length of effect history.
+                self.save_snapshot()
             print(self.board.to_str(probs))
             if self.game_state == GameState.CONTINUES:
                 # If the game continues, switch the player.

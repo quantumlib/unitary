@@ -248,11 +248,17 @@ class QuantumWorld:
 
     def add_effect(self, op_list: List[cirq.Operation]):
         """Adds an operation to the current circuit."""
+        print("## Add_effect")
+        print(len(self.effect_history))
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
         )
         for op in op_list:
+            print("### op")
+            print(op)
             self._append_op(op)
+        print("## Add_effect 2")
+        print(len(self.effect_history))
 
     def undo_last_effect(self):
         """Restores the `QuantumWorld` to the state before the last effect.
@@ -266,6 +272,8 @@ class QuantumWorld:
         if not self.effect_history:
             raise IndexError("No effects to undo")
         self.circuit, self.post_selection = self.effect_history.pop()
+        print("## undo_last_effect")
+        print(len(self.effect_history))
 
     def _suggest_num_reps(self, sample_size: int) -> int:
         """Guess the number of raw samples needed to get sample_size results.
@@ -305,6 +313,20 @@ class QuantumWorld:
             return result_list[0]
         return result
 
+    def unhook(self, object: QuantumObject) -> None:
+        """Replaces all usages of the given object in the circuit with a new ancilla with value=0."""
+        # Creates a new ancilla.
+        new_ancilla = self._add_ancilla(object.name)
+        # Replace operations using the qubit of the given object with the new ancilla.
+        qubit_remapping_dict = {
+            object.qubit: new_ancilla.qubit,
+            new_ancilla.qubit: object.qubit,
+        }
+        self.circuit = self.circuit.transform_qubits(
+            lambda q: qubit_remapping_dict.get(q, q)
+        )
+        return
+
     def force_measurement(
         self, obj: QuantumObject, result: Union[enum.Enum, int]
     ) -> None:
@@ -316,7 +338,6 @@ class QuantumWorld:
         state of the result.
         """
         new_obj = self._add_ancilla(namespace=obj.name, value=result)
-        print(new_obj.name)
         # Swap the input and ancilla qubits using a remapping dict.
         qubit_remapping_dict = {obj.qubit: new_obj.qubit, new_obj.qubit: obj.qubit}
         if self.compile_to_qubits:
@@ -424,6 +445,8 @@ class QuantumWorld:
         objects: Optional[Sequence[Union[QuantumObject, str]]] = None,
         convert_to_enum: bool = True,
     ) -> List[Union[enum.Enum, int]]:
+        print("## pop")
+        print(len(self.effect_history))
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
         )
@@ -437,6 +460,8 @@ class QuantumWorld:
         results = self.peek(quantum_objects, convert_to_enum=convert_to_enum)
         for idx, result in enumerate(results[0]):
             self.force_measurement(quantum_objects[idx], result)
+        print("## pop 2")
+        print(len(self.effect_history))
 
         return results[0]
 
@@ -515,12 +540,3 @@ class QuantumWorld:
             for obj in self.object_name_dict.keys():
                 print(obj)
             raise KeyError(f"{name} did not exist in this world.")
-
-    def unhook(self, object: QuantumObject) -> None:
-        new_ancilla = self._add_ancilla(object.name)
-        # Replace operations using the qubit of the given object with the ancilla instead
-        qubit_remapping_dict = {object.qubit: new_ancilla.qubit, new_ancilla.qubit: object.qubit}
-        self.circuit = self.circuit.transform_qubits(
-            lambda q: qubit_remapping_dict.get(q, q)
-        )
-        return

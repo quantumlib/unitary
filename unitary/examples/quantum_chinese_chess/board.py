@@ -30,7 +30,9 @@ dim = "\033[02m"
 negative = "\033[03m"
 underline = "\033[04m"
 blink = "\033[05m"
+reverse = "\033[07m"
 invisible = "\033[08m"
+strikethrough = "\033[09m"
 
 # background
 grey = "\033[47m"
@@ -38,6 +40,11 @@ grey = "\033[47m"
 # foreground
 black = "\033[30m"
 red = "\033[31m"
+green = "\033[32m"
+lightred = "\033[91m"
+lightgreen = "\033[92m"
+lightgrey = "\033[37m"
+darkgrey = "\033[90m"
 
 # The default initial state of the game.
 _INITIAL_FEN = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr w---1"
@@ -104,12 +111,14 @@ class Board:
         if probs is None:
             probs = self.board.get_binary_probabilities()
         # Print the top line of col letters.
+        board_string += grey
+        board_string += black
         for col in "abcdefghi":
             if self.lang == Language.EN:
                 board_string.append(f" {col}  ")
             else:
                 board_string.append(f"{col}  ")
-        board_string.append("\n")
+        board_string += "\b" + reset + " \n"
         for row in range(num_rows):
             # Print the row index on the left.
             if self.lang == Language.EN:
@@ -118,13 +127,19 @@ class Board:
                 board_string.append(f"{row}  ")
             for col in "abcdefghi":
                 piece = self.board[f"{col}{row}"]
-                board_string += grey
+                # board_string += grey
                 if piece.is_entangled:
-                    board_string += dim
-                if piece.color == Color.RED:
-                    board_string += red
+                    if piece.color == Color.RED:
+                        board_string += lightred
+                    else:
+                        board_string += lightgrey
                 else:
-                    board_string += black
+                    # board_string += bold
+                    if piece.color == Color.RED:
+                        board_string += red
+                    else:
+                        # board_string += black
+                        pass
                 board_string += piece.symbol(self.lang)
                 if col != "i":
                     if self.lang == Language.EN:
@@ -133,28 +148,29 @@ class Board:
                         board_string.append("  ")
                 board_string += reset
             # Print the row index on the right.
-            board_string.append(f" {row}\n   ")
+            board_string.append(f"  {row}\n   ")
             # Print the sampled prob. of the pieces in the above row.
-            # We need to do the following range() conversion since the sequence of
-            # qubits returned from get_binary_probabilities() is
-            # a9 b9 ... i9, a8 b8 ... i8, ..., a0 b0 ... i0
-            for i in range((num_rows - row - 1) * 9, (num_rows - row) * 9):
+            board_string += grey
+            board_string += black
+            for i in range(row * 9, (row + 1) * 9):
                 board_string.append("{:.1f} ".format(probs[i]))
-            board_string.append("\n")
+            board_string += "\b" + reset + " \n"
         board_string.append("   ")
         # Print the bottom line of col letters.
+        board_string += grey
+        board_string += black
         for col in "abcdefghi":
             if self.lang == Language.EN:
                 board_string.append(f" {col}  ")
             else:
                 board_string.append(f"{col}  ")
-        board_string.append("\n")
+        board_string += "\b" + reset + " \n"
         if self.lang == Language.EN:
             return "".join(board_string)
         # We need to turn letters into their full-width counterparts to align
         # a mix of letters + Chinese characters.
         half_width_chars = "".join(
-            [" ", "･"]
+            [" ", "."]
             + [chr(c) for c in range(ord("A"), ord("Z"))]
             + [chr(c) for c in range(ord("a"), ord("z"))]
         )

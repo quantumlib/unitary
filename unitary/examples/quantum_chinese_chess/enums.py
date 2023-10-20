@@ -85,7 +85,7 @@ class Type(enum.Enum):
     - Chinese black
     """
 
-    EMPTY = ("･", "･", "･", "･")
+    EMPTY = (".", ".", ".", ".")
     PAWN = ("P", "p", "兵", "卒")
     CANNON = ("C", "c", "炮", "砲")
     ROOK = ("R", "r", "车", "車")

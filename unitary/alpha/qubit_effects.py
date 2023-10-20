@@ -207,9 +207,11 @@ class PhasedSplit(QuantumEffect):
         return 3
 
     def effect(self, *objects):
+        print("## PhasedSplit")
         yield cirq.ISWAP(objects[0].qubit, objects[1].qubit) ** 0.5
         yield cirq.ISWAP(objects[0].qubit, objects[2].qubit) ** 0.5
         yield cirq.ISWAP(objects[0].qubit, objects[2].qubit) ** 0.5
+        print("## PhasedSplit 1")
 
     def __eq__(self, other):
         return isinstance(other, PhasedSplit) or NotImplemented

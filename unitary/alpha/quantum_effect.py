@@ -60,7 +60,12 @@ class QuantumEffect(abc.ABC):
         """Apply the Quantum Effect to the objects."""
         self._verify_objects(*objects)
         world = objects[0].world
-        world.add_effect(list(self.effect(*objects)))
+        effects = list(self.effect(*objects))
+        if len(effects) > 0:
+            print("### call of QuantumEffect")
+            print(effects)
+            world.add_effect(effects)
+            print("\n\n")
 
     def __str__(self):
         return self.__class__.__name__
