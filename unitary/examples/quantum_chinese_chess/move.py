@@ -15,97 +15,97 @@ from typing import Optional, List, Tuple, Iterator
 import cirq
 from unitary import alpha
 from unitary.alpha.quantum_effect import QuantumEffect
-from unitary.examples.quantum_chinese_chess.board import Board
+from unitary.examples.quantum_chinese_chess.board import *
 from unitary.examples.quantum_chinese_chess.piece import Piece
 from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant, Type
 
 
 # TODO(): now the class is no longer the base class of all chess moves. Maybe convert this class
 # to a helper class to save each move (with its pop results) in a string form into move history.
-class Move(QuantumEffect):
-    """The base class of all chess moves."""
+# class Move(QuantumEffect):
+#     """The base class of all chess moves."""
 
-    def __init__(
-        self,
-        source: str,
-        target: str,
-        board: Board,
-        source2: Optional[str] = None,
-        target2: Optional[str] = None,
-        move_type: Optional[MoveType] = None,
-        move_variant: Optional[MoveVariant] = None,
-    ):
-        self.source = source
-        self.source2 = source2
-        self.target = target
-        self.target2 = target2
-        self.move_type = move_type
-        self.move_variant = move_variant
-        self.board = board
+#     def __init__(
+#         self,
+#         source: str,
+#         target: str,
+#         board: Board,
+#         source2: Optional[str] = None,
+#         target2: Optional[str] = None,
+#         move_type: Optional[MoveType] = None,
+#         move_variant: Optional[MoveVariant] = None,
+#     ):
+#         self.source = source
+#         self.source2 = source2
+#         self.target = target
+#         self.target2 = target2
+#         self.move_type = move_type
+#         self.move_variant = move_variant
+#         self.board = board
 
-    def __eq__(self, other):
-        if isinstance(other, Move):
-            return (
-                self.source == other.source
-                and self.source2 == other.source2
-                and self.target == other.target
-                and self.target2 == other.target2
-                and self.move_type == other.move_type
-                and self.move_variant == other.move_variant
-            )
-        return False
+#     def __eq__(self, other):
+#         if isinstance(other, Move):
+#             return (
+#                 self.source == other.source
+#                 and self.source2 == other.source2
+#                 and self.target == other.target
+#                 and self.target2 == other.target2
+#                 and self.move_type == other.move_type
+#                 and self.move_variant == other.move_variant
+#             )
+#         return False
 
-    def _verify_objects(self, *objects):
-        # TODO(): add checks that apply to all move types
-        return
+#     def _verify_objects(self, *objects):
+#         # TODO(): add checks that apply to all move types
+#         return
 
-    def effect(self, *objects):
-        # TODO(): add effects according to move_type and move_variant
-        return
+#     def effect(self, *objects):
+#         # TODO(): add effects according to move_type and move_variant
+#         return
 
-    def is_split_move(self) -> bool:
-        return self.target2 is not None
+#     def is_split_move(self) -> bool:
+#         return self.target2 is not None
 
-    def is_merge_move(self) -> bool:
-        return self.source2 is not None
+#     def is_merge_move(self) -> bool:
+#         return self.source2 is not None
 
-    def to_str(self, verbose_level: int = 1) -> str:
-        """Constructs the string representation of the move.
-        According to the value of verbose_level:
-        - 1: only returns the move source(s) and target(s);
-        - 2: additionally returns the move type and variant;
-        - 3: additionally returns the source(s) and target(s) piece type and color.
-        """
-        if verbose_level < 1:
-            return ""
+#     def to_str(self, verbose_level: int = 1) -> str:
+#         """Constructs the string representation of the move.
+#         According to the value of verbose_level:
+#         - 1: only returns the move source(s) and target(s);
+#         - 2: additionally returns the move type and variant;
+#         - 3: additionally returns the source(s) and target(s) piece type and color.
+#         """
+#         if verbose_level < 1:
+#             return ""
 
-        if self.is_split_move():
-            move_str = [self.source + "^" + self.target + str(self.target2)]
-        elif self.is_merge_move():
-            move_str = [self.source + str(self.source2) + "^" + self.target]
-        else:
-            move_str = [self.source + self.target]
+#         if self.is_split_move():
+#             move_str = [self.source + "^" + self.target + str(self.target2)]
+#         elif self.is_merge_move():
+#             move_str = [self.source + str(self.source2) + "^" + self.target]
+#         else:
+#             move_str = [self.source + self.target]
 
-        if verbose_level > 1:
-            move_str.append(self.move_type.name)
-            move_str.append(self.move_variant.name)
+#         if verbose_level > 1:
+#             move_str.append(self.move_type.name)
+#             move_str.append(self.move_variant.name)
 
-        if verbose_level > 2:
-            source = self.board.board[self.source]
-            target = self.board.board[self.target]
-            move_str.append(
-                source.color.name
-                + "_"
-                + source.type_.name
-                + "->"
-                + target.color.name
-                + "_"
-                + target.type_.name
-            )
-        return ":".join(move_str)
+#         if verbose_level > 2:
+#             source = self.board.board[self.source]
+#             target = self.board.board[self.target]
+#             move_str.append(
+#                 source.color.name
+#                 + "_"
+#                 + source.type_.name
+#                 + "->"
+#                 + target.color.name
+#                 + "_"
+#                 + target.type_.name
+#             )
+#         return ":".join(move_str)
 
-    def __str__(self):
-        return self.to_str()
+#     def __str__(self):
+#         return self.to_str()
 
 
 class Jump(QuantumEffect):
@@ -528,13 +528,13 @@ class CannonFire(QuantumEffect):
         world = source_0.world
         quantum_path_pieces_0 = [world[path] for path in self.quantum_path_pieces_0]
         # Source has to be there to fire.
-        if not world.pop([source_0])[0].value:
+        if source_0.is_entangled and not world.pop([source_0])[0].value:
             source_0.reset()
             print("Cannonn fire not applied: source turns out to be empty.")
             return iter(())
         source_0.is_entangled = False
         # Target has to be there to fire.
-        if not world.pop([target_0])[0].value:
+        if target_0.is_entangled and not world.pop([target_0])[0].value:
             target_0.reset()
             print("Cannonn fire not applied: target turns out to be empty.")
             return iter(())
@@ -551,7 +551,6 @@ class CannonFire(QuantumEffect):
                     quantum_path_pieces_0[0].reset()
                     could_capture = True
             else:
-                source_0.is_entangled = True
                 # We add a new ancilla to indicate whether the capture could happen (value 1 means it could).
                 capture_ancilla = world._add_ancilla(f"{source_0.name}{target_0.name}")
                 control_objects = [source_0] + quantum_path_pieces_0
@@ -561,13 +560,11 @@ class CannonFire(QuantumEffect):
                     alpha.Flip()
                 )(capture_ancilla)
                 # We measure this ancilla to determine if the cannon fire could be made.
-                could_capture = world.pop([capture_ancilla])[0].value
+                could_capture = world.pop([capture_ancilla])[0]
             if not could_capture:
                 # TODO(): in this case non of the path qubits are popped, i.e. the pieces are still entangled and the player
                 # could try to do this move again. Is this desired?
-                print(
-                    "Cannon fire not applied: the source turns out to be empty or the path turns out to be blocked."
-                )
+                print("Cannon fire not applied: tthe path turns out to be blocked.")
                 return iter(())
             # Apply the capture.
             # Quantumly reset the target.
@@ -591,7 +588,6 @@ class CannonFire(QuantumEffect):
             # path piece(s), the cannon could fire and capture only if there is exactly
             # one quantum path piece being occupied.
             could_capture = False
-            source_0.is_entangled = True
             # TODO(): think a more efficient way of implementing this case.
             # We loop over all quantum path pieces and check if it could be the only
             # occupied piece. The fire could be made if it does, otherwise not.
@@ -618,7 +614,7 @@ class CannonFire(QuantumEffect):
                     alpha.Flip()
                 )(capture_ancilla)
                 # We measure the ancilla to determine if the fire could be made.
-                could_capture = world.pop([capture_ancilla])[0].value
+                could_capture = world.pop([capture_ancilla])[0]
                 if could_capture:
                     # Apply the capture.
                     world.unhook(target_0)
@@ -637,6 +633,6 @@ class CannonFire(QuantumEffect):
                     return iter(())
             # Reaching the end of the for loop means the fire could not be made.
             print(
-                "Cannon fire not applied: either the source turns out be empty, or there turns out to be (!=1) occupied path pieces."
+                "Cannon fire not applied: there turns out to be (!=1) occupied path pieces."
             )
             return iter(())

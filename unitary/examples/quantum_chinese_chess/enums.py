@@ -85,7 +85,7 @@ class Type(enum.Enum):
     - Chinese black
     """
 
-    EMPTY = ("\uFF65", "\uFF65", "\uFF65", "\uFF65")
+    EMPTY = ("･", "･", "･", "･")
     PAWN = ("P", "p", "兵", "卒")
     CANNON = ("C", "c", "炮", "砲")
     ROOK = ("R", "r", "车", "車")
@@ -104,7 +104,7 @@ class Type(enum.Enum):
             "e": Type.ELEPHANT,
             "a": Type.ADVISOR,
             "k": Type.KING,
-            ".": Type.EMPTY,
+            "･": Type.EMPTY,
         }.get(c.lower(), None)
 
     @staticmethod

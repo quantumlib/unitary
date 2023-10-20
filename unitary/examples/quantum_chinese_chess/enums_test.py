@@ -19,7 +19,7 @@ def test_type_of():
     assert Type.type_of("P") == Type.PAWN
     assert Type.type_of("k") == Type.KING
     assert Type.type_of("K") == Type.KING
-    assert Type.type_of(".") == Type.EMPTY
+    assert Type.type_of("･") == Type.EMPTY
     assert Type.type_of("b") == None
 
 
@@ -34,7 +34,7 @@ def test_symbol():
     assert Type.symbol(Type.HORSE, Color.RED, Language.ZH) == "马"
     assert Type.symbol(Type.HORSE, Color.BLACK, Language.ZH) == "馬"
 
-    assert Type.symbol(Type.EMPTY, Color.RED) == "."
-    assert Type.symbol(Type.EMPTY, Color.BLACK) == "."
-    assert Type.symbol(Type.EMPTY, Color.RED, Language.ZH) == "."
-    assert Type.symbol(Type.EMPTY, Color.BLACK, Language.ZH) == "."
+    assert Type.symbol(Type.EMPTY, Color.RED) == "･"
+    assert Type.symbol(Type.EMPTY, Color.BLACK) == "･"
+    assert Type.symbol(Type.EMPTY, Color.RED, Language.ZH) == "･"
+    assert Type.symbol(Type.EMPTY, Color.BLACK, Language.ZH) == "･"

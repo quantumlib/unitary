@@ -11,16 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.examples.quantum_chinese_chess.move import (
-    Move,
-    Jump,
-    SplitJump,
-    MergeJump,
-    Slide,
-    SplitSlide,
-    MergeSlide,
-    CannonFire,
-)
+from unitary.examples.quantum_chinese_chess.move import *
 from unitary.examples.quantum_chinese_chess.board import Board
 from unitary.examples.quantum_chinese_chess.piece import Piece
 import pytest
@@ -615,7 +606,7 @@ def test_move_type():
 
 
 def test_split_slide():
-    # Source is in classical state + one arm is path-clear.
+    # Source is in classical state + one path is clear.
     board = set_board(["a1", "b1"])
     world = board.board
     SplitJump()(world["b1"], world["b2"], world["b3"])
@@ -645,27 +636,311 @@ def test_split_slide():
         board,
         {
             # both paths blocked
-            locations_to_bitboard(["a2", "b2", "c2", "d2"]): 1.0 / 17,
-            locations_to_bitboard(["a2", "b3", "c2", "d2"]): 1.0 / 17,
-            locations_to_bitboard(["a2", "b2", "c3", "d2"]): 1.0 / 17,
-            locations_to_bitboard(["a3", "b2", "c2", "d2"]): 1.0 / 17,
-            locations_to_bitboard(["a3", "b3", "c2", "d2"]): 1.0 / 17,
-            locations_to_bitboard(["a3", "b2", "c3", "d2"]): 1.0 / 17,
+            locations_to_bitboard(["a2", "b2", "c2", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a2", "b3", "c2", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a2", "b2", "c3", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a3", "b2", "c2", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a3", "b3", "c2", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a3", "b2", "c3", "d2"]): 1.0 / 16,
             # path 0 is clear
-            locations_to_bitboard(["a3", "b3", "c3", "d2"]): 1.0 / 17,
-            locations_to_bitboard(["e1", "b3", "c3", "d2"]): 1.0 / 17,  # slide to e1
+            locations_to_bitboard(["a3", "b3", "c3", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["e1", "b3", "c3", "d2"]): 1.0 / 16,  # slide to e1
             # path 1 is clear
-            locations_to_bitboard(["e2", "b2", "c2", "d3"]): 1.0 / 17,  # slide to e2
-            locations_to_bitboard(["e2", "b3", "c2", "d3"]): 1.0 / 17,  # slide to e2
-            locations_to_bitboard(["e2", "b2", "c3", "d3"]): 1.0 / 17,  # slide to e2
-            locations_to_bitboard(["a3", "b2", "c2", "d3"]): 1.0 / 17,
-            locations_to_bitboard(["a3", "b3", "c2", "d3"]): 1.0 / 17,
-            locations_to_bitboard(["a3", "b2", "c3", "d3"]): 1.0 / 17,
+            locations_to_bitboard(["e2", "b2", "c2", "d3"]): 1.0 / 16,  # slide to e2
+            locations_to_bitboard(["e2", "b3", "c2", "d3"]): 1.0 / 16,  # slide to e2
+            locations_to_bitboard(["e2", "b2", "c3", "d3"]): 1.0 / 16,  # slide to e2
+            locations_to_bitboard(["a3", "b2", "c2", "d3"]): 1.0 / 16,
+            locations_to_bitboard(["a3", "b3", "c2", "d3"]): 1.0 / 16,
+            locations_to_bitboard(["a3", "b2", "c3", "d3"]): 1.0 / 16,
             # both paths are clear
-            locations_to_bitboard(["e1", "b3", "c3", "d3"]): 1.0 / 17,  # slide to e1
-            locations_to_bitboard(["e2", "b3", "c3", "d3"]): 1.0 / 17,  # slide to e2
-            locations_to_bitboard(["a3", "b3", "c3", "d3"]): 1.0 / 17,
+            locations_to_bitboard(["e1", "b3", "c3", "d3"]): 1.0 / 32,  # slide to e1
+            locations_to_bitboard(["e2", "b3", "c3", "d3"]): 1.0 / 32,  # slide to e2
+            locations_to_bitboard(["a3", "b3", "c3", "d3"]): 1.0 / 16,
         },
     )
 
     # Source in quantum state + overlapped paths.
+    board = set_board(["a1", "b1", "c1"])
+    world = board.board
+    SplitJump()(world["a1"], world["a2"], world["a3"])
+    SplitJump()(world["b1"], world["b2"], world["b3"])
+    SplitJump()(world["c1"], world["c2"], world["c3"])
+
+    SplitSlide(["b2", "c2"], ["b2"])(world["a2"], world["d1"], world["e1"])
+
+    assert_sample_distribution(
+        board,
+        {
+            # both paths blocked
+            locations_to_bitboard(["a2", "b2", "c2"]): 1.0 / 8,
+            locations_to_bitboard(["a3", "b2", "c2"]): 1.0 / 8,
+            locations_to_bitboard(["a2", "b2", "c3"]): 1.0 / 8,
+            locations_to_bitboard(["a3", "b2", "c3"]): 1.0 / 8,
+            # path 1 is clear
+            locations_to_bitboard(["e1", "b3", "c2"]): 1.0 / 8,  # slide to e1
+            locations_to_bitboard(["a3", "b3", "c2"]): 1.0 / 8,
+            # both paths are clear
+            locations_to_bitboard(["e1", "b3", "c3"]): 1.0 / 16,  # slide to e1
+            locations_to_bitboard(["d1", "b3", "c3"]): 1.0 / 16,  # slide to d1
+            locations_to_bitboard(["a3", "b3", "c3"]): 1.0 / 8,
+        },
+    )
+
+
+def test_merge_slide():
+    # One path is clear.
+    board = set_board(["a1", "b1"])
+    world = board.board
+    SplitJump()(world["a1"], world["a2"], world["a3"])
+    SplitJump()(world["b1"], world["b2"], world["b3"])
+
+    MergeSlide(["b2"], [])(world["a2"], world["a3"], world["c1"])
+
+    assert_sample_distribution(
+        board,
+        {
+            locations_to_bitboard(["b2", "c1"]): 1.0 / 4,
+            locations_to_bitboard(["b2", "a2"]): 1.0 / 4,
+            locations_to_bitboard(["b3", "c1"]): 1.0 / 2,
+        },
+    )
+
+    # Multiple path qubits.
+    board = set_board(["a1", "b1", "c1", "d1"])
+    world = board.board
+    SplitJump()(world["a1"], world["a2"], world["a3"])
+    SplitJump()(world["b1"], world["b2"], world["b3"])
+    SplitJump()(world["c1"], world["c2"], world["c3"])
+    SplitJump()(world["d1"], world["d2"], world["d3"])
+
+    MergeSlide(["b2", "c2"], ["d2"])(world["a2"], world["a3"], world["e1"])
+
+    assert_sample_distribution(
+        board,
+        {
+            # both paths blocked
+            locations_to_bitboard(["a2", "b2", "c2", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a2", "b3", "c2", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a2", "b2", "c3", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a3", "b2", "c2", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a3", "b3", "c2", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["a3", "b2", "c3", "d2"]): 1.0 / 16,
+            # path 0 is clear
+            locations_to_bitboard(["a3", "b3", "c3", "d2"]): 1.0 / 16,
+            locations_to_bitboard(["e1", "b3", "c3", "d2"]): 1.0 / 16,  # success
+            # path 1 is clear
+            locations_to_bitboard(["a2", "b2", "c2", "d3"]): 1.0 / 16,
+            locations_to_bitboard(["a2", "b3", "c2", "d3"]): 1.0 / 16,
+            locations_to_bitboard(["a2", "b2", "c3", "d3"]): 1.0 / 16,
+            locations_to_bitboard(["e1", "b2", "c2", "d3"]): 1.0 / 16,  # success
+            locations_to_bitboard(["e1", "b3", "c2", "d3"]): 1.0 / 16,  # success
+            locations_to_bitboard(["e1", "b2", "c3", "d3"]): 1.0 / 16,  # success
+            # both paths are clear
+            locations_to_bitboard(["e1", "b3", "c3", "d3"]): 1.0 / 8,  # success
+        },
+    )
+
+    # Overlapped paths.
+    board = set_board(["a1", "b1", "c1"])
+    world = board.board
+    SplitJump()(world["a1"], world["a2"], world["a3"])
+    SplitJump()(world["b1"], world["b2"], world["b3"])
+    SplitJump()(world["c1"], world["c2"], world["c3"])
+
+    MergeSlide(["b2", "c2"], ["b2"])(world["a2"], world["a3"], world["d1"])
+
+    assert_sample_distribution(
+        board,
+        {
+            # both paths blocked
+            locations_to_bitboard(["a2", "b2", "c2"]): 1.0 / 8,
+            locations_to_bitboard(["a3", "b2", "c2"]): 1.0 / 8,
+            locations_to_bitboard(["a2", "b2", "c3"]): 1.0 / 8,
+            locations_to_bitboard(["a3", "b2", "c3"]): 1.0 / 8,
+            # path 1 is clear
+            locations_to_bitboard(["d1", "b3", "c2"]): 1.0 / 8,  # success
+            locations_to_bitboard(["a2", "b3", "c2"]): 1.0 / 8,
+            # both paths are clear
+            locations_to_bitboard(["d1", "b3", "c3"]): 1.0 / 4,  # success
+        },
+    )
+
+
+def test_cannon_fire():
+    # There are one classical piece and one quantum piece in path + both source and target are classical.
+    board = set_board(["a1", "b1", "c1", "d1"])
+    world = board.board
+    SplitJump()(world["c1"], world["c2"], world["c3"])
+
+    CannonFire(["b1"], ["c2"])(world["a1"], world["d1"])
+
+    # We check the ancilla to learn if the fire was applied or not.
+    path_is_blocked = world.post_selection[world["ancilla_c2_0"]]
+
+    if not path_is_blocked:
+        assert_samples_in(board, {locations_to_bitboard(["b1", "c3", "d1"]): 1.0})
+    else:
+        assert_samples_in(board, {locations_to_bitboard(["a1", "b1", "c2", "d1"]): 1.0})
+
+    # There are one classical piece and one quantum piece in path + both source and target are quantum.
+    board = set_board(["a1", "b1", "c1", "d1"])
+    world = board.board
+    SplitJump()(world["a1"], world["a2"], world["a3"])
+    SplitJump()(world["c1"], world["c2"], world["c3"])
+    SplitJump()(world["d1"], world["d2"], world["d3"])
+
+    CannonFire(["b1"], ["c2"])(world["a2"], world["d2"])
+
+    # We check the ancilla to learn if the fire was applied or not.
+    source_is_occupied = world.post_selection[world["ancilla_a2_0"]]
+    if not source_is_occupied:
+        assert_sample_distribution(
+            board,
+            {
+                locations_to_bitboard(["a3", "b1", "c2", "d2"]): 1.0 / 4,
+                locations_to_bitboard(["a3", "b1", "c2", "d3"]): 1.0 / 4,
+                locations_to_bitboard(["a3", "b1", "c3", "d2"]): 1.0 / 4,
+                locations_to_bitboard(["a3", "b1", "c3", "d3"]): 1.0 / 4,
+            },
+        )
+    else:
+        target_is_occupied = world.post_selection[world["ancilla_d2_0"]]
+        if not target_is_occupied:
+            assert_sample_distribution(
+                board,
+                {
+                    locations_to_bitboard(["a2", "b1", "c2", "d3"]): 1.0 / 2,
+                    locations_to_bitboard(["a2", "b1", "c3", "d3"]): 1.0 / 2,
+                },
+            )
+        else:
+            path_is_blocked = world.post_selection[world["ancilla_c2_0"]]
+            if path_is_blocked:
+                assert_samples_in(
+                    board, {locations_to_bitboard(["a2", "b1", "c2", "d2"]): 1.0}
+                )
+            else:
+                # successful fire
+                assert_samples_in(
+                    board, {locations_to_bitboard(["b1", "c3", "d2"]): 1.0}
+                )
+
+    # There are one classical piece and multiple quantum pieces in path.
+    board = set_board(["a1", "b1", "c1", "d1", "e1"])
+    world = board.board
+    SplitJump()(world["a1"], world["a2"], world["a3"])
+    SplitJump()(world["c1"], world["c2"], world["c3"])
+    SplitJump()(world["d1"], world["d2"], world["d3"])
+    SplitJump()(world["e1"], world["e2"], world["e3"])
+
+    CannonFire(["b1"], ["c2", "d2"])(world["a2"], world["e2"])
+
+    # We check the ancilla to learn if the fire was applied or not.
+    source_is_occupied = world.post_selection[world["ancilla_a2_0"]]
+    if not source_is_occupied:
+        assert_sample_distribution(
+            board,
+            {
+                locations_to_bitboard(["a3", "b1", "c2", "d2", "e2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b1", "c2", "d2", "e3"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b1", "c2", "d3", "e2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b1", "c2", "d3", "e3"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b1", "c3", "d2", "e2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b1", "c3", "d2", "e3"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b1", "c3", "d3", "e2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b1", "c3", "d3", "e3"]): 1.0 / 8,
+            },
+        )
+    else:
+        target_is_occupied = world.post_selection[world["ancilla_e2_0"]]
+        if not target_is_occupied:
+            assert_sample_distribution(
+                board,
+                {
+                    locations_to_bitboard(["a2", "b1", "c2", "d2", "e3"]): 1.0 / 4,
+                    locations_to_bitboard(["a2", "b1", "c2", "d3", "e3"]): 1.0 / 4,
+                    locations_to_bitboard(["a2", "b1", "c3", "d2", "e3"]): 1.0 / 4,
+                    locations_to_bitboard(["a2", "b1", "c3", "d3", "e3"]): 1.0 / 4,
+                },
+            )
+        else:
+            captured = world.post_selection[world["ancilla_ancilla_a2e2_0_0"]]
+            if not captured:
+                assert_sample_distribution(
+                    board,
+                    {
+                        locations_to_bitboard(["a2", "b1", "c2", "d2", "e2"]): 1.0 / 3,
+                        locations_to_bitboard(["a2", "b1", "c2", "d3", "e2"]): 1.0 / 3,
+                        locations_to_bitboard(["a2", "b1", "c3", "d2", "e2"]): 1.0 / 3,
+                    },
+                )
+            else:
+                # successful fire
+                assert_samples_in(
+                    board, {locations_to_bitboard(["b1", "c3", "d3", "e2"]): 1.0}
+                )
+
+    # There is no classical piece in path.
+    board = set_board(["a1", "b1", "c1", "d1"])
+    world = board.board
+    SplitJump()(world["a1"], world["a2"], world["a3"])
+    SplitJump()(world["b1"], world["b2"], world["b3"])
+    SplitJump()(world["c1"], world["c2"], world["c3"])
+    SplitJump()(world["d1"], world["d2"], world["d3"])
+
+    CannonFire([], ["b2", "c2"])(world["a2"], world["d2"])
+
+    # We check the ancilla to learn if the fire was applied or not.
+    source_is_occupied = world.post_selection[world["ancilla_a2_0"]]
+    if not source_is_occupied:
+        assert_sample_distribution(
+            board,
+            {
+                locations_to_bitboard(["a3", "b2", "c2", "d2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b2", "c2", "d3"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b2", "c3", "d2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b2", "c3", "d3"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b3", "c2", "d2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b3", "c2", "d3"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b3", "c3", "d2"]): 1.0 / 8,
+                locations_to_bitboard(["a3", "b3", "c3", "d3"]): 1.0 / 8,
+            },
+        )
+    else:
+        target_is_occupied = world.post_selection[world["ancilla_d2_0"]]
+        if not target_is_occupied:
+            assert_sample_distribution(
+                board,
+                {
+                    locations_to_bitboard(["a2", "b2", "c2", "d3"]): 1.0 / 4,
+                    locations_to_bitboard(["a2", "b2", "c3", "d3"]): 1.0 / 4,
+                    locations_to_bitboard(["a2", "b3", "c2", "d3"]): 1.0 / 4,
+                    locations_to_bitboard(["a2", "b3", "c3", "d3"]): 1.0 / 4,
+                },
+            )
+        else:
+            only_b2_is_occupied_in_path = world.post_selection[
+                world["ancilla_ancilla_b2_0_0"]
+            ]
+            if only_b2_is_occupied_in_path:
+                # successful fire
+                assert_samples_in(
+                    board, {locations_to_bitboard(["b2", "c3", "d2"]): 1.0}
+                )
+            else:
+                only_c2_is_occupied_in_path = world.post_selection[
+                    world["ancilla_ancilla_c2_0_0"]
+                ]
+                if only_c2_is_occupied_in_path:
+                    # successful fire
+                    assert_samples_in(
+                        board, {locations_to_bitboard(["b3", "c2", "d2"]): 1.0}
+                    )
+                else:
+                    assert_sample_distribution(
+                        board,
+                        {
+                            locations_to_bitboard(["a2", "b2", "c2", "d2"]): 1.0 / 2,
+                            locations_to_bitboard(["a2", "b3", "c3", "d2"]): 1.0 / 2,
+                        },
+                    )
