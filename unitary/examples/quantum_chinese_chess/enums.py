@@ -40,32 +40,32 @@ class GameState(enum.Enum):
     DRAW = 2
 
 
-# TODO(): consider if we could allow split/merge + excluded/capture,
-# and cannon_split_fire/cannon_merge_fire + capture
 class MoveType(enum.Enum):
     """Each valid move will be classfied into one of the following MoveTypes."""
 
-    UNSPECIFIED = 0
-    CLASSICAL = 1
+    NULL_TYPE = 0
+    UNSPECIFIED_STANDARD = 1
     JUMP = 2
     SLIDE = 3
     SPLIT_JUMP = 4
     SPLIT_SLIDE = 5
     MERGE_JUMP = 6
     MERGE_SLIDE = 7
-    CANNON_FIRE = 8
+    HORSE_MOVE = 8
+    HORSE_SPLIT_MOVE = 9
+    HORSE_MERGE_MOVE = 10
+    CANNON_FIRE = 11
 
 
 class MoveVariant(enum.Enum):
-    """Each valid move will be classfied into one of the following MoveVariant, in addition to
+    """Each valid move will be classfied into one of the following MoveVariat, in addition to
     the MoveType above.
     """
 
     UNSPECIFIED = 0
-    CLASSICAL = 1  # Used together with MoveType = CLASSICAL.
-    BASIC = 2  # The target piece is empty.
-    EXCLUDED = 3  # The target piece has the same color.
-    CAPTURE = 4  # The target piece has the opposite color.
+    BASIC = 1
+    EXCLUDED = 2
+    CAPTURE = 3
 
 
 class Color(enum.Enum):
@@ -104,14 +104,14 @@ class Type(enum.Enum):
             "e": Type.ELEPHANT,
             "a": Type.ADVISOR,
             "k": Type.KING,
-            "･": Type.EMPTY,
+            ".": Type.EMPTY,
         }.get(c.lower(), None)
 
     @staticmethod
     def symbol(type_: "Type", color: Color, lang: Language = Language.EN) -> str:
         """Returns symbol of the given piece according to its color and desired language."""
         if type_ == Type.EMPTY:
-            return type_.value[0]
+            return "."
         if lang == Language.EN:  # Return English symbols
             if color == Color.RED:
                 return type_.value[0]

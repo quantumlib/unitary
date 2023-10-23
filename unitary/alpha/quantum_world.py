@@ -248,17 +248,11 @@ class QuantumWorld:
 
     def add_effect(self, op_list: List[cirq.Operation]):
         """Adds an operation to the current circuit."""
-        print("## Add_effect")
-        print(len(self.effect_history))
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
         )
         for op in op_list:
-            print("### op")
-            print(op)
             self._append_op(op)
-        print("## Add_effect 2")
-        print(len(self.effect_history))
 
     def undo_last_effect(self):
         """Restores the `QuantumWorld` to the state before the last effect.
@@ -272,8 +266,6 @@ class QuantumWorld:
         if not self.effect_history:
             raise IndexError("No effects to undo")
         self.circuit, self.post_selection = self.effect_history.pop()
-        print("## undo_last_effect")
-        print(len(self.effect_history))
 
     def _suggest_num_reps(self, sample_size: int) -> int:
         """Guess the number of raw samples needed to get sample_size results.
@@ -312,20 +304,6 @@ class QuantumWorld:
                 )
             return result_list[0]
         return result
-
-    def unhook(self, object: QuantumObject) -> None:
-        """Replaces all usages of the given object in the circuit with a new ancilla with value=0."""
-        # Creates a new ancilla.
-        new_ancilla = self._add_ancilla(object.name)
-        # Replace operations using the qubit of the given object with the new ancilla.
-        qubit_remapping_dict = {
-            object.qubit: new_ancilla.qubit,
-            new_ancilla.qubit: object.qubit,
-        }
-        self.circuit = self.circuit.transform_qubits(
-            lambda q: qubit_remapping_dict.get(q, q)
-        )
-        return
 
     def force_measurement(
         self, obj: QuantumObject, result: Union[enum.Enum, int]
@@ -445,8 +423,6 @@ class QuantumWorld:
         objects: Optional[Sequence[Union[QuantumObject, str]]] = None,
         convert_to_enum: bool = True,
     ) -> List[Union[enum.Enum, int]]:
-        print("## pop")
-        print(len(self.effect_history))
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
         )
@@ -460,8 +436,6 @@ class QuantumWorld:
         results = self.peek(quantum_objects, convert_to_enum=convert_to_enum)
         for idx, result in enumerate(results[0]):
             self.force_measurement(quantum_objects[idx], result)
-        print("## pop 2")
-        print(len(self.effect_history))
 
         return results[0]
 
@@ -487,30 +461,6 @@ class QuantumWorld:
         for result in peek_results:
             for idx in range(len(objects)):
                 histogram[idx][cast(int, result[idx])] += 1
-        return histogram
-
-    def get_histogram_with_whole_world_as_key(self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
-    ) -> Dict[Tuple[int], int]:
-        """Creates histogram based on measurements (peeks) carried out.
-
-        Parameters:
-            objects:    List of QuantumObjects
-            count:      Number of measurements
-
-        Returns:
-            A dictionary, with the keys being each possible state of the whole quantum world 
-            (or `objects` if specified), and the values being the count of that state.
-        """
-        if not objects:
-            objects = self.public_objects
-        peek_results = self.peek(objects=objects, convert_to_enum=False, count=count)
-        histogram = {}
-        for result in peek_results:
-            key = tuple(result)
-            if key not in histogram:
-                histogram[key] = 1
-            else:
-                histogram[key] += 1
         return histogram
 
     def get_probabilities(
@@ -556,11 +506,7 @@ class QuantumWorld:
         return binary_probs
 
     def __getitem__(self, name: str) -> QuantumObject:
-        try:
-            quantum_object = self.object_name_dict.get(name, None)
-            return quantum_object
-        except:
-            print("exsiting")
-            for obj in self.object_name_dict.keys():
-                print(obj)
+        quantum_object = self.object_name_dict.get(name, None)
+        if not quantum_object:
             raise KeyError(f"{name} did not exist in this world.")
+        return quantum_object

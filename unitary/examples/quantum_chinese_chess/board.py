@@ -11,40 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import numpy as np
-from typing import List, Tuple
+from typing import List
 import unitary.alpha as alpha
 from unitary.examples.quantum_chinese_chess.enums import (
     SquareState,
     Color,
     Type,
     Language,
-    MoveVariant,
 )
 from unitary.examples.quantum_chinese_chess.piece import Piece
-from unitary.examples.quantum_chinese_chess.move import *
 
-reset = "\033[0m"
-bold = "\033[01m"
-dim = "\033[02m"
-negative = "\033[03m"
-underline = "\033[04m"
-blink = "\033[05m"
-reverse = "\033[07m"
-invisible = "\033[08m"
-strikethrough = "\033[09m"
-
-# background
-grey = "\033[47m"
-
-# foreground
-black = "\033[30m"
-red = "\033[31m"
-green = "\033[32m"
-lightred = "\033[91m"
-lightgreen = "\033[92m"
-lightgrey = "\033[37m"
-darkgrey = "\033[90m"
 
 # The default initial state of the game.
 _INITIAL_FEN = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr w---1"
@@ -58,7 +34,6 @@ class Board:
     ):
         self.board = board
         self.current_player = current_player
-        # This saves the locations of KINGs in the order of [RED_KING_LOCATION, BLACK_KING_LOCATION].
         self.king_locations = king_locations
         self.lang = Language.EN  # The default language is English.
 
@@ -72,7 +47,7 @@ class Board:
         FEN rule for Chinese Chess could be found at https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
         """
         chess_board = {}
-        row_index = 0
+        row_index = 9
         king_locations = []
         pieces, turns = fen.split(" ", 1)
         for row in pieces.split("/"):
@@ -97,203 +72,50 @@ class Board:
                         name, SquareState.OCCUPIED, piece_type, color
                     )
                     col += 1
-            row_index += 1
+            row_index -= 1
         board = alpha.QuantumWorld(chess_board.values())
         # Here 0 means the player RED while 1 the player BLACK.
         current_player = 0 if "w" in turns else 1
-        # TODO(): maybe add check to make sure the input fen itself is correct.
         return cls(board, current_player, king_locations)
 
-    def to_str(
-        self,
-        probabilities: List[float] = None,
-        print_probabilities=True,
-        peek_result: List[int] = None,
-    ):
-        # TODO(): print players' names in their corresponding side of the board.
+    def __str__(self):
         num_rows = 10
-        board_string = ["\n   "]
-        if print_probabilities and probabilities is None:
-            probabilities = self.board.get_binary_probabilities()
+        board_string = ["\n "]
         # Print the top line of col letters.
-        board_string += grey
-        board_string += black
         for col in "abcdefghi":
-            if self.lang == Language.EN:
-                board_string.append(f" {col}  ")
-            else:
-                board_string.append(f"{col}  ")
-        board_string += "\b" + reset + " \n"
-        index = 0
+            board_string.append(f" {col}")
+        board_string.append("\n")
         for row in range(num_rows):
             # Print the row index on the left.
-            if self.lang == Language.EN:
-                board_string.append(f"{row}   ")
-            else:
-                board_string.append(f"{row}  ")
+            board_string.append(f"{row} ")
             for col in "abcdefghi":
                 piece = self.board[f"{col}{row}"]
-                # board_string += grey
-                if peek_result is None and piece.is_entangled:
-                    if piece.color == Color.RED:
-                        board_string += lightred
-                    else:
-                        board_string += lightgrey
-                else:
-                    # board_string += bold
-                    if piece.color == Color.RED:
-                        board_string += red
-                    else:
-                        # board_string += black
-                        pass
-                if (
-                    peek_result is None
-                    or piece.type_ == Type.EMPTY
-                    or peek_result[index] == 1
-                ):
-                    board_string += piece.symbol(self.lang)
-                elif piece.is_entangled and peek_result[index] == 0:
-                    board_string += Type.symbol(Type.EMPTY, Color.NA, self.lang)
-                if col != "i":
-                    if self.lang == Language.EN:
-                        board_string.append("   ")
-                    else:
-                        board_string.append("  ")
-                board_string += reset
-                index += 1
+                board_string += piece.symbol(self.lang)
+                if self.lang == Language.EN:
+                    board_string.append(" ")
             # Print the row index on the right.
-            board_string.append(f"  {row}\n")
-            # Print the sampled prob. of the pieces in the above row.
-            if print_probabilities:
-                board_string += "   "
-                board_string += grey
-                board_string += black
-                for i in range(row * 9, (row + 1) * 9):
-                    board_string.append("{:.1f} ".format(probabilities[i]))
-                board_string += "\b" + reset + " \n"
-        board_string.append("   ")
+            board_string.append(f" {row}\n")
+        board_string.append(" ")
         # Print the bottom line of col letters.
-        board_string += grey
-        board_string += black
         for col in "abcdefghi":
-            if self.lang == Language.EN:
-                board_string.append(f" {col}  ")
-            else:
-                board_string.append(f"{col}  ")
-        board_string += "\b" + reset + " \n"
+            board_string.append(f" {col}")
+        board_string.append("\n")
         if self.lang == Language.EN:
             return "".join(board_string)
         # We need to turn letters into their full-width counterparts to align
         # a mix of letters + Chinese characters.
-        half_width_chars = "".join(
-            [" ", "."]
-            + [chr(c) for c in range(ord("A"), ord("Z"))]
-            + [chr(c) for c in range(ord("a"), ord("z"))]
+        chars = "".join(chr(c) for c in range(ord(" "), ord("z")))
+        full_width_chars = "\N{IDEOGRAPHIC SPACE}" + "".join(
+            chr(c)
+            for c in range(
+                ord("\N{FULLWIDTH EXCLAMATION MARK}"),
+                ord("\N{FULLWIDTH LATIN SMALL LETTER Z}"),
+            )
         )
-        full_width_chars = "".join(
-            ["\N{IDEOGRAPHIC SPACE}", "\u30FB"]
-            + [
-                chr(c)
-                for c in range(
-                    ord("\N{FULLWIDTH LATIN CAPITAL LETTER A}"),
-                    ord("\N{FULLWIDTH LATIN CAPITAL LETTER Z}"),
-                )
-            ]
-            + [
-                chr(c)
-                for c in range(
-                    ord("\N{FULLWIDTH LATIN SMALL LETTER A}"),
-                    ord("\N{FULLWIDTH LATIN SMALL LETTER Z}"),
-                )
-            ]
+        translation = str.maketrans(chars, full_width_chars)
+        return (
+            "".join(board_string)
+            .replace(" ", "")
+            .replace("abcdefghi", " abcdefghi")
+            .translate(translation)
         )
-        translation = str.maketrans(half_width_chars, full_width_chars)
-        return "".join(board_string).translate(translation)
-
-    def path_pieces(self, source: str, target: str) -> Tuple[List[str], List[str]]:
-        """Returns the nonempty classical and quantum pieces from source to target (excluded)."""
-        x0 = ord(source[0])
-        x1 = ord(target[0])
-        dx = x1 - x0
-        y0 = int(source[1])
-        y1 = int(target[1])
-        dy = y1 - y0
-        # In case of only moving one step, return empty path pieces.
-        if abs(dx) + abs(dy) <= 1:
-            return [], []
-        # In case of advisor moving, return empty path pieces.
-        # TODO(): maybe move this to the advisor move check.
-        if abs(dx) == 1 and abs(dy) == 1:
-            return [], []
-        pieces = []
-        classical_pieces = []
-        quantum_pieces = []
-        dx_sign = np.sign(dx)
-        dy_sign = np.sign(dy)
-        # In case of elephant move, there should only be one path piece.
-        if abs(dx) == abs(dy):
-            pieces.append(f"{chr(x0 + dx_sign)}{y0 + dy_sign}")
-        # This could be move of rook, king, pawn or cannon.
-        elif dx == 0:
-            for i in range(1, abs(dy)):
-                pieces.append(f"{chr(x0)}{y0 + dy_sign * i}")
-        # This could be move of rook, king, pawn or cannon.
-        elif dy == 0:
-            for i in range(1, abs(dx)):
-                pieces.append(f"{chr(x0 + dx_sign * i)}{y0}")
-        # This covers four possible directions of horse move.
-        elif abs(dx) == 2 and abs(dy) == 1:
-            pieces.append(f"{chr(x0 + dx_sign)}{y0}")
-        # This covers the other four possible directions of horse move.
-        elif abs(dy) == 2 and abs(dx) == 1:
-            pieces.append(f"{chr(x0)}{y0 + dy_sign}")
-        else:
-            raise ValueError("The input move is illegal.")
-        for piece in pieces:
-            if self.board[piece].is_entangled:
-                quantum_pieces.append(piece)
-            elif self.board[piece].type_ != Type.EMPTY:
-                classical_pieces.append(piece)
-        return classical_pieces, quantum_pieces
-
-    def flying_general_check(self) -> bool:
-        """Check and return if the two KINGs are directly facing each other (i.e. in the same column) without any pieces in between."""
-        king_0 = self.king_locations[0]
-        king_1 = self.king_locations[1]
-        if king_0[0] != king_1[0]:
-            # If they are in different columns, the check fails. Game continues.
-            return False
-        classical_pieces, quantum_pieces = self.path_pieces(king_0, king_1)
-        if len(classical_pieces) > 0:
-            # If there are classical pieces between two KINGs, the check fails. Game continues.
-            return False
-        if len(quantum_pieces) == 0:
-            # If there are no pieces between two KINGs, the check successes. Game ends.
-            return True
-        # When there are quantum pieces in between, the check successes (and game ends)
-        # if there are at lease one occupied path piece.
-        capture_ancilla = self.board._add_ancilla("flying_general_check")
-        control_objects = [self.board[path] for path in quantum_pieces]
-        conditions = [0] * len(control_objects)
-        alpha.quantum_if(*control_objects).equals(*conditions).apply(alpha.Flip())(
-            capture_ancilla
-        )
-        could_capture = self.board.pop([capture_ancilla])[0]
-        if could_capture:
-            # Force measure all path pieces to be empty.
-            for path_piece in control_objects:
-                self.board.force_measurement(path_piece, 0)
-                path_piece.reset()
-
-            # Let the general/king fly, i.e. the opposite king will capture the current king.
-            current_king = self.board[self.king_locations[self.current_player]]
-            oppsite_king = self.board[self.king_locations[1 - self.current_player]]
-            Jump(MoveVariant.CLASSICAL)(oppsite_king, current_king)
-            print("==== FLYING GENERAL ! ====")
-            return True
-        else:
-            # TODO(): we are leaving the path pieces unchanged in entangled state. Maybe
-            # better to force measure them? One option is to randomly chosing one path piece
-            # and force measure it to be occupied.
-            print("==== General not flies yet ! ====")
-            return False
