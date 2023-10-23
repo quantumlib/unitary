@@ -37,6 +37,7 @@ from unitary.examples.quantum_chinese_chess.test_utils import (
     set_board,
 )
 from unitary.examples.quantum_chinese_chess.chess import *
+import cirq
 
 # def test_move_eq():
 #     board = Board.from_fen()
@@ -1022,6 +1023,12 @@ def test_undo(monkeypatch):
                             locations_to_bitboard(["a2", "b3", "c3", "d2"]): 1.0 / 2,
                         },
                     )
+    s = cirq.Simulator()
+    results = s.simulate(world.circuit)
+    print(results)
+    print("".join([f"{x[0].name}:  {x[1]}\n" for x in world.post_selection.items()]))
+    # print(world.post_selection.keys())
+    # print(world.post_selection.values())
     game.undo()
     print("After undo.")
     print(len(world.effect_history))

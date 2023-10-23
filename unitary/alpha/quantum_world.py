@@ -184,6 +184,7 @@ class QuantumWorld:
         new_obj = QuantumObject(ancilla_name, value)
         self.add_object(new_obj)
         self.ancilla_names.add(ancilla_name)
+        print(f"## Add ancilla {ancilla_name}")
         return new_obj
 
     def _append_op(self, op: cirq.Operation):
@@ -347,10 +348,11 @@ class QuantumWorld:
             qubit_remapping_dict.update(
                 {*zip(obj_qubits, new_obj_qubits), *zip(new_obj_qubits, obj_qubits)}
             )
-
+        print("### Before transform_qubits\n", self.circuit)
         self.circuit = self.circuit.transform_qubits(
             lambda q: qubit_remapping_dict.get(q, q)
         )
+        print("### After transform_qubits\n", self.circuit)
         post_selection = result.value if isinstance(result, enum.Enum) else result
         self.post_selection[new_obj] = post_selection
         if self.use_sparse:
