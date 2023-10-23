@@ -489,6 +489,30 @@ class QuantumWorld:
                 histogram[idx][cast(int, result[idx])] += 1
         return histogram
 
+    def get_histogram_with_whole_world_as_key(self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
+    ) -> Dict[Tuple[int], int]:
+        """Creates histogram based on measurements (peeks) carried out.
+
+        Parameters:
+            objects:    List of QuantumObjects
+            count:      Number of measurements
+
+        Returns:
+            A dictionary, with the keys being each possible state of the whole quantum world 
+            (or `objects` if specified), and the values being the count of that state.
+        """
+        if not objects:
+            objects = self.public_objects
+        peek_results = self.peek(objects=objects, convert_to_enum=False, count=count)
+        histogram = {}
+        for result in peek_results:
+            key = tuple(result)
+            if key not in histogram:
+                histogram[key] = 1
+            else:
+                histogram[key] += 1
+        return histogram
+
     def get_probabilities(
         self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
     ) -> List[Dict[int, float]]:

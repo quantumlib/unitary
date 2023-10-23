@@ -104,12 +104,17 @@ class Board:
         # TODO(): maybe add check to make sure the input fen itself is correct.
         return cls(board, current_player, king_locations)
 
-    def to_str(self, probs: List[float] = None):
+    def to_str(
+        self,
+        probabilities: List[float] = None,
+        print_probabilities=True,
+        peek_result: List[int] = None,
+    ):
         # TODO(): print players' names in their corresponding side of the board.
         num_rows = 10
         board_string = ["\n   "]
-        if probs is None:
-            probs = self.board.get_binary_probabilities()
+        if print_probabilities and probabilities is None:
+            probabilities = self.board.get_binary_probabilities()
         # Print the top line of col letters.
         board_string += grey
         board_string += black
@@ -119,6 +124,7 @@ class Board:
             else:
                 board_string.append(f"{col}  ")
         board_string += "\b" + reset + " \n"
+        index = 0
         for row in range(num_rows):
             # Print the row index on the left.
             if self.lang == Language.EN:
@@ -128,7 +134,7 @@ class Board:
             for col in "abcdefghi":
                 piece = self.board[f"{col}{row}"]
                 # board_string += grey
-                if piece.is_entangled:
+                if peek_result is None and piece.is_entangled:
                     if piece.color == Color.RED:
                         board_string += lightred
                     else:
@@ -140,21 +146,31 @@ class Board:
                     else:
                         # board_string += black
                         pass
-                board_string += piece.symbol(self.lang)
+                if (
+                    peek_result is None
+                    or piece.type_ == Type.EMPTY
+                    or peek_result[index] == 1
+                ):
+                    board_string += piece.symbol(self.lang)
+                elif piece.is_entangled and peek_result[index] == 0:
+                    board_string += Type.symbol(Type.EMPTY, Color.NA, self.lang)
                 if col != "i":
                     if self.lang == Language.EN:
                         board_string.append("   ")
                     else:
                         board_string.append("  ")
                 board_string += reset
+                index += 1
             # Print the row index on the right.
-            board_string.append(f"  {row}\n   ")
+            board_string.append(f"  {row}\n")
             # Print the sampled prob. of the pieces in the above row.
-            board_string += grey
-            board_string += black
-            for i in range(row * 9, (row + 1) * 9):
-                board_string.append("{:.1f} ".format(probs[i]))
-            board_string += "\b" + reset + " \n"
+            if print_probabilities:
+                board_string += "   "
+                board_string += grey
+                board_string += black
+                for i in range(row * 9, (row + 1) * 9):
+                    board_string.append("{:.1f} ".format(probabilities[i]))
+                board_string += "\b" + reset + " \n"
         board_string.append("   ")
         # Print the bottom line of col letters.
         board_string += grey

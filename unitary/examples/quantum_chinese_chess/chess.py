@@ -405,7 +405,19 @@ class QuantumChineseChess:
             output = "Exiting."
         elif input_str.lower() == "peek":
             # TODO(): make it look like the normal board. Right now it's only for debugging purposes.
-            print(self.board.board.peek(convert_to_enum=False))
+            print(
+                self.board.to_str(
+                    None, False, self.board.board.peek(convert_to_enum=False)[0]
+                )
+            )
+        elif input_str.lower() == "peek all":
+            all_boards = self.board.board.get_histogram_with_whole_world_as_key()
+            sorted_boards = sorted(all_boards.items(), key=lambda x: x[1], reverse=True)
+            for board, count in sorted_boards:
+                print(
+                    "\n ====== With probability ~ {:.1f} ======".format(count / 100.0)
+                )
+                print(self.board.to_str(None, False, list(board)))
         elif input_str.lower() == "undo":
             if len(self.effect_history_length) <= 1:
                 # length == 1 corresponds to the initial state, and no more undo could be made.
