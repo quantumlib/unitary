@@ -40,10 +40,12 @@ class GameState(enum.Enum):
     DRAW = 2
 
 
+# TODO(): consider if we could allow split/merge + excluded/capture,
+# and cannon_split_fire/cannon_merge_fire + capture
 class MoveType(enum.Enum):
     """Each valid move will be classfied into one of the following MoveTypes."""
 
-    NULL_TYPE = 0
+    CLASSICAL = 0
     UNSPECIFIED_STANDARD = 1
     JUMP = 2
     SLIDE = 3
@@ -51,21 +53,18 @@ class MoveType(enum.Enum):
     SPLIT_SLIDE = 5
     MERGE_JUMP = 6
     MERGE_SLIDE = 7
-    HORSE_MOVE = 8
-    HORSE_SPLIT_MOVE = 9
-    HORSE_MERGE_MOVE = 10
-    CANNON_FIRE = 11
+    CANNON_FIRE = 8
 
 
 class MoveVariant(enum.Enum):
-    """Each valid move will be classfied into one of the following MoveVariat, in addition to
+    """Each valid move will be classfied into one of the following MoveVariant, in addition to
     the MoveType above.
     """
 
-    UNSPECIFIED = 0
-    BASIC = 1
-    EXCLUDED = 2
-    CAPTURE = 3
+    UNSPECIFIED = 0  # Used together with MoveType = CLASSICAL.
+    BASIC = 1  # The target piece is empty.
+    EXCLUDED = 2  # The target piece has the same color.
+    CAPTURE = 3  # The target piece has the opposite color.
 
 
 class Color(enum.Enum):

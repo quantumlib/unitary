@@ -47,3 +47,16 @@ def test_enum():
     assert board.peek() == [
         [SquareState.OCCUPIED, SquareState.OCCUPIED, SquareState.EMPTY]
     ]
+
+
+def test_reset():
+    p0 = Piece("a0", SquareState.OCCUPIED, Type.CANNON, Color.RED)
+    p1 = Piece("b1", SquareState.OCCUPIED, Type.HORSE, Color.BLACK)
+
+    p0.reset()
+    assert p0.type_ == Type.EMPTY
+    assert p0.color == Color.NA
+
+    p0.reset(p1)
+    assert p0.type_ == p1.type_
+    assert p0.color == p1.color
