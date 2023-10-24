@@ -559,8 +559,8 @@ class QuantumWorld:
         return binary_probs
 
     def get_binary_probabilities_from_state_vector(
-        self, objects: Optional[Sequence[QuantumObject]] = None, decimals: int = 2
-    ) -> List[float]:
+        self, decimals: int = 2
+    ) -> Dict[str, float]:
         """Calculates the total probabilities for all non-zero states
         Returns:
             A list with one element for each object which contains
@@ -624,15 +624,18 @@ class QuantumWorld:
                     final_object_distribution[obj.name] += value
 
         print(final_object_distribution)
+        return final_object_distribution
+        # TODO(): not all public objects are in the state vector.
+        #
+        # if not objects:
+        #     objects = self.public_objects
+        # binary_probs = []
+        # for obj in objects:
+        #     if obj.name not in final_object_distribution:
+        #         raise ValueError(f"ERROR: {obj.name} not found.")
+        #     binary_probs.append(final_object_distribution[obj.name])
+        # return binary_probs
 
-        if not objects:
-            objects = self.public_objects
-        binary_probs = []
-        for obj in objects:
-            if obj.name not in final_object_distribution:
-                raise ValueError(f"ERROR: {obj.name} not found.")
-            binary_probs.append(final_object_distribution[obj.name])
-        return binary_probs
 
     def __getitem__(self, name: str) -> QuantumObject:
         try:

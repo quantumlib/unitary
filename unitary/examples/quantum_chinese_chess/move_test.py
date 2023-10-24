@@ -982,79 +982,12 @@ def test_undo(monkeypatch):
     # for obj in world.object_name_dict.keys():
     #     # print(obj)
     #     globals()[obj] = cirq.NamedQubit(obj)
+    print(world.get_binary_probabilities_from_state_vector())
 
-    s = cirq.Simulator()
-    result = s.simulate(world.circuit, initial_state=0)
-    state_vector = result.state_vector()
-    qubit_map = result.qubit_map
-    print(qubit_map)
-    # results = s.simulate(world.circuit, initial_state=0).state_vector()
-    print(state_vector)
-    r = cirq.dirac_notation(state_vector)
-    print(r)
-
-    decimals = 2
-    coefficients = [
-        round(x.real, decimals) + 1j * round(x.imag, decimals) for x in state_vector
-    ]
-    qid_shape = (2,) * (len(state_vector).bit_length() - 1)
-    perm_list = [
-        "".join(seq)
-        for seq in itertools.product(*((str(i) for i in range(d)) for d in qid_shape))
-    ]
-    # build map from all post selected qubits' corresponding index in the permutations to its post selected value
-    post_selection_filter = {}
-    for post_selection_obj, post_selection_value in world.post_selection.items():
-        for obj, index in qubit_map.items():
-            if obj.name == post_selection_obj.name:
-                post_selection_filter[index] = post_selection_value
-                break
-    if len(post_selection_filter) != len(world.post_selection):
-        print("ERROR: missing post_selection qubits!")
-    print("Post Selection Filter:", post_selection_filter)
-
-    filtered_indices = []
-    for index in np.nonzero(coefficients)[0]:
-        perm = perm_list[index]
-        satisfied = True
-        # check all post selection criteria are satisfied.
-        for filter_index, value in post_selection_filter.items():
-            if int(perm[filter_index]) != value:
-                satisfied = False
-                break
-        if satisfied:
-            filtered_indices.append(index)
-    print("Satisfied indices: ", filtered_indices)
-
-    print("After post selection:")
-    prob_sum = 0
-    for index in filtered_indices:
-        prob_sum += abs(coefficients[index]) ** 2
-
-    final_world_distribution = {}
-    for index in filtered_indices:
-        final_world_distribution[perm_list[index]] = (
-            abs(coefficients[index]) ** 2 / prob_sum
-        )
-
-    print(final_world_distribution)
-
-    final_object_distribution = {}
-    for obj, index in qubit_map.items():
-        final_object_distribution[obj.name] = 0
-        for key, value in final_world_distribution.items():
-            if int(key[index]) == 1:
-                final_object_distribution[obj.name] += value
-
-    print(final_object_distribution)
-
-    # print(perm_list)
     print(
         "\nPost Selection:\n",
         "".join([f"{x[0].name}:  {x[1]}\n" for x in world.post_selection.items()]),
     )
-    # print(world.post_selection.keys())
-    # print(world.post_selection.values())
     game.undo()
     print("After undo.")
     print(len(world.effect_history))
