@@ -22,6 +22,7 @@ from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, num_bits
 import numpy as np
 import itertools
 
+
 class QuantumWorld:
     """A collection of `QuantumObject`s with effects.
 
@@ -492,7 +493,8 @@ class QuantumWorld:
                 histogram[idx][cast(int, result[idx])] += 1
         return histogram
 
-    def get_histogram_with_whole_world_as_key(self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
+    def get_histogram_with_whole_world_as_key(
+        self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
     ) -> Dict[Tuple[int], int]:
         """Creates histogram based on measurements (peeks) carried out.
 
@@ -501,7 +503,7 @@ class QuantumWorld:
             count:      Number of measurements
 
         Returns:
-            A dictionary, with the keys being each possible state of the whole quantum world 
+            A dictionary, with the keys being each possible state of the whole quantum world
             (or `objects` if specified), and the values being the count of that state.
         """
         if not objects:
@@ -559,8 +561,8 @@ class QuantumWorld:
         return binary_probs
 
     def get_binary_probabilities_from_state_vector(
-        self, decimals: int = 2
-    ) -> Dict[str, float]:
+        self, objects: Optional[Sequence[QuantumObject]] = None, decimals: int = 2
+    ) -> List[float]:
         """Calculates the total probabilities for all non-zero states
         Returns:
             A list with one element for each object which contains
@@ -575,11 +577,15 @@ class QuantumWorld:
         print(state_vector)
         print(cirq.dirac_notation(state_vector))
 
-        coefficients = [round(x.real, decimals) + 1j * round(x.imag, decimals) for x in state_vector]
+        coefficients = [
+            round(x.real, decimals) + 1j * round(x.imag, decimals) for x in state_vector
+        ]
         qid_shape = (2,) * (len(state_vector).bit_length() - 1)
         perm_list = [
             "".join(seq)
-            for seq in itertools.product(*((str(i) for i in range(d)) for d in qid_shape))
+            for seq in itertools.product(
+                *((str(i) for i in range(d)) for d in qid_shape)
+            )
         ]
         # build map from all post selected qubits' corresponding index in the permutations to its post selected value
         post_selection_filter = {}
@@ -589,7 +595,7 @@ class QuantumWorld:
                     post_selection_filter[index] = post_selection_value
                     break
         if len(post_selection_filter) != len(self.post_selection):
-            print("ERROR: missing post_selection qubits!")
+            raise ValueError("Missing post_selection qubits!")
         print("Post Selection Filter:", post_selection_filter)
 
         filtered_indices = []
@@ -608,11 +614,13 @@ class QuantumWorld:
         print("After post selection:")
         prob_sum = 0
         for index in filtered_indices:
-            prob_sum += abs(coefficients[index])**2
+            prob_sum += abs(coefficients[index]) ** 2
 
         final_world_distribution = {}
         for index in filtered_indices:
-            final_world_distribution[perm_list[index]] = abs(coefficients[index])**2 / prob_sum
+            final_world_distribution[perm_list[index]] = (
+                abs(coefficients[index]) ** 2 / prob_sum
+            )
 
         print(final_world_distribution)
 
@@ -624,18 +632,17 @@ class QuantumWorld:
                     final_object_distribution[obj.name] += value
 
         print(final_object_distribution)
-        return final_object_distribution
-        # TODO(): not all public objects are in the state vector.
-        #
-        # if not objects:
-        #     objects = self.public_objects
-        # binary_probs = []
-        # for obj in objects:
-        #     if obj.name not in final_object_distribution:
-        #         raise ValueError(f"ERROR: {obj.name} not found.")
-        #     binary_probs.append(final_object_distribution[obj.name])
-        # return binary_probs
 
+        # TODO(): not all public objects are in the state vector.
+
+        if not objects:
+            objects = self.public_objects
+        binary_probs = []
+        for obj in objects:
+            if obj.name not in final_object_distribution:
+                raise ValueError(f"ERROR: {obj.name} not found.")
+            binary_probs.append(final_object_distribution[obj.name])
+        return binary_probs
 
     def __getitem__(self, name: str) -> QuantumObject:
         try:
