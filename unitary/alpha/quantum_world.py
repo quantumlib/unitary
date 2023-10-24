@@ -19,7 +19,8 @@ import cirq
 from unitary.alpha.quantum_object import QuantumObject
 from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
 from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, num_bits
-
+import numpy as np
+import itertools
 
 class QuantumWorld:
     """A collection of `QuantumObject`s with effects.
@@ -557,12 +558,88 @@ class QuantumWorld:
             binary_probs.append(1 - one_probs[0])
         return binary_probs
 
+    def get_binary_probabilities_from_state_vector(
+        self, objects: Optional[Sequence[QuantumObject]] = None, decimals: int = 2
+    ) -> List[float]:
+        """Calculates the total probabilities for all non-zero states
+        Returns:
+            A list with one element for each object which contains
+            the probability for the event state!=0. Which is the same as
+            1.0-Probability(state==0).
+        """
+        s = cirq.Simulator()
+        result = s.simulate(self.circuit, initial_state=0)
+        state_vector = result.state_vector()
+        qubit_map = result.qubit_map
+        print(qubit_map)
+        print(state_vector)
+        print(cirq.dirac_notation(state_vector))
+
+        coefficients = [round(x.real, decimals) + 1j * round(x.imag, decimals) for x in state_vector]
+        qid_shape = (2,) * (len(state_vector).bit_length() - 1)
+        perm_list = [
+            "".join(seq)
+            for seq in itertools.product(*((str(i) for i in range(d)) for d in qid_shape))
+        ]
+        # build map from all post selected qubits' corresponding index in the permutations to its post selected value
+        post_selection_filter = {}
+        for post_selection_obj, post_selection_value in self.post_selection.items():
+            for obj, index in qubit_map.items():
+                if obj.name == post_selection_obj.name:
+                    post_selection_filter[index] = post_selection_value
+                    break
+        if len(post_selection_filter) != len(self.post_selection):
+            print("ERROR: missing post_selection qubits!")
+        print("Post Selection Filter:", post_selection_filter)
+
+        filtered_indices = []
+        for index in np.nonzero(coefficients)[0]:
+            perm = perm_list[index]
+            satisfied = True
+            # check all post selection criteria are satisfied.
+            for filter_index, value in post_selection_filter.items():
+                if int(perm[filter_index]) != value:
+                    satisfied = False
+                    break
+            if satisfied:
+                filtered_indices.append(index)
+        print("Satisfied indices: ", filtered_indices)
+
+        print("After post selection:")
+        prob_sum = 0
+        for index in filtered_indices:
+            prob_sum += abs(coefficients[index])**2
+
+        final_world_distribution = {}
+        for index in filtered_indices:
+            final_world_distribution[perm_list[index]] = abs(coefficients[index])**2 / prob_sum
+
+        print(final_world_distribution)
+
+        final_object_distribution = {}
+        for obj, index in qubit_map.items():
+            final_object_distribution[obj.name] = 0
+            for key, value in final_world_distribution.items():
+                if int(key[index]) > 0:
+                    final_object_distribution[obj.name] += value
+
+        print(final_object_distribution)
+
+        if not objects:
+            objects = self.public_objects
+        binary_probs = []
+        for obj in objects:
+            if obj.name not in final_object_distribution:
+                raise ValueError(f"ERROR: {obj.name} not found.")
+            binary_probs.append(final_object_distribution[obj.name])
+        return binary_probs
+
     def __getitem__(self, name: str) -> QuantumObject:
         try:
             quantum_object = self.object_name_dict.get(name, None)
             return quantum_object
         except:
-            print("exsiting")
+            print("existing")
             for obj in self.object_name_dict.keys():
                 print(obj)
             raise KeyError(f"{name} did not exist in this world.")
