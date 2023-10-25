@@ -184,3 +184,15 @@ class Board:
             # If there are no pieces between two KINGs, the check successes. Game ends.
             return True
         # TODO(): add check when there are quantum pieces in between.
+
+    def sample(self, repetitions: int) -> List[int]:
+        """Sample the current board by the given `repetitions`.
+        Returns a list of 90-bit bitstring, each corresponding to one sample.
+        """
+        samples = self.board.peek(count=repetitions, convert_to_enum=False)
+        # Convert peek results (in List[List[int]]) into List[int].
+        samples = [
+            int("0b" + "".join([str(i) for i in sample[::-1]]), base=2)
+            for sample in samples
+        ]
+        return samples

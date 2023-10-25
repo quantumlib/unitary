@@ -165,9 +165,9 @@ class Jump(QuantumEffect):
             target_0.reset()
         elif self.move_variant == MoveVariant.CLASSICAL:
             if target_0.type_ != Type.EMPTY:
-                # For classical moves with target_0 occupied, we replace the qubit of target_0 with
-                # a new ancilla, and set its classical properties to be EMPTY.
-                world.unhook(target_0)
+                # For classical moves with target_0 occupied, we flip target_0 to be empty,
+                # and set its classical properties to be EMPTY.
+                alpha.Flip()(target_0)
                 target_0.reset()
 
         # Make the jump move.

@@ -31,7 +31,6 @@ from unitary.examples.quantum_chinese_chess.test_utils import (
     assert_this_or_that,
     assert_prob_about,
     assert_fifty_fifty,
-    sample_board,
     get_board_probability_distribution,
     print_samples,
     set_board,
@@ -156,7 +155,7 @@ def test_jump_classical():
     assert_samples_in(board, [locations_to_bitboard(["b1"])])
 
 
-def test_jump_capture():
+def test_jump_capture_quantum_source():
     # Source is in quantum state.
     board = set_board(["a1", "b1"])
     world = board.board
@@ -166,7 +165,7 @@ def test_jump_capture():
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a2", "b1"]))
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b1"]))
     Jump(MoveVariant.CAPTURE)(world["a2"], world["b1"])
-    # pop() will break the supersition and only one of the following two states are possible.
+    # pop() will break the superposition and only one of the following two states are possible.
     # We check the ancilla to learn if the jump was applied or not.
     source_is_occupied = world.post_selection[world["ancilla_a2_0"]]
     if source_is_occupied:
@@ -174,6 +173,8 @@ def test_jump_capture():
     else:
         assert_samples_in(board, [locations_to_bitboard(["a3", "b1"])])
 
+
+def test_jump_capture_quantum_target():
     # Target is in quantum state.
     board = set_board(["a1", "b1"])
     world = board.board
@@ -184,6 +185,8 @@ def test_jump_capture():
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2"]))
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["b2", "b3"]))
 
+
+def test_jump_capture_quantum_source_and_target():
     # Both source and target are in quantum state.
     board = set_board(["a1", "b1"])
     world = board.board
@@ -212,13 +215,13 @@ def test_jump_capture():
         assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3", "b3"]))
 
 
-def test_jump_excluded():
+def test_jump_excluded_quantum_target():
     # Target is in quantum state.
     board = set_board(["a1", "b1"])
     world = board.board
     alpha.PhasedSplit()(world["b1"], world["b2"], world["b3"])
     Jump(MoveVariant.EXCLUDED)(world["a1"], world["b2"])
-    # pop() will break the supersition and only one of the following two states are possible.
+    # pop() will break the superposition and only one of the following two states are possible.
     # We check the ancilla to learn if the jump was applied or not.
     target_is_occupied = world.post_selection[world["ancilla_b2_0"]]
     print(target_is_occupied)
@@ -227,6 +230,8 @@ def test_jump_excluded():
     else:
         assert_samples_in(board, [locations_to_bitboard(["b2", "b3"])])
 
+
+def test_jump_excluded_quantum_source_and_target():
     # Both source and target are in quantum state.
     board = set_board(["a1", "b1"])
     world = board.board

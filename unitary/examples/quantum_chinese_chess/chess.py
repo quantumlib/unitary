@@ -386,15 +386,16 @@ class QuantumChineseChess:
             quantum_pieces_1,
         )
 
-        print(move_type, " ", move_variant)
+        if self.debug_level > 1:
+            print(move_type, " ", move_variant)
 
         # Apply the move accoding to its type.
         if move_type == MoveType.CLASSICAL:
             if source_0.type_ == Type.KING:
                 # Update the locations of KING.
                 self.board.king_locations[self.current_player] = targets[0]
-                # TODO(): only make such prints for a certain debug level.
-                print(f"Updated king locations: {self.board.king_locations}.")
+                if self.debug_level > 1:
+                    print(f"Updated king locations: {self.board.king_locations}.")
             if target_0.type_ == Type.KING:
                 # King is captured, then the game is over.
                 self.game_state = GameState(self.current_player)
