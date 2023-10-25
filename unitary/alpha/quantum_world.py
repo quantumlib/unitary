@@ -511,6 +511,7 @@ class QuantumWorld:
         peek_results = self.peek(objects=objects, convert_to_enum=False, count=count)
         histogram = {}
         for result in peek_results:
+            # Convert the list to tuple so that it could be the key of a dictionary.
             key = tuple(result)
             if key not in histogram:
                 histogram[key] = 1
@@ -560,66 +561,47 @@ class QuantumWorld:
             binary_probs.append(1 - one_probs[0])
         return binary_probs
 
+    # TODO(): make this function work for compile_to_qubits==True.
     def get_binary_probabilities_from_state_vector(
         self, objects: Optional[Sequence[QuantumObject]] = None, decimals: int = 2
     ) -> List[float]:
         """Calculates the total probabilities for all non-zero states
+        based on simulating the state vector.
+
+        Parameters:
+            objects:    List of QuantumObjects
+            decimals:   Number of rounding decimals of the real and imaginary coefficients
+                        of the state vector.
+
         Returns:
             A list with one element for each object which contains
             the probability for the event state!=0. Which is the same as
             1.0-Probability(state==0).
         """
-        measure_circuit = self.circuit.copy()
         if objects is None:
-            quantum_objects = self.public_objects
-        else:
-            quantum_objects = objects
-        measure_set = set(quantum_objects)
-        measure_set.update(self.post_selection.keys())
-        measure_circuit.append(
-            [
-                cirq.measure(
-                    self.compiled_qubits.get(p.qubit, p.qubit), key=p.qubit.name
-                )
-                for p in measure_set
-            ]
-        )
-        results = self.sampler.run(measure_circuit, repetitions=2)
-        print(results.measurements)
+            objects = self.public_objects
 
-        # Perform post-selection
-        # rtn_list = _existing_list or []
-        # for rep in range(num_reps):
-        #     post_selected = True
-        #     for obj in self.post_selection.keys():
-        #         result = self._interpret_result(results.measurements[obj.name][rep])
-        #         if result != self.post_selection[obj]:
-        #             post_selected = False
-        #             break
-        #     if post_selected:
-        #         rtn_list.append(
-        #             [
-        #                 self._interpret_result(results.measurements[obj.name][rep])
-        #                 for obj in quantum_objects
-        #             ]
-        #         )
-        #         if len(rtn_list) == count:
-        #             break
-
-        s = cirq.Simulator()
-        # result = s.simulate(self.circuit, initial_state=0)
-        result = s.simulate(measure_circuit, initial_state=0)
-        print(result)
+        simulator = cirq.Simulator()
+        result = simulator.simulate(self.circuit, initial_state=0)
         state_vector = result.state_vector()
+        # qubit_map gives the mapping from object to its index in (the dirac notation of)
+        # the state vector.
         qubit_map = result.qubit_map
-        print(qubit_map)
-        print(state_vector)
-        print(cirq.dirac_notation(state_vector))
-
+        # We support quantum objects in different dimensions.
+        qid_shape = tuple([obj.dimension for obj in qubit_map.keys()])
+        # Calculate all permutations, as the basis of the state vector.
+        perm_list = [
+            "".join(seq)
+            for seq in itertools.product(
+                *((str(i) for i in range(d)) for d in qid_shape)
+            )
+        ]
+        # Round each real/imaginary coefficient up to `decimals`, before judging if it's zero.
         coefficients = [
             round(x.real, decimals) + 1j * round(x.imag, decimals) for x in state_vector
         ]
-        # build map from all post selected qubits' corresponding index in the permutations to its post selected value
+        # Build map from all post selected objects' corresponding index in the
+        # permutations to its post selected value.
         post_selection_filter = {}
         for post_selection_obj, post_selection_value in self.post_selection.items():
             for obj, index in qubit_map.items():
@@ -627,56 +609,47 @@ class QuantumWorld:
                     post_selection_filter[index] = post_selection_value
                     break
         if len(post_selection_filter) != len(self.post_selection):
-            raise ValueError("Missing post_selection qubits!")
-        print("Post Selection Filter:", post_selection_filter)
+            raise ValueError("Missing post selection qubits!")
 
+        # Apply the post selection to trim the state vector.
         filtered_indices = []
-        # qid_shape = (2,) * (len(state_vector).bit_length() - 1)
-        qid_shape = tuple([obj.qubit.dimension for obj in quantum_objects])
-        perm_list = [
-            "".join(seq)
-            for seq in itertools.product(
-                *((str(i) for i in range(d)) for d in qid_shape)
-            )
-        ]
         for index in np.nonzero(coefficients)[0]:
             perm = perm_list[index]
             satisfied = True
-            # check all post selection criteria are satisfied.
+            # Check that all post selection criteria are satisfied.
             for filter_index, value in post_selection_filter.items():
                 if int(perm[filter_index]) != value:
                     satisfied = False
                     break
             if satisfied:
                 filtered_indices.append(index)
-        print("Satisfied indices: ", filtered_indices)
 
-        print("After post selection:")
+        # We need to renormalize the state vector since it's been trimed.
         prob_sum = 0
         for index in filtered_indices:
             prob_sum += abs(coefficients[index]) ** 2
 
+        # Calculate the probability of each world scenario.
         final_world_distribution = {}
         for index in filtered_indices:
-            final_world_distribution[perm_list[index]] = (
-                abs(coefficients[index]) ** 2 / prob_sum
-            )
+            # Convert the permutation string into tuple of int,
+            # i.e. "101" into (1, 0, 1).
+            key = tuple(map(int, tuple(perm_list[index])))
+            final_world_distribution[key] = abs(coefficients[index]) ** 2 / prob_sum
+        # TODO(pengfeichen): make the above calculation a seperate function, which calculates
+        # the distribution of the whole world (or specified objects) by state vector.
 
-        print(final_world_distribution)
-
+        # Calculate the distribution of all objects.
         final_object_distribution = {}
         for obj, index in qubit_map.items():
             final_object_distribution[obj.name] = 0
             for key, value in final_world_distribution.items():
-                if int(key[index]) > 0:
+                # We sum up all non-zero probabilities.
+                if key[index] > 0:
                     final_object_distribution[obj.name] += value
 
-        print(final_object_distribution)
-
-        # TODO(): not all public objects are in the state vector.
-
-        if not objects:
-            objects = self.public_objects
+        # Shrink the dictionary above to a list of probabilities of the
+        # desired/specified objects.
         binary_probs = []
         for obj in objects:
             if obj.name not in final_object_distribution:

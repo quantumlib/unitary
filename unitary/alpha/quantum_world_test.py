@@ -700,6 +700,11 @@ def test_get_histogram_and_get_probabilities_one_trinary_qobject(
     assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities()
     assert bin_probs == [1.0]
+
+
+def test_get_binary_probabilities_from_state_vector_one_trinary_qobject():
+    l1 = alpha.QuantumObject("l1", StopLight.YELLOW)
+    world = alpha.QuantumWorld([l1], sampler=cirq.Simulator(), compile_to_qubits=False)
     bin_probs = world.get_binary_probabilities_from_state_vector()
     assert bin_probs == [1.0]
 
@@ -717,7 +722,7 @@ def test_get_histogram_and_get_probabilities_two_qobjects(simulator, compile_to_
     l1 = alpha.QuantumObject("l1", Light.GREEN)
     l2 = alpha.QuantumObject("l2", StopLight.YELLOW)
     world = alpha.QuantumWorld(
-        [l1, l2], sampler=simulator(), compile_to_qubits=False  # compile_to_qubits
+        [l1, l2], sampler=simulator(), compile_to_qubits=compile_to_qubits
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100}, {0: 0, 1: 100, 2: 0}]
@@ -727,8 +732,6 @@ def test_get_histogram_and_get_probabilities_two_qobjects(simulator, compile_to_
     assert probs == [{0: 0.0, 1: 1.0}, {0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities()
     assert bin_probs == [1.0, 1.0]
-    bin_probs = world.get_binary_probabilities_from_state_vector()
-    assert bin_probs == [1.0, 1.0]
     histogram = world.get_histogram(objects=[l2], count=1000)
     assert histogram == [{0: 0, 1: 1000, 2: 0}]
     histogram = world.get_histogram_with_whole_world_as_key(objects=[l2], count=1000)
@@ -737,5 +740,15 @@ def test_get_histogram_and_get_probabilities_two_qobjects(simulator, compile_to_
     assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities(objects=[l2], count=1000)
     assert bin_probs == [1.0]
+
+
+def test_get_binary_probabilities_from_state_vector_two_qobjects():
+    l1 = alpha.QuantumObject("l1", Light.GREEN)
+    l2 = alpha.QuantumObject("l2", StopLight.GREEN)
+    world = alpha.QuantumWorld(
+        [l1, l2], sampler=cirq.Simulator(), compile_to_qubits=False
+    )
+    bin_probs = world.get_binary_probabilities_from_state_vector()
+    assert bin_probs == [1.0, 1.0]
     bin_probs = world.get_binary_probabilities_from_state_vector(objects=[l2])
     assert bin_probs == [1.0]
