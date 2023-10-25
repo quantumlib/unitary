@@ -308,9 +308,9 @@ class QuantumWorld:
     def unhook(self, object: QuantumObject) -> None:
         """Replace all usages of the given `object` in the circuit with a new ancilla,
         so that
-         - all former operations on `object` will be applied on the new ancilla; 
+         - all former operations on `object` will be applied on the new ancilla;
          - future operations on `object` start with its new reset value.
-        
+
         Note that we don't do force measurement on it, since we don't care about its
         current value but just want to reset it.
         """
