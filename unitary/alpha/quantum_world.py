@@ -472,7 +472,8 @@ class QuantumWorld:
     def get_histogram(
         self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
     ) -> List[Dict[int, int]]:
-        """Creates histogram based on measurements (peeks) carried out.
+        """Creates histogram of each specified `objects` based on measurements
+        (peeks) carried out.
 
         Parameters:
             objects:    List of QuantumObjects
@@ -493,10 +494,12 @@ class QuantumWorld:
                 histogram[idx][cast(int, result[idx])] += 1
         return histogram
 
-    def get_histogram_with_whole_world_as_key(
+    def get_histogram_with_all_objects_as_key(
         self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
     ) -> Dict[Tuple[int], int]:
-        """Creates histogram based on measurements (peeks) carried out.
+        """Creates histogram of the whole quantum world (or `objects` if specified)
+        based on measurements (peeks) carried out. Comparing to get_histogram(),
+        this statistics contains entanglement information accross quantum objects.
 
         Parameters:
             objects:    List of QuantumObjects
@@ -504,7 +507,8 @@ class QuantumWorld:
 
         Returns:
             A dictionary, with the keys being each possible state of the whole quantum world
-            (or `objects` if specified), and the values being the count of that state.
+            (or `objects` if specified) in terms of tuple, and the values being the
+            count of that state.
         """
         if not objects:
             objects = self.public_objects
@@ -574,9 +578,8 @@ class QuantumWorld:
                         of the state vector.
 
         Returns:
-            A list with one element for each object which contains
-            the probability for the event state!=0. Which is the same as
-            1.0-Probability(state==0).
+            A list with one element for each object which contains the probability
+            for the event state!=0. Which is the same as 1.0-Probability(state==0).
         """
         if objects is None:
             objects = self.public_objects
@@ -653,7 +656,7 @@ class QuantumWorld:
         binary_probs = []
         for obj in objects:
             if obj.name not in final_object_distribution:
-                raise ValueError(f"ERROR: {obj.name} not found.")
+                raise ValueError(f"{obj.name} not found.")
             binary_probs.append(final_object_distribution[obj.name])
         return binary_probs
 

@@ -636,7 +636,7 @@ def test_get_histogram_and_get_probabilities_one_binary_qobject(
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100}]
-    histogram = world.get_histogram_with_whole_world_as_key()
+    histogram = world.get_histogram_with_all_objects_as_key()
     assert histogram == {(1,): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 0.0, 1: 1.0}]
@@ -647,7 +647,7 @@ def test_get_histogram_and_get_probabilities_one_binary_qobject(
     alpha.Flip()(l1)
     histogram = world.get_histogram()
     assert histogram == [{0: 100, 1: 0}]
-    histogram = world.get_histogram_with_whole_world_as_key()
+    histogram = world.get_histogram_with_all_objects_as_key()
     assert histogram == {(0,): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 1.0, 1: 0.0}]
@@ -661,7 +661,7 @@ def test_get_histogram_and_get_probabilities_one_binary_qobject(
     assert len(histogram[0]) == 2
     assert histogram[0][0] > 10
     assert histogram[0][1] > 10
-    histogram = world.get_histogram_with_whole_world_as_key()
+    histogram = world.get_histogram_with_all_objects_as_key()
     assert len(histogram) == 2
     assert histogram[(0,)] > 10
     assert histogram[(1,)] > 10
@@ -694,7 +694,7 @@ def test_get_histogram_and_get_probabilities_one_trinary_qobject(
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100, 2: 0}]
-    histogram = world.get_histogram_with_whole_world_as_key()
+    histogram = world.get_histogram_with_all_objects_as_key()
     assert histogram == {(1,): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
@@ -726,7 +726,7 @@ def test_get_histogram_and_get_probabilities_two_qobjects(simulator, compile_to_
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100}, {0: 0, 1: 100, 2: 0}]
-    histogram = world.get_histogram_with_whole_world_as_key()
+    histogram = world.get_histogram_with_all_objects_as_key()
     assert histogram == {(1, 1): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 0.0, 1: 1.0}, {0: 0.0, 1: 1.0, 2: 0.0}]
@@ -734,7 +734,7 @@ def test_get_histogram_and_get_probabilities_two_qobjects(simulator, compile_to_
     assert bin_probs == [1.0, 1.0]
     histogram = world.get_histogram(objects=[l2], count=1000)
     assert histogram == [{0: 0, 1: 1000, 2: 0}]
-    histogram = world.get_histogram_with_whole_world_as_key(objects=[l2], count=1000)
+    histogram = world.get_histogram_with_all_objects_as_key(objects=[l2], count=1000)
     assert histogram == {(1,): 1000}
     probs = world.get_probabilities(objects=[l2], count=1000)
     assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
