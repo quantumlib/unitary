@@ -569,8 +569,47 @@ class QuantumWorld:
             the probability for the event state!=0. Which is the same as
             1.0-Probability(state==0).
         """
+        measure_circuit = self.circuit.copy()
+        if objects is None:
+            quantum_objects = self.public_objects
+        else:
+            quantum_objects = objects
+        measure_set = set(quantum_objects)
+        measure_set.update(self.post_selection.keys())
+        measure_circuit.append(
+            [
+                cirq.measure(
+                    self.compiled_qubits.get(p.qubit, p.qubit), key=p.qubit.name
+                )
+                for p in measure_set
+            ]
+        )
+        results = self.sampler.run(measure_circuit, repetitions=2)
+        print(results.measurements)
+
+        # Perform post-selection
+        # rtn_list = _existing_list or []
+        # for rep in range(num_reps):
+        #     post_selected = True
+        #     for obj in self.post_selection.keys():
+        #         result = self._interpret_result(results.measurements[obj.name][rep])
+        #         if result != self.post_selection[obj]:
+        #             post_selected = False
+        #             break
+        #     if post_selected:
+        #         rtn_list.append(
+        #             [
+        #                 self._interpret_result(results.measurements[obj.name][rep])
+        #                 for obj in quantum_objects
+        #             ]
+        #         )
+        #         if len(rtn_list) == count:
+        #             break
+
         s = cirq.Simulator()
-        result = s.simulate(self.circuit, initial_state=0)
+        # result = s.simulate(self.circuit, initial_state=0)
+        result = s.simulate(measure_circuit, initial_state=0)
+        print(result)
         state_vector = result.state_vector()
         qubit_map = result.qubit_map
         print(qubit_map)
@@ -579,13 +618,6 @@ class QuantumWorld:
 
         coefficients = [
             round(x.real, decimals) + 1j * round(x.imag, decimals) for x in state_vector
-        ]
-        qid_shape = (2,) * (len(state_vector).bit_length() - 1)
-        perm_list = [
-            "".join(seq)
-            for seq in itertools.product(
-                *((str(i) for i in range(d)) for d in qid_shape)
-            )
         ]
         # build map from all post selected qubits' corresponding index in the permutations to its post selected value
         post_selection_filter = {}
@@ -599,6 +631,14 @@ class QuantumWorld:
         print("Post Selection Filter:", post_selection_filter)
 
         filtered_indices = []
+        # qid_shape = (2,) * (len(state_vector).bit_length() - 1)
+        qid_shape = tuple([obj.qubit.dimension for obj in quantum_objects])
+        perm_list = [
+            "".join(seq)
+            for seq in itertools.product(
+                *((str(i) for i in range(d)) for d in qid_shape)
+            )
+        ]
         for index in np.nonzero(coefficients)[0]:
             perm = perm_list[index]
             satisfied = True
