@@ -144,7 +144,7 @@ def test_to_str():
     assert move3.to_str(3) == "a0a6:SLIDE:CAPTURE:RED_ROOK->BLACK_PAWN"
 
 
-def test_split_jump():
+def test_split_jump_classical_source():
     # Source is in classical state.
     board = set_board(["a1"])
     world = board.board
@@ -154,6 +154,8 @@ def test_split_jump():
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a2"]))
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3"]))
 
+
+def test_split_jump_quantum_source():
     # Source is in quantum state.
     board = set_board(["a1"])
     world = board.board
@@ -169,7 +171,7 @@ def test_split_jump():
     )
 
 
-def test_merge_jump():
+def test_merge_jump_perfect_merge():
     # Two quantum pieces split from one source could be merge back to one.
     board = set_board(["a1"])
     world = board.board
@@ -177,6 +179,8 @@ def test_merge_jump():
     MergeJump()(world["a2"], world["a3"], world["a1"])
     assert_samples_in(board, {locations_to_bitboard(["a1"]): 1.0})
 
+
+def test_merge_jump_imperfect_merge_scenario_1():
     # Imperfect merge scenario 1
     board = set_board(["a1"])
     world = board.board
@@ -198,6 +202,8 @@ def test_merge_jump():
         },
     )
 
+
+def test_merge_jump_imperfect_merge_scenario_2():
     # Imperfect merge scenario 2
     # Two quantum pieces split from two sources could not be merge into to one.
     board = set_board(["a1", "b1"])
@@ -206,12 +212,12 @@ def test_merge_jump():
     SplitJump()(world["b1"], world["b2"], world["b3"])
     MergeJump()(world["a2"], world["b2"], world["c2"])
     # According to matrix calculations, the ending coefficient of
-    # [a3, b3]: 1/4
+    # [a3, b3]: 1/2
     # [a3, c2]: i/2/sqrt(2)
     # [a3, b2]: -1/2/sqrt(2)
     # [b3, c2]: i/2/sqrt(2)
     # [b2, b3]: 1/2/sqrt(2)
-    # [b2, c2]: 1/4
+    # [b2, c2]: 1/2
     assert_sample_distribution(
         board,
         {
@@ -224,6 +230,8 @@ def test_merge_jump():
         },
     )
 
+
+def test_merge_jump_imperfect_merge_scenario_3():
     # Imperfect merge scenario 3
     # This is a simplied version of the scenario above, where we unhook a3 and b3.
     board = set_board(["a1", "b1"])
