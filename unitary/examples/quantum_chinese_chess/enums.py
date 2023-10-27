@@ -13,6 +13,7 @@
 # limitations under the License.
 import enum
 from typing import Optional
+import unicodedata
 
 
 class Language(enum.Enum):
@@ -85,7 +86,12 @@ class Type(enum.Enum):
     - Chinese black
     """
 
-    EMPTY = (".", ".", ".", ".")
+    EMPTY = (
+        "\u00B7",
+        "\u00B7",
+        "\u30FB",
+        "\u30FB",
+    )  # \u00B7 is a half width mid dot, and \u30FB is full width
     PAWN = ("P", "p", "兵", "卒")
     CANNON = ("C", "c", "炮", "砲")
     ROOK = ("R", "r", "车", "車")
@@ -104,22 +110,20 @@ class Type(enum.Enum):
             "e": Type.ELEPHANT,
             "a": Type.ADVISOR,
             "k": Type.KING,
-            "･": Type.EMPTY,
+            "\u00B7": Type.EMPTY,
         }.get(c.lower(), None)
 
     @staticmethod
     def symbol(type_: "Type", color: Color, lang: Language = Language.EN) -> str:
         """Returns symbol of the given piece according to its color and desired language."""
-        if type_ == Type.EMPTY:
-            return type_.value[0]
         if lang == Language.EN:  # Return English symbols
             if color == Color.RED:
                 return type_.value[0]
-            elif color == Color.BLACK:
+            else:
                 return type_.value[1]
         elif lang == Language.ZH:  # Return Chinese symbols
             if color == Color.RED:
                 return type_.value[2]
-            elif color == Color.BLACK:
+            else:
                 return type_.value[3]
         raise ValueError("Unexpected combinations of language and color.")
