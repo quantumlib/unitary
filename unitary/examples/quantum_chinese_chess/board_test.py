@@ -149,7 +149,7 @@ def test_path_pieces():
     assert board.path_pieces("c8", "d6") == ([], ["c7"])
 
 
-def test_flying_general_check():
+def test_flying_general_check_classical_cases():
     board = Board.from_fen()
     # If they are in different columns, the check fails.
     board.king_locations = ["d0", "e9"]
@@ -164,6 +164,8 @@ def test_flying_general_check():
     board.board["e6"].reset()
     assert board.flying_general_check() == True
 
+
+def test_flying_general_check_quantum_cases():
     # When there are quantum pieces in between.
     board = set_board(["a3", "a4", "e0", "e9"])
     board.king_locations = ["e0", "e9"]

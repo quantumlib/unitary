@@ -183,8 +183,8 @@ class Board:
         if len(quantum_pieces) == 0:
             # If there are no pieces between two KINGs, the check successes. Game ends.
             return True
-        # When there are quantum pieces in between, the check successes (and game ends)
-        # if there are at lease one occupied path piece.
+        # When there are only quantum pieces in between, the check successes (and game ends)
+        # if all of those pieces turn out to be empty.
         capture_ancilla = self.board._add_ancilla("flying_general_check")
         control_objects = [self.board[path] for path in quantum_pieces]
         conditions = [0] * len(control_objects)
@@ -206,7 +206,7 @@ class Board:
             return True
         else:
             # TODO(): we are leaving the path pieces unchanged in entangled state. Maybe
-            # better to force measure them? One option is to randomly chosing one path piece
+            # better to force measure them? One option is to randomly choose one path piece
             # and force measure it to be occupied.
             print("==== General not flies yet ! ====")
             return False
