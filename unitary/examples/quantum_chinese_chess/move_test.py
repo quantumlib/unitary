@@ -252,6 +252,10 @@ def test_jump_excluded_quantum_source_and_target():
 
 
 def test_jump_basic():
+    # Source is in quantum state.
+    board = set_board(["a1"])
+    world = board.board
+    alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
     Jump(MoveVariant.BASIC)(world["a2"], world["d1"])
     board_probabilities = get_board_probability_distribution(board, 1000)
     assert len(board_probabilities) == 2
