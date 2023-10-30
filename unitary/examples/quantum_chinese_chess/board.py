@@ -19,6 +19,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     Color,
     Type,
     Language,
+    MoveVariant,
 )
 from unitary.examples.quantum_chinese_chess.piece import Piece
 from unitary.examples.quantum_chinese_chess.move import Jump
