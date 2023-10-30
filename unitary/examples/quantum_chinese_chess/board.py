@@ -49,7 +49,7 @@ class Board:
         FEN rule for Chinese Chess could be found at https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
         """
         chess_board = {}
-        row_index = 9
+        row_index = 0
         king_locations = []
         pieces, turns = fen.split(" ", 1)
         for row in pieces.split("/"):
@@ -74,15 +74,11 @@ class Board:
                         name, SquareState.OCCUPIED, piece_type, color
                     )
                     col += 1
-            row_index -= 1
+            row_index += 1
         board = alpha.QuantumWorld(chess_board.values())
         # Here 0 means the player RED while 1 the player BLACK.
         current_player = 0 if "w" in turns else 1
         # TODO(): maybe add check to make sure the input fen itself is correct.
-        if len(king_locations) != 2:
-            raise ValueError(
-                f"We expect two KINGs on the board, but got {len(king_locations)}."
-            )
         return cls(board, current_player, king_locations)
 
     def __str__(self):
@@ -92,7 +88,7 @@ class Board:
         for col in "abcdefghi":
             board_string.append(f" {col}")
         board_string.append("\n")
-        for row in range(num_rows):
+        for row in range(num_rows - 1, -1, -1):
             # Print the row index on the left.
             board_string.append(f"{row} ")
             for col in "abcdefghi":
@@ -165,7 +161,7 @@ class Board:
         elif abs(dy) == 2 and abs(dx) == 1:
             pieces.append(f"{chr(x0)}{y0 + dy_sign}")
         else:
-            raise ValueError("Unexpected input to path_pieces().")
+            raise ValueError("The input move is illegal.")
         for piece in pieces:
             if self.board[piece].is_entangled:
                 quantum_pieces.append(piece)
@@ -188,3 +184,15 @@ class Board:
             # If there are no pieces between two KINGs, the check successes. Game ends.
             return True
         # TODO(): add check when there are quantum pieces in between.
+
+    def sample(self, repetitions: int) -> List[int]:
+        """Sample the current board by the given `repetitions`.
+        Returns a list of 90-bit bitstring, each corresponding to one sample.
+        """
+        samples = self.board.peek(count=repetitions, convert_to_enum=False)
+        # Convert peek results (in List[List[int]]) into List[int].
+        samples = [
+            int("0b" + "".join([str(i) for i in sample[::-1]]), base=2)
+            for sample in samples
+        ]
+        return samples

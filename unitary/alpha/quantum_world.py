@@ -305,6 +305,27 @@ class QuantumWorld:
             return result_list[0]
         return result
 
+    def unhook(self, object: QuantumObject) -> None:
+        """Replace all usages of the given `object` in the circuit with a new ancilla,
+        so that
+         - all former operations on `object` will be applied on the new ancilla;
+         - future operations on `object` start with its new reset value.
+
+        Note that we don't do force measurement on it, since we don't care about its
+        current value but just want to reset it.
+        """
+        # Create a new ancilla.
+        new_ancilla = self._add_ancilla(object.name)
+        # Replace operations of the given `object` with the new ancilla.
+        qubit_remapping_dict = {
+            object.qubit: new_ancilla.qubit,
+            new_ancilla.qubit: object.qubit,
+        }
+        self.circuit = self.circuit.transform_qubits(
+            lambda q: qubit_remapping_dict.get(q, q)
+        )
+        return
+
     def force_measurement(
         self, obj: QuantumObject, result: Union[enum.Enum, int]
     ) -> None:

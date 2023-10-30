@@ -11,12 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Iterator
+import cirq
+from unitary import alpha
 from unitary.alpha.quantum_effect import QuantumEffect
 from unitary.examples.quantum_chinese_chess.board import Board
+from unitary.examples.quantum_chinese_chess.piece import Piece
 from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant, Type
 
 
+# TODO(): now the class is no longer the base class of all chess moves. Maybe convert this class
+# to a helper class to save each move (with its pop results) in a string form into move history.
 class Move(QuantumEffect):
     """The base class of all chess moves."""
 
@@ -101,3 +106,73 @@ class Move(QuantumEffect):
 
     def __str__(self):
         return self.to_str()
+
+
+class Jump(QuantumEffect):
+    """Jump from source_0 to target_0. The accepted move_variant includes
+    - CLASSICAL (where all classical moves will be handled here)
+    - CAPTURE
+    - EXCLUDED
+    - BASIC
+    """
+
+    def __init__(
+        self,
+        move_variant: MoveVariant,
+    ):
+        self.move_variant = move_variant
+
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self) -> Optional[int]:
+        return 2
+
+    def effect(self, *objects) -> Iterator[cirq.Operation]:
+        # TODO(): currently pawn capture is the same as jump capture, while in quantum chess it's different,
+        # i.e. pawn would move only if the target is there, i.e. CNOT(t, s), and an entanglement could be
+        # created. This could be a general game setting, i.e. we could allow players to choose if they
+        # want the source piece to move (in case of capture) if the target piece is not there.
+        source_0, target_0 = objects
+        world = source_0.world
+        if self.move_variant == MoveVariant.CAPTURE:
+            # We peek and force measure source_0.
+            source_is_occupied = world.pop([source_0])[0].value
+            # For move_variant==CAPTURE, we require source_0 to be occupied before further actions.
+            # This is to prevent a piece of the board containing two types of different pieces.
+            if not source_is_occupied:
+                # If source_0 turns out to be not there, we set it to be EMPTY, and the jump
+                # could not be made.
+                source_0.reset()
+                print("Jump move not applied: source turns out to be empty.")
+                return iter(())
+            source_0.is_entangled = False
+            # We replace the qubit of target_0 with a new ancilla, and set its classical properties to be EMPTY.
+            world.unhook(target_0)
+            target_0.reset()
+        elif self.move_variant == MoveVariant.EXCLUDED:
+            # We peek and force measure target_0.
+            target_is_occupied = world.pop([target_0])[0].value
+            # For move_variant==EXCLUDED, we require target_0 to be empty before further actions.
+            # This is to prevent a piece of the board containing two types of different pieces.
+            if target_is_occupied:
+                # If target_0 turns out to be there, we set it to be classically OCCUPIED, and
+                # the jump could not be made.
+                print("Jump move not applied: target turns out to be occupied.")
+                target_0.is_entangled = False
+                return iter(())
+            # Otherwise we set target_0 to be classically EMPTY.
+            target_0.reset()
+        elif self.move_variant == MoveVariant.CLASSICAL:
+            if target_0.type_ != Type.EMPTY:
+                # For classical moves with target_0 occupied, we flip target_0 to be empty,
+                # and set its classical properties to be EMPTY.
+                alpha.Flip()(target_0)
+                target_0.reset()
+
+        # Make the jump move.
+        alpha.PhasedMove()(source_0, target_0)
+        # Move the classical properties of the source piece to the target piece.
+        target_0.reset(source_0)
+        source_0.reset()
+        return iter(())
