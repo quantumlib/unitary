@@ -24,6 +24,8 @@ from unitary.examples.quantum_chinese_chess.enums import (
     MoveType,
     MoveVariant,
 )
+from unitary.examples.quantum_chinese_chess.test_utils import *
+from unitary import alpha
 
 
 def test_game_init(monkeypatch):
@@ -380,3 +382,71 @@ def test_update_board_by_sampling(monkeypatch):
     # Verify that the method would set a1 to classically occupied.
     game.update_board_by_sampling()
     assert board["a1"].is_entangled == False
+
+
+def test_undo_single_effect_per_move(monkeypatch):
+    inputs = iter(["y", "Bob", "Ben"])
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+    game = QuantumChineseChess()
+    board = set_board(["a1", "b1", "c1"])
+    game.board = board
+    world = board.board
+    game.save_snapshot()
+    alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
+    game.save_snapshot()
+    alpha.PhasedSplit()(world["b1"], world["b2"], world["b3"])
+    game.save_snapshot()
+
+    assert_sample_distribution(
+        board,
+        {
+            locations_to_bitboard(["a2", "b2", "c1"]): 1.0 / 4,
+            locations_to_bitboard(["a2", "b3", "c1"]): 1.0 / 4,
+            locations_to_bitboard(["a3", "b2", "c1"]): 1.0 / 4,
+            locations_to_bitboard(["a3", "b3", "c1"]): 1.0 / 4,
+        },
+    )
+
+    game.undo()
+    assert_sample_distribution(
+        board,
+        {
+            locations_to_bitboard(["a2", "b1", "c1"]): 1.0 / 2,
+            locations_to_bitboard(["a3", "b1", "c1"]): 1.0 / 2,
+        },
+    )
+
+    game.undo()
+    assert_samples_in(board, {locations_to_bitboard(["a1", "b1", "c1"]): 1.0})
+
+    with pytest.raises(ValueError, match="Unable to undo any more."):
+        game.undo()
+
+
+def test_undo_multiple_effects_per_move(monkeypatch):
+    inputs = iter(["y", "Bob", "Ben"])
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+    game = QuantumChineseChess()
+    board = set_board(["a1", "b1", "c1"])
+    game.board = board
+    world = board.board
+    game.save_snapshot()
+    alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
+    alpha.PhasedSplit()(world["b1"], world["b2"], world["b3"])
+    game.save_snapshot()
+
+    assert_sample_distribution(
+        board,
+        {
+            locations_to_bitboard(["a2", "b2", "c1"]): 1.0 / 4,
+            locations_to_bitboard(["a2", "b3", "c1"]): 1.0 / 4,
+            locations_to_bitboard(["a3", "b2", "c1"]): 1.0 / 4,
+            locations_to_bitboard(["a3", "b3", "c1"]): 1.0 / 4,
+        },
+    )
+
+    game.undo()
+    assert_samples_in(board, {locations_to_bitboard(["a1", "b1", "c1"]): 1.0})
+
+    with pytest.raises(ValueError, match="Unable to undo any more."):
+        game.undo()
