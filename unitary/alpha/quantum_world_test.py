@@ -176,7 +176,7 @@ def test_pop(simulator, compile_to_qubits):
         compile_to_qubits=compile_to_qubits,
     )
     alpha.Split()(light, light2, light3)
-    results = board.peek([light2, light3], count=200, convert_to_enum=False)
+    results = board.peek([light2, light3], count=200)
     assert all(result[0] != result[1] for result in results)
     assert not all(result[0] == 0 for result in results)
     assert not all(result[0] == 1 for result in results)
@@ -187,26 +187,6 @@ def test_pop(simulator, compile_to_qubits):
     assert len(results) == 200
     assert all(result[0] == popped for result in results)
     assert all(result[1] != popped for result in results)
-
-
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
-def test_unhook(simulator, compile_to_qubits):
-    light = alpha.QuantumObject("l1", Light.GREEN)
-    light2 = alpha.QuantumObject("l2", Light.RED)
-    light3 = alpha.QuantumObject("l3", Light.RED)
-    board = alpha.QuantumWorld(
-        [light, light2, light3],
-        sampler=simulator(),
-        compile_to_qubits=compile_to_qubits,
-    )
-    alpha.Split()(light, light2, light3)
-    board.unhook(light2)
-    results = board.peek([light2, light3], count=200, convert_to_enum=False)
-    print(results)
-    assert all(result[0] == 0 for result in results)
-    assert not all(result[1] == 0 for result in results)
-    assert not all(result[1] == 1 for result in results)
 
 
 # TODO: Consider moving to qudit_effects.py if this can be broadly useful.
@@ -656,16 +636,24 @@ def test_get_histogram_and_get_probabilities_one_binary_qobject(
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100}]
+    histogram = world.get_histogram_with_all_objects_as_key()
+    assert histogram == {(1,): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 0.0, 1: 1.0}]
     bin_probs = world.get_binary_probabilities()
     assert bin_probs == [1.0]
+    bin_probs = world.get_binary_probabilities_from_state_vector()
+    assert bin_probs == [1.0]
     alpha.Flip()(l1)
     histogram = world.get_histogram()
     assert histogram == [{0: 100, 1: 0}]
+    histogram = world.get_histogram_with_all_objects_as_key()
+    assert histogram == {(0,): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 1.0, 1: 0.0}]
     bin_probs = world.get_binary_probabilities()
+    assert bin_probs == [0.0]
+    bin_probs = world.get_binary_probabilities_from_state_vector()
     assert bin_probs == [0.0]
     alpha.Superposition()(l1)
     histogram = world.get_histogram()
@@ -673,12 +661,18 @@ def test_get_histogram_and_get_probabilities_one_binary_qobject(
     assert len(histogram[0]) == 2
     assert histogram[0][0] > 10
     assert histogram[0][1] > 10
+    histogram = world.get_histogram_with_all_objects_as_key()
+    assert len(histogram) == 2
+    assert histogram[(0,)] > 10
+    assert histogram[(1,)] > 10
     probs = world.get_probabilities()
     assert len(probs) == 1
     assert len(probs[0]) == 2
     assert probs[0][0] > 0.1
     assert probs[0][1] > 0.1
     bin_probs = world.get_binary_probabilities()
+    assert 0.1 <= bin_probs[0] <= 1.0
+    bin_probs = world.get_binary_probabilities_from_state_vector()
     assert 0.1 <= bin_probs[0] <= 1.0
 
 
@@ -700,9 +694,18 @@ def test_get_histogram_and_get_probabilities_one_trinary_qobject(
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100, 2: 0}]
+    histogram = world.get_histogram_with_all_objects_as_key()
+    assert histogram == {(1,): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities()
+    assert bin_probs == [1.0]
+
+
+def test_get_binary_probabilities_from_state_vector_one_trinary_qobject():
+    l1 = alpha.QuantumObject("l1", StopLight.YELLOW)
+    world = alpha.QuantumWorld([l1], sampler=cirq.Simulator(), compile_to_qubits=False)
+    bin_probs = world.get_binary_probabilities_from_state_vector()
     assert bin_probs == [1.0]
 
 
@@ -723,13 +726,29 @@ def test_get_histogram_and_get_probabilities_two_qobjects(simulator, compile_to_
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100}, {0: 0, 1: 100, 2: 0}]
+    histogram = world.get_histogram_with_all_objects_as_key()
+    assert histogram == {(1, 1): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 0.0, 1: 1.0}, {0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities()
     assert bin_probs == [1.0, 1.0]
     histogram = world.get_histogram(objects=[l2], count=1000)
     assert histogram == [{0: 0, 1: 1000, 2: 0}]
+    histogram = world.get_histogram_with_all_objects_as_key(objects=[l2], count=1000)
+    assert histogram == {(1,): 1000}
     probs = world.get_probabilities(objects=[l2], count=1000)
     assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities(objects=[l2], count=1000)
+    assert bin_probs == [1.0]
+
+
+def test_get_binary_probabilities_from_state_vector_two_qobjects():
+    l1 = alpha.QuantumObject("l1", Light.GREEN)
+    l2 = alpha.QuantumObject("l2", StopLight.GREEN)
+    world = alpha.QuantumWorld(
+        [l1, l2], sampler=cirq.Simulator(), compile_to_qubits=False
+    )
+    bin_probs = world.get_binary_probabilities_from_state_vector()
+    assert bin_probs == [1.0, 1.0]
+    bin_probs = world.get_binary_probabilities_from_state_vector(objects=[l2])
     assert bin_probs == [1.0]
