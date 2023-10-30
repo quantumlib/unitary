@@ -22,7 +22,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     MoveVariant,
 )
 from unitary.examples.quantum_chinese_chess.piece import Piece
-from unitary.examples.quantum_chinese_chess.move import *
+from unitary.examples.quantum_chinese_chess.move import Jump
 
 
 # The default initial state of the game.
