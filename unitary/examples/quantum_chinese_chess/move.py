@@ -15,23 +15,21 @@ from typing import Optional, List, Tuple, Iterator
 import cirq
 from unitary import alpha
 from unitary.alpha.quantum_effect import QuantumEffect
-from unitary.examples.quantum_chinese_chess.board import Board
 from unitary.examples.quantum_chinese_chess.piece import Piece
 from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant, Type
 
 
 # TODO(): now the class is no longer the base class of all chess moves. Maybe convert this class
 # to a helper class to save each move (with its pop results) in a string form into move history.
-class Move(QuantumEffect):
+class Move:
     """The base class of all chess moves."""
 
     def __init__(
         self,
-        source: str,
-        target: str,
-        board: Board,
-        source2: Optional[str] = None,
-        target2: Optional[str] = None,
+        source: Piece,
+        target: Piece,
+        source2: Optional[Piece] = None,
+        target2: Optional[Piece] = None,
         move_type: Optional[MoveType] = None,
         move_variant: Optional[MoveVariant] = None,
     ):
@@ -41,27 +39,11 @@ class Move(QuantumEffect):
         self.target2 = target2
         self.move_type = move_type
         self.move_variant = move_variant
-        self.board = board
 
     def __eq__(self, other):
         if isinstance(other, Move):
-            return (
-                self.source == other.source
-                and self.source2 == other.source2
-                and self.target == other.target
-                and self.target2 == other.target2
-                and self.move_type == other.move_type
-                and self.move_variant == other.move_variant
-            )
+            return self.to_str(3) == other.to_str(3)
         return False
-
-    def _verify_objects(self, *objects):
-        # TODO(): add checks that apply to all move types
-        return
-
-    def effect(self, *objects):
-        # TODO(): add effects according to move_type and move_variant
-        return
 
     def is_split_move(self) -> bool:
         return self.target2 is not None
@@ -80,27 +62,25 @@ class Move(QuantumEffect):
             return ""
 
         if self.is_split_move():
-            move_str = [self.source + "^" + self.target + str(self.target2)]
+            move_str = [self.source.name + "^" + self.target.name + self.target2.name]
         elif self.is_merge_move():
-            move_str = [self.source + str(self.source2) + "^" + self.target]
+            move_str = [self.source.name + self.source2.name + "^" + self.target.name]
         else:
-            move_str = [self.source + self.target]
+            move_str = [self.source.name + self.target.name]
 
         if verbose_level > 1:
             move_str.append(self.move_type.name)
             move_str.append(self.move_variant.name)
 
         if verbose_level > 2:
-            source = self.board.board[self.source]
-            target = self.board.board[self.target]
             move_str.append(
-                source.color.name
+                self.source.color.name
                 + "_"
-                + source.type_.name
+                + self.source.type_.name
                 + "->"
-                + target.color.name
+                + self.target.color.name
                 + "_"
-                + target.type_.name
+                + self.target.type_.name
             )
         return ":".join(move_str)
 
