@@ -52,11 +52,14 @@ def test_enum():
 def test_reset():
     p0 = Piece("a0", SquareState.OCCUPIED, Type.CANNON, Color.RED)
     p1 = Piece("b1", SquareState.OCCUPIED, Type.HORSE, Color.BLACK)
+    p1.is_entangled = True
 
     p0.reset()
     assert p0.type_ == Type.EMPTY
     assert p0.color == Color.NA
+    assert p0.is_entangled == False
 
     p0.reset(p1)
     assert p0.type_ == p1.type_
     assert p0.color == p1.color
+    assert p0.is_entangled == p1.is_entangled
