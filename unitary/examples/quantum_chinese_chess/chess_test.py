@@ -104,6 +104,7 @@ def test_check_classical_rule(monkeypatch):
     inputs = iter(["y", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
+    board = game.board.board
     # The move is blocked by classical path piece.
     with pytest.raises(ValueError, match="The path is blocked."):
         game.check_classical_rule("a0", "a4", ["a3"])
@@ -128,14 +129,10 @@ def test_check_classical_rule(monkeypatch):
     game.check_classical_rule("c0", "e2", [])
     with pytest.raises(ValueError, match="ELEPHANT cannot move like this."):
         game.check_classical_rule("c0", "e1", [])
-    game.board.board["g5"].reset(
-        Piece("g5", SquareState.OCCUPIED, Type.ELEPHANT, Color.BLACK)
-    )
+    board["g5"].reset(Piece("g5", SquareState.OCCUPIED, Type.ELEPHANT, Color.BLACK))
     with pytest.raises(ValueError, match="ELEPHANT cannot cross the river"):
         game.check_classical_rule("g5", "i3", [])
-    game.board.board["c4"].reset(
-        Piece("c4", SquareState.OCCUPIED, Type.ELEPHANT, Color.RED)
-    )
+    board["c4"].reset(Piece("c4", SquareState.OCCUPIED, Type.ELEPHANT, Color.RED))
     with pytest.raises(ValueError, match="ELEPHANT cannot cross the river"):
         game.check_classical_rule("c4", "e6", [])
 
@@ -152,9 +149,9 @@ def test_check_classical_rule(monkeypatch):
     game.check_classical_rule("e9", "e8", [])
     with pytest.raises(ValueError, match="KING cannot move like this."):
         game.check_classical_rule("e9", "d8", [])
-    game.board.board["c0"].reset()
-    game.board.board["d0"].reset(game.board.board["e0"])
-    game.board.board["e0"].reset()
+    board["c0"].reset()
+    board["d0"].reset(board["e0"])
+    board["e0"].reset()
     with pytest.raises(ValueError, match="KING cannot leave the palace."):
         game.check_classical_rule("d0", "c0", [])
 
@@ -167,9 +164,9 @@ def test_check_classical_rule(monkeypatch):
     with pytest.raises(ValueError, match="CANNON cannot fire like this."):
         game.check_classical_rule("b2", "b9", ["b5", "b7"])
     # Cannon cannot fire to a piece with same color.
-    game.board.board["b3"].reset(game.board.board["b2"])
-    game.board.board["b2"].reset()
-    game.board.board["e3"].is_entangled = True
+    board["b3"].reset(board["b2"])
+    board["b2"].reset()
+    board["e3"].is_entangled = True
     with pytest.raises(
         ValueError, match="CANNON cannot fire to a piece with same color."
     ):
@@ -194,8 +191,8 @@ def test_check_classical_rule(monkeypatch):
     with pytest.raises(ValueError, match="PAWN can not move backward."):
         game.check_classical_rule("g6", "g7", [])
     # After crossing the rive the pawn could move horizontally.
-    game.board.board["c4"].reset(game.board.board["c6"])
-    game.board.board["c6"].reset()
+    board["c4"].reset(board["c6"])
+    board["c6"].reset()
     game.check_classical_rule("c4", "b4", [])
     game.check_classical_rule("c4", "d4", [])
 
@@ -206,6 +203,7 @@ def test_classify_move_fail(monkeypatch):
     inputs = iter(["y", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
+    board = game.board.board
     with pytest.raises(
         ValueError, match="CANNON could not fire/capture without a cannon platform."
     ):
@@ -216,21 +214,21 @@ def test_classify_move_fail(monkeypatch):
     ):
         game.classify_move(["b2", "h2"], ["e2"], [], [], [], [])
 
-    game.board.board["c0"].reset(game.board.board["b7"])
-    game.board.board["c0"].is_entangled = True
-    game.board.board["b7"].reset()
-    game.board.board["g0"].reset(game.board.board["h7"])
-    game.board.board["g0"].is_entangled = True
-    game.board.board["h7"].reset()
+    board["c0"].reset(board["b7"])
+    board["c0"].is_entangled = True
+    board["b7"].reset()
+    board["g0"].reset(board["h7"])
+    board["g0"].is_entangled = True
+    board["h7"].reset()
     with pytest.raises(ValueError, match="Currently CANNON cannot merge while firing."):
         game.classify_move(["c0", "g0"], ["e0"], ["d0"], [], ["f0"], [])
 
-    game.board.board["b3"].reset(game.board.board["b2"])
-    game.board.board["b3"].is_entangled = True
-    game.board.board["b2"].reset()
-    game.board.board["d3"].reset(game.board.board["h2"])
-    game.board.board["d3"].is_entangled = True
-    game.board.board["h2"].reset()
+    board["b3"].reset(board["b2"])
+    board["b3"].is_entangled = True
+    board["b2"].reset()
+    board["d3"].reset(board["h2"])
+    board["d3"].is_entangled = True
+    board["h2"].reset()
     with pytest.raises(
         ValueError, match="Currently we could only merge into an empty piece."
     ):
@@ -239,14 +237,14 @@ def test_classify_move_fail(monkeypatch):
     with pytest.raises(ValueError, match="Currently CANNON cannot split while firing."):
         game.classify_move(["g0"], ["e0", "i0"], ["f0"], [], ["h0"], [])
 
-    game.board.board["d0"].is_entangled = True
+    board["d0"].is_entangled = True
     with pytest.raises(
         ValueError, match="Currently we could only split into empty pieces."
     ):
         game.classify_move(["d3"], ["d0", "d4"], [], [], [], [])
 
-    game.board.board["d0"].reset()
-    game.board.board["f0"].reset()
+    board["d0"].reset()
+    board["f0"].reset()
     with pytest.raises(ValueError, match="King split is not supported currently."):
         game.classify_move(["e0"], ["d0", "f0"], [], [], [], [])
 
@@ -257,6 +255,7 @@ def test_classify_move_success(monkeypatch):
     inputs = iter(["y", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
+    board = game.board.board
     # classical
     assert game.classify_move(["h9"], ["g7"], [], [], [], []) == (
         MoveType.CLASSICAL,
@@ -268,28 +267,28 @@ def test_classify_move_success(monkeypatch):
     )
 
     # jump basic
-    game.board.board["c9"].is_entangled = True
+    board["c9"].is_entangled = True
     assert game.classify_move(["c9"], ["e7"], [], [], [], []) == (
         MoveType.JUMP,
         MoveVariant.BASIC,
     )
-    game.board.board["b2"].is_entangled = True
+    board["b2"].is_entangled = True
     assert game.classify_move(["b2"], ["e2"], [], [], [], []) == (
         MoveType.JUMP,
         MoveVariant.BASIC,
     )
 
     # jump excluded
-    game.board.board["a3"].is_entangled = True
+    board["a3"].is_entangled = True
     assert game.classify_move(["a0"], ["a3"], [], [], [], []) == (
         MoveType.JUMP,
         MoveVariant.EXCLUDED,
     )
 
     # jump capture
-    game.board.board["g4"].reset(game.board.board["g6"])
-    game.board.board["g4"].is_entangled = True
-    game.board.board["g6"].reset()
+    board["g4"].reset(board["g6"])
+    board["g4"].is_entangled = True
+    board["g6"].reset()
     assert game.classify_move(["g4"], ["g3"], [], [], [], []) == (
         MoveType.JUMP,
         MoveVariant.CAPTURE,
@@ -302,10 +301,10 @@ def test_classify_move_success(monkeypatch):
     )
 
     # slide excluded
-    game.board.board["i7"].reset(game.board.board["h7"])
-    game.board.board["i7"].is_entangled = True
-    game.board.board["h7"].reset()
-    game.board.board["i6"].is_entangled = True
+    board["i7"].reset(board["h7"])
+    board["i7"].is_entangled = True
+    board["h7"].reset()
+    board["i6"].is_entangled = True
     assert game.classify_move(["i9"], ["i6"], [], ["i7"], [], []) == (
         MoveType.SLIDE,
         MoveVariant.EXCLUDED,
@@ -324,17 +323,17 @@ def test_classify_move_success(monkeypatch):
     )
 
     # split_slide basic
-    game.board.board["d3"].reset(game.board.board["h2"])
-    game.board.board["h2"].reset()
-    game.board.board["c3"].is_entangled = True
-    game.board.board["e3"].is_entangled = True
+    board["d3"].reset(board["h2"])
+    board["h2"].reset()
+    board["c3"].is_entangled = True
+    board["e3"].is_entangled = True
     assert game.classify_move(["d3"], ["b3", "f3"], [], ["c3"], [], ["e3"]) == (
         MoveType.SPLIT_SLIDE,
         MoveVariant.BASIC,
     )
 
     # merge_jump basic
-    game.board.board["b7"].is_entangled = True
+    board["b7"].is_entangled = True
     assert game.classify_move(["b7", "i7"], ["e7"], [], [], [], []) == (
         MoveType.MERGE_JUMP,
         MoveVariant.BASIC,
@@ -351,8 +350,33 @@ def test_classify_move_success(monkeypatch):
         MoveType.CANNON_FIRE,
         MoveVariant.CAPTURE,
     )
-    game.board.board["i6"].is_entangled = False
+    board["i6"].is_entangled = False
     assert game.classify_move(["i7"], ["i3"], ["i6"], [], [], []) == (
         MoveType.CANNON_FIRE,
         MoveVariant.CAPTURE,
     )
+
+
+def test_update_board_by_sampling(monkeypatch):
+    output = io.StringIO()
+    sys.stdout = output
+    inputs = iter(["y", "Bob", "Ben"])
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+    game = QuantumChineseChess()
+    board = game.board.board
+
+    board.unhook(board["a0"])
+    board["a0"].type_ = Type.ROOK
+    board["a0"].color = Color.RED
+    board["a0"].is_entangled = True
+
+    # Verify that the method would set a0 to classically empty.
+    game.update_board_by_sampling()
+    assert board["a0"].type_ == Type.EMPTY
+    assert board["a0"].color == Color.NA
+    assert board["a0"].is_entangled == False
+
+    board["a1"].is_entangled = True
+    # Verify that the method would set a1 to classically occupied.
+    game.update_board_by_sampling()
+    assert board["a1"].is_entangled == False

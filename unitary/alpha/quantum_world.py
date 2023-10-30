@@ -19,8 +19,6 @@ import cirq
 from unitary.alpha.quantum_object import QuantumObject
 from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
 from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, num_bits
-import numpy as np
-import itertools
 
 
 class QuantumWorld:
@@ -186,7 +184,6 @@ class QuantumWorld:
         new_obj = QuantumObject(ancilla_name, value)
         self.add_object(new_obj)
         self.ancilla_names.add(ancilla_name)
-        print(f"## Add ancilla {ancilla_name}")
         return new_obj
 
     def _append_op(self, op: cirq.Operation):
@@ -251,17 +248,11 @@ class QuantumWorld:
 
     def add_effect(self, op_list: List[cirq.Operation]):
         """Adds an operation to the current circuit."""
-        print("## Add_effect")
-        print(len(self.effect_history))
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
         )
         for op in op_list:
-            print("### op")
-            print(op)
             self._append_op(op)
-        print("## Add_effect 2")
-        print(len(self.effect_history))
 
     def undo_last_effect(self):
         """Restores the `QuantumWorld` to the state before the last effect.
@@ -275,8 +266,6 @@ class QuantumWorld:
         if not self.effect_history:
             raise IndexError("No effects to undo")
         self.circuit, self.post_selection = self.effect_history.pop()
-        print("## undo_last_effect")
-        print(len(self.effect_history))
 
     def _suggest_num_reps(self, sample_size: int) -> int:
         """Guess the number of raw samples needed to get sample_size results.
@@ -317,10 +306,17 @@ class QuantumWorld:
         return result
 
     def unhook(self, object: QuantumObject) -> None:
-        """Replaces all usages of the given object in the circuit with a new ancilla with value=0."""
-        # Creates a new ancilla.
+        """Replace all usages of the given `object` in the circuit with a new ancilla,
+        so that
+         - all former operations on `object` will be applied on the new ancilla;
+         - future operations on `object` start with its new reset value.
+
+        Note that we don't do force measurement on it, since we don't care about its
+        current value but just want to reset it.
+        """
+        # Create a new ancilla.
         new_ancilla = self._add_ancilla(object.name)
-        # Replace operations using the qubit of the given object with the new ancilla.
+        # Replace operations of the given `object` with the new ancilla.
         qubit_remapping_dict = {
             object.qubit: new_ancilla.qubit,
             new_ancilla.qubit: object.qubit,
@@ -350,11 +346,10 @@ class QuantumWorld:
             qubit_remapping_dict.update(
                 {*zip(obj_qubits, new_obj_qubits), *zip(new_obj_qubits, obj_qubits)}
             )
-        print("### Before transform_qubits\n", self.circuit)
+
         self.circuit = self.circuit.transform_qubits(
             lambda q: qubit_remapping_dict.get(q, q)
         )
-        print("### After transform_qubits\n", self.circuit)
         post_selection = result.value if isinstance(result, enum.Enum) else result
         self.post_selection[new_obj] = post_selection
         if self.use_sparse:
@@ -449,8 +444,6 @@ class QuantumWorld:
         objects: Optional[Sequence[Union[QuantumObject, str]]] = None,
         convert_to_enum: bool = True,
     ) -> List[Union[enum.Enum, int]]:
-        print("## pop")
-        print(len(self.effect_history))
         self.effect_history.append(
             (self.circuit.copy(), copy.copy(self.post_selection))
         )
@@ -464,16 +457,13 @@ class QuantumWorld:
         results = self.peek(quantum_objects, convert_to_enum=convert_to_enum)
         for idx, result in enumerate(results[0]):
             self.force_measurement(quantum_objects[idx], result)
-        print("## pop 2")
-        print(len(self.effect_history))
 
         return results[0]
 
     def get_histogram(
         self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
     ) -> List[Dict[int, int]]:
-        """Creates histogram of each specified `objects` based on measurements
-        (peeks) carried out.
+        """Creates histogram based on measurements (peeks) carried out.
 
         Parameters:
             objects:    List of QuantumObjects
@@ -492,35 +482,6 @@ class QuantumWorld:
         for result in peek_results:
             for idx in range(len(objects)):
                 histogram[idx][cast(int, result[idx])] += 1
-        return histogram
-
-    def get_histogram_with_all_objects_as_key(
-        self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
-    ) -> Dict[Tuple[int], int]:
-        """Creates histogram of the whole quantum world (or `objects` if specified)
-        based on measurements (peeks) carried out. Comparing to get_histogram(),
-        this statistics contains entanglement information accross quantum objects.
-
-        Parameters:
-            objects:    List of QuantumObjects
-            count:      Number of measurements
-
-        Returns:
-            A dictionary, with the keys being each possible state of the whole quantum world
-            (or `objects` if specified) in terms of tuple, and the values being the
-            count of that state.
-        """
-        if not objects:
-            objects = self.public_objects
-        peek_results = self.peek(objects=objects, convert_to_enum=False, count=count)
-        histogram = {}
-        for result in peek_results:
-            # Convert the list to tuple so that it could be the key of a dictionary.
-            key = tuple(result)
-            if key not in histogram:
-                histogram[key] = 1
-            else:
-                histogram[key] += 1
         return histogram
 
     def get_probabilities(
@@ -565,107 +526,8 @@ class QuantumWorld:
             binary_probs.append(1 - one_probs[0])
         return binary_probs
 
-    # TODO(): make this function work for compile_to_qubits==True.
-    def get_binary_probabilities_from_state_vector(
-        self, objects: Optional[Sequence[QuantumObject]] = None, decimals: int = 2
-    ) -> List[float]:
-        """Calculates the total probabilities for all non-zero states
-        based on simulating the state vector.
-
-        Parameters:
-            objects:    List of QuantumObjects
-            decimals:   Number of rounding decimals of the real and imaginary coefficients
-                        of the state vector.
-
-        Returns:
-            A list with one element for each object which contains the probability
-            for the event state!=0. Which is the same as 1.0-Probability(state==0).
-        """
-        if objects is None:
-            objects = self.public_objects
-
-        simulator = cirq.Simulator()
-        result = simulator.simulate(self.circuit, initial_state=0)
-        state_vector = result.state_vector()
-        # qubit_map gives the mapping from object to its index in (the dirac notation of)
-        # the state vector.
-        qubit_map = result.qubit_map
-        # We support quantum objects in different dimensions.
-        qid_shape = tuple([obj.dimension for obj in qubit_map.keys()])
-        # Calculate all permutations, as the basis of the state vector.
-        perm_list = [
-            "".join(seq)
-            for seq in itertools.product(
-                *((str(i) for i in range(d)) for d in qid_shape)
-            )
-        ]
-        # Round each real/imaginary coefficient up to `decimals`, before judging if it's zero.
-        coefficients = [
-            round(x.real, decimals) + 1j * round(x.imag, decimals) for x in state_vector
-        ]
-        # Build map from all post selected objects' corresponding index in the
-        # permutations to its post selected value.
-        post_selection_filter = {}
-        for post_selection_obj, post_selection_value in self.post_selection.items():
-            for obj, index in qubit_map.items():
-                if obj.name == post_selection_obj.name:
-                    post_selection_filter[index] = post_selection_value
-                    break
-        if len(post_selection_filter) != len(self.post_selection):
-            raise ValueError("Missing post selection qubits!")
-
-        # Apply the post selection to trim the state vector.
-        filtered_indices = []
-        for index in np.nonzero(coefficients)[0]:
-            perm = perm_list[index]
-            satisfied = True
-            # Check that all post selection criteria are satisfied.
-            for filter_index, value in post_selection_filter.items():
-                if int(perm[filter_index]) != value:
-                    satisfied = False
-                    break
-            if satisfied:
-                filtered_indices.append(index)
-
-        # We need to renormalize the state vector since it's been trimed.
-        prob_sum = 0
-        for index in filtered_indices:
-            prob_sum += abs(coefficients[index]) ** 2
-
-        # Calculate the probability of each world scenario.
-        final_world_distribution = {}
-        for index in filtered_indices:
-            # Convert the permutation string into tuple of int,
-            # i.e. "101" into (1, 0, 1).
-            key = tuple(map(int, tuple(perm_list[index])))
-            final_world_distribution[key] = abs(coefficients[index]) ** 2 / prob_sum
-        # TODO(pengfeichen): make the above calculation a seperate function, which calculates
-        # the distribution of the whole world (or specified objects) by state vector.
-
-        # Calculate the distribution of all objects.
-        final_object_distribution = {}
-        for obj, index in qubit_map.items():
-            final_object_distribution[obj.name] = 0
-            for key, value in final_world_distribution.items():
-                # We sum up all non-zero probabilities.
-                if key[index] > 0:
-                    final_object_distribution[obj.name] += value
-
-        # Shrink the dictionary above to a list of probabilities of the
-        # desired/specified objects.
-        binary_probs = []
-        for obj in objects:
-            if obj.name not in final_object_distribution:
-                raise ValueError(f"{obj.name} not found.")
-            binary_probs.append(final_object_distribution[obj.name])
-        return binary_probs
-
     def __getitem__(self, name: str) -> QuantumObject:
-        try:
-            quantum_object = self.object_name_dict.get(name, None)
-            return quantum_object
-        except:
-            print("existing")
-            for obj in self.object_name_dict.keys():
-                print(obj)
+        quantum_object = self.object_name_dict.get(name, None)
+        if not quantum_object:
             raise KeyError(f"{name} did not exist in this world.")
+        return quantum_object

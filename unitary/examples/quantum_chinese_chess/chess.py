@@ -21,15 +21,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     MoveType,
     MoveVariant,
 )
-from unitary.examples.quantum_chinese_chess.move import (
-    Jump,
-    Slide,
-    SplitJump,
-    SplitSlide,
-    MergeJump,
-    MergeSlide,
-    CannonFire,
-)
+from unitary.examples.quantum_chinese_chess.move import Jump
 import readline
 
 # List of accepable commands.
@@ -73,16 +65,10 @@ class QuantumChineseChess:
         self.print_welcome()
         self.board = Board.from_fen()
         self.board.set_language(self.lang)
-        print(self.board.to_str())
+        print(self.board)
         self.game_state = GameState.CONTINUES
         self.current_player = self.board.current_player
         self.debug_level = 3
-        # This variable is used to save the length of current effect history before each move is made,
-        # so that if we later undo we know how many effects we need to pop out.
-        self.effect_history_length = []
-        # This variable is used to save the classical properties of the whole board before each move is
-        # made, so that if we later undo we could recover the earlier classical state.
-        self.classical_properties_history = []
 
     @staticmethod
     def parse_input_string(str_to_parse: str) -> Tuple[List[str], List[str]]:
@@ -133,10 +119,25 @@ class QuantumChineseChess:
                 )
         return sources, targets
 
+    @classmethod
+    def _is_in_palace(self, color: Color, x: int, y: int) -> bool:
+        """Check if the given location is within palace. This check will be applied to all KING ans ADVISOR moves."""
+        return (
+            x <= ord("f")
+            and x >= ord("d")
+            and ((color == Color.RED and y <= 2) or (color == Color.BLACK and y >= 7))
+        )
+
     def check_classical_rule(
         self, source: str, target: str, classical_path_pieces: List[str]
     ) -> None:
-        """Check if the proposed move satisfies classical rules, and raises ValueError if not."""
+        """Check if the proposed move satisfies classical rules, and raises ValueError if not.
+
+        Args:
+            source: the name of the source piece
+            target: the name of the target piece
+            classical_path_pieces: the names of the path pieces from source to target (excluded)
+        """
         source_piece = self.board.board[source]
         target_piece = self.board.board[target]
         # Check if the move is blocked by classical path piece.
@@ -167,8 +168,8 @@ class QuantumChineseChess:
         elif source_piece.type_ == Type.ELEPHANT:
             if not (abs(dx) == 2 and abs(dy) == 2):
                 raise ValueError("ELEPHANT cannot move like this.")
-            if (source_piece.color == Color.RED and y1 < 5) or (
-                source_piece.color == Color.BLACK and y1 > 4
+            if (source_piece.color == Color.RED and y1 > 4) or (
+                source_piece.color == Color.BLACK and y1 < 5
             ):
                 raise ValueError(
                     "ELEPHANT cannot cross the river (i.e. the middle line)."
@@ -176,22 +177,12 @@ class QuantumChineseChess:
         elif source_piece.type_ == Type.ADVISOR:
             if not (abs(dx) == 1 and abs(dy) == 1):
                 raise ValueError("ADVISOR cannot move like this.")
-            if (
-                x1 > ord("f")
-                or x1 < ord("d")
-                or (source_piece.color == Color.RED and y1 < 7)
-                or (source_piece.color == Color.BLACK and y1 > 2)
-            ):
+            if not self._is_in_palace(source_piece.color, x1, y1):
                 raise ValueError("ADVISOR cannot leave the palace.")
         elif source_piece.type_ == Type.KING:
             if abs(dx) + abs(dy) != 1:
                 raise ValueError("KING cannot move like this.")
-            if (
-                x1 > ord("f")
-                or x1 < ord("d")
-                or (source_piece.color == Color.RED and y1 < 7)
-                or (source_piece.color == Color.BLACK and y1 > 2)
-            ):
+            if not self._is_in_palace(source_piece.color, x1, y1):
                 raise ValueError("KING cannot leave the palace.")
         elif source_piece.type_ == Type.CANNON:
             if dx != 0 and dy != 0:
@@ -209,16 +200,16 @@ class QuantumChineseChess:
             if abs(dx) + abs(dy) != 1:
                 raise ValueError("PAWN cannot move like this.")
             if source_piece.color == Color.RED:
-                if dy == 1:
+                if dy == -1:
                     raise ValueError("PAWN can not move backward.")
-                if y0 > 4 and dy != -1:
+                if y0 <= 4 and dy != 1:
                     raise ValueError(
                         "PAWN can only go forward before crossing the river (i.e. the middle line)."
                     )
             else:
-                if dy == -1:
+                if dy == 1:
                     raise ValueError("PAWN can not move backward.")
-                if y0 <= 4 and dy != 1:
+                if y0 > 4 and dy != -1:
                     raise ValueError(
                         "PAWN can only go forward before crossing the river (i.e. the middle line)."
                     )
@@ -232,7 +223,19 @@ class QuantumChineseChess:
         classical_path_pieces_1: List[str],
         quantum_path_pieces_1: List[str],
     ) -> Tuple[MoveType, MoveVariant]:
-        """Determines the MoveType and MoveVariant."""
+        """Determines and returns the MoveType and MoveVariant. This function assumes that check_classical_rule()
+        has been called before this.
+
+        Args:
+            sources: the list of names of the source pieces
+            targets: the list of names of the target pieces
+            classical_path_pieces_0: the list of names of classical pieces from source_0 to target_0 (excluded)
+            quantum_path_pieces_0: the list of names of quantum pieces from source_0 to target_0 (excluded)
+            classical_path_pieces_1: the list of names of classical pieces from source_0 to target_1 (for split)
+                                     or from source_1 to target_0 (for merge) (excluded)
+            quantum_path_pieces_1: the list of names of quantum pieces from source_0 to target_1 (for split) or
+                                     from source_1 to target_0 (for merge) (excluded)
+        """
         move_type = MoveType.UNSPECIFIED
         move_variant = MoveVariant.UNSPECIFIED
 
@@ -246,14 +249,21 @@ class QuantumChineseChess:
                     and source.type_ == Type.CANNON
                     and target.color.value == 1 - source.color.value
                 ):
+                    # CANNON is special in that there has to be a platform between itself and the target
+                    # to capture.
                     raise ValueError(
                         "CANNON could not fire/capture without a cannon platform."
                     )
                 if not source.is_entangled and not target.is_entangled:
+                    # This handles all classical cases, where no quantum piece is envolved.
+                    # We don't need to further classify MoveVariant types since all classical cases
+                    # will be handled in a similar way.
                     return MoveType.CLASSICAL, MoveVariant.CLASSICAL
                 else:
+                    # If any of the source or target is entangled, this move is a JUMP.
                     move_type = MoveType.JUMP
             else:
+                # If there is any quantum path pieces, this move is a SLIDE.
                 move_type = MoveType.SLIDE
 
             if (
@@ -263,18 +273,24 @@ class QuantumChineseChess:
                 )
                 and target.color.value == 1 - source.color.value
             ):
-                # By this time the classical cannon fire has been identified as CLASSICAL JUMP.
+                # By this time the classical cannon fire has been identified as CLASSICAL move,
+                # so the current case has quantum piece(s) envolved.
                 return MoveType.CANNON_FIRE, MoveVariant.CAPTURE
+
             # Determine MoveVariant.
             if target.color == Color.NA:
+                # If the target piece is classical empty => BASIC.
                 move_variant = MoveVariant.BASIC
-            # TODO(): such move could be a merge. Take care of such cases later.
             elif target.color == source.color:
+                # If the target has the same color as the source => EXCLUDED.
+                # TODO(): such move could be a merge. Take care of such cases later.
                 move_variant = MoveVariant.EXCLUDED
             else:
+                # If the target is on the opposite side => CAPTURE.
                 move_variant = MoveVariant.CAPTURE
 
         elif len(sources) == 2:
+            # Determine types for merge cases.
             source_1 = self.board.board[sources[1]]
             if not source.is_entangled or not source_1.is_entangled:
                 raise ValueError(
@@ -282,29 +298,36 @@ class QuantumChineseChess:
                 )
             # TODO(): Currently we don't support merge + excluded/capture, or cannon_merge_fire + capture. Maybe add support later.
             if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
-                raise ValueError("Currently CANNON could not merge while fire.")
+                raise ValueError("Currently CANNON cannot merge while firing.")
             if target.type_ != Type.EMPTY:
                 raise ValueError("Currently we could only merge into an empty piece.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
+                # The move is MERGE_JUMP if there are no quantum pieces in either path.
                 move_type = MoveType.MERGE_JUMP
             else:
+                # The move is MERGE_SLIDE if there is quantum piece in any path.
                 move_type = MoveType.MERGE_SLIDE
+            # Currently we don't support EXCLUDE or CAPTURE typed merge moves.
             move_variant = MoveVariant.BASIC
 
         elif len(targets) == 2:
+            # Determine types for split cases.
             target_1 = self.board.board[targets[1]]
-            # TODO(): Currently we don't support split + excluded/capture, or cannon_split_fire + capture. Maybee add support later.
+            # TODO(): Currently we don't support split + excluded/capture, or cannon_split_fire + capture. Maybe add support later.
             if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
-                raise ValueError("Currently CANNON could not split while fire.")
+                raise ValueError("Currently CANNON cannot split while firing.")
             if target.type_ != Type.EMPTY or target_1.type_ != Type.EMPTY:
                 raise ValueError("Currently we could only split into empty pieces.")
             if source.type_ == Type.KING:
                 # TODO(): Currently we don't support KING split. Maybe add support later.
                 raise ValueError("King split is not supported currently.")
             if len(quantum_path_pieces_0) == 0 and len(quantum_path_pieces_1) == 0:
+                # The move is SPLIT_JUMP if there are no quantum pieces in either path.
                 move_type = MoveType.SPLIT_JUMP
             else:
+                # The move is SPLIT_SLIDE if there is quantum piece in any path.
                 move_type = MoveType.SPLIT_SLIDE
+            # Currently we don't support EXCLUDE or CAPTURE typed split moves.
             move_variant = MoveVariant.BASIC
         return move_type, move_variant
 
@@ -352,6 +375,7 @@ class QuantumChineseChess:
                 sources[0], targets[1]
             )
             self.check_classical_rule(sources[0], targets[1], classical_pieces_1)
+
         # Classify the move type and move variant.
         move_type, move_variant = self.classify_move(
             sources,
@@ -362,32 +386,23 @@ class QuantumChineseChess:
             quantum_pieces_1,
         )
 
-        print(move_type, " ", move_variant)
+        if self.debug_level > 1:
+            print(move_type, " ", move_variant)
 
+        # Apply the move accoding to its type.
         if move_type == MoveType.CLASSICAL:
             if source_0.type_ == Type.KING:
                 # Update the locations of KING.
                 self.board.king_locations[self.current_player] = targets[0]
-                # TODO(): only make such prints for a certain debug level.
-                print(f"Updated king locations: {self.board.king_locations}.")
+                if self.debug_level > 1:
+                    print(f"Updated king locations: {self.board.king_locations}.")
             if target_0.type_ == Type.KING:
                 # King is captured, then the game is over.
                 self.game_state = GameState(self.current_player)
             Jump(move_variant)(source_0, target_0)
         elif move_type == MoveType.JUMP:
             Jump(move_variant)(source_0, target_0)
-        elif move_type == MoveType.SLIDE:
-            Slide(quantum_pieces_0, move_variant)(source_0, target_0)
-        elif move_type == MoveType.SPLIT_JUMP:
-            SplitJump()(source_0, target_0, target_1)
-        elif move_type == MoveType.SPLIT_SLIDE:
-            SplitSlide(quantum_pieces_0, quantum_pieces_1)(source_0, target_0, target_1)
-        elif move_type == MoveType.MERGE_JUMP:
-            MergeJump()(source_0, source_1, target_0)
-        elif move_type == MoveType.MERGE_SLIDE:
-            MergeSlide(quantum_pieces_0, quantum_pieces_1)(source_0, source_1, target_0)
-        elif move_type == MoveType.CANNON_FIRE:
-            CannonFire(classical_pieces_0, quantum_pieces_0)(source_0, target_0)
+        # TODO(): apply other move types.
 
     def next_move(self) -> Tuple[bool, str]:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
@@ -403,12 +418,19 @@ class QuantumChineseChess:
             # The other player wins if the current player quits.
             self.game_state = GameState(1 - self.current_player)
             output = "Exiting."
+        elif input_str.lower() == "peek":
+            # TODO(): make it look like the normal board. Right now it's only for debugging purposes.
+            print(self.board.board.peek(convert_to_enum=False))
         elif input_str.lower() == "undo":
-            if len(self.effect_history_length) <= 1:
-                # length == 1 corresponds to the initial state, and no more undo could be made.
-                return False, "Unable to undo any more."
-            self.undo()
-            return True, "Undoing."
+            output = "Undo last quantum effect."
+            # Right now it's only for debugging purposes, since it has following problems:
+            # TODO(): there are several problems here:
+            # 1) the classical piece information is not reversed back.
+            # ==> we may need to save the change of classical piece information of each step.
+            # 2) last move involved multiple effects.
+            # ==> we may need to save number of effects per move, and undo that number of times.
+            self.board.board.undo_last_effect()
+            return True, output
         else:
             try:
                 # The move is success if no ValueError is raised.
@@ -419,14 +441,25 @@ class QuantumChineseChess:
         return False, output
 
     def update_board_by_sampling(self) -> List[float]:
+        """After quantum moves, there might be pieces that:
+        - is actually empty, but their classical properties is not cleared; or
+        - is actually classically occupied, but their is_entangled state is not updated.
+        This method is called after each quantum move, and runs (100x) sampling of the board
+        to identify and fix those cases.
+        """
+        # TODO(): return the sampled probabilities and pass it into the print method
+        # of the board to print it together with the board, or better use mathemetical
+        # matrix calculations to determine the probability, and use it (with some error
+        # threshold) to update the piece infos.
         probs = self.board.board.get_binary_probabilities()
         num_rows = 10
         num_cols = 9
-        for row in range(num_rows - 1, -1, -1):
+        for row in range(num_rows):
             for col in "abcdefghi":
                 piece = self.board.board[f"{col}{row}"]
                 prob = probs[row * num_cols + ord(col) - ord("a")]
-                # TODO(): set more accurate threshold
+                # TODO(): This threshold does not actually work right now since we have 100 sampling.
+                # Change it to be more meaningful values maybe when we do error mitigation.
                 if prob < 1e-3:
                     piece.reset()
                 elif prob > 1 - 1e-3:
@@ -443,52 +476,8 @@ class QuantumChineseChess:
         # TODO(): add the following checks
         # - If player 0 made N repeatd back-and_forth moves in a row.
 
-    def save_snapshot(self) -> None:
-        """Saves the current length of the effect history, and the current classical states of all pieces."""
-        # Save the current length of the effect history.
-        self.effect_history_length.append(len(self.board.board.effect_history))
-        # Save the classical states of all pieces.
-        snapshot = []
-        for row in range(10):
-            for col in "abcdefghi":
-                piece = self.board.board[f"{col}{row}"]
-                snapshot.append(
-                    [piece.type_.value, piece.color.value, piece.is_entangled]
-                )
-        self.classical_properties_history.append(snapshot)
-
-    def undo(self) -> None:
-        """Undo the last move, which includes reset quantum effects and classical properties."""
-        if (
-            len(self.effect_history_length) <= 1
-            or len(self.classical_properties_history) <= 1
-        ):
-            # length == 1 corresponds to the initial state, and no more undo could be made.
-            raise ValueError("Unable to undo any more.")
-
-        # Recover the effects up to the last snapshot (which was done after the last move finished) by
-        # popping effects out of the effect history of the board until its length equals the last
-        # snapshot's length.
-        self.effect_history_length.pop()
-        last_length = self.effect_history_length[-1]
-        while len(self.board.board.effect_history) > last_length:
-            self.board.board.undo_last_effect()
-
-        # Recover the classical properties of all pieces to the last snapshot.
-        self.classical_properties_history.pop()
-        snapshot = self.classical_properties_history[-1]
-        index = 0
-        for row in range(10):
-            for col in "abcdefghi":
-                piece = self.board.board[f"{col}{row}"]
-                piece.type_ = Type(snapshot[index][0])
-                piece.color = Color(snapshot[index][1])
-                piece.is_entangled = snapshot[index][2]
-                index += 1
-
     def play(self) -> None:
         """The loop where each player takes turn to play."""
-        self.save_snapshot()
         while True:
             move_success, output = self.next_move()
             if not move_success:
@@ -498,14 +487,12 @@ class QuantumChineseChess:
                     print("\nPlease re-enter your move.")
                     continue
             print(output)
-            if output != "Undoing.":
-                # Check if the game is over.
-                self.game_over()
-                # Update any empty or occupied pieces' classical state.
-                probs = self.update_board_by_sampling()
-                # Save the classical states and the current length of effect history.
-                self.save_snapshot()
-            print(self.board.to_str(probs))
+            # TODO(): maybe we should not check game_over() when an undo is made.
+            # Check if the game is over.
+            self.game_over()
+            # TODO(): no need to do sampling if the last move was CLASSICAL.
+            self.update_board_by_sampling()
+            print(self.board)
             if self.game_state == GameState.CONTINUES:
                 # If the game continues, switch the player.
                 self.current_player = 1 - self.current_player

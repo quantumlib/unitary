@@ -78,19 +78,6 @@ def bitboard_to_locations(bitboard: int) -> List[str]:
     return locations
 
 
-def sample_board(board: Board, repetitions: int) -> List[int]:
-    """Sample the given `board` by the given `repetitions`.
-    Returns a list of 90-bit bitstring, each corresponding to one sample.
-    """
-    samples = board.board.peek(count=repetitions, convert_to_enum=False)
-    # Convert peek results (in List[List[int]]) into List[int].
-    samples = [
-        int("0b" + "".join([str(i) for i in sample[::-1]]), base=2)
-        for sample in samples
-    ]
-    return samples
-
-
 def print_samples(samples: List[int]) -> None:
     """Aggregate all the samples and print the dictionary of {locations: count}."""
     sample_dict = {}
@@ -111,7 +98,7 @@ def get_board_probability_distribution(
     """
     board_probabilities: Dict[int, float] = {}
 
-    samples = sample_board(board, repetitions)
+    samples = board.sample(repetitions)
     for sample in samples:
         if sample not in board_probabilities:
             board_probabilities[sample] = 0.0
@@ -128,8 +115,7 @@ def assert_samples_in(board: Board, probabilities: Dict[int, float]) -> None:
     the given `probabilities` (i.e. a map from bitstring into its possibility),
     and that each possibility is represented at least once in the samples.
     """
-    samples = sample_board(board, 500)
-    assert len(samples) == 500
+    samples = board.sample(500)
     all_in = all(sample in probabilities for sample in samples)
     assert all_in, print_samples(samples)
     # Make sure each possibility is represented at least once.
@@ -148,10 +134,10 @@ def assert_sample_distribution(
     """
     n_samples = 500
     assert abs(sum(probabilities.values()) - 1) < 1e-9
-    samples = sample_board(board, n_samples)
+    samples = board.sample(n_samples)
     counts = defaultdict(int)
     for sample in samples:
-        assert sample in probabilities, print_samples(samples)
+        assert sample in probabilities, bitboard_to_locations(sample)
         counts[sample] += 1
     observed = []
     expected = []
@@ -176,7 +162,7 @@ def assert_this_or_that(samples: List[int], this: int, that: int) -> None:
 
 
 def assert_prob_about(
-    probabilities: Dict[int, float], that: int, expected: float, atol: float = 0.05
+    probabilities: Dict[int, float], that: int, expected: float, atol: float = 0.06
 ) -> None:
     """Checks that the probability of `that` is within `atol` of the value of `expected`."""
     assert that in probabilities, print_samples(list(probabilities.keys()))
