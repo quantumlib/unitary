@@ -110,16 +110,23 @@ class Board:
         probabilities: List[float] = None,
         print_probabilities=True,
         peek_result: List[int] = None,
+        sublime_terminus=False,
     ):
         def add_piece_symbol(board_string: str, piece: Piece):
             if peek_result is None and piece.is_entangled:
+                # dim works on mac terminal and gLinux terminal,
+                # but not on sublime terminus
+                if not sublime_terminus:
+                    board_string += dim
                 if piece.color == Color.RED:
                     board_string += lightred
                 else:
                     board_string += lightgrey
             else:
-                # bold works on mac terminal, but not on sublime terminus
-                # board_string += bold
+                # bold works on mac terminal and gLinux terminal,
+                # but not on sublime terminus
+                if not sublime_terminus:
+                    board_string += bold
                 if piece.color == Color.RED:
                     board_string += red
                 else:
@@ -132,6 +139,7 @@ class Board:
                 board_string += piece.symbol(self.lang)
             elif piece.is_entangled and peek_result[index] == 0:
                 board_string += Type.symbol(Type.EMPTY, Color.NA, self.lang)
+            board_string += reset
 
         num_rows = 10
         if print_probabilities and probabilities is None:
@@ -192,29 +200,32 @@ class Board:
                     add_piece_symbol(board_string, piece)
                     if col != "i":
                         board_string.append(f_space * 2)
-                    board_string += reset
                 # Print the row index on the right.
-                board_string += f_space * 2 + f"{row}" + reset + "\n"
+                board_string += f_space * 2 + f"{row}\n"
                 # Print the sampled prob. of the pieces in the above row.
                 if print_probabilities:
                     board_string += f_space + " "
                     board_string += grey
                     board_string += black
                     for i in range(row * 9, (row + 1) * 9):
-                        # space + f_space works for mac terminal, but not on sublime terminus
-                        # board_string.append("{:.1f} ".format(probabilities[i]) + f_space)
-                        # space + space works for sublime terminal
-                        board_string.append("{:.1f}  ".format(probabilities[i]))
+                        if not sublime_terminus:
+                            # space + f_space works for mac terminal and gLinux terminal.
+                            board_string.append(
+                                "{:.1f} ".format(probabilities[i]) + f_space
+                            )
+                        else:
+                            # space + space works for sublime terminus.
+                            board_string.append("{:.1f}  ".format(probabilities[i]))
                     board_string += "\b" + reset + f_space + "\n"
-            board_string.append(f_space + " ")
             # Print the bottom line of col letters.
+            board_string.append(f_space + " ")
             board_string += grey
             board_string += black
             for col in range(f_a, f_a + 9):
                 board_string.append(f"{chr(col)}")
                 if col != f_a + 8:
                     board_string += f_space * 2
-            board_string += " \n" + reset
+            board_string += " " + reset
             return "".join(board_string)
 
     def path_pieces(self, source: str, target: str) -> Tuple[List[str], List[str]]:
