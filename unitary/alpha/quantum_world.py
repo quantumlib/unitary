@@ -571,7 +571,7 @@ class QuantumWorld:
 
         Returns:
             A list with one element for each object which contains the probability
-            for the event state!=0. Which is the same as 1.0-Probability(state==0).
+            for the event state!=0, which is the same as 1.0-Probability(state==0).
         """
         if objects is None:
             objects = self.public_objects
@@ -630,7 +630,9 @@ class QuantumWorld:
             # Convert the permutation string into tuple of int,
             # i.e. "101" into (1, 0, 1).
             key = tuple(map(int, tuple(perm_list[index])))
+            # Renormalize.
             final_world_distribution[key] = abs(coefficients[index]) ** 2 / prob_sum
+
         # TODO(pengfeichen): make the above calculation a seperate function, which calculates
         # the distribution of the whole world (or specified objects) by state vector.
 
