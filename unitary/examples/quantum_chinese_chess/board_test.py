@@ -20,6 +20,14 @@ from unitary.examples.quantum_chinese_chess.enums import (
 )
 from unitary.examples.quantum_chinese_chess.board import Board
 from unitary.examples.quantum_chinese_chess.piece import Piece
+from unitary.examples.quantum_chinese_chess.test_utils import (
+    locations_to_bitboard,
+    assert_samples_in,
+    assert_sample_distribution,
+    get_board_probability_distribution,
+    set_board,
+)
+from unitary import alpha
 
 
 def test_init_with_default_fen():
@@ -155,3 +163,30 @@ def test_flying_general_check():
     board.board["e3"].reset()
     board.board["e6"].reset()
     assert board.flying_general_check() == True
+
+    # When there are quantum pieces in between.
+    board = set_board(["a3", "a4", "e0", "e9"])
+    board.king_locations = ["e0", "e9"]
+    board.current_player = 0  # i.e. RED
+    world = board.board
+    alpha.PhasedSplit()(world["a3"], world["c3"], world["e3"])
+    world["e3"].is_entangled = True
+    alpha.PhasedSplit()(world["a4"], world["c4"], world["e4"])
+    world["e4"].is_entangled = True
+
+    result = board.flying_general_check()
+    # We check the ancilla to learn whether the general/king flies or not.
+    captured = world.post_selection[world["ancilla_ancilla_flying_general_check_0_0"]]
+    if captured:
+        assert result
+        assert_samples_in(board, {locations_to_bitboard(["c3", "c4", "e0"]): 1.0})
+    else:
+        assert not result
+        assert_sample_distribution(
+            board,
+            {
+                locations_to_bitboard(["e0", "e9", "e3", "e4"]): 1.0 / 3,
+                locations_to_bitboard(["e0", "e9", "e3", "c4"]): 1.0 / 3,
+                locations_to_bitboard(["e0", "e9", "c3", "e4"]): 1.0 / 3,
+            },
+        )
