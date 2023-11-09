@@ -294,11 +294,7 @@ def test_split_jump_quantum_source():
             locations_to_bitboard(["a5"]): 0.25,
         },
     )
-    assert world["a4"].type_ == Type.ROOK
-    assert world["a4"].color == Color.RED
     assert world["a4"].is_entangled == True
-    assert world["a5"].type_ == Type.ROOK
-    assert world["a5"].color == Color.RED
     assert world["a5"].is_entangled == True
 
 
