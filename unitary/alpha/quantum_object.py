@@ -16,8 +16,7 @@ import enum
 
 import cirq
 
-from unitary.alpha.qubit_effects import Flip
-from unitary.alpha.qudit_effects import QuditCycle, QuditFlip
+from unitary.alpha.qudit_effects import Cycle, Flip
 
 if TYPE_CHECKING:
     from unitary.alpha.quantum_world import QuantumWorld
@@ -54,13 +53,8 @@ class QuantumObject:
             self.qubit = cirq.NamedQid(name, dimension=self.num_states)
 
     def initial_effect(self) -> None:
-        if self.num_states == 2:
-            if self.initial_state == 1:
-                Flip()(self)
-        else:
-            if self.initial_state > 0:
-                QuditFlip(self.num_states, 0, self.initial_state)(self)
-
+        if self.initial_state > 0:
+            Flip(state0=0, state1=self.initial_state)(self)
         return None
 
     def __iadd__(self, other: Union[enum.Enum, int]):
@@ -73,13 +67,8 @@ class QuantumObject:
 
         if self.world is None:
             self.initial_state = (self.initial_state + add_num) % self.num_states
-        else:
-            if self.num_states == 2:
-                if add_num == 1:
-                    Flip()(self)
-            else:
-                if add_num > 0:
-                    QuditCycle(self.num_states, add_num)(self)
+        elif add_num > 0:
+            Cycle(add_num)(self)
         return self
 
     def __neg__(self):
