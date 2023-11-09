@@ -114,6 +114,8 @@ class Jump(QuantumEffect):
     - CAPTURE
     - EXCLUDED
     - BASIC
+
+    All types of pieces could make Jump move.
     """
 
     def __init__(
@@ -181,6 +183,9 @@ class Jump(QuantumEffect):
 class SplitJump(QuantumEffect):
     """SplitJump from source_0 to target_0 and target_1. The only accepted (default) move_variant is
     - BASIC.
+
+    All types of pieces could make SplitJump move, except KING. This is implemented with a
+    PhasedSplit().
     """
 
     def __init__(
@@ -208,6 +213,8 @@ class SplitJump(QuantumEffect):
 class MergeJump(QuantumEffect):
     """MergeJump from source_0 to source_1 to target_0. The only accepted (default) move_variant is
     - BASIC.
+
+    All types of pieces could make MergeJump move, except KING.
     """
 
     def __init__(

@@ -272,6 +272,12 @@ def test_split_jump_classical_source():
     assert len(board_probabilities) == 2
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a2"]))
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3"]))
+    assert world["a2"].type_ == Type.ROOK
+    assert world["a2"].color == Color.RED
+    assert world["a2"].is_entangled == True
+    assert world["a3"].type_ == Type.ROOK
+    assert world["a3"].color == Color.RED
+    assert world["a3"].is_entangled == True
 
 
 def test_split_jump_quantum_source():
@@ -288,6 +294,12 @@ def test_split_jump_quantum_source():
             locations_to_bitboard(["a5"]): 0.25,
         },
     )
+    assert world["a4"].type_ == Type.ROOK
+    assert world["a4"].color == Color.RED
+    assert world["a4"].is_entangled == True
+    assert world["a5"].type_ == Type.ROOK
+    assert world["a5"].color == Color.RED
+    assert world["a5"].is_entangled == True
 
 
 def test_merge_jump_perfect_merge():
