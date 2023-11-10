@@ -486,7 +486,7 @@ class QuantumWorld:
                 histogram[idx][cast(int, result[idx])] += 1
         return histogram
 
-    def get_histogram_with_all_objects_as_key(
+    def get_correlated_histogram(
         self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
     ) -> Dict[Tuple[int], int]:
         """Creates histogram of the whole quantum world (or `objects` if specified)
@@ -576,8 +576,7 @@ class QuantumWorld:
         if objects is None:
             objects = self.public_objects
 
-        simulator = cirq.Simulator()
-        result = simulator.simulate(self.circuit, initial_state=0)
+        result = cirq.Simulator().simulate(self.circuit, initial_state=0)
         state_vector = result.state_vector()
         # qubit_map gives the mapping from object to its index in (the dirac notation of)
         # the state vector.
@@ -633,7 +632,7 @@ class QuantumWorld:
             # Renormalize.
             final_world_distribution[key] = abs(coefficients[index]) ** 2 / prob_sum
 
-        # TODO(pengfeichen): make the above calculation a seperate function, which calculates
+        # TODO(pengfeichen): make the above calculation a separate function, which calculates
         # the distribution of the whole world (or specified objects) by state vector.
 
         # Calculate the distribution of all objects.
