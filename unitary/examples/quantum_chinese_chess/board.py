@@ -207,9 +207,7 @@ class Board:
             print("==== FLYING GENERAL ! ====")
             return True
         else:
-            # TODO(): we are leaving the path pieces unchanged in entangled state. Maybe
-            # better to force measure them? One option is to randomly choose one path piece
-            # and force measure it to be occupied.
+            # Note: we are leaving the path pieces unchanged in entangled state.
             print("==== General not flies yet ! ====")
             return False
 
