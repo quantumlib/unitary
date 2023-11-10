@@ -192,3 +192,24 @@ def test_flying_general_check_quantum_cases():
                 locations_to_bitboard(["e0", "e9", "c3", "e4"]): 1.0 / 3,
             },
         )
+
+
+def test_flying_general_check_quantum_cases_not_captured():
+    # When there are quantum pieces in between, but the capture cannot happen.
+    board = set_board(["a3", "e0", "e9"])
+    board.king_locations = ["e0", "e9"]
+    board.current_player = 0  # i.e. RED
+    world = board.board
+    alpha.PhasedSplit()(world["a3"], world["e3"], world["e4"])
+    world["e3"].is_entangled = True
+    world["e4"].is_entangled = True
+
+    result = board.flying_general_check()
+    assert not result
+    assert_sample_distribution(
+        board,
+        {
+            locations_to_bitboard(["e0", "e9", "e3"]): 1.0 / 2,
+            locations_to_bitboard(["e0", "e9", "e4"]): 1.0 / 2,
+        },
+    )
