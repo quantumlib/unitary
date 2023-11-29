@@ -773,7 +773,5 @@ def test_get_correlated_histogram_with_entangled_qobjects(simulator, compile_to_
     alpha.Split()(light1, light2, light3)
     alpha.quantum_if(light2).equals(1).apply(alpha.Move())(light4, light5)
 
-    # histogram = world.get_histogram()
-    # assert histogram == [{0: 0, 1: 100}, {0: 0, 1: 100, 2: 0}]
     histogram = world.get_correlated_histogram()
-    assert histogram.keys() == [(0, 0, 1, 1, 0), (0, 1, 0, 0, 1)]
+    assert histogram.keys() == {(0, 0, 1, 1, 0), (0, 1, 0, 0, 1)}

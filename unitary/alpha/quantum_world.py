@@ -498,9 +498,10 @@ class QuantumWorld:
             count:      Number of measurements
 
         Returns:
-            A dictionary, with the keys being each possible state of the whole quantum
-            world (or `objects` if specified) in terms of tuple, and the values being
-            the count of that state.
+            A dictionary, with the keys being tuples representing each possible state of
+            the whole quantum world (or, if `objects` is specified, the key is a tuple of
+            the results of each object in `objects` and in the order of `objects`), and
+            the values being the count of that state.
         """
         if not objects:
             objects = self.public_objects
