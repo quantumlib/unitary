@@ -143,7 +143,7 @@ def test_to_str():
 
 
 def test_jump_classical():
-    # Target is empty.
+    """Target is empty."""
     board = set_board(["a1", "b1"])
     world = board.board
     # TODO(): try move all varaibles declarations of a1 = world["a1"] into a function.
@@ -156,7 +156,7 @@ def test_jump_classical():
 
 
 def test_jump_capture_quantum_source():
-    # Source is in quantum state.
+    """Source is in quantum state."""
     board = set_board(["a1", "b1"])
     world = board.board
     alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
@@ -175,7 +175,7 @@ def test_jump_capture_quantum_source():
 
 
 def test_jump_capture_quantum_target():
-    # Target is in quantum state.
+    """Target is in quantum state."""
     board = set_board(["a1", "b1"])
     world = board.board
     alpha.PhasedSplit()(world["b1"], world["b2"], world["b3"])
@@ -187,7 +187,7 @@ def test_jump_capture_quantum_target():
 
 
 def test_jump_capture_quantum_source_and_target():
-    # Both source and target are in quantum state.
+    """Both source and target are in quantum state."""
     board = set_board(["a1", "b1"])
     world = board.board
     alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
@@ -216,7 +216,7 @@ def test_jump_capture_quantum_source_and_target():
 
 
 def test_jump_excluded_quantum_target():
-    # Target is in quantum state.
+    """Target is in quantum state."""
     board = set_board(["a1", "b1"])
     world = board.board
     alpha.PhasedSplit()(world["b1"], world["b2"], world["b3"])
@@ -232,7 +232,7 @@ def test_jump_excluded_quantum_target():
 
 
 def test_jump_excluded_quantum_source_and_target():
-    # Both source and target are in quantum state.
+    """Both source and target are in quantum state."""
     board = set_board(["a1", "b1"])
     world = board.board
     alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
@@ -252,7 +252,7 @@ def test_jump_excluded_quantum_source_and_target():
 
 
 def test_jump_basic():
-    # Source is in quantum state.
+    """Source is in quantum state."""
     board = set_board(["a1"])
     world = board.board
     alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
@@ -264,7 +264,7 @@ def test_jump_basic():
 
 
 def test_split_jump_classical_source():
-    # Source is in classical state.
+    """Source is in classical state."""
     board = set_board(["a1"])
     world = board.board
     SplitJump()(world["a1"], world["a2"], world["a3"])
@@ -281,7 +281,7 @@ def test_split_jump_classical_source():
 
 
 def test_split_jump_quantum_source():
-    # Source is in quantum state.
+    """Source is in quantum state."""
     board = set_board(["a1"])
     world = board.board
     alpha.PhasedSplit()(world["a1"], world["a2"], world["a3"])
@@ -299,7 +299,7 @@ def test_split_jump_quantum_source():
 
 
 def test_merge_jump_perfect_merge():
-    # Two quantum pieces split from one source could be merge back to one.
+    """Two quantum pieces split from one source could be merge back to one."""
     board = set_board(["a1"])
     world = board.board
     SplitJump()(world["a1"], world["a2"], world["a3"])
@@ -308,7 +308,7 @@ def test_merge_jump_perfect_merge():
 
 
 def test_merge_jump_imperfect_merge_scenario_1():
-    # Imperfect merge scenario 1
+    """Imperfect merge scenario 1"""
     board = set_board(["a1"])
     world = board.board
     SplitJump()(world["a1"], world["a2"], world["a3"])
@@ -331,8 +331,9 @@ def test_merge_jump_imperfect_merge_scenario_1():
 
 
 def test_merge_jump_imperfect_merge_scenario_2():
-    # Imperfect merge scenario 2
-    # Two quantum pieces split from two sources could not be merge into to one.
+    """Imperfect merge scenario 2
+    Two quantum pieces split from two sources could not be merge into to one.
+    """
     board = set_board(["a1", "b1"])
     world = board.board
     SplitJump()(world["a1"], world["a2"], world["a3"])
@@ -359,8 +360,9 @@ def test_merge_jump_imperfect_merge_scenario_2():
 
 
 def test_merge_jump_imperfect_merge_scenario_3():
-    # Imperfect merge scenario 3
-    # This is a simplied version of the scenario above, where we unhook a3 and b3.
+    """Imperfect merge scenario 3.
+    This is a simplied version of the scenario above, where we unhook a3 and b3.
+    """
     board = set_board(["a1", "b1"])
     world = board.board
     SplitJump()(world["a1"], world["a2"], world["a3"])
