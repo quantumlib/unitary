@@ -39,30 +39,31 @@ from unitary.examples.quantum_chinese_chess.test_utils import (
 
 def test_move_eq():
     board = Board.from_fen()
+    world = board.board
     move1 = Move(
-        "a1",
-        "b2",
-        board,
-        "c1",
+        world["a1"],
+        world["b2"],
+        world["c1"],
         move_type=MoveType.MERGE_JUMP,
         move_variant=MoveVariant.CAPTURE,
     )
     move2 = Move(
-        "a1",
-        "b2",
-        board,
-        "c1",
+        world["a1"],
+        world["b2"],
+        world["c1"],
         move_type=MoveType.MERGE_JUMP,
         move_variant=MoveVariant.CAPTURE,
     )
     move3 = Move(
-        "a1", "b2", board, move_type=MoveType.JUMP, move_variant=MoveVariant.CAPTURE
+        world["a1"],
+        world["b2"],
+        move_type=MoveType.JUMP,
+        move_variant=MoveVariant.CAPTURE,
     )
     move4 = Move(
-        "a1",
-        "b2",
-        board,
-        "c1",
+        world["a1"],
+        world["b2"],
+        world["c1"],
         move_type=MoveType.MERGE_SLIDE,
         move_variant=MoveVariant.CAPTURE,
     )
@@ -75,11 +76,11 @@ def test_move_eq():
 def test_move_type():
     # TODO(): change to real senarios
     board = Board.from_fen()
+    world = board.board
     move1 = Move(
-        "a1",
-        "b2",
-        board,
-        "c1",
+        world["a1"],
+        world["b2"],
+        world["c1"],
         move_type=MoveType.MERGE_JUMP,
         move_variant=MoveVariant.CAPTURE,
     )
@@ -87,10 +88,9 @@ def test_move_type():
     assert move1.is_merge_move()
 
     move2 = Move(
-        "a1",
-        "b2",
-        board,
-        target2="c1",
+        world["a1"],
+        world["b2"],
+        target2=world["c1"],
         move_type=MoveType.SPLIT_JUMP,
         move_variant=MoveVariant.BASIC,
     )
@@ -98,7 +98,10 @@ def test_move_type():
     assert move2.is_merge_move() == False
 
     move3 = Move(
-        "a1", "b2", board, move_type=MoveType.SLIDE, move_variant=MoveVariant.CAPTURE
+        world["a1"],
+        world["b2"],
+        move_type=MoveType.SLIDE,
+        move_variant=MoveVariant.CAPTURE,
     )
     assert move3.is_split_move() == False
     assert move3.is_merge_move() == False
@@ -107,11 +110,11 @@ def test_move_type():
 def test_to_str():
     # TODO(): change to real scenarios
     board = Board.from_fen()
+    world = board.board
     move1 = Move(
-        "a0",
-        "a6",
-        board,
-        "c1",
+        world["a0"],
+        world["a6"],
+        world["c1"],
         move_type=MoveType.MERGE_JUMP,
         move_variant=MoveVariant.CAPTURE,
     )
@@ -121,10 +124,9 @@ def test_to_str():
     assert move1.to_str(3) == "a0c1^a6:MERGE_JUMP:CAPTURE:RED_ROOK->BLACK_PAWN"
 
     move2 = Move(
-        "a0",
-        "b3",
-        board,
-        target2="c1",
+        world["a0"],
+        world["b3"],
+        target2=world["c1"],
         move_type=MoveType.SPLIT_JUMP,
         move_variant=MoveVariant.BASIC,
     )
@@ -134,7 +136,10 @@ def test_to_str():
     assert move2.to_str(3) == "a0^b3c1:SPLIT_JUMP:BASIC:RED_ROOK->NA_EMPTY"
 
     move3 = Move(
-        "a0", "a6", board, move_type=MoveType.SLIDE, move_variant=MoveVariant.CAPTURE
+        world["a0"],
+        world["a6"],
+        move_type=MoveType.SLIDE,
+        move_variant=MoveVariant.CAPTURE,
     )
     assert move3.to_str(0) == ""
     assert move3.to_str(1) == "a0a6"
