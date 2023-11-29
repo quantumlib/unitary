@@ -94,6 +94,8 @@ class Jump(QuantumEffect):
     - CAPTURE
     - EXCLUDED
     - BASIC
+
+    All types of pieces could make Jump move.
     """
 
     def __init__(
@@ -155,4 +157,63 @@ class Jump(QuantumEffect):
         # Move the classical properties of the source piece to the target piece.
         target_0.reset(source_0)
         source_0.reset()
+        return iter(())
+
+
+class SplitJump(QuantumEffect):
+    """SplitJump from source_0 to target_0 and target_1. The only accepted (default) move_variant is
+    - BASIC.
+
+    All types of pieces could make SplitJump move, except KING. This is implemented with a
+    PhasedSplit().
+    """
+
+    def __init__(
+        self,
+    ):
+        return
+
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self) -> Optional[int]:
+        return 3
+
+    def effect(self, *objects) -> Iterator[cirq.Operation]:
+        source_0, target_0, target_1 = objects
+        # Make the split jump.
+        source_0.is_entangled = True
+        alpha.PhasedSplit()(source_0, target_0, target_1)
+        # Pass the classical properties of the source piece to the target pieces.
+        target_0.reset(source_0)
+        target_1.reset(source_0)
+        return iter(())
+
+
+class MergeJump(QuantumEffect):
+    """MergeJump from source_0 to source_1 to target_0. The only accepted (default) move_variant is
+    - BASIC.
+
+    All types of pieces could make MergeJump move, except KING.
+    """
+
+    def __init__(
+        self,
+    ):
+        return
+
+    def num_dimension(self) -> Optional[int]:
+        return 2
+
+    def num_objects(self) -> Optional[int]:
+        return 3
+
+    def effect(self, *objects) -> Iterator[cirq.Operation]:
+        source_0, source_1, target_0 = objects
+        # Make the merge jump.
+        alpha.PhasedMove(-0.5)(source_0, target_0)
+        alpha.PhasedMove(-0.5)(source_0, target_0)
+        alpha.PhasedMove(-0.5)(source_1, target_0)
+        # Pass the classical properties of the source pieces to the target piece.
+        target_0.reset(source_0)
         return iter(())
