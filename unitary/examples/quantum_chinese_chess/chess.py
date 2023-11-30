@@ -21,7 +21,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     MoveType,
     MoveVariant,
 )
-from unitary.examples.quantum_chinese_chess.move import Jump
+from unitary.examples.quantum_chinese_chess.move import *
 import readline
 
 # List of accepable commands.
