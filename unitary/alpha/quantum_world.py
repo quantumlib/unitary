@@ -19,6 +19,8 @@ import cirq
 from unitary.alpha.quantum_object import QuantumObject
 from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
 from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, num_bits
+import numpy as np
+import itertools
 
 
 class QuantumWorld:
@@ -482,6 +484,36 @@ class QuantumWorld:
         for result in peek_results:
             for idx in range(len(objects)):
                 histogram[idx][cast(int, result[idx])] += 1
+        return histogram
+
+    def get_correlated_histogram(
+        self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 100
+    ) -> Dict[Tuple[int], int]:
+        """Creates histogram of the whole quantum world (or `objects` if specified)
+        based on measurements (peeks) carried out. Comparing to get_histogram(),
+        this statistics contains entanglement information accross quantum objects.
+
+        Parameters:
+            objects:    List of QuantumObjects
+            count:      Number of measurements
+
+        Returns:
+            A dictionary, with the keys being tuples representing each possible state of
+            the whole quantum world (or, if `objects` is specified, the key is a tuple of
+            the results of each object in `objects` and in the order of `objects`), and
+            the values being the count of that state.
+        """
+        if not objects:
+            objects = self.public_objects
+        peek_results = self.peek(objects=objects, convert_to_enum=False, count=count)
+        histogram = {}
+        for result in peek_results:
+            # Convert the list to tuple so that it could be the key of a dictionary.
+            key = tuple(result)
+            if key not in histogram:
+                histogram[key] = 1
+            else:
+                histogram[key] += 1
         return histogram
 
     def get_probabilities(
