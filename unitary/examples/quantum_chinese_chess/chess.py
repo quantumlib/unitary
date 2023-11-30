@@ -402,7 +402,18 @@ class QuantumChineseChess:
             Jump(move_variant)(source_0, target_0)
         elif move_type == MoveType.JUMP:
             Jump(move_variant)(source_0, target_0)
-        # TODO(): apply other move types.
+        elif move_type == MoveType.SLIDE:
+            Slide(quantum_pieces_0, move_variant)(source_0, target_0)
+        elif move_type == MoveType.SPLIT_JUMP:
+            SplitJump()(source_0, target_0, target_1)
+        elif move_type == MoveType.SPLIT_SLIDE:
+            SplitSlide(quantum_pieces_0, quantum_pieces_1)(source_0, target_0, target_1)
+        elif move_type == MoveType.MERGE_JUMP:
+            MergeJump()(source_0, source_1, target_0)
+        elif move_type == MoveType.MERGE_SLIDE:
+            MergeSlide(quantum_pieces_0, quantum_pieces_1)(source_0, source_1, target_0)
+        elif move_type == MoveType.CANNON_FIRE:
+            CannonFire(classical_pieces_0, quantum_pieces_0)(source_0, target_0)
 
     def next_move(self) -> Tuple[bool, str]:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
