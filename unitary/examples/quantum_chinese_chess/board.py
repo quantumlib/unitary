@@ -19,8 +19,10 @@ from unitary.examples.quantum_chinese_chess.enums import (
     Color,
     Type,
     Language,
+    MoveVariant,
 )
 from unitary.examples.quantum_chinese_chess.piece import Piece
+from unitary.examples.quantum_chinese_chess.move import Jump
 
 
 # The default initial state of the game.
@@ -183,7 +185,31 @@ class Board:
         if len(quantum_pieces) == 0:
             # If there are no pieces between two KINGs, the check successes. Game ends.
             return True
-        # TODO(): add check when there are quantum pieces in between.
+        # When there are only quantum pieces in between, the check successes (and game ends)
+        # if all of those pieces turn out to be empty.
+        capture_ancilla = self.board._add_ancilla("flying_general_check")
+        control_objects = [self.board[path] for path in quantum_pieces]
+        conditions = [0] * len(control_objects)
+        alpha.quantum_if(*control_objects).equals(*conditions).apply(alpha.Flip())(
+            capture_ancilla
+        )
+        could_capture = self.board.pop([capture_ancilla])[0]
+        if could_capture:
+            # Force measure all path pieces to be empty.
+            for path_piece in control_objects:
+                self.board.force_measurement(path_piece, 0)
+                path_piece.reset()
+
+            # Let the general/king fly, i.e. the opposite king will capture the current king.
+            current_king = self.board[self.king_locations[self.current_player]]
+            oppsite_king = self.board[self.king_locations[1 - self.current_player]]
+            Jump(MoveVariant.CLASSICAL)(oppsite_king, current_king)
+            print("==== FLYING GENERAL ! ====")
+            return True
+        else:
+            # Note: we are leaving the path pieces unchanged in entangled state.
+            print("==== General not flies yet ! ====")
+            return False
 
     def sample(self, repetitions: int) -> List[int]:
         """Sample the current board by the given `repetitions`.

@@ -656,6 +656,8 @@ def test_get_histogram_and_get_probabilities_one_binary_qobject(
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100}]
+    histogram = world.get_correlated_histogram()
+    assert histogram == {(1,): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 0.0, 1: 1.0}]
     bin_probs = world.get_binary_probabilities()
@@ -663,6 +665,8 @@ def test_get_histogram_and_get_probabilities_one_binary_qobject(
     alpha.Flip()(l1)
     histogram = world.get_histogram()
     assert histogram == [{0: 100, 1: 0}]
+    histogram = world.get_correlated_histogram()
+    assert histogram == {(0,): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 1.0, 1: 0.0}]
     bin_probs = world.get_binary_probabilities()
@@ -673,6 +677,10 @@ def test_get_histogram_and_get_probabilities_one_binary_qobject(
     assert len(histogram[0]) == 2
     assert histogram[0][0] > 10
     assert histogram[0][1] > 10
+    histogram = world.get_correlated_histogram()
+    assert len(histogram) == 2
+    assert histogram[(0,)] > 10
+    assert histogram[(1,)] > 10
     probs = world.get_probabilities()
     assert len(probs) == 1
     assert len(probs[0]) == 2
@@ -700,6 +708,8 @@ def test_get_histogram_and_get_probabilities_one_trinary_qobject(
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100, 2: 0}]
+    histogram = world.get_correlated_histogram()
+    assert histogram == {(1,): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities()
@@ -723,13 +733,45 @@ def test_get_histogram_and_get_probabilities_two_qobjects(simulator, compile_to_
     )
     histogram = world.get_histogram()
     assert histogram == [{0: 0, 1: 100}, {0: 0, 1: 100, 2: 0}]
+    histogram = world.get_correlated_histogram()
+    assert histogram == {(1, 1): 100}
     probs = world.get_probabilities()
     assert probs == [{0: 0.0, 1: 1.0}, {0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities()
     assert bin_probs == [1.0, 1.0]
     histogram = world.get_histogram(objects=[l2], count=1000)
     assert histogram == [{0: 0, 1: 1000, 2: 0}]
+    histogram = world.get_correlated_histogram(objects=[l2], count=1000)
+    assert histogram == {(1,): 1000}
     probs = world.get_probabilities(objects=[l2], count=1000)
     assert probs == [{0: 0.0, 1: 1.0, 2: 0.0}]
     bin_probs = world.get_binary_probabilities(objects=[l2], count=1000)
     assert bin_probs == [1.0]
+
+
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_get_correlated_histogram_with_entangled_qobjects(simulator, compile_to_qubits):
+    light1 = alpha.QuantumObject("l1", Light.GREEN)
+    light2 = alpha.QuantumObject("l2", Light.RED)
+    light3 = alpha.QuantumObject("l3", Light.RED)
+    light4 = alpha.QuantumObject("l4", Light.GREEN)
+    light5 = alpha.QuantumObject("l5", Light.RED)
+
+    world = alpha.QuantumWorld(
+        [light1, light2, light3, light4, light5],
+        sampler=simulator(),
+        compile_to_qubits=compile_to_qubits,
+    )
+    alpha.Split()(light1, light2, light3)
+    alpha.quantum_if(light2).equals(1).apply(alpha.Move())(light4, light5)
+
+    histogram = world.get_correlated_histogram()
+    assert histogram.keys() == {(0, 0, 1, 1, 0), (0, 1, 0, 0, 1)}
