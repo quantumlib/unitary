@@ -351,7 +351,10 @@ def test_copy(simulator, compile_to_qubits):
     assert board.ancilla_names == board2.ancilla_names
     assert board.ancilla_names is not board2.ancilla_names
     assert len(board2.post_selection) == 2
-    assert [key.name for key in board2.qubit_remapping_dict[-1].keys()] == ['l2', 'ancilla_l2_0']
+    assert [key.name for key in board2.qubit_remapping_dict[-1].keys()] == [
+        "l2",
+        "ancilla_l2_0",
+    ]
 
     # Assert that they now evolve independently
     board2.undo_last_effect()

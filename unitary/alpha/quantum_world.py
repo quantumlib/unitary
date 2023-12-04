@@ -111,7 +111,9 @@ class QuantumWorld:
         for remap in self.qubit_remapping_dict:
             new_dict = {}
             for key_obj, value_obj in remap.items():
-                new_dict[new_world.get_object_by_name(key_obj.name)] = new_world.get_object_by_name(value_obj.name)
+                new_dict[
+                    new_world.get_object_by_name(key_obj.name)
+                ] = new_world.get_object_by_name(value_obj.name)
             new_world.qubit_remapping_dict.append(new_dict)
         new_world.qubit_remapping_dict_length = self.qubit_remapping_dict_length.copy()
         return new_world
@@ -294,8 +296,8 @@ class QuantumWorld:
         self.qubit_remapping_dict_length.append(len(self.qubit_remapping_dict))
 
     def restore_last_snapshot(self) -> None:
-        """Restores the `QuantumWorld` to the last snapshot (which was saved after the last move 
-        finished), which includes 
+        """Restores the `QuantumWorld` to the last snapshot (which was saved after the last move
+        finished), which includes
         - reversing the mapping of qubits, if any,
         - restoring the post selection dictionary,
         - restoring the circuit.
@@ -327,7 +329,7 @@ class QuantumWorld:
                 if obj in self.post_selection:
                     self.post_selection.pop(obj)
 
-        # Recover the effects up to the last snapshot by popping effects out of the 
+        # Recover the effects up to the last snapshot by popping effects out of the
         # effect history of the board until its length equals the last snapshot's length.
         self.effect_history_length.pop()
         last_length = self.effect_history_length[-1]
