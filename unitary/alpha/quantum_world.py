@@ -268,7 +268,7 @@ class QuantumWorld:
             self._append_op(op)
 
     def undo_last_effect(self):
-        """Restores the circuit and post selection table of `QuantumWorld` to the
+        """Restores the circuit and post selection dictionary of `QuantumWorld` to the
         state before the last effect.
 
         Note that pop() is considered to be an effect for the purposes
@@ -287,7 +287,12 @@ class QuantumWorld:
         self.qubit_remapping_dict_length.append(len(self.qubit_remapping_dict))
 
     def restore_last_snapshot(self) -> None:
-        """Restores the `QuantumWorld` to the last snapshot, which includes reset quantum effects, and remapping qubits."""
+        """Restores the `QuantumWorld` to the last snapshot (which was saved after the last move 
+        finished), which includes 
+        - reversing the mapping of qubits, if any,
+        - restoring the post selection dictionary,
+        - restoring the circuit.
+        """
         if (
             len(self.effect_history_length) <= 1
             or len(self.qubit_remapping_dict_length) <= 1
@@ -309,13 +314,14 @@ class QuantumWorld:
                 lambda q: qubit_remapping_dict.get(q, q)
             )
             # Clear relevant qubits from the post selection dictionary.
+            # TODO(): rethink if this is necessary, given that undo_last_effect()
+            # will also restore post selection dictionary.
             for obj in qubit_remapping_dict.keys():
                 if obj in self.post_selection:
                     self.post_selection.pop(obj)
 
-        # Recover the effects up to the last snapshot (which was done after the last move finished) by
-        # popping effects out of the effect history of the board until its length equals the last
-        # snapshot's length.
+        # Recover the effects up to the last snapshot by popping effects out of the 
+        # effect history of the board until its length equals the last snapshot's length.
         self.effect_history_length.pop()
         last_length = self.effect_history_length[-1]
         while len(self.effect_history) > last_length:
