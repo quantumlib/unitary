@@ -775,3 +775,72 @@ def test_get_correlated_histogram_with_entangled_qobjects(simulator, compile_to_
 
     histogram = world.get_correlated_histogram()
     assert histogram.keys() == {(0, 0, 1, 1, 0), (0, 1, 0, 0, 1)}
+
+
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_save_and_restore_snapshot(simulator, compile_to_qubits):
+    light1 = alpha.QuantumObject("l1", Light.GREEN)
+    light2 = alpha.QuantumObject("l2", Light.RED)
+    light3 = alpha.QuantumObject("l3", Light.RED)
+    light4 = alpha.QuantumObject("l4", Light.RED)
+    light5 = alpha.QuantumObject("l5", Light.RED)
+
+    # Initial state.
+    world = alpha.QuantumWorld(
+        [light1, light2, light3, light4, light5],
+        sampler=simulator(),
+        compile_to_qubits=compile_to_qubits,
+    )
+    # Snapshot #0
+    world.save_snapshot()
+    circuit_0 = world.circuit.copy()
+    # one effect from Flip()
+    assert world.effect_history_length == [1]
+    assert world.qubit_remapping_dict_length == [0]
+    assert world.post_selection == {}
+
+    # First move.
+    alpha.Split()(light1, light2, light3)
+    # Snapshot #1
+    world.save_snapshot()
+    circuit_1 = world.circuit.copy()
+    # one more effect from Split()
+    assert world.effect_history_length == [1, 2]
+    assert world.qubit_remapping_dict_length == [0, 0]
+    assert world.post_selection == {}
+
+    # Second move, which includes multiple effects and post selection.
+    alpha.Flip()(light2)
+    alpha.Split()(light3, light4, light5)
+    world.force_measurement(light4, Light.RED)
+    world.unhook(light5)
+    # Snapshot #2
+    world.save_snapshot()
+    # 2 more effects from Flip() and Split()
+    assert world.effect_history_length == [1, 2, 4]
+    # 2 mapping from force_measurement() and unhook()
+    assert world.qubit_remapping_dict_length == [0, 0, 2]
+    # 1 post selection from force_measurement
+    assert len(world.post_selection) == 1
+
+    # Restore to snapshot #1
+    world.restore_last_snapshot()
+    assert world.effect_history_length == [1, 2]
+    assert world.qubit_remapping_dict_length == [0, 0]
+    assert world.circuit == circuit_1
+    assert world.post_selection == {}
+
+    # Restore to snapshot #0
+    world.restore_last_snapshot()
+    assert world.effect_history_length == [1]
+    assert world.qubit_remapping_dict_length == [0]
+    assert world.circuit == circuit_0
+    assert world.post_selection == {}
