@@ -506,7 +506,10 @@ class QuantumChineseChess:
 
         # Recover the mapping of qubits to the last snapshot, remove any related post selection memory,
         # and recover the effects up to the last snapshot (which was saved after the last move finished).
-        world.restore_last_snapshot()
+        try:
+            world.restore_last_snapshot()
+        except:
+            return False
 
         # Recover the classical properties of all pieces to the last snapshot.
         self.classical_properties_history.pop()
@@ -536,10 +539,11 @@ class QuantumChineseChess:
                 # Check if the game is over.
                 self.game_over()
                 # Update any empty or occupied pieces' classical state.
+                # TODO(): no need to do sampling if the last move was CLASSICAL.
                 probs = self.update_board_by_sampling()
                 # Save the current states.
                 self.save_snapshot()
-            # TODO(): pass probs into the following method to print probabilities.            print(self.board)
+            # TODO(): pass probs into the following method to print probabilities.
             print(self.board)
             if self.game_state == GameState.CONTINUES:
                 # If the game continues, switch the player.

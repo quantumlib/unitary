@@ -326,6 +326,7 @@ def test_copy(simulator, compile_to_qubits):
     alpha.Flip()(light2)
     assert board.pop([light1])[0] == Light.RED
     assert board.pop([light2])[0] == Light.GREEN
+    board.save_snapshot()
 
     board2 = board.copy()
 
@@ -345,9 +346,12 @@ def test_copy(simulator, compile_to_qubits):
     assert board.circuit is not board2.circuit
     assert board.effect_history == board2.effect_history
     assert board.effect_history is not board2.effect_history
+    assert board.effect_history_length == board2.effect_history_length
+    assert board.qubit_remapping_dict_length == board2.qubit_remapping_dict_length
     assert board.ancilla_names == board2.ancilla_names
     assert board.ancilla_names is not board2.ancilla_names
     assert len(board2.post_selection) == 2
+    assert [key.name for key in board2.qubit_remapping_dict[-1].keys()] == ['l2', 'ancilla_l2_0']
 
     # Assert that they now evolve independently
     board2.undo_last_effect()

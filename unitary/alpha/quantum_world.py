@@ -105,8 +105,15 @@ class QuantumWorld:
             (circuit.copy(), copy.copy(post_selection))
             for circuit, post_selection in self.effect_history
         ]
+        new_world.effect_history_length = self.effect_history_length.copy()
         new_world.post_selection = new_post_selection
-        # TODO(): copy qubit_remapping_dict with a temp mapping.
+        # copy qubit_remapping_dict
+        for remap in self.qubit_remapping_dict:
+            new_dict = {}
+            for key_obj, value_obj in remap.items():
+                new_dict[new_world.get_object_by_name(key_obj.name)] = new_world.get_object_by_name(value_obj.name)
+            new_world.qubit_remapping_dict.append(new_dict)
+        new_world.qubit_remapping_dict_length = self.qubit_remapping_dict_length.copy()
         return new_world
 
     def add_object(self, obj: QuantumObject):
