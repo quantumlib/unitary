@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Iterator, Optional, Sequence, Union
+from typing import Iterator, Optional, Sequence, Union, TYPE_CHECKING
 import abc
 import enum
 
 import cirq
+
+if TYPE_CHECKING:
+    from unitary.alpha.quantum_object import QuantumObject
 
 
 def _to_int(value: Union[enum.Enum, int]) -> int:
@@ -25,7 +28,7 @@ def _to_int(value: Union[enum.Enum, int]) -> int:
 
 class QuantumEffect(abc.ABC):
     @abc.abstractmethod
-    def effect(self, *objects) -> Iterator[cirq.Operation]:
+    def effect(self, *objects: "QuantumObject") -> Iterator[cirq.Operation]:
         """Apply the Quantum Effect to the QuantumObjects."""
 
     def num_dimension(self) -> Optional[int]:
@@ -39,7 +42,7 @@ class QuantumEffect(abc.ABC):
         """
         return None
 
-    def _verify_objects(self, *objects):
+    def _verify_objects(self, *objects: "QuantumObject"):
         if self.num_objects() is not None and len(objects) != self.num_objects():
             raise ValueError(f"Cannot apply effect to {len(objects)} qubits.")
 
@@ -56,7 +59,7 @@ class QuantumEffect(abc.ABC):
                     "Object must be added to a QuantumWorld to apply effects."
                 )
 
-    def __call__(self, *objects):
+    def __call__(self, *objects: "QuantumObject"):
         """Apply the Quantum Effect to the objects."""
         self._verify_objects(*objects)
         world = objects[0].world
@@ -86,15 +89,15 @@ class QuantumIf:
     must equal the number of control qubits.
     """
 
-    def effect(self, *objects) -> Iterator[cirq.Operation]:
+    def effect(self, *objects: "QuantumObject") -> Iterator[cirq.Operation]:
         return iter(())
 
-    def __call__(self, *objects):
+    def __call__(self, *objects: "QuantumObject"):
         return QuantumThen(*objects)
 
 
 class QuantumThen(QuantumEffect):
-    def __init__(self, *objects):
+    def __init__(self, *objects: "QuantumObject"):
         self.control_objects = list(objects)
         self.condition = [1] * len(self.control_objects)
         self.then_effect = None
@@ -126,7 +129,7 @@ class QuantumThen(QuantumEffect):
         self.then_effect = effect
         return self
 
-    def effect(self, *objects):
+    def effect(self, *objects: "QuantumObject"):
         """A Quantum if/then produces a controlled operation."""
         # For anti-controls, add an X before the controlled operation
         for idx, cond in enumerate(self.condition):

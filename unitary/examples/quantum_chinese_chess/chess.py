@@ -21,7 +21,15 @@ from unitary.examples.quantum_chinese_chess.enums import (
     MoveType,
     MoveVariant,
 )
-from unitary.examples.quantum_chinese_chess.move import *
+from unitary.examples.quantum_chinese_chess.move import (
+    Jump,
+    SplitJump,
+    MergeJump,
+    Slide,
+    SplitSlide,
+    MergeSlide,
+    CannonFire,
+)
 import readline
 
 # List of accepable commands.
@@ -390,6 +398,7 @@ class QuantumChineseChess:
             print(move_type, " ", move_variant)
 
         # Apply the move accoding to its type.
+        # TODO(): using match...case... when python 3.11 satisfies the dependency.
         if move_type == MoveType.CLASSICAL:
             if source_0.type_ == Type.KING:
                 # Update the locations of KING.

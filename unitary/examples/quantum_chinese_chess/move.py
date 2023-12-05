@@ -593,9 +593,7 @@ class CannonFire(QuantumEffect):
             for index, expect_occupied_path_piece in enumerate(quantum_path_pieces_0):
                 # TODO(): consider specific cases to save the ancilla.
                 # Add a new ancilla to indicate whether the fire could be made (value = 1 means it could).
-                capture_ancilla = world._add_ancilla(
-                    f"{expect_occupied_path_piece.name}"
-                )
+                capture_ancilla = world._add_ancilla(expect_occupied_path_piece.name)
                 # All other path pieces are expected to be empty to make the fire happen.
                 expect_empty_pieces = [
                     piece
