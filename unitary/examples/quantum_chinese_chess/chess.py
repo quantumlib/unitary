@@ -61,7 +61,7 @@ class QuantumChineseChess:
         self.players_name.append("Player_1" if len(name_1) == 0 else name_1)
 
     def __init__(self):
-        self.players_name = []
+        self.players_name: List[str] = []
         self.print_welcome()
         self.board = Board.from_fen()
         self.board.set_language(self.lang)
@@ -71,7 +71,7 @@ class QuantumChineseChess:
         self.debug_level = 3
         # This variable is used to save the classical properties of the whole board before each move is
         # made, so that if we later undo we could recover the earlier classical state.
-        self.classical_properties_history = []
+        self.classical_properties_history: List[List[List[int]]] = []
 
     @staticmethod
     def parse_input_string(str_to_parse: str) -> Tuple[List[str], List[str]]:

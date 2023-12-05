@@ -14,7 +14,12 @@
 import pytest
 import io
 import sys
-from unitary.examples.quantum_chinese_chess.test_utils import *
+from unitary.examples.quantum_chinese_chess.test_utils import (
+    set_board,
+    assert_sample_distribution,
+    locations_to_bitboard,
+    assert_samples_in,
+)
 from unitary import alpha
 from unitary.examples.quantum_chinese_chess.chess import QuantumChineseChess
 from unitary.examples.quantum_chinese_chess.piece import Piece

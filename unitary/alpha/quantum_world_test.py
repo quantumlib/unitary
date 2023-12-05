@@ -354,7 +354,7 @@ def test_copy(simulator, compile_to_qubits):
     assert [key.name for key in board2.qubit_remapping_dict[-1].keys()] == [
         "l2",
         "ancilla_l2_0",
-    ]
+    ], "Failed to copy qubit_remapping_dict correctly."
 
     # Assert that they now evolve independently
     board2.undo_last_effect()

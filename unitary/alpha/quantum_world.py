@@ -72,7 +72,7 @@ class QuantumWorld:
         # This variable is used to save the length of current effect history before each move is made,
         # so that if we later undo we know how many effects we need to pop out, since each move could
         # consisit of several effects.
-        self.effect_history_length = []
+        self.effect_history_length: List[int] = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
         self.ancilla_names: Set[str] = set()
         # When `compile_to_qubits` is True, this tracks the mapping of the
@@ -84,7 +84,7 @@ class QuantumWorld:
         self.qubit_remapping_dict: List[Dict[cirq.Qid, cirq.Qid]] = []
         # This variable is used to save the length of qubit_remapping_dict before each move is made,
         # so that if we later undo we know how to remap the qubits.
-        self.qubit_remapping_dict_length = []
+        self.qubit_remapping_dict_length: List[int] = []
 
     def copy(self) -> "QuantumWorld":
         new_objects = []
