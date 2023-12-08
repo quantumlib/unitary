@@ -402,7 +402,8 @@ class SplitSlide(QuantumEffect):
             alpha.PhasedMove()
         )(source_0, target_1)
 
-        # TODO(): Do we need to zero-out, i.e. reverse those ancillas?
+        # Note: we do not zero-out, i.e. reverse those ancillas. But we could do this
+        # if we want to reuse them.
 
         # Pass the classical properties of the source piece to the target pieces.
         target_0.reset(source_0)
