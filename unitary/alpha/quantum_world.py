@@ -71,7 +71,7 @@ class QuantumWorld:
         self.effect_history: List[Tuple[cirq.Circuit, Dict[QuantumObject, int]]] = []
         # This variable is used to save the length of current effect history before each move is made,
         # so that if we later undo we know how many effects we need to pop out, since each move could
-        # consisit of several effects.
+        # consist of several effects.
         self.effect_history_length: List[int] = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
         self.ancilla_names: Set[str] = set()
@@ -291,7 +291,12 @@ class QuantumWorld:
         self.circuit, self.post_selection = self.effect_history.pop()
 
     def save_snapshot(self) -> None:
-        """Saves the current length of the effect history and qubit_remapping_dict."""
+        """Saves the current length of the effect history and qubit_remapping_dict.
+
+        Normally this could default to be called after every move made by player of your
+        game, so that later if the player choose to undo his last move, we could use
+        `restore_last_snapshot` to restore the quantum properties to the snapshot.
+        """
         self.effect_history_length.append(len(self.effect_history))
         self.qubit_remapping_dict_length.append(len(self.qubit_remapping_dict))
 

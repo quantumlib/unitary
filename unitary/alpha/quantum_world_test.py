@@ -837,6 +837,14 @@ def test_save_and_restore_snapshot(simulator, compile_to_qubits):
     assert world.qubit_remapping_dict_length == [0, 0, 2]
     # 1 post selection from force_measurement
     assert len(world.post_selection) == 1
+    results = world.peek(
+        [light1, light2, light3, light4, light5], count=200, convert_to_enum=False
+    )
+    assert all(result[0] == 0 for result in results)
+    assert not all(result[1] == 0 for result in results)
+    assert all(result[2] == 0 for result in results)
+    assert all(result[3] == 0 for result in results)
+    assert all(result[4] == 0 for result in results)
 
     # Restore to snapshot #1
     world.restore_last_snapshot()
@@ -844,6 +852,13 @@ def test_save_and_restore_snapshot(simulator, compile_to_qubits):
     assert world.qubit_remapping_dict_length == [0, 0]
     assert world.circuit == circuit_1
     assert world.post_selection == {}
+    results = world.peek(
+        [light1, light2, light3, light4, light5], count=200, convert_to_enum=False
+    )
+    assert all(result[0] == 0 for result in results)
+    assert all(result[1] != result[2] for result in results)
+    assert all(result[3] == 0 for result in results)
+    assert all(result[4] == 0 for result in results)
 
     # Restore to snapshot #0
     world.restore_last_snapshot()
@@ -851,3 +866,15 @@ def test_save_and_restore_snapshot(simulator, compile_to_qubits):
     assert world.qubit_remapping_dict_length == [0]
     assert world.circuit == circuit_0
     assert world.post_selection == {}
+    results = world.peek(
+        [light1, light2, light3, light4, light5], count=200, convert_to_enum=False
+    )
+    assert all(result[0] == 1 for result in results)
+    assert all(result[1] == 0 for result in results)
+    assert all(result[2] == 0 for result in results)
+    assert all(result[3] == 0 for result in results)
+    assert all(result[4] == 0 for result in results)
+
+    # Further restore would return a value error.
+    with pytest.raises(ValueError, match="Unable to restore any more."):
+        world.restore_last_snapshot()

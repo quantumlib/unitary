@@ -427,7 +427,7 @@ class QuantumChineseChess:
         elif input_str.lower() == "undo":
             if self.undo():
                 return True, "Undoing."
-            return False, "Unable to undo any more."
+            return False, "Failed to undo."
 
         else:
             try:
@@ -508,8 +508,12 @@ class QuantumChineseChess:
         # and recover the effects up to the last snapshot (which was saved after the last move finished).
         try:
             world.restore_last_snapshot()
-        except:
+        except ValueError as err:
+            print(err)
             return False
+        except Exception:
+            print("Unexpected error during undo.")
+            raise
 
         # Recover the classical properties of all pieces to the last snapshot.
         self.classical_properties_history.pop()
