@@ -21,7 +21,15 @@ from unitary.examples.quantum_chinese_chess.enums import (
     MoveType,
     MoveVariant,
 )
-from unitary.examples.quantum_chinese_chess.move import Jump
+from unitary.examples.quantum_chinese_chess.move import (
+    Jump,
+    SplitJump,
+    MergeJump,
+    Slide,
+    SplitSlide,
+    MergeSlide,
+    CannonFire,
+)
 import readline
 
 # List of accepable commands.
@@ -390,6 +398,7 @@ class QuantumChineseChess:
             print(move_type, " ", move_variant)
 
         # Apply the move accoding to its type.
+        # TODO(): using match...case... when python 3.11 satisfies the dependency.
         if move_type == MoveType.CLASSICAL:
             if source_0.type_ == Type.KING:
                 # Update the locations of KING.
@@ -402,7 +411,18 @@ class QuantumChineseChess:
             Jump(move_variant)(source_0, target_0)
         elif move_type == MoveType.JUMP:
             Jump(move_variant)(source_0, target_0)
-        # TODO(): apply other move types.
+        elif move_type == MoveType.SLIDE:
+            Slide(quantum_pieces_0, move_variant)(source_0, target_0)
+        elif move_type == MoveType.SPLIT_JUMP:
+            SplitJump()(source_0, target_0, target_1)
+        elif move_type == MoveType.SPLIT_SLIDE:
+            SplitSlide(quantum_pieces_0, quantum_pieces_1)(source_0, target_0, target_1)
+        elif move_type == MoveType.MERGE_JUMP:
+            MergeJump()(source_0, source_1, target_0)
+        elif move_type == MoveType.MERGE_SLIDE:
+            MergeSlide(quantum_pieces_0, quantum_pieces_1)(source_0, source_1, target_0)
+        elif move_type == MoveType.CANNON_FIRE:
+            CannonFire(classical_pieces_0, quantum_pieces_0)(source_0, target_0)
 
     def next_move(self) -> Tuple[bool, str]:
         """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
