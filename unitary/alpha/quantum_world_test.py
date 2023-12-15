@@ -326,6 +326,7 @@ def test_copy(simulator, compile_to_qubits):
     alpha.Flip()(light2)
     assert board.pop([light1])[0] == Light.RED
     assert board.pop([light2])[0] == Light.GREEN
+    board.save_snapshot()
 
     board2 = board.copy()
 
@@ -345,9 +346,15 @@ def test_copy(simulator, compile_to_qubits):
     assert board.circuit is not board2.circuit
     assert board.effect_history == board2.effect_history
     assert board.effect_history is not board2.effect_history
+    assert board.effect_history_length == board2.effect_history_length
+    assert board.qubit_remapping_dict_length == board2.qubit_remapping_dict_length
     assert board.ancilla_names == board2.ancilla_names
     assert board.ancilla_names is not board2.ancilla_names
     assert len(board2.post_selection) == 2
+    assert [key.name for key in board2.qubit_remapping_dict[-1].keys()] == [
+        "l2",
+        "ancilla_l2_0",
+    ], "Failed to copy qubit_remapping_dict correctly."
 
     # Assert that they now evolve independently
     board2.undo_last_effect()
@@ -775,3 +782,99 @@ def test_get_correlated_histogram_with_entangled_qobjects(simulator, compile_to_
 
     histogram = world.get_correlated_histogram()
     assert histogram.keys() == {(0, 0, 1, 1, 0), (0, 1, 0, 0, 1)}
+
+
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_save_and_restore_snapshot(simulator, compile_to_qubits):
+    light1 = alpha.QuantumObject("l1", Light.GREEN)
+    light2 = alpha.QuantumObject("l2", Light.RED)
+    light3 = alpha.QuantumObject("l3", Light.RED)
+    light4 = alpha.QuantumObject("l4", Light.RED)
+    light5 = alpha.QuantumObject("l5", Light.RED)
+
+    # Initial state.
+    world = alpha.QuantumWorld(
+        [light1, light2, light3, light4, light5],
+        sampler=simulator(),
+        compile_to_qubits=compile_to_qubits,
+    )
+    # Snapshot #0
+    world.save_snapshot()
+    circuit_0 = world.circuit.copy()
+    # one effect from Flip()
+    assert world.effect_history_length == [1]
+    assert world.qubit_remapping_dict_length == [0]
+    assert world.post_selection == {}
+
+    # First move.
+    alpha.Split()(light1, light2, light3)
+    # Snapshot #1
+    world.save_snapshot()
+    circuit_1 = world.circuit.copy()
+    # one more effect from Split()
+    assert world.effect_history_length == [1, 2]
+    assert world.qubit_remapping_dict_length == [0, 0]
+    assert world.post_selection == {}
+
+    # Second move, which includes multiple effects and post selection.
+    alpha.Flip()(light2)
+    alpha.Split()(light3, light4, light5)
+    world.force_measurement(light4, Light.RED)
+    world.unhook(light5)
+    # Snapshot #2
+    world.save_snapshot()
+    # 2 more effects from Flip() and Split()
+    assert world.effect_history_length == [1, 2, 4]
+    # 2 mapping from force_measurement() and unhook()
+    assert world.qubit_remapping_dict_length == [0, 0, 2]
+    # 1 post selection from force_measurement
+    assert len(world.post_selection) == 1
+    results = world.peek(
+        [light1, light2, light3, light4, light5], count=200, convert_to_enum=False
+    )
+    assert all(result[0] == 0 for result in results)
+    assert not all(result[1] == 0 for result in results)
+    assert all(result[2] == 0 for result in results)
+    assert all(result[3] == 0 for result in results)
+    assert all(result[4] == 0 for result in results)
+
+    # Restore to snapshot #1
+    world.restore_last_snapshot()
+    assert world.effect_history_length == [1, 2]
+    assert world.qubit_remapping_dict_length == [0, 0]
+    assert world.circuit == circuit_1
+    assert world.post_selection == {}
+    results = world.peek(
+        [light1, light2, light3, light4, light5], count=200, convert_to_enum=False
+    )
+    assert all(result[0] == 0 for result in results)
+    assert all(result[1] != result[2] for result in results)
+    assert all(result[3] == 0 for result in results)
+    assert all(result[4] == 0 for result in results)
+
+    # Restore to snapshot #0
+    world.restore_last_snapshot()
+    assert world.effect_history_length == [1]
+    assert world.qubit_remapping_dict_length == [0]
+    assert world.circuit == circuit_0
+    assert world.post_selection == {}
+    results = world.peek(
+        [light1, light2, light3, light4, light5], count=200, convert_to_enum=False
+    )
+    assert all(result[0] == 1 for result in results)
+    assert all(result[1] == 0 for result in results)
+    assert all(result[2] == 0 for result in results)
+    assert all(result[3] == 0 for result in results)
+    assert all(result[4] == 0 for result in results)
+
+    # Further restore would return a value error.
+    with pytest.raises(ValueError, match="Unable to restore any more."):
+        world.restore_last_snapshot()

@@ -69,12 +69,22 @@ class QuantumWorld:
         """
         self.circuit = cirq.Circuit()
         self.effect_history: List[Tuple[cirq.Circuit, Dict[QuantumObject, int]]] = []
+        # This variable is used to save the length of current effect history before each move is made,
+        # so that if we later undo we know how many effects we need to pop out, since each move could
+        # consist of several effects.
+        self.effect_history_length: List[int] = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
         self.ancilla_names: Set[str] = set()
         # When `compile_to_qubits` is True, this tracks the mapping of the
         # original qudits to the compiled qubits.
         self.compiled_qubits: Dict[cirq.Qid, List[cirq.Qid]] = {}
         self.post_selection: Dict[QuantumObject, int] = {}
+        # This variable is used to save the qubit remapping dictionary before each move, so that if
+        # we later undo we know how to reverse the mapping.
+        self.qubit_remapping_dict: List[Dict[cirq.Qid, cirq.Qid]] = []
+        # This variable is used to save the length of qubit_remapping_dict before each move is made,
+        # so that if we later undo we know how to remap the qubits.
+        self.qubit_remapping_dict_length: List[int] = []
 
     def copy(self) -> "QuantumWorld":
         new_objects = []
@@ -95,7 +105,17 @@ class QuantumWorld:
             (circuit.copy(), copy.copy(post_selection))
             for circuit, post_selection in self.effect_history
         ]
+        new_world.effect_history_length = self.effect_history_length.copy()
         new_world.post_selection = new_post_selection
+        # copy qubit_remapping_dict
+        for remap in self.qubit_remapping_dict:
+            new_dict = {}
+            for key_obj, value_obj in remap.items():
+                new_dict[
+                    new_world.get_object_by_name(key_obj.name)
+                ] = new_world.get_object_by_name(value_obj.name)
+            new_world.qubit_remapping_dict.append(new_dict)
+        new_world.qubit_remapping_dict_length = self.qubit_remapping_dict_length.copy()
         return new_world
 
     def add_object(self, obj: QuantumObject):
@@ -257,7 +277,8 @@ class QuantumWorld:
             self._append_op(op)
 
     def undo_last_effect(self):
-        """Restores the `QuantumWorld` to the state before the last effect.
+        """Restores the circuit and post selection dictionary of `QuantumWorld` to the
+        state before the last effect.
 
         Note that pop() is considered to be an effect for the purposes
         of this call.
@@ -268,6 +289,57 @@ class QuantumWorld:
         if not self.effect_history:
             raise IndexError("No effects to undo")
         self.circuit, self.post_selection = self.effect_history.pop()
+
+    def save_snapshot(self) -> None:
+        """Saves the current length of the effect history and qubit_remapping_dict.
+
+        Normally this could default to be called after every move made by player of your
+        game, so that later if the player choose to undo his last move, we could use
+        `restore_last_snapshot` to restore the quantum properties to the snapshot.
+        """
+        self.effect_history_length.append(len(self.effect_history))
+        self.qubit_remapping_dict_length.append(len(self.qubit_remapping_dict))
+
+    def restore_last_snapshot(self) -> None:
+        """Restores the `QuantumWorld` to the last snapshot (which was saved after the last move
+        finished), which includes
+        - reversing the mapping of qubits, if any,
+        - restoring the post selection dictionary,
+        - restoring the circuit.
+        """
+        if (
+            len(self.effect_history_length) <= 1
+            or len(self.qubit_remapping_dict_length) <= 1
+        ):
+            # length == 1 corresponds to the initial state, and no more restore could be made.
+            raise ValueError("Unable to restore any more.")
+
+        # Recover the mapping of qubits to the last snapshot, and remove any related post selection memory.
+        # Note that this need to be done before calling `undo_last_effect()`, otherwise the remapping does not
+        # work as expected.
+        self.qubit_remapping_dict_length.pop()
+        last_length = self.qubit_remapping_dict_length[-1]
+        while len(self.qubit_remapping_dict) > last_length:
+            qubit_remapping_dict = self.qubit_remapping_dict.pop()
+            if len(qubit_remapping_dict) == 0:
+                continue
+            # Reverse the mapping.
+            self.circuit = self.circuit.transform_qubits(
+                lambda q: qubit_remapping_dict.get(q, q)
+            )
+            # Clear relevant qubits from the post selection dictionary.
+            # TODO(): rethink if this is necessary, given that undo_last_effect()
+            # will also restore post selection dictionary.
+            for obj in qubit_remapping_dict.keys():
+                if obj in self.post_selection:
+                    self.post_selection.pop(obj)
+
+        # Recover the effects up to the last snapshot by popping effects out of the
+        # effect history of the board until its length equals the last snapshot's length.
+        self.effect_history_length.pop()
+        last_length = self.effect_history_length[-1]
+        while len(self.effect_history) > last_length:
+            self.undo_last_effect()
 
     def _suggest_num_reps(self, sample_size: int) -> int:
         """Guess the number of raw samples needed to get sample_size results.
@@ -323,6 +395,7 @@ class QuantumWorld:
             object.qubit: new_ancilla.qubit,
             new_ancilla.qubit: object.qubit,
         }
+        self.qubit_remapping_dict.append(qubit_remapping_dict)
         self.circuit = self.circuit.transform_qubits(
             lambda q: qubit_remapping_dict.get(q, q)
         )
@@ -348,7 +421,7 @@ class QuantumWorld:
             qubit_remapping_dict.update(
                 {*zip(obj_qubits, new_obj_qubits), *zip(new_obj_qubits, obj_qubits)}
             )
-
+        self.qubit_remapping_dict.append(qubit_remapping_dict)
         self.circuit = self.circuit.transform_qubits(
             lambda q: qubit_remapping_dict.get(q, q)
         )
