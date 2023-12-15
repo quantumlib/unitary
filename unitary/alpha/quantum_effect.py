@@ -141,8 +141,8 @@ class QuantumThen(QuantumEffect):
                 yield cirq.X(self.control_objects[idx].qubit)
 
         for effect in self.then_effects:
-          for op in effect.effect(*objects):
-            yield op.controlled_by(*[q.qubit for q in self.control_objects])
+            for op in effect.effect(*objects):
+                yield op.controlled_by(*[q.qubit for q in self.control_objects])
 
         # For anti-controls, add an X after the controlled operation
         # to revert its state back to what it was.
