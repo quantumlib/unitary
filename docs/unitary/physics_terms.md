@@ -2,7 +2,7 @@
 
 If you are already familiar with quantum computing terms, have used cirq, or come from a physics background,
 the terms in the Unitary may feel a bit unfamiliar.  They are meant to connect quantum concepts to traditional
-programming contructs, such as "if/then".  
+programming constructs, such as "if/then".  
 
 The following is a table that connects physics terms to cirq and unitary terms.
 
