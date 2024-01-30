@@ -32,15 +32,19 @@ from unitary.examples.quantum_chinese_chess.move import (
 )
 import readline
 
-# List of accepable commands.
+# List of acceptable commands.
 _HELP_TEXT = """
     Each location on the board is represented by two characters [abcdefghi][0-9], i.e. from a0 to i9. You may input (s=source, t=target)
     - s1t1 to do a slide move, e.g. "a1a4"; 
     - s1^t1t2 to do a split move, e.g. "a1^b1a2";
     - s1s2^t1 to do a merge move, e.g. "b1a2^a1";
+
     Other commands:
-    - "exit" to quit
+    - "peek": to peek (print a sample of) the current board state
+    - "peek all": to print all possible board states with associated probabilities
+    - "undo": to undo last move
     - "help": to see this message again
+    - "exit": to quit the game
 """
 
 _WELCOME_MESSAGE = """
