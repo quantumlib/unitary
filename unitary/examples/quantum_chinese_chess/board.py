@@ -27,6 +27,16 @@ from unitary.examples.quantum_chinese_chess.move import Jump
 
 # The default initial state of the game.
 _INITIAL_FEN = "RHEAKAEHR/9/1C5C1/P1P1P1P1P/9/9/p1p1p1p1p/1c5c1/9/rheakaehr w---1"
+reset = "\033[0m"
+bold = "\033[01m"
+dim = "\033[02m"
+# background
+grey = "\033[47m"
+# foreground
+black = "\033[30m"
+red = "\033[31m"
+lightred = "\033[91m"
+lightgrey = "\033[37m"
 
 
 class Board:
@@ -83,47 +93,146 @@ class Board:
         # TODO(): maybe add check to make sure the input fen itself is correct.
         return cls(board, current_player, king_locations)
 
-    def __str__(self):
-        num_rows = 10
-        board_string = ["\n "]
-        # Print the top line of col letters.
-        for col in "abcdefghi":
-            board_string.append(f" {col}")
-        board_string.append("\n")
-        for row in range(num_rows - 1, -1, -1):
-            # Print the row index on the left.
-            board_string.append(f"{row} ")
-            for col in "abcdefghi":
-                piece = self.board[f"{col}{row}"]
+    # TODO(): print players' names in their corresponding side of the board.
+    def to_str(
+        self,
+        probabilities: List[float] = None,
+        print_probabilities=True,
+        peek_result: List[int] = None,
+        sublime_terminus=False,
+    ):
+        def add_piece_symbol(
+            board_string: str,
+            piece: Piece,
+            peek_result: List[int] = None,
+            index: int = 0,
+            sublime_terminus=False,
+        ):
+            if peek_result is None and piece.is_entangled:
+                # dim works on mac terminal and gLinux terminal,
+                # but not on sublime terminus
+                # if not sublime_terminus:
+                #     board_string += dim
+                if piece.color == Color.RED:
+                    board_string += lightred
+                else:
+                    board_string += lightgrey
+            else:
+                # bold works on mac terminal and gLinux terminal,
+                # but not on sublime terminus
+                if not sublime_terminus:
+                    board_string += bold
+                if piece.color == Color.RED:
+                    board_string += red
+                else:
+                    pass
+            if (
+                peek_result is None
+                or piece.type_ == Type.EMPTY
+                or peek_result[index] == 1
+            ):
                 board_string += piece.symbol(self.lang)
-                if self.lang == Language.EN:
-                    board_string.append(" ")
-            # Print the row index on the right.
-            board_string.append(f" {row}\n")
-        board_string.append(" ")
-        # Print the bottom line of col letters.
-        for col in "abcdefghi":
-            board_string.append(f" {col}")
-        board_string.append("\n")
+            elif piece.is_entangled and peek_result[index] == 0:
+                board_string += Type.symbol(Type.EMPTY, Color.NA, self.lang)
+            board_string += reset
+
+        num_rows = 10
+        if print_probabilities and probabilities is None:
+            probabilities = self.board.get_binary_probabilities()
+
         if self.lang == Language.EN:
+            board_string = ["\n   "]
+            # Print the top line of col letters.
+            board_string += grey
+            board_string += black
+            for col in "abcdefghi":
+                board_string.append(f" {col}  ")
+            board_string += "\b" + reset + " \n"
+            index = 0
+            for row in range(num_rows):
+                # Print the row index on the left.
+                board_string.append(f"{row}   ")
+                for col in "abcdefghi":
+                    piece = self.board[f"{col}{row}"]
+                    add_piece_symbol(
+                        board_string, piece, peek_result, index, sublime_terminus
+                    )
+                    if col != "i":
+                        board_string.append("   ")
+                    board_string += reset
+                    index += 1
+                # Print the row index on the right.
+                board_string += f"  {row}" + reset + "\n"
+                # Print the sampled prob. of the pieces in the above row.
+                if print_probabilities:
+                    board_string += "   "
+                    board_string += grey
+                    board_string += black
+                    for i in range(row * 9, (row + 1) * 9):
+                        if probabilities[i] > 0.01 and probabilities[i] < 0.99:
+                            board_string.append("{:.1f} ".format(probabilities[i]))
+                        else:
+                            board_string.append("    ")
+                    board_string += "\b" + reset + " \n"
+            board_string.append("   ")
+            # Print the bottom line of col letters.
+            board_string += grey
+            board_string += black
+            for col in "abcdefghi":
+                board_string.append(f" {col}  ")
+            board_string += "\b" + reset + " \n"
             return "".join(board_string)
-        # We need to turn letters into their full-width counterparts to align
-        # a mix of letters + Chinese characters.
-        chars = "".join(chr(c) for c in range(ord(" "), ord("z")))
-        full_width_chars = "\N{IDEOGRAPHIC SPACE}" + "".join(
-            chr(c)
-            for c in range(
-                ord("\N{FULLWIDTH EXCLAMATION MARK}"),
-                ord("\N{FULLWIDTH LATIN SMALL LETTER Z}"),
-            )
-        )
-        translation = str.maketrans(chars, full_width_chars)
-        return (
-            "".join(board_string)
-            .replace(" ", "")
-            .replace("abcdefghi", " abcdefghi")
-            .translate(translation)
-        )
+        else:
+            f_space = "\N{IDEOGRAPHIC SPACE}"
+            f_a = ord("\N{FULLWIDTH LATIN SMALL LETTER A}")
+            board_string = ["\n" + f_space + " "]
+            # Print the top line of col letters.
+            board_string += grey
+            board_string += black
+            for col in range(f_a, f_a + 9):
+                board_string.append(f"{chr(col)}")
+                if col != f_a + 8:
+                    board_string += f_space * 2
+            board_string += " \n" + reset
+            index = 0
+            for row in range(num_rows):
+                # Print the row index on the left.
+                board_string.append(f"{row}" + f_space)
+                for col in "abcdefghi":
+                    piece = self.board[f"{col}{row}"]
+                    add_piece_symbol(
+                        board_string, piece, peek_result, index, sublime_terminus
+                    )
+                    if col != "i":
+                        board_string.append(f_space * 2)
+                    index += 1
+                # Print the row index on the right.
+                board_string += f_space * 2 + f"{row}\n"
+                # Print the sampled prob. of the pieces in the above row.
+                if print_probabilities:
+                    board_string += f_space + " "
+                    board_string += grey
+                    board_string += black
+                    for i in range(row * 9, (row + 1) * 9):
+                        if not sublime_terminus:
+                            # space + f_space works for mac terminal and gLinux terminal.
+                            board_string.append(
+                                "{:.1f} ".format(probabilities[i]) + f_space
+                            )
+                        else:
+                            # space + space works for sublime terminus.
+                            board_string.append("{:.1f}  ".format(probabilities[i]))
+                    board_string += "\b" + reset + f_space + "\n"
+            # Print the bottom line of col letters.
+            board_string.append(f_space + " ")
+            board_string += grey
+            board_string += black
+            for col in range(f_a, f_a + 9):
+                board_string.append(f"{chr(col)}")
+                if col != f_a + 8:
+                    board_string += f_space * 2
+            board_string += " " + reset
+            return "".join(board_string)
 
     def path_pieces(self, source: str, target: str) -> Tuple[List[str], List[str]]:
         """Returns the nonempty classical and quantum pieces from source to target (excluded)."""

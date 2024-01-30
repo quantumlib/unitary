@@ -73,7 +73,7 @@ class QuantumChineseChess:
         self.print_welcome()
         self.board = Board.from_fen()
         self.board.set_language(self.lang)
-        print(self.board)
+        print(self.board.to_str())
         self.game_state = GameState.CONTINUES
         self.current_player = self.board.current_player
         self.debug_level = 3
@@ -442,13 +442,23 @@ class QuantumChineseChess:
             self.game_state = GameState(1 - self.current_player)
             output = "Exiting."
         elif input_str.lower() == "peek":
-            # TODO(): make it look like the normal board. Right now it's only for debugging purposes.
-            print(self.board.board.peek(convert_to_enum=False))
+            print(
+                self.board.to_str(
+                    None, False, self.board.board.peek(convert_to_enum=False)[0]
+                )
+            )
+        elif input_str.lower() == "peek all":
+            all_boards = self.board.board.get_correlated_histogram()
+            sorted_boards = sorted(all_boards.items(), key=lambda x: x[1], reverse=True)
+            for board, count in sorted_boards:
+                print(
+                    "\n ====== With probability ~ {:.1f} ======".format(count / 100.0)
+                )
+                print(self.board.to_str(None, False, list(board)))
         elif input_str.lower() == "undo":
             if self.undo():
                 return True, "Undoing."
             return False, "Failed to undo."
-
         else:
             try:
                 # The move is success if no ValueError is raised.
@@ -550,6 +560,7 @@ class QuantumChineseChess:
 
     def play(self) -> None:
         """The loop where each player takes turn to play."""
+        probs = None
         while True:
             move_success, output = self.next_move()
             if not move_success:
@@ -567,8 +578,9 @@ class QuantumChineseChess:
                 probs = self.update_board_by_sampling()
                 # Save the current states.
                 self.save_snapshot()
-            # TODO(): pass probs into the following method to print probabilities.
-            print(self.board)
+            else:
+                probs = self.update_board_by_sampling()
+            print(self.board.to_str(probs))
             if self.game_state == GameState.CONTINUES:
                 # If the game continues, switch the player.
                 self.current_player = 1 - self.current_player

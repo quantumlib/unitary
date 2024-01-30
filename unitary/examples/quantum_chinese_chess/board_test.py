@@ -28,44 +28,26 @@ from unitary.examples.quantum_chinese_chess.test_utils import (
     set_board,
 )
 from unitary import alpha
+import re
 
 
 def test_init_with_default_fen():
     board = Board.from_fen()
     assert (
-        board.__str__()
+        re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
         == """
-  a b c d e f g h i
-9 r h e a k a e h r  9
-8 . . . . . . . . .  8
-7 . c . . . . . c .  7
-6 p . p . p . p . p  6
-5 . . . . . . . . .  5
-4 . . . . . . . . .  4
-3 P . P . P . P . P  3
-2 . C . . . . . C .  2
-1 . . . . . . . . .  1
-0 R H E A K A E H R  0
-  a b c d e f g h i
-"""
-    )
-
-    board.set_language(Language.ZH)
-    assert (
-        board.__str__()
-        == """
-　ａｂｃｄｅｆｇｈｉ
-９車馬相仕帥仕相馬車９
-８．．．．．．．．．８
-７．砲．．．．．砲．７
-６卒．卒．卒．卒．卒６
-５．．．．．．．．．５
-４．．．．．．．．．４
-３兵．兵．兵．兵．兵３
-２．炮．．．．．炮．２
-１．．．．．．．．．１
-０车马象士将士象马车０
-　ａｂｃｄｅｆｇｈｉ
+    a   b   c   d   e   f   g   h   i   
+0   R   H   E   A   K   A   E   H   R  0
+1   ·   ·   ·   ·   ·   ·   ·   ·   ·  1
+2   ·   C   ·   ·   ·   ·   ·   C   ·  2
+3   P   ·   P   ·   P   ·   P   ·   P  3
+4   ·   ·   ·   ·   ·   ·   ·   ·   ·  4
+5   ·   ·   ·   ·   ·   ·   ·   ·   ·  5
+6   p   ·   p   ·   p   ·   p   ·   p  6
+7   ·   c   ·   ·   ·   ·   ·   c   ·  7
+8   ·   ·   ·   ·   ·   ·   ·   ·   ·  8
+9   r   h   e   a   k   a   e   h   r  9
+    a   b   c   d   e   f   g   h   i   
 """
     )
 
@@ -76,39 +58,20 @@ def test_init_with_specified_fen():
     board = Board.from_fen("4kaR2/4a4/3hR4/7H1/9/9/9/9/4Ap1r1/3AK3c w---1 ")
 
     assert (
-        board.__str__()
+        re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
         == """
-  a b c d e f g h i
-9 . . . A K . . . c  9
-8 . . . . A p . r .  8
-7 . . . . . . . . .  7
-6 . . . . . . . . .  6
-5 . . . . . . . . .  5
-4 . . . . . . . . .  4
-3 . . . . . . . H .  3
-2 . . . h R . . . .  2
-1 . . . . a . . . .  1
-0 . . . . k a R . .  0
-  a b c d e f g h i
-"""
-    )
-
-    board.set_language(Language.ZH)
-    assert (
-        board.__str__()
-        == """
-　ａｂｃｄｅｆｇｈｉ
-９．．．士将．．．砲９
-８．．．．士卒．車．８
-７．．．．．．．．．７
-６．．．．．．．．．６
-５．．．．．．．．．５
-４．．．．．．．．．４
-３．．．．．．．马．３
-２．．．馬车．．．．２
-１．．．．仕．．．．１
-０．．．．帥仕车．．０
-　ａｂｃｄｅｆｇｈｉ
+    a   b   c   d   e   f   g   h   i   
+0   ·   ·   ·   ·   k   a   R   ·   ·  0
+1   ·   ·   ·   ·   a   ·   ·   ·   ·  1
+2   ·   ·   ·   h   R   ·   ·   ·   ·  2
+3   ·   ·   ·   ·   ·   ·   ·   H   ·  3
+4   ·   ·   ·   ·   ·   ·   ·   ·   ·  4
+5   ·   ·   ·   ·   ·   ·   ·   ·   ·  5
+6   ·   ·   ·   ·   ·   ·   ·   ·   ·  6
+7   ·   ·   ·   ·   ·   ·   ·   ·   ·  7
+8   ·   ·   ·   ·   A   p   ·   r   ·  8
+9   ·   ·   ·   A   K   ·   ·   ·   c  9
+    a   b   c   d   e   f   g   h   i   
 """
     )
 
