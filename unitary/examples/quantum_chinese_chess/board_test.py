@@ -33,6 +33,8 @@ import re
 
 def test_init_with_default_fen():
     board = Board.from_fen()
+
+    # test English print
     assert (
         re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
         == """
@@ -51,12 +53,34 @@ def test_init_with_default_fen():
 """
     )
 
+    # test Chinese print
+    board.set_language(Language.ZH)
+    assert (
+        re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
+        == """
+　 ａ　　ｂ　　ｃ　　ｄ　　ｅ　　ｆ　　ｇ　　ｈ　　ｉ 
+0　车　　马　　象　　士　　将　　士　　象　　马　　车　　0
+1　・　　・　　・　　・　　・　　・　　・　　・　　・　　1
+2　・　　炮　　・　　・　　・　　・　　・　　炮　　・　　2
+3　兵　　・　　兵　　・　　兵　　・　　兵　　・　　兵　　3
+4　・　　・　　・　　・　　・　　・　　・　　・　　・　　4
+5　・　　・　　・　　・　　・　　・　　・　　・　　・　　5
+6　卒　　・　　卒　　・　　卒　　・　　卒　　・　　卒　　6
+7　・　　砲　　・　　・　　・　　・　　・　　砲　　・　　7
+8　・　　・　　・　　・　　・　　・　　・　　・　　・　　8
+9　車　　馬　　相　　仕　　帥　　仕　　相　　馬　　車　　9
+　 ａ　　ｂ　　ｃ　　ｄ　　ｅ　　ｆ　　ｇ　　ｈ　　ｉ 
+"""
+    )
+
+    # check locations of KINGs
     assert board.king_locations == ["e0", "e9"]
 
 
 def test_init_with_specified_fen():
     board = Board.from_fen("4kaR2/4a4/3hR4/7H1/9/9/9/9/4Ap1r1/3AK3c w---1 ")
 
+    # test English print
     assert (
         re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
         == """
@@ -75,6 +99,27 @@ def test_init_with_specified_fen():
 """
     )
 
+    # test Chinese print
+    board.set_language(Language.ZH)
+    assert (
+        re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
+        == """
+　 ａ　　ｂ　　ｃ　　ｄ　　ｅ　　ｆ　　ｇ　　ｈ　　ｉ 
+0　・　　・　　・　　・　　帥　　仕　　车　　・　　・　　0
+1　・　　・　　・　　・　　仕　　・　　・　　・　　・　　1
+2　・　　・　　・　　馬　　车　　・　　・　　・　　・　　2
+3　・　　・　　・　　・　　・　　・　　・　　马　　・　　3
+4　・　　・　　・　　・　　・　　・　　・　　・　　・　　4
+5　・　　・　　・　　・　　・　　・　　・　　・　　・　　5
+6　・　　・　　・　　・　　・　　・　　・　　・　　・　　6
+7　・　　・　　・　　・　　・　　・　　・　　・　　・　　7
+8　・　　・　　・　　・　　士　　卒　　・　　車　　・　　8
+9　・　　・　　・　　士　　将　　・　　・　　・　　砲　　9
+　 ａ　　ｂ　　ｃ　　ｄ　　ｅ　　ｆ　　ｇ　　ｈ　　ｉ 
+"""
+    )
+
+    # check locations of KINGs
     assert board.king_locations == ["e0", "e9"]
 
 

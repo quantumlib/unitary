@@ -36,5 +36,5 @@ def test_symbol():
 
     assert Type.symbol(Type.EMPTY, Color.RED) == "·"
     assert Type.symbol(Type.EMPTY, Color.BLACK) == "·"
-    assert Type.symbol(Type.EMPTY, Color.RED, Language.ZH) == "·"
-    assert Type.symbol(Type.EMPTY, Color.BLACK, Language.ZH) == "·"
+    assert Type.symbol(Type.EMPTY, Color.RED, Language.ZH) == "・"
+    assert Type.symbol(Type.EMPTY, Color.BLACK, Language.ZH) == "・"

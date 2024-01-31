@@ -85,12 +85,6 @@ class Type(enum.Enum):
     - Chinese black
     """
 
-    EMPTY = (
-        "\u00B7",
-        "\u00B7",
-        "\u30FB",
-        "\u30FB",
-    )  # \u00B7 is a half width mid dot, and \u30FB is full width
     PAWN = ("P", "p", "兵", "卒")
     CANNON = ("C", "c", "炮", "砲")
     ROOK = ("R", "r", "车", "車")
@@ -98,6 +92,13 @@ class Type(enum.Enum):
     ELEPHANT = ("E", "e", "象", "相")
     ADVISOR = ("A", "a", "士", "仕")
     KING = ("K", "k", "将", "帥")
+    # \u00B7 is a half width mid dot, and \u30FB is full width
+    EMPTY = (
+        "\u00B7",
+        "\u00B7",
+        "\u30FB",
+        "\u30FB",
+    )
 
     @staticmethod
     def type_of(c: str) -> Optional["Type"]:
@@ -115,8 +116,6 @@ class Type(enum.Enum):
     @staticmethod
     def symbol(type_: "Type", color: Color, lang: Language = Language.EN) -> str:
         """Returns symbol of the given piece according to its color and desired language."""
-        if type_ == Type.EMPTY:
-            return type_.value[0]
         if lang == Language.EN:  # Return English symbols
             if color == Color.RED:
                 return type_.value[0]

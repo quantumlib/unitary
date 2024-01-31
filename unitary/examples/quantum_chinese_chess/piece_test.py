@@ -36,7 +36,7 @@ def test_symbol():
     p2 = Piece("c2", SquareState.EMPTY, Type.EMPTY, Color.NA)
     assert p2.symbol() == "·"
     assert p2.__str__() == "·"
-    assert p2.symbol(Language.ZH) == "·"
+    assert p2.symbol(Language.ZH) == "・"
 
 
 def test_enum():
