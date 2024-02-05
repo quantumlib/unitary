@@ -17,6 +17,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     Color,
     Type,
     SquareState,
+    TerminalType,
 )
 from unitary.examples.quantum_chinese_chess.board import Board
 from unitary.examples.quantum_chinese_chess.piece import Piece
@@ -36,7 +37,9 @@ def test_init_with_default_fen():
 
     # test English print
     assert (
-        re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
+        re.sub("\\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
+            "\b", ""
+        )
         == """
     a   b   c   d   e   f   g   h   i   
 0   R   H   E   A   K   A   E   H   R  0
@@ -56,7 +59,9 @@ def test_init_with_default_fen():
     # test Chinese print
     board.set_language(Language.ZH)
     assert (
-        re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
+        re.sub("\\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
+            "\b", ""
+        )
         == """
 　 ａ　　ｂ　　ｃ　　ｄ　　ｅ　　ｆ　　ｇ　　ｈ　　ｉ 
 0　车　　马　　象　　士　　将　　士　　象　　马　　车　　0
@@ -82,7 +87,9 @@ def test_init_with_specified_fen():
 
     # test English print
     assert (
-        re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
+        re.sub("\\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
+            "\b", ""
+        )
         == """
     a   b   c   d   e   f   g   h   i   
 0   ·   ·   ·   ·   k   a   R   ·   ·  0
@@ -102,7 +109,9 @@ def test_init_with_specified_fen():
     # test Chinese print
     board.set_language(Language.ZH)
     assert (
-        re.sub("\\033\[\d{1,2}m", "", board.to_str(None, False)).replace("\b", "")
+        re.sub("\\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
+            "\b", ""
+        )
         == """
 　 ａ　　ｂ　　ｃ　　ｄ　　ｅ　　ｆ　　ｇ　　ｈ　　ｉ 
 0　・　　・　　・　　・　　帥　　仕　　车　　・　　・　　0
