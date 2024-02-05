@@ -30,16 +30,18 @@ from unitary.examples.quantum_chinese_chess.enums import (
     SquareState,
     MoveType,
     MoveVariant,
+    TerminalType,
 )
 
 
 def test_game_init(monkeypatch):
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     output = io.StringIO()
     sys.stdout = output
     game = QuantumChineseChess()
     assert game.lang == Language.ZH
+    assert game.terminal == TerminalType.MAC_OR_LINUX
     assert game.players_name == ["Bob", "Ben"]
     assert game.current_player == 0
     assert "Welcome" in output.getvalue()
@@ -47,7 +49,7 @@ def test_game_init(monkeypatch):
 
 
 def test_parse_input_string_success(monkeypatch):
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     assert game.parse_input_string("a1b1") == (["a1"], ["b1"])
@@ -56,7 +58,7 @@ def test_parse_input_string_success(monkeypatch):
 
 
 def test_parse_input_string_fail(monkeypatch):
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     with pytest.raises(ValueError, match="Invalid sources/targets string "):
@@ -76,7 +78,7 @@ def test_parse_input_string_fail(monkeypatch):
 
 
 def test_apply_move_fail(monkeypatch):
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     with pytest.raises(ValueError, match="Could not move empty piece."):
@@ -94,7 +96,7 @@ def test_apply_move_fail(monkeypatch):
 def test_game_invalid_move(monkeypatch):
     output = io.StringIO()
     sys.stdout = output
-    inputs = iter(["y", "Bob", "Ben", "a1n1", "exit"])
+    inputs = iter(["y", "n", "Bob", "Ben", "a1n1", "exit"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     game.play()
@@ -108,7 +110,7 @@ def test_game_invalid_move(monkeypatch):
 def test_check_classical_rule(monkeypatch):
     output = io.StringIO()
     sys.stdout = output
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     board = game.board.board
@@ -207,7 +209,7 @@ def test_check_classical_rule(monkeypatch):
 def test_classify_move_fail(monkeypatch):
     output = io.StringIO()
     sys.stdout = output
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     board = game.board.board
@@ -259,7 +261,7 @@ def test_classify_move_fail(monkeypatch):
 def test_classify_move_success(monkeypatch):
     output = io.StringIO()
     sys.stdout = output
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     board = game.board.board
@@ -367,7 +369,7 @@ def test_classify_move_success(monkeypatch):
 def test_update_board_by_sampling(monkeypatch):
     output = io.StringIO()
     sys.stdout = output
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     board = game.board.board
@@ -390,7 +392,7 @@ def test_update_board_by_sampling(monkeypatch):
 
 
 def test_undo_single_effect_per_move(monkeypatch):
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     board = set_board(["a1", "b1", "c1"])
@@ -431,7 +433,7 @@ def test_undo_single_effect_per_move(monkeypatch):
 
 
 def test_undo_multiple_effects_per_move(monkeypatch):
-    inputs = iter(["y", "Bob", "Ben"])
+    inputs = iter(["y", "n", "Bob", "Ben"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     game = QuantumChineseChess()
     board = set_board(["a1", "b1", "c1"])
