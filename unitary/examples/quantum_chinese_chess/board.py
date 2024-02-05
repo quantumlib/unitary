@@ -20,6 +20,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     Type,
     Language,
     MoveVariant,
+    TerminalType,
 )
 from unitary.examples.quantum_chinese_chess.piece import Piece
 from unitary.examples.quantum_chinese_chess.move import Jump
@@ -55,7 +56,7 @@ class Board:
         self.king_locations = king_locations
         self.lang = Language.EN  # The default language is English.
 
-    def set_language(self, lang: Language):
+    def set_language(self, lang: Language) -> None:
         self.lang = lang
 
     @classmethod
@@ -98,40 +99,48 @@ class Board:
         return cls(board, current_player, king_locations)
 
     # TODO(): print players' names in their corresponding side of the board.
-    # To run the game on sublime terminus, set the following sublime_terminus=True
-    # for proer printing.
     # TODO(): check if there is better way to automatic determine the current terminal
-    # type, e.g. sublime terminus vs glinux / mac terminal.
+    # type, e.g. colab / sublime terminus vs glinux / mac terminal.
     # TODO(): right now all possibilities are printed in black, maybe update to print
     # in the same color as the corresponding pieces.
+    # TODO(): in some scenarios the black entangled pieces seems too light/weak to see.
     def to_str(
         self,
+        terminal: TerminalType,
         probabilities: List[float] = None,
-        print_probabilities=True,
         peek_result: List[int] = None,
-        sublime_terminus: bool = True,
-    ):
+    ) -> str:
+        """
+        Print the board into string.
+
+        Args:
+            terminal: type of the terminal that the game is currently running on;
+            probabilities: the probabilities of each piece of the board, in length of 90;
+            peek_result: for one peek of the board, provide a list of ints with length 90,
+                         with int=1 indicating the piece is there (for this peek);
+        """
+
         def add_piece_symbol(
             board_string: str,
             piece: Piece,
             peek_result: List[int],
             index: int,
-            sublime_terminus: bool,
+            terminal: TerminalType,
         ):
             if peek_result is None and piece.is_entangled:
                 if piece.color == Color.RED:
                     board_string += _FG_LIGHT_RED
                 else:
+                    # bold works on mac terminal and gLinux terminal,
+                    # but not on sublime terminus
+                    if terminal != TerminalType.COLAB_OR_SUBLIME_TERMINUS:
+                        board_string += _BOLD
                     board_string += _FG_LIGHT_GREY
             else:
-                # bold works on mac terminal and gLinux terminal,
-                # but not on sublime terminus
-                if not sublime_terminus:
+                if terminal != TerminalType.COLAB_OR_SUBLIME_TERMINUS:
                     board_string += _BOLD
                 if piece.color == Color.RED:
                     board_string += _FG_RED
-                else:
-                    pass
             if (
                 peek_result is None
                 or piece.type_ == Type.EMPTY
@@ -144,8 +153,6 @@ class Board:
             board_string += _RESET
 
         num_rows = 10
-        if print_probabilities and probabilities is None:
-            probabilities = self.board.get_binary_probabilities()
 
         if self.lang == Language.EN:
             board_string = ["\n   "]
@@ -162,9 +169,7 @@ class Board:
                 # Print each piece of this row, including empty piece.
                 for col in "abcdefghi":
                     piece = self.board[f"{col}{row}"]
-                    add_piece_symbol(
-                        board_string, piece, peek_result, index, sublime_terminus
-                    )
+                    add_piece_symbol(board_string, piece, peek_result, index, terminal)
                     if col != "i":
                         board_string.append("   ")
                     board_string += _RESET
@@ -172,7 +177,7 @@ class Board:
                 # Print the row index on the right.
                 board_string += f"  {row}" + _RESET + "\n"
                 # Print the sampled prob. of the pieces in the above row.
-                if print_probabilities:
+                if probabilities is not None:
                     board_string += "   "
                     board_string += _BG_GREY
                     board_string += _FG_BLACK
@@ -208,22 +213,20 @@ class Board:
                 # Print each piece of this row, including empty piece.
                 for col in "abcdefghi":
                     piece = self.board[f"{col}{row}"]
-                    add_piece_symbol(
-                        board_string, piece, peek_result, index, sublime_terminus
-                    )
+                    add_piece_symbol(board_string, piece, peek_result, index, terminal)
                     if col != "i":
                         board_string.append(_FULL_SPACE * 2)
                     index += 1
                 # Print the row index on the right.
                 board_string += _FULL_SPACE * 2 + f"{row}\n"
                 # Print the sampled prob. of the pieces in the above row.
-                if print_probabilities:
+                if probabilities is not None:
                     board_string += _FULL_SPACE + " "
                     board_string += _BG_GREY
                     board_string += _FG_BLACK
                     for i in range(row * 9, (row + 1) * 9):
                         # We only print non-zero probabilities
-                        if not sublime_terminus:
+                        if terminal != TerminalType.COLAB_OR_SUBLIME_TERMINUS:
                             # space + _FULL_SPACE works for mac terminal and gLinux terminal.
                             if probabilities[i] >= 1e-3:
                                 board_string.append(

@@ -127,3 +127,12 @@ class Type(enum.Enum):
             else:
                 return type_.value[3]
         raise ValueError("Unexpected combinations of language and color.")
+
+
+class TerminalType(enum.Enum):
+    """Type of the terminal that the game is running. This affects
+    how to properly print boards.
+    """
+
+    MAC_OR_LINUX = 0
+    COLAB_OR_SUBLIME_TERMINUS = 1
