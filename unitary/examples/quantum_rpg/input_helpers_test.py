@@ -43,8 +43,7 @@ def test_get_user_input_number_max():
         ["0", "-1", "a", "7", "3"])
     output = io.StringIO()
     assert (
-        input_helpers.get_user_input_number(
-            get_input, file=output, max_number=4) == 3
+        input_helpers.get_user_input_number(get_input, file=output, max_number=4) == 3
     )
 
 

@@ -154,9 +154,9 @@ class Battle:
                     lambda: input_helpers.get_user_input_number(
                         self.get_user_input,
                         "Which enemy qubit number: ",
-                        file=self.file
+                        file=self.file,
                     ),
-                    file=self.file
+                    file=self.file,
                 )
                 selected_monster = self.enemy_side[monster - 1]
                 qubit_name = selected_monster.quantum_object_name(qubit)
