@@ -143,19 +143,22 @@ class Battle:
                 else:
                     break
             if action in current_player.actions():
-                monster = (
-                    input_helpers.get_user_input_number(
+                monster, qubit = input_helpers.get_multiple_user_inputs(
+                    self.get_user_input,
+                    lambda: input_helpers.get_user_input_number(
                         self.get_user_input,
                         "Which enemy number: ",
                         max_number=len(self.enemy_side),
                         file=self.file,
-                    )
-                    - 1
+                    ),
+                    lambda: input_helpers.get_user_input_number(
+                        self.get_user_input,
+                        "Which enemy qubit number: ",
+                        file=self.file
+                    ),
+                    file=self.file
                 )
-                selected_monster = self.enemy_side[monster]
-                qubit = input_helpers.get_user_input_number(
-                    self.get_user_input, "Which enemy qubit number: ", file=self.file
-                )
+                selected_monster = self.enemy_side[monster - 1]
                 qubit_name = selected_monster.quantum_object_name(qubit)
                 if qubit_name in selected_monster.active_qubits():
                     res = actions[action](selected_monster, qubit)

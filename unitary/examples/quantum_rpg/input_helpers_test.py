@@ -1,7 +1,8 @@
-import pytest
 import io
 
-import unitary.examples.quantum_rpg.input_helpers as input_helpers
+import pytest
+
+from unitary.examples.quantum_rpg import input_helpers
 
 
 def test_get_user_input_function():
@@ -38,8 +39,38 @@ Invalid number selected.
 
 
 def test_get_user_input_number_max():
-    get_input = input_helpers.get_user_input_function(["0", "-1", "a", "7", "3"])
+    get_input = input_helpers.get_user_input_function(
+        ["0", "-1", "a", "7", "3"])
     output = io.StringIO()
     assert (
-        input_helpers.get_user_input_number(get_input, file=output, max_number=4) == 3
+        input_helpers.get_user_input_number(
+            get_input, file=output, max_number=4) == 3
     )
+
+
+def test_get_multiple_user_inputs():
+    get_input = input_helpers.get_user_input_function(
+        ["1", "2", "r", "3", "1", ""],
+    )
+    output = io.StringIO()
+
+    def p1():
+        return input_helpers.get_user_input_number(
+            get_input,
+            max_number=4,
+            file=output,
+        )
+
+    def p2():
+        return input_helpers.get_user_input_number(
+            get_input,
+            max_number=4,
+            file=output,
+        )
+
+    assert input_helpers.get_multiple_user_inputs(
+        get_input,
+        p1,
+        p2,
+        file=output,
+    ) == [3, 1]
