@@ -69,11 +69,11 @@ def get_multiple_user_inputs(
         print("[enter]) Confirm selection.", file=file)
         print("r) Select again.", file=file)
         while True:
-            match get_user_input("Choose your action: "):
-                case "r":
-                    break
-                case "":
-                    return inputs
+            a = get_user_input("Choose your action: ")
+            if a == "r":
+                break
+            if a == "":
+                return inputs
 
 
 def get_user_input_qaracter_name(
