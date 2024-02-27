@@ -26,7 +26,6 @@ import unitary.quantum_chess.quantum_board as qb
 from unitary.quantum_chess.test_utils import (
     assert_sample_distribution,
     assert_samples_in,
-    assert_this_or_that,
     assert_prob_about,
     assert_fifty_fifty,
 )
@@ -182,10 +181,7 @@ def test_split_move(move_type, board):
             move_variant=enums.MoveVariant.BASIC,
         )
     )
-    samples = b.sample(100)
-    assert_this_or_that(
-        samples, u.squares_to_bitboard(["a3"]), u.squares_to_bitboard(["c1"])
-    )
+    assert_samples_in(b, [u.squares_to_bitboard(["a3"]), u.squares_to_bitboard(["c1"])])
     probs = b.get_probability_distribution(5000)
     assert_fifty_fifty(probs, qb.square_to_bit("a3"))
     assert_fifty_fifty(probs, qb.square_to_bit("c1"))
@@ -200,9 +196,7 @@ def test_split_move(move_type, board):
     )
     assert b.do_move(m)
     samples = b.sample(100)
-    assert_this_or_that(
-        samples, u.squares_to_bitboard(["a3"]), u.squares_to_bitboard(["d1"])
-    )
+    assert_samples_in(b, [u.squares_to_bitboard(["a3"]), u.squares_to_bitboard(["d1"])])
     probs = b.get_probability_distribution(5000)
     assert_fifty_fifty(probs, u.square_to_bit("a3"))
     assert_fifty_fifty(probs, u.square_to_bit("d1"))

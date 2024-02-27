@@ -67,17 +67,6 @@ def assert_sample_distribution(b, probability_map, p_significant=1e-6):
     ), f"Observed {observed} far from expected {expected} (p = {p})"
 
 
-def assert_this_or_that(samples, this, that):
-    """Asserts all the samples are either equal to this or that,
-    and that one of each exists in the samples.
-    """
-    assert any(sample == this for sample in samples)
-    assert any(sample == that for sample in samples)
-    assert all(sample == this or sample == that for sample in samples), print_samples(
-        samples
-    )
-
-
 def assert_prob_about(probs, that, expected, atol=0.04):
     """Checks that the probability is within atol of the expected value."""
     assert probs[that] > expected - atol
