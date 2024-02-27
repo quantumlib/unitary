@@ -17,28 +17,39 @@ from scipy.stats import chisquare
 import unitary.quantum_chess.bit_utils as u
 
 
-def print_samples(samples):
-    """For debugging only. Prints all the samples as lists of squares."""
+def bitboard_to_string(bitboard):
+    """Returns space-separated string of square names."""
+    return "[" + " ".join(u.bitboard_to_squares(bitboard)) + "]"
+
+
+def print_samples(samples, possibilities):
+    """For debugging only. Prints expected and actual lists of squares."""
+    print("Expected bitboards:")
+    for bitboard in possibilities:
+        print(" " * 5, bitboard_to_string(bitboard))
+    print("Sample distribution:")
     sample_dict = {}
     for sample in samples:
         if sample not in sample_dict:
             sample_dict[sample] = 0
         sample_dict[sample] += 1
     for key in sample_dict:
-        print(f"{u.bitboard_to_squares(key)}: {sample_dict[key]}")
+        print(f"{sample_dict[key]:5} {bitboard_to_string(key)}")
 
 
 def assert_samples_in(b, possibilities):
+    def message(message):
+        print_samples(samples, possibilities)
+        return message
+
     samples = b.sample(500)
     assert len(samples) == 500
     all_in = all(sample in possibilities for sample in samples)
-    print(possibilities)
-    print(set(samples))
-    assert all_in, print_samples(samples)
+    assert all_in, message("Unexpected bitboard in samples")
     # make sure each is represented at least once
     for p in possibilities:
         any_in = any(sample == p for sample in samples)
-        assert any_in, print_samples(samples)
+        assert any_in, message("Not all expected bitboards appeared")
 
 
 def assert_sample_distribution(b, probability_map, p_significant=1e-6):
