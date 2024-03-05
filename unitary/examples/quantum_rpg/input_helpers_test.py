@@ -39,8 +39,7 @@ Invalid number selected.
 
 
 def test_get_user_input_number_max():
-    get_input = input_helpers.get_user_input_function(
-        ["0", "-1", "a", "7", "3"])
+    get_input = input_helpers.get_user_input_function(["0", "-1", "a", "7", "3"])
     output = io.StringIO()
     assert (
         input_helpers.get_user_input_number(get_input, file=output, max_number=4) == 3

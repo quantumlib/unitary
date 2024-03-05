@@ -1,8 +1,8 @@
 """Functions for safe and user-friendly input."""
 
-from typing import Callable, Optional, Sequence, TextIO
-
 import sys
+from typing import Callable, Optional, Sequence, TextIO, Union
+
 from unitary.examples.quantum_rpg import qaracter
 
 _USER_INPUT = Callable[[str], str]
@@ -56,9 +56,9 @@ def get_user_input_number(
 
 def get_multiple_user_inputs(
     get_user_input: _USER_INPUT,
-    *prompts: Sequence[Callable[[], int] | Callable[[], str]],
+    *prompts: Sequence[Union[Callable[[], int], Callable[[], str]]],
     file: TextIO = sys.stdout,
-) -> Sequence[int | str]:
+) -> Sequence[Union[int, str]]:
     """Runs multiple number or string prompts and returns their results.
 
     After all inputs have been provided the last prompt asks for confirmation if

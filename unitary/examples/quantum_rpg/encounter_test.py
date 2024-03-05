@@ -13,11 +13,12 @@
 # limitations under the License.
 
 import io
+
 import unitary.alpha as alpha
 import unitary.examples.quantum_rpg.battle as battle
 import unitary.examples.quantum_rpg.classes as classes
-import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.encounter as encounter
+import unitary.examples.quantum_rpg.game_state as game_state
 import unitary.examples.quantum_rpg.npcs as npcs
 import unitary.examples.quantum_rpg.xp_utils as xp_utils
 
@@ -38,7 +39,7 @@ def test_encounter():
     c = classes.Analyst("Aaronson")
     o = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["m", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["m", "1", "1", ""], file=io.StringIO()
     )
     e = encounter.Encounter([o])
 
@@ -56,6 +57,8 @@ Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
+[enter]) Confirm selection.
+r) Select again.
 """.strip()
     )
 
