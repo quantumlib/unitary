@@ -75,9 +75,7 @@ class Analyst(qaracter.Qaracter):
             ),
         }
         if self.level >= 3:
-            action_dict[
-                "s"
-            ] = (
+            action_dict["s"] = (
                 lambda monster, qubit: f"Sample result {monster.sample(monster.quantum_object_name(qubit), False)}"
             )
         return action_dict
