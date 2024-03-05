@@ -427,9 +427,9 @@ class CirqBoard:
                 probs = self._apply_cache(
                     previous_probability, last_move, self.cache[cache_key]
                 )
-                self.move_history_probabilities_cache[
-                    -1
-                ] = self._make_probability_history(repetitions, probs)
+                self.move_history_probabilities_cache[-1] = (
+                    self._make_probability_history(repetitions, probs)
+                )
                 # Remove entry from cached since it has been consumed.
                 del self.cache[cache_key]
                 return
