@@ -60,9 +60,11 @@ def _get_program_id(program: Any):
         return str(uuid.uuid4())
 
     parts = [
-        p
-        if len(p) <= chars_per_part
-        else p[: chars_per_part // 2] + p[-chars_per_part // 2 :]
+        (
+            p
+            if len(p) <= chars_per_part
+            else p[: chars_per_part // 2] + p[-chars_per_part // 2 :]
+        )
         for p in parts
     ]
     return "_".join(parts)
