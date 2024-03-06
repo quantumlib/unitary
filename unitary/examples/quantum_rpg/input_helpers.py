@@ -1,4 +1,5 @@
 """Functions for safe and user-friendly input."""
+
 from typing import Callable, Optional, Sequence, TextIO, Union
 
 import sys
