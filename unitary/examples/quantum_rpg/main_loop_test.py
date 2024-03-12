@@ -369,7 +369,7 @@ m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
@@ -434,7 +434,7 @@ x) Attack with X gate.
 q) Read Quantopedia.
 ?) Help.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 Observer watcher measures Mensing_1 as HURT.
 ------------------------------------------------------------
                     Battle Summary
@@ -503,7 +503,7 @@ x) Attack with X gate.
 q) Read Quantopedia.
 ?) Help.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 Observer watcher measures Mensing_1 as HEALTHY.
 ------------------------------------------------------------
                     Battle Summary

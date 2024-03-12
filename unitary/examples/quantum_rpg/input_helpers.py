@@ -69,7 +69,7 @@ def get_multiple_user_inputs(
     while True:
         inputs = [p() for p in prompts]
         print("[enter]) Confirm selection.", file=file)
-        print("r) Select again.", file=file)
+        print("r) Redo selection.", file=file)
         while True:
             a = get_user_input("Choose your action: ")
             if a == "r":

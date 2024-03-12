@@ -58,7 +58,7 @@ m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 """.strip()
     )
 

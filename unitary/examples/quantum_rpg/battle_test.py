@@ -40,7 +40,7 @@ m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 """.strip()
     )
 
@@ -66,7 +66,7 @@ q) Read Quantopedia.
 ?) Help.
 Invalid number selected.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 """.strip()
     )
 
@@ -101,7 +101,7 @@ s) Sample enemy qubit.
 q) Read Quantopedia.
 ?) Help.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 ------------------------------------------------------------
 Aaronson Analyst                        1) watcher Observer
 3QP (0|1> 0|0> 3?)                      1QP (0|1> 1|0> 0?) *DOWN* 
@@ -114,7 +114,7 @@ x) Attack with X gate.
 q) Read Quantopedia.
 ?) Help.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 """.strip()
     )
 
@@ -162,7 +162,7 @@ m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
@@ -197,7 +197,7 @@ into the |0> state or |1> state with a probability based on its
 amplitude. Try to measure the enemy qubits as |0> to defeat them.
 
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
@@ -229,7 +229,7 @@ q) Read Quantopedia.
 ?) Help.
 You do not have information on Observer yet.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
@@ -263,7 +263,7 @@ q) Read Quantopedia.
 Observers are known to frequent quantum events.
 They will measure qubits in order to find out their values.
 [enter]) Confirm selection.
-r) Select again.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
