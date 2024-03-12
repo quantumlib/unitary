@@ -129,15 +129,30 @@ HOLE = Item(
 )
 
 
-def _bridge(state: GameState, world) -> str:
+def _examine_bridge(state: GameState, world) -> str:
+    location = world.get(state.current_location_label)
+    if "hbridgestate" in state.state_dict:
+        location.exits[Direction.NORTH] = "hadamard1"
+    if Direction.NORTH in location.exits:
+        return "You have already fixed the bridge."
+    return (
+        "It looks as if this bridge has fallen into disrepair.\n"
+        "Parts have decayed and have fallen into the river. However,\n"
+        "there are plenty of logs around, and the supports are intact,\n"
+        "so it should be possible to repair it, for someone with the right skills."
+    )
+
+
+def _fix_bridge(state: GameState, world) -> str:
+    location = world.get(state.current_location_label)
+    if Direction.NORTH in location.exits:
+        return "You have already fixed the bridge."
     has_engineer = any(isinstance(qar, Engineer) for qar in state.party)
     if not has_engineer:
         return "You do not have the required skills to fix the bridge."
     else:
-        location = world.get(state.current_location_label)
-        if Direction.NORTH in location.exits:
-            return "You have already fixed the bridge."
         location.exits[Direction.NORTH] = "hadamard1"
+        state.state_dict["hbridgestate"] = "fixed"
         return "The engineer uses nearby logs to repair the bridge and provide a safe passage."
 
 
@@ -146,17 +161,12 @@ BRIDGE = Item(
         (
             EXAMINE,
             ["bridge"],
-            (
-                "It looks as if this bridge has fallen into disrepair.\n"
-                "Parts have decayed and have fallen into the river. However,\n"
-                "there are plenty of logs around, and the supports are intact,\n"
-                "so it should be possible to repair it, for someone with the right skills."
-            ),
+            _examine_bridge,
         ),
         (
             ["fix", "repair"],
             ["bridge"],
-            _bridge,
+            _fix_bridge,
         ),
     ]
 )
@@ -320,8 +330,8 @@ CLASSICAL_FRONTIER = [
         description=(
             "Here, at the southern shore of the river is a rickety bridge\n"
             "that leads to the northern side of the river. Pieces of the bridge\n"
-            "have collapsed and fallen apart, and there seems to be no way to\n"
-            "cross safely, given the condition the bridge is in now."
+            "have collapsed and fallen apart, and without further examination\n"
+            "it's unclear if the bridge is safe to cross, given its current condition."
         ),
         encounters=[red_foam(2, 0.3), green_foam(3, 0.2)],
         items=[BRIDGE],
