@@ -131,22 +131,61 @@ def test_bridge():
     state = game_state.GameState(party=[c], user_input=["Hamilton"], file=io.StringIO())
     state.current_location_label = "classical12"
     test_world = go_directions("nnwnnnne")
-    assert test_world.current_location.title == "At a Broken Bridge"
-    action = test_world.current_location.get_action("fix bridge")
-    assert callable(action)
-    msg = action(state, test_world)
-    assert msg == "You do not have the required skills to fix the bridge."
     bridge_location = test_world.get("classical12")
+    fix = test_world.current_location.get_action("fix bridge")
+    examine = test_world.current_location.get_action("examine bridge")
+
+    # The world and the game state are at the location of the broken bridge, which can be fixed and examined.
+    assert test_world.current_location.title == "At a Broken Bridge"
+    assert (
+        test_world.current_location.label
+        == state.current_location_label
+        == bridge_location.label
+    )
+    assert callable(fix)
+    assert callable(examine)
+
+    # The bridge is not yet fixed
     assert Direction.NORTH not in bridge_location.exits
+
+    # Examining the bridge doesn't fix it, nor can it be fixed without an engineer.
+    msg = examine(state, test_world)
+    assert Direction.NORTH not in bridge_location.exits
+
+    msg = fix(state, test_world)
+    assert msg == "You do not have the required skills to fix the bridge."
+    assert Direction.NORTH not in bridge_location.exits
+
+    # The engineer is able to fix the bridge,
+    # and the fix is saved in the game state.
     c = classes.Engineer("Tesla")
     state.party.append(c)
-    assert callable(action)
-    msg = action(state, test_world)
+    msg = fix(state, test_world)
     assert (
         msg
         == "The engineer uses nearby logs to repair the bridge and provide a safe passage."
     )
     assert Direction.NORTH in bridge_location.exits
-    assert callable(action)
-    msg = action(state, test_world)
+    assert state.state_dict["hbridgestate"] == "fixed"
+
+    # The bridge is already fixed,
+    # fixing it or examining it doesn't change that.
+    msg = fix(state, test_world)
     assert msg == "You have already fixed the bridge."
+
+    msg = examine(state, test_world)
+    assert msg == "You have already fixed the bridge."
+
+    assert Direction.NORTH in bridge_location.exits
+
+    # Remove North direction to simulate restarting the game
+    # with bridge fix in the save file.
+    bridge_location.exits.pop(Direction.NORTH)
+
+    # The bridge doesn't appear fixed,
+    # but on further examination we learn that it had been fixed,
+    # so now we know it can be used to exit North.
+    assert Direction.NORTH not in bridge_location.exits
+    msg = examine(state, test_world)
+    assert msg == "You have already fixed the bridge."
+    assert Direction.NORTH in bridge_location.exits
