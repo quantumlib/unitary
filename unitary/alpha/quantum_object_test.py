@@ -18,11 +18,10 @@ import pytest
 import cirq
 
 import unitary.alpha as alpha
-from unitary.alpha.sparse_vector_simulator import SparseSimulator
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_negation(simulator, compile_to_qubits):
     piece = alpha.QuantumObject("t", 0)
     board = alpha.QuantumWorld(
@@ -38,7 +37,7 @@ def test_negation(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_add_world_after_state_change(simulator, compile_to_qubits):
     piece = alpha.QuantumObject("t", 0)
     piece += 1
