@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import cast
-
 import copy
 import io
+from typing import cast
+
 import unitary.alpha as alpha
 import unitary.examples.quantum_rpg.ascii_art as ascii_art
 import unitary.examples.quantum_rpg.classes as classes
@@ -328,7 +328,9 @@ Exits: east.
 def test_battle() -> None:
     c = classes.Analyst("Mensing")
     state = game_state.GameState(
-        party=[c], user_input=["e", "south", "m", "1", "1", "quit"], file=io.StringIO()
+        party=[c],
+        user_input=["e", "south", "m", "1", "1", "", "quit"],
+        file=io.StringIO(),
     )
     loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
     loop.loop()
@@ -366,6 +368,8 @@ Mensing turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
+[enter]) Confirm selection.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
@@ -385,7 +389,9 @@ Exits: north.
 def test_lost_battle() -> None:
     c = classes.Engineer("Mensing")
     state = game_state.GameState(
-        party=[c], user_input=["e", "south", "x", "1", "1", "quit"], file=io.StringIO()
+        party=[c],
+        user_input=["e", "south", "x", "1", "1", "", "quit"],
+        file=io.StringIO(),
     )
     assert state.party[0].name == "Mensing"
     assert len(state.party[0].active_qubits()) == 1
@@ -427,6 +433,8 @@ Mensing turn:
 x) Attack with X gate.
 q) Read Quantopedia.
 ?) Help.
+[enter]) Confirm selection.
+r) Redo selection.
 Observer watcher measures Mensing_1 as HURT.
 ------------------------------------------------------------
                     Battle Summary
@@ -450,7 +458,9 @@ def test_escaped_battle():
     c = classes.Engineer("Mensing")
     c.add_quantum_effect(alpha.Flip(), 1)
     state = game_state.GameState(
-        party=[c], user_input=["e", "south", "x", "1", "1", "quit"], file=io.StringIO()
+        party=[c],
+        user_input=["e", "south", "x", "1", "1", "", "quit"],
+        file=io.StringIO(),
     )
     assert state.party[0].name == "Mensing"
     assert len(state.party[0].active_qubits()) == 1
@@ -492,6 +502,8 @@ Mensing turn:
 x) Attack with X gate.
 q) Read Quantopedia.
 ?) Help.
+[enter]) Confirm selection.
+r) Redo selection.
 Observer watcher measures Mensing_1 as HEALTHY.
 ------------------------------------------------------------
                     Battle Summary

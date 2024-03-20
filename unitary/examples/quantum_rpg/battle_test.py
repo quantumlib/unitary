@@ -23,7 +23,7 @@ def test_battle():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["m", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["m", "1", "1", ""], file=io.StringIO()
     )
     b = battle.Battle(state, [e])
     b.take_player_turn()
@@ -39,6 +39,8 @@ Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
+[enter]) Confirm selection.
+r) Redo selection.
 """.strip()
     )
 
@@ -47,7 +49,7 @@ def test_bad_monster():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["m", "2", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["m", "2", "1", "1", ""], file=io.StringIO()
     )
     b = battle.Battle(state, [e])
     b.take_player_turn()
@@ -63,6 +65,8 @@ m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
 Invalid number selected.
+[enter]) Confirm selection.
+r) Redo selection.
 """.strip()
     )
 
@@ -78,7 +82,7 @@ def test_higher_level_players():
     w = npcs.Observer("watcher")
     w2 = npcs.Observer("watcher")
     state = game_state.GameState(
-        [c, e], user_input=["m", "1", "1", "h", "2", "1"], file=io.StringIO()
+        [c, e], user_input=["m", "1", "1", "", "h", "2", "1", ""], file=io.StringIO()
     )
     b = battle.Battle(state, [w, w2])
     b.take_player_turn()
@@ -96,6 +100,8 @@ m) Measure enemy qubit.
 s) Sample enemy qubit.
 q) Read Quantopedia.
 ?) Help.
+[enter]) Confirm selection.
+r) Redo selection.
 ------------------------------------------------------------
 Aaronson Analyst                        1) watcher Observer
 3QP (0|1> 0|0> 3?)                      1QP (0|1> 1|0> 0?) *DOWN* 
@@ -107,6 +113,8 @@ h) Attack with H gate.
 x) Attack with X gate.
 q) Read Quantopedia.
 ?) Help.
+[enter]) Confirm selection.
+r) Redo selection.
 """.strip()
     )
 
@@ -138,7 +146,7 @@ def test_battle_loop():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["m", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["m", "1", "1", ""], file=io.StringIO()
     )
     b = battle.Battle(state, [e])
     assert b.loop() == battle.BattleResult.PLAYERS_WON
@@ -153,6 +161,8 @@ Aaronson turn:
 m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
+[enter]) Confirm selection.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
@@ -167,7 +177,7 @@ def test_battle_help():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["?", "m", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["?", "m", "1", "1", ""], file=io.StringIO()
     )
     b = battle.Battle(state, [e])
     assert b.loop() == battle.BattleResult.PLAYERS_WON
@@ -186,6 +196,8 @@ The analyst can measure enemy qubits.  This forces an enemy qubit
 into the |0> state or |1> state with a probability based on its
 amplitude. Try to measure the enemy qubits as |0> to defeat them.
 
+[enter]) Confirm selection.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
@@ -200,7 +212,7 @@ def test_read_quantopedia_not_known():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["q", "m", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["q", "m", "1", "1", ""], file=io.StringIO()
     )
     b = battle.Battle(state, [e])
     assert b.loop() == battle.BattleResult.PLAYERS_WON
@@ -216,6 +228,8 @@ m) Measure enemy qubit.
 q) Read Quantopedia.
 ?) Help.
 You do not have information on Observer yet.
+[enter]) Confirm selection.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
@@ -230,7 +244,7 @@ def test_read_quantopedia():
     c = classes.Analyst("Aaronson")
     e = npcs.Observer("watcher")
     state = game_state.GameState(
-        party=[c], user_input=["q", "m", "1", "1"], file=io.StringIO()
+        party=[c], user_input=["q", "m", "1", "1", ""], file=io.StringIO()
     )
     state.set_quantopedia(1)
     b = battle.Battle(state, [e])
@@ -248,6 +262,8 @@ q) Read Quantopedia.
 ?) Help.
 Observers are known to frequent quantum events.
 They will measure qubits in order to find out their values.
+[enter]) Confirm selection.
+r) Redo selection.
 ------------------------------------------------------------
                     Battle Summary
 
