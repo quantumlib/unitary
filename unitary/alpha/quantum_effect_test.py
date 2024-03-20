@@ -17,14 +17,13 @@ import pytest
 import cirq
 
 import unitary.alpha as alpha
-from unitary.alpha.sparse_vector_simulator import SparseSimulator
 
 Q0 = cirq.NamedQubit("q0")
 Q1 = cirq.NamedQubit("q1")
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_quantum_if(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("q0", 1)
@@ -46,7 +45,7 @@ def test_quantum_if(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_anti_control(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("q0", 0)

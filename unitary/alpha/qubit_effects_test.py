@@ -18,11 +18,10 @@ import pytest
 import cirq
 
 import unitary.alpha as alpha
-from unitary.alpha.sparse_vector_simulator import SparseSimulator
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_flip(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", 0)
@@ -33,7 +32,7 @@ def test_flip(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_partial_flip(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", 0)
@@ -44,7 +43,7 @@ def test_partial_flip(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_partial_flip_multiple(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", 0)
@@ -56,7 +55,7 @@ def test_partial_flip_multiple(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_phase(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", 0)
@@ -67,7 +66,7 @@ def test_phase(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_partial_phase(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", 0)
@@ -78,7 +77,7 @@ def test_partial_phase(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_superposition(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", 0)
@@ -89,7 +88,7 @@ def test_superposition(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_move(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece1 = alpha.QuantumObject("a", 1)
@@ -110,7 +109,7 @@ def test_move(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_partial_move(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece1 = alpha.QuantumObject("a", 1)
@@ -133,7 +132,7 @@ def test_partial_move(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_phased_move(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece1 = alpha.QuantumObject("a", 1)
@@ -154,7 +153,7 @@ def test_phased_move(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_partial_phased_move(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece1 = alpha.QuantumObject("a", 1)
@@ -177,7 +176,7 @@ def test_partial_phased_move(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_split(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece1 = alpha.QuantumObject("a", 1)
@@ -199,7 +198,7 @@ def test_split(simulator, compile_to_qubits):
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
-@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
 def test_phased_split(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece1 = alpha.QuantumObject("a", 1)
