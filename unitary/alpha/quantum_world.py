@@ -36,8 +36,11 @@ class QuantumWorld:
     This object also has a history so that effects can be undone.
 
     This object should be initialized with a sampler that determines
-    how to evaluate the quantum game state.  If not specified, this
-    defaults to the built-in cirq Simulator.
+    how to evaluate the quantum game state. If not specified, this
+    defaults to a noiseless simulator optimized for sparse state vectors.
+    You may also use e.g. cirq.Simulator, a noiseless simulator using
+    dense state vectors, which natively supports qudits unlike the sparse
+    simulator.
 
     Setting the `compile_to_qubits` option results in an internal state
     representation of ancilla qubits for every qudit in the world. That
@@ -48,12 +51,14 @@ class QuantumWorld:
     def __init__(
         self,
         objects: Optional[List[QuantumObject]] = None,
-        sampler=cirq.Simulator(),
-        compile_to_qubits: bool = False,
+        sampler: cirq.Sampler = SparseSimulator(),
+        compile_to_qubits: Optional[bool] = None,
     ):
         self.clear()
         self.sampler = sampler
         self.use_sparse = isinstance(sampler, SparseSimulator)
+        if compile_to_qubits is None:
+            compile_to_qubits = self.use_sparse
         self.compile_to_qubits = compile_to_qubits
 
         if isinstance(objects, QuantumObject):

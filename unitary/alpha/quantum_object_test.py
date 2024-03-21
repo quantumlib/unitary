@@ -47,10 +47,20 @@ def test_add_world_after_state_change(simulator, compile_to_qubits):
     assert board.peek() == [[1]]
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_qutrit(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_qutrit(simulator, compile_to_qubits):
     piece = alpha.QuantumObject("t", 2)
-    board = alpha.QuantumWorld(piece, compile_to_qubits=compile_to_qubits)
+    board = alpha.QuantumWorld(
+        piece, sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
     assert board.peek() == [[2]]
     piece += 1
     assert board.peek() == [[0]]
@@ -64,15 +74,25 @@ def test_qutrit(compile_to_qubits):
     assert board.peek() == [[2]]
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_enum(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_enum(simulator, compile_to_qubits):
     class Color(enum.Enum):
         RED = 0
         YELLOW = 1
         GREEN = 2
 
     piece = alpha.QuantumObject("t", Color.YELLOW)
-    board = alpha.QuantumWorld(piece, compile_to_qubits=compile_to_qubits)
+    board = alpha.QuantumWorld(
+        piece, sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
     assert board.peek() == [[Color.YELLOW]]
     piece += Color.YELLOW
     assert board.peek() == [[Color.GREEN]]

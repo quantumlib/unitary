@@ -15,6 +15,8 @@
 import enum
 import pytest
 
+import cirq
+
 import unitary.alpha as alpha
 
 
@@ -24,9 +26,17 @@ class StopLight(enum.Enum):
     GREEN = 2
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_qudit_cycle(compile_to_qubits):
-    board = alpha.QuantumWorld(compile_to_qubits=compile_to_qubits)
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_qudit_cycle(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", StopLight.GREEN)
     board.add_object(piece)
     alpha.QuditCycle(3)(piece)
@@ -43,9 +53,17 @@ def test_qudit_cycle(compile_to_qubits):
     assert all(result == [StopLight.YELLOW] for result in results)
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_qudit_flip(compile_to_qubits):
-    board = alpha.QuantumWorld(compile_to_qubits=compile_to_qubits)
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_qudit_flip(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", StopLight.GREEN)
     board.add_object(piece)
     alpha.QuditFlip(3, 0, 2)(piece)

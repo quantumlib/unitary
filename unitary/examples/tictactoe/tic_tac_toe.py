@@ -15,6 +15,8 @@ import io
 import sys
 from typing import Dict, List, TextIO
 
+import cirq
+
 from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.alpha.qudit_effects import QuditFlip
 from unitary.examples.tictactoe.enums import (
@@ -146,7 +148,9 @@ class TicTacToe:
             self.empty_squares.add(name)
             self.squares[name] = QuantumObject(name, TicTacSquare.EMPTY)
         self.board = QuantumWorld(
-            list(self.squares.values()), compile_to_qubits=run_on_hardware
+            list(self.squares.values()),
+            sampler=cirq.Simulator(),
+            compile_to_qubits=run_on_hardware,
         )
 
     def result(self) -> TicTacResult:
@@ -171,7 +175,7 @@ class TicTacToe:
             if self.last_result[idx] == TicTacSquare.EMPTY:
                 self.empty_squares.add(name)
             self.squares[name] = QuantumObject(name, self.last_result[idx])
-        self.board = QuantumWorld(list(self.squares.values()))
+        self.board = QuantumWorld(list(self.squares.values()), sampler=cirq.Simulator())
 
     def move(self, move: str, mark: TicTacSquare) -> TicTacResult:
         """Make a move on the TicTacToe board.

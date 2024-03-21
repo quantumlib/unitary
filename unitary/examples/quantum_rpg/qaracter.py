@@ -162,7 +162,8 @@ class Qaracter(alpha.QuantumWorld):
             self.get_object_by_name(self.quantum_object_name(i)).qubit
             for i in range(1, self.level + 1)
         ]
-        return self.circuit.to_text_diagram(qubit_order=all_qubits)
+        canonical_circuit = cirq.Circuit(cirq.flatten_op_tree(self.circuit))
+        return canonical_circuit.to_text_diagram(qubit_order=all_qubits)
 
     def qar_status(self) -> str:
         """Prints out the qaracter's name/class/level and circuit.

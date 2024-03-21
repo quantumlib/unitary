@@ -99,7 +99,9 @@ def test_tic_tac_split(
 ):
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
-    board = alpha.QuantumWorld([a, b], compile_to_qubits=compile_to_qubits)
+    board = alpha.QuantumWorld(
+        [a, b], sampler=cirq.Simulator(), compile_to_qubits=compile_to_qubits
+    )
     tictactoe.TicTacSplit(mark, ruleset)(a, b)
     results = board.peek(count=1000)
     on_a = [mark, tictactoe.TicTacSquare.EMPTY]
@@ -114,7 +116,9 @@ def test_tic_tac_split_entangled_v2(compile_to_qubits):
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
     c = alpha.QuantumObject("c", tictactoe.TicTacSquare.EMPTY)
-    board = alpha.QuantumWorld([a, b, c], compile_to_qubits=compile_to_qubits)
+    board = alpha.QuantumWorld(
+        [a, b, c], sampler=cirq.Simulator(), compile_to_qubits=compile_to_qubits
+    )
     ruleset = tictactoe.TicTacRules.QUANTUM_V2
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.X, ruleset)(a, b)
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.O, ruleset)(b, c)
@@ -133,7 +137,9 @@ def test_tic_tac_split_entangled_v3(compile_to_qubits):
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
     c = alpha.QuantumObject("c", tictactoe.TicTacSquare.EMPTY)
-    board = alpha.QuantumWorld([a, b, c], compile_to_qubits=compile_to_qubits)
+    board = alpha.QuantumWorld(
+        [a, b, c], sampler=cirq.Simulator(), compile_to_qubits=compile_to_qubits
+    )
     ruleset = tictactoe.TicTacRules.QUANTUM_V3
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.X, ruleset)(a, b)
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.O, ruleset)(b, c)
@@ -160,7 +166,9 @@ def test_tic_tac_split_entangled_v3_empty(compile_to_qubits):
     a = alpha.QuantumObject("a", tictactoe.TicTacSquare.EMPTY)
     b = alpha.QuantumObject("b", tictactoe.TicTacSquare.EMPTY)
     c = alpha.QuantumObject("c", tictactoe.TicTacSquare.EMPTY)
-    board = alpha.QuantumWorld([a, b, c], compile_to_qubits=compile_to_qubits)
+    board = alpha.QuantumWorld(
+        [a, b, c], sampler=cirq.Simulator(), compile_to_qubits=compile_to_qubits
+    )
     ruleset = tictactoe.TicTacRules.QUANTUM_V3
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.X, ruleset)(a, b)
     tictactoe.TicTacSplit(tictactoe.TicTacSquare.O, ruleset)(c, b)
