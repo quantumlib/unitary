@@ -100,7 +100,9 @@ def test_two_qubits(simulator, compile_to_qubits):
 def test_two_qutrits(compile_to_qubits):
     light = alpha.QuantumObject("yellow", StopLight.YELLOW)
     light2 = alpha.QuantumObject("green", StopLight.GREEN)
-    board = alpha.QuantumWorld([light, light2], compile_to_qubits=compile_to_qubits)
+    board = alpha.QuantumWorld(
+        [light, light2], sampler=cirq.Simulator(), compile_to_qubits=compile_to_qubits
+    )
     assert board.peek(convert_to_enum=False) == [[1, 2]]
     assert board.peek() == [[StopLight.YELLOW, StopLight.GREEN]]
     assert board.peek([light], count=2) == [[StopLight.YELLOW], [StopLight.YELLOW]]
@@ -630,19 +632,31 @@ def test_combine_incompatibly_sparse_worlds(compile_to_qubits):
         world2.combine_with(world1)
 
 
-@pytest.mark.parametrize("compile_to_qubits", [False, True])
-def test_combine_worlds(compile_to_qubits):
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_combine_worlds(simulator, compile_to_qubits):
     l1 = alpha.QuantumObject("l1", Light.GREEN)
     l2 = alpha.QuantumObject("l2", Light.RED)
     l3 = alpha.QuantumObject("l3", Light.RED)
-    world1 = alpha.QuantumWorld([l1, l2, l3], compile_to_qubits=compile_to_qubits)
+    world1 = alpha.QuantumWorld(
+        [l1, l2, l3], sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
 
     # Split and pop to test post-selection after combining
     alpha.Split()(l1, l2, l3)
     result = world1.pop()
 
     l4 = alpha.QuantumObject("stop_light", StopLight.YELLOW)
-    world2 = alpha.QuantumWorld([l4], compile_to_qubits=compile_to_qubits)
+    world2 = alpha.QuantumWorld(
+        [l4], sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
     world2.combine_with(world1)
 
     results = world2.peek(count=100)

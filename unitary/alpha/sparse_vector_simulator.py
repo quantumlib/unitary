@@ -18,8 +18,7 @@ Just enough features to support Unitary are implemented.
 
 Supports standard unitary Cirq gates, plus a post-selection operator.
 
-Does not work with 3+-state qudits. TODO: integrate with qutrit-to-qubit conversion
-when that is available.
+Does not work with 3+-state qudits.
 """
 import cirq
 import numpy as np
