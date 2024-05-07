@@ -110,7 +110,6 @@ class GameInterface:
                     self.do_game_move(move)
                     prev_take = False
                 elif(self.game.player == CheckersPlayer.BLACK and not isinstance(self.black_player, human_player)):
-                    self.black_player = MCTS(self.game, self.args)
                     # move = self.black_player.search()
                     move = self.white_player.select_move(self.game.legal_moves)
                     self.do_game_move(move)

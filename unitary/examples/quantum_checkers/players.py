@@ -40,17 +40,5 @@ class random_bot(bot):
 class exp_min_max(bot):
     def select_move(self, possible_moves):
         pass
-
-class mcts_bot(bot):
-    def __init__(self, game) -> None:
-        args = {
-            'C': 1.41, # sqrt of 2
-            'num_searches': 100 #Budget per rollout
-        }
-        mcts = MCTS(game, args)
-        super().__init__()
-
-    def select_move(self, possible_moves):
-        pass
     
             
