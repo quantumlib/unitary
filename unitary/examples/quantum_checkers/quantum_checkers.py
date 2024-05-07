@@ -1135,12 +1135,12 @@ class Checkers:
                     # for i, classical_id in enumerate(ids):
 
                     temp_state.classical_squares[str(move.source_id)].chance = 100
-                    temp_state.classical_squares[
-                        str(move.target1_id)
-                    ] = temp_state.classical_squares[str(move.source_id)]
-                    temp_state.classical_squares[
-                        str(move.target1_id)
-                    ].id = move.target1_id
+                    temp_state.classical_squares[str(move.target1_id)] = (
+                        temp_state.classical_squares[str(move.source_id)]
+                    )
+                    temp_state.classical_squares[str(move.target1_id)].id = (
+                        move.target1_id
+                    )  
                     temp_state.remove_from_rel_squares(move.source_id)
                     temp_state.remove_piece(move.source_id)
                     for i in source_ids:
@@ -1283,9 +1283,9 @@ class Checkers:
                 )
 
                 # Since we jump over a piece in superposition we need to add these two pieces to the correct superposition squares in related squares
-                self.classical_squares[
-                    str(move.target1_id)
-                ].chance = self.classical_squares[str(jumped_id)].chance
+                self.classical_squares[str(move.target1_id)].chance = (
+                    self.classical_squares[str(jumped_id)].chance
+                )
                 self.classical_squares[str(move.source_id)].chance = (
                     100 - self.classical_squares[str(jumped_id)].chance
                 )
