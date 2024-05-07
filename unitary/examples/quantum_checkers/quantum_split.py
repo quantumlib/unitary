@@ -33,7 +33,7 @@ class QuditSplitGate(cirq.Gate):
         g = np.exp(1j * np.pi / 4)
         coeff = -1j * g * np.sin(np.pi / 4)
         diag = g * np.cos(np.pi / 4)
-        if self.square == CheckersSquare.WHITE: # Maybe should be black?
+        if self.square == CheckersSquare.WHITE:  # Maybe should be black?
             arr[2, 6] = coeff
             arr[6, 2] = coeff
             arr[6, 6] = diag
@@ -79,6 +79,7 @@ class CheckersSplit(QuantumEffect):
         yield QuditISwapPowGate(2, 0.5)(target1.qubit, target2.qubit)
         # yield QuditISwapPowGate(5, 0.5)(square1.qubit, square2.qubit)
 
+
 class CheckersClassicMove(QuantumEffect):
     """
     Flips a qubit from |0> to |1> then splits to another square.
@@ -100,4 +101,3 @@ class CheckersClassicMove(QuantumEffect):
         source = objects[0]
         target = objects[1]
         yield QuditISwapPowGate(2, 1)(source.qubit, target.qubit)
-      

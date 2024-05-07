@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Union
 
+
 class CheckersResult(Enum):
     UNFINISHED = 0
     WHITE_WINS = 1
@@ -8,15 +9,18 @@ class CheckersResult(Enum):
     DRAW = 3
     BOTH_WIN = 4
 
+
 class CheckersPlayer(Enum):
     WHITE = 0
     BLACK = 1
+
 
 class MoveType(Enum):
     CLASSIC = 0
     SPLIT = 1
     TAKE = 2
     ENTANGLE = 3
+
 
 class CheckersRules(Enum):
     """The different rulesets for Quantum Checkers.
@@ -35,16 +39,19 @@ class CheckersRules(Enum):
     """
 
     CLASSICAL = 0
-    QUANTUM_V1 = 1 # Superpositions
-    QUANTUM_V2 = 2 # Entanglement without being able to entangle with entangled squares
-    QUANTUM_V3 = 3 # Entanglement with no limitations
+    QUANTUM_V1 = 1  # Superpositions
+    QUANTUM_V2 = 2  # Entanglement without being able to entangle with entangled squares
+    QUANTUM_V3 = 3  # Entanglement with no limitations
+
 
 class Colors(Enum):
     """
     OLD used for classical checkers
     """
+
     BLACK = 0
     WHITE = 1
+
 
 class CheckersSquare(Enum):
     EMPTY = 0

@@ -1,14 +1,15 @@
 import unittest
 from quantum_checkers import Checkers
 
-class TestIsAdjacent(unittest.TestCase):        
+
+class TestIsAdjacent(unittest.TestCase):
     def test_is_adjacent_true(self):
         game = Checkers(num_vertical=3, num_horizontal=3, num_vertical_pieces=1)
         for i in range(9):
             is_adjacent, id = game.is_adjacent(4, i)
             self.assertEqual(is_adjacent, True, "Should be True")
             self.assertEqual(id, None, f"{id} should be None")
-    
+
     def test_is_adjacent_false(self):
         game = Checkers(num_vertical=5, num_horizontal=5, num_vertical_pieces=1)
         for i in range(9):
@@ -34,6 +35,6 @@ class TestIsAdjacent(unittest.TestCase):
         self.assertEqual(is_adjacent, False, f"12 is not adjacent to 24")
         self.assertEqual(id, 18, f"{id} should be 18")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
-    
