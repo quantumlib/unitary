@@ -1140,7 +1140,7 @@ class Checkers:
                     )
                     temp_state.classical_squares[str(move.target1_id)].id = (
                         move.target1_id
-                    )  
+                    )
                     temp_state.remove_from_rel_squares(move.source_id)
                     temp_state.remove_piece(move.source_id)
                     for i in source_ids:
