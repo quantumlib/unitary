@@ -11,6 +11,7 @@ In this game, multiple rules are implemented.
 
 # How to run
 Copy this repository and run the main file: `python3 .\main.py`
+Flags: If you want to play with GUI (experimental) add `--GUI=True`: `python3 .\main.py --GUI=True`
 
 # Full implementation
 For the full implementation with a Monte Carlo Tree search agent, see https://github.com/LuukvandenNouweland/quantum_checkers
