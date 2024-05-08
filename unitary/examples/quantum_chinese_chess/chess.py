@@ -20,6 +20,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     Color,
     MoveType,
     MoveVariant,
+    TerminalType,
 )
 from unitary.examples.quantum_chinese_chess.move import (
     Jump,
@@ -32,15 +33,19 @@ from unitary.examples.quantum_chinese_chess.move import (
 )
 import readline
 
-# List of accepable commands.
+# List of acceptable commands.
 _HELP_TEXT = """
     Each location on the board is represented by two characters [abcdefghi][0-9], i.e. from a0 to i9. You may input (s=source, t=target)
     - s1t1 to do a slide move, e.g. "a1a4"; 
     - s1^t1t2 to do a split move, e.g. "a1^b1a2";
     - s1s2^t1 to do a merge move, e.g. "b1a2^a1";
+
     Other commands:
-    - "exit" to quit
+    - "peek": to peek (print a sample of) the current board state
+    - "peek all": to print all possible board states with associated probabilities
+    - "undo": to undo last move
     - "help": to see this message again
+    - "exit": to quit the game
 """
 
 _WELCOME_MESSAGE = """
@@ -63,6 +68,13 @@ class QuantumChineseChess:
             self.lang = Language.ZH
         else:
             self.lang = Language.EN
+        terminal = input(
+            "Are you running this game on Colab or Sublime Terminus? (y/n)  "
+        )
+        if terminal == "y":
+            self.terminal = TerminalType.COLAB_OR_SUBLIME_TERMINUS
+        else:
+            self.terminal = TerminalType.MAC_OR_LINUX
         name_0 = input("Player 0's name (default to be Player_0):  ")
         self.players_name.append("Player_0" if len(name_0) == 0 else name_0)
         name_1 = input("Player 1's name (default to be Player_1):  ")
@@ -73,7 +85,7 @@ class QuantumChineseChess:
         self.print_welcome()
         self.board = Board.from_fen()
         self.board.set_language(self.lang)
-        print(self.board)
+        print(self.board.to_str(self.terminal))
         self.game_state = GameState.CONTINUES
         self.current_player = self.board.current_player
         self.debug_level = 3
@@ -442,13 +454,23 @@ class QuantumChineseChess:
             self.game_state = GameState(1 - self.current_player)
             output = "Exiting."
         elif input_str.lower() == "peek":
-            # TODO(): make it look like the normal board. Right now it's only for debugging purposes.
-            print(self.board.board.peek(convert_to_enum=False))
+            print(
+                self.board.to_str(
+                    self.terminal, None, self.board.board.peek(convert_to_enum=False)[0]
+                )
+            )
+        elif input_str.lower() == "peek all":
+            all_boards = self.board.board.get_correlated_histogram()
+            sorted_boards = sorted(all_boards.items(), key=lambda x: x[1], reverse=True)
+            for board, count in sorted_boards:
+                print(
+                    "\n ====== With probability ~ {:.1f} ======".format(count / 100.0)
+                )
+                print(self.board.to_str(self.terminal, None, list(board)))
         elif input_str.lower() == "undo":
             if self.undo():
                 return True, "Undoing."
             return False, "Failed to undo."
-
         else:
             try:
                 # The move is success if no ValueError is raised.
@@ -465,10 +487,6 @@ class QuantumChineseChess:
         This method is called after each quantum move, and runs (100x) sampling of the board
         to identify and fix those cases.
         """
-        # TODO(): return the sampled probabilities and pass it into the print method
-        # of the board to print it together with the board, or better use mathemetical
-        # matrix calculations to determine the probability, and use it (with some error
-        # threshold) to update the piece infos.
         probs = self.board.board.get_binary_probabilities()
         num_rows = 10
         num_cols = 9
@@ -480,8 +498,11 @@ class QuantumChineseChess:
                 # Change it to be more meaningful values maybe when we do error mitigation.
                 if prob < 1e-3:
                     piece.reset()
+                    probs[row * num_cols + ord(col) - ord("a")] = 0
                 elif prob > 1 - 1e-3:
                     piece.is_entangled = False
+                    probs[row * num_cols + ord(col) - ord("a")] = 1
+        return probs
 
     def game_over(self) -> None:
         """Checks if the game is over, and update self.game_state accordingly."""
@@ -550,6 +571,7 @@ class QuantumChineseChess:
 
     def play(self) -> None:
         """The loop where each player takes turn to play."""
+        probs = None
         while True:
             move_success, output = self.next_move()
             if not move_success:
@@ -567,8 +589,9 @@ class QuantumChineseChess:
                 probs = self.update_board_by_sampling()
                 # Save the current states.
                 self.save_snapshot()
-            # TODO(): pass probs into the following method to print probabilities.
-            print(self.board)
+            else:
+                probs = self.update_board_by_sampling()
+            print(self.board.to_str(self.terminal, probs))
             if self.game_state == GameState.CONTINUES:
                 # If the game continues, switch the player.
                 self.current_player = 1 - self.current_player
