@@ -87,7 +87,7 @@ class QuditControlledXGate(cirq.Gate):
 
     Args:
         dimension: dimension of the qudits, for instance, a dimension of 3 would be a qutrit.
-        control_state: the state of first qudit that when satisfied the X gate on the second qudit will be activated.  
+        control_state: the state of first qudit that when satisfied the X gate on the second qudit will be activated.
           For instance, if `control_state` is set to 2, then the X gate will be
           activated when the first qudit is in the |2> state.
         state: the destination state of the second qudit. For instance, if set to 1, it will perform a
@@ -222,7 +222,11 @@ class QuditHadamardGate(cirq.Gate):
         return (self.dimension,)
 
     def _unitary_(self):
-        arr = 1.0 / np.sqrt(self.dimension) * np.ones((self.dimension, self.dimension), dtype=np.complex64)
+        arr = (
+            1.0
+            / np.sqrt(self.dimension)
+            * np.ones((self.dimension, self.dimension), dtype=np.complex64)
+        )
         w = np.exp(1j * 2 * np.pi / self.dimension)
         # Note: this unitary matrice always has first row and first column elements equal to one,
         # so we only do calculation for rest of the elements.

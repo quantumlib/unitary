@@ -125,6 +125,7 @@ def test_control_x(control: int, dest: int):
     assert np.all(results.measurements["m0"] == control)
     assert np.all(results.measurements["m1"] == non_active)
 
+
 @pytest.mark.parametrize("dest", [1, 2])
 def test_control_of_0_x(dest: int):
     qutrit0 = cirq.NamedQid("q0", dimension=3)
@@ -185,6 +186,7 @@ def test_control_of_0_x(dest: int):
     results = sim.run(c, repetitions=1000)
     assert np.all(results.measurements["m0"] == 0)
     assert np.all(results.measurements["m1"] == non_active)
+
 
 @pytest.mark.parametrize(
     "gate",

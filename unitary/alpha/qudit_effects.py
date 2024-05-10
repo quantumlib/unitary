@@ -137,9 +137,7 @@ class Superpose(QuantumEffect):
             if q.qubit.dimension == 2:
                 yield cirq.H(q.qubit)
             else:
-                yield QuditHadamardGate(dimension=q.qubit.dimension)(
-                    q.qubit
-                )
+                yield QuditHadamardGate(dimension=q.qubit.dimension)(q.qubit)
 
 
 class QuditSuperpose(Superpose):
