@@ -81,7 +81,7 @@ def test_qudit_superpose():
     board = alpha.QuantumWorld(sampler=cirq.Simulator(), compile_to_qubits=False)
     piece = alpha.QuantumObject("t", StopLight.GREEN)
     board.add_object(piece)
-    alpha.QuditSuperpose(3)(piece)
+    alpha.QuditSuperpose()(piece)
     results = board.peek([piece], count=100)
     assert any(result == [StopLight.RED] for result in results)
     assert any(result == [StopLight.YELLOW] for result in results)

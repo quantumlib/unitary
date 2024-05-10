@@ -132,9 +132,6 @@ class Superpose(QuantumEffect):
     all pure states.
     """
 
-    def __init__(self):
-        pass
-
     def effect(self, *objects):
         for q in objects:
             if q.qubit.dimension == 2:
@@ -152,5 +149,5 @@ class QuditSuperpose(Superpose):
     Will be removed in 2024.
     """
 
-    def __init__(self, dimension: int):
+    def __init__(self):
         super().__init__()
