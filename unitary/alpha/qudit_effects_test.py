@@ -75,3 +75,14 @@ def test_qudit_flip(simulator, compile_to_qubits):
     alpha.QuditFlip(3, 0, 1)(piece)
     results = board.peek([piece], count=100)
     assert all(result == [StopLight.GREEN] for result in results)
+
+
+def test_qudit_superpose():
+    board = alpha.QuantumWorld(sampler=cirq.Simulator(), compile_to_qubits=False)
+    piece = alpha.QuantumObject("t", StopLight.GREEN)
+    board.add_object(piece)
+    alpha.QuditSuperpose(3)(piece)
+    results = board.peek([piece], count=100)
+    assert any(result == [StopLight.RED] for result in results)
+    assert any(result == [StopLight.YELLOW] for result in results)
+    assert any(result == [StopLight.GREEN] for result in results)

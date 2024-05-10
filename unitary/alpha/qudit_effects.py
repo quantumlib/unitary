@@ -18,12 +18,12 @@ import enum
 
 import cirq
 
-from unitary.alpha.qudit_gates import QuditPlusGate, QuditXGate
+from unitary.alpha.qudit_gates import QuditPlusGate, QuditXGate, QuditHadamardGate
 from unitary.alpha.quantum_effect import QuantumEffect
 
 
 class Cycle(QuantumEffect):
-    """Cycles a qubit from |0> to |1>, |1> to |2>, etc.
+    """Cycles a qudit from |0> to |1>, |1> to |2>, etc.
 
     Essentially adds `addend` to the state, where `addend`
     is the parameter supplied at creation.
@@ -55,15 +55,13 @@ class QuditCycle(Cycle):
 
 
 class Flip(QuantumEffect):
-    """Flips two states of a qubit, leaving all other states unchanged.
+    """Flips two states of a qudit, leaving all other states unchanged.
 
-    For instance, Flip(state0 = 0, state1=2) is a qutrit effect
+    For instance, Flip(state0 = 0, state1 = 2) is a qutrit effect
     that flips |0> to |2>, |2> to |0> and leaves
-    |1> alone.  This is also sometimes referred to as the X_0_2 gate.
+    |1> alone.  This is also sometimes referred as the X_02 gate.
 
     For a partial flip, use the `effect_fraction` argument.
-    Note that this is only applied so far on qubits and not yet for
-    qudits.
 
     These effects will be cumulative.  For instance, two quarter
     flips (effect_fraction=0.25) will be equivalent to a half
@@ -127,3 +125,32 @@ class QuditFlip(Flip):
 
     def __init__(self, dimension: int, state0: int, state1: int):
         super().__init__(state0=state0, state1=state1)
+
+
+class Superpose(QuantumEffect):
+    """Transforms each pure state to a (equal, in terms of absolute magnitude) superposition of
+    all pure states.
+    """
+
+    def __init__(self):
+        pass
+
+    def effect(self, *objects):
+        for q in objects:
+            if q.qubit.dimension == 2:
+                yield cirq.H(q.qubit)
+            else:
+                yield QuditHadamardGate(dimension=q.qubit.dimension)(
+                    q.qubit
+                )
+
+
+class QuditSuperpose(Superpose):
+    """Equivalent to Superpose.
+
+    Exists only for backwards compatibiltity.
+    Will be removed in 2024.
+    """
+
+    def __init__(self, dimension: int):
+        super().__init__()

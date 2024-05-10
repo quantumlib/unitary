@@ -24,8 +24,8 @@ class QuditXGate(cirq.Gate):
     'destination_state' parameter that is passed in.
     All other states are left alone.
 
-    For example, QuditXGate(dimension=3, state=1)
-    is a X_01 gate that leaves the |2〉 state alone.
+    For example, QuditXGate(dimension=3, source_state=0, destination_state=1)
+    is a X_01 gate that leaves the |2〉state alone.
     """
 
     def __init__(
@@ -34,17 +34,21 @@ class QuditXGate(cirq.Gate):
         self.dimension = dimension
         self.source_state = source_state
         self.destination_state = destination_state
+        if self.source_state >= self.dimension:
+            raise ValueError("Source state must be smaller than dimension.")
+        if self.destination_state >= self.dimension:
+            raise ValueError("Destination state must be smaller than dimension.")
 
     def _qid_shape_(self):
         return (self.dimension,)
 
     def _unitary_(self):
-        arr = np.zeros((self.dimension, self.dimension))
-        arr[self.source_state, self.destination_state] = 1
-        arr[self.destination_state, self.source_state] = 1
-        for i in range(self.dimension):
-            if i != self.source_state and i != self.destination_state:
-                arr[i, i] = 1
+        arr = np.eye(self.dimension)
+        if self.source_state != self.destination_state:
+            arr[self.source_state, self.source_state] = 0
+            arr[self.destination_state, self.destination_state] = 0
+            arr[self.source_state, self.destination_state] = 1
+            arr[self.destination_state, self.source_state] = 1
         return arr
 
     def _circuit_diagram_info_(self, args):
@@ -52,10 +56,10 @@ class QuditXGate(cirq.Gate):
 
 
 class QuditPlusGate(cirq.Gate):
-    """Cycles all the states using a permutation gate.
+    """Cycles all the states by `addend` using a permutation gate.
 
-    This gate adds a number to each state.  For instance,
-    `QuditPlusGate(dimension=3, addend=1)`
+    This gate adds a number to each state. For instance,`QuditPlusGate(dimension=3, addend=1)`
+    will cycle state vector (a, b, c) to (c, a, b), and will cycle state |0> to |1>, |1> to |2>, |2> to |0>.
     """
 
     def __init__(self, dimension: int, addend: int = 1):
@@ -78,19 +82,16 @@ class QuditPlusGate(cirq.Gate):
 class QuditControlledXGate(cirq.Gate):
     """A Qudit controlled-X gate.
 
-    This gate takes the dimension of the qudit (e.g. 3 for qutrits)
-    as well as the control and destination gates to produce a
+    This gate takes the dimension of the qudit as well as the control and destination states to produce a
     controlled-X 2-qudit gate.
 
-    Note that there are two parameters for this gate.  The first
-    is the control state, which determines when the X gate on the
-    second qudit is activated.  For instance, if this is set to 2,
-    then the X gate will be activated when the first qudit is
-    in the |2> state.
-
-    The state parameter specifies the destination state of the
-    second qudit.  For instance, if set to 1, it will perform a
-    X_01 gate when activated by the control.
+    Args:
+        dimension: dimension of the qudits, for instance, a dimension of 3 would be a qutrit.
+        control_state: the state of first qudit that when satisfied the X gate on the second qudit will be activated.  
+          For instance, if `control_state` is set to 2, then the X gate will be
+          activated when the first qudit is in the |2> state.
+        state: the destination state of the second qudit. For instance, if set to 1, it will perform a
+          X_01 gate when activated by `control_state`.
     """
 
     def __init__(self, dimension: int, control_state: int = 1, state: int = 1):
@@ -103,14 +104,12 @@ class QuditControlledXGate(cirq.Gate):
 
     def _unitary_(self):
         size = self.dimension * self.dimension
-        arr = np.zeros((size, size), dtype=np.complex64)
+        arr = np.eye(size, dtype=np.complex64)
         control_block_offset = self.control_state * self.dimension
+        arr[control_block_offset, control_block_offset] = 0
+        arr[control_block_offset + self.state, control_block_offset + self.state] = 0
         arr[control_block_offset, control_block_offset + self.state] = 1
         arr[control_block_offset + self.state, control_block_offset] = 1
-        for x in range(self.dimension):
-            for y in range(self.dimension):
-                if x != self.control_state or (y != self.state and y != 0):
-                    arr[x * self.dimension + y, x * self.dimension + y] = 1
         return arr
 
 
@@ -139,14 +138,14 @@ class QuditSwapPowGate(cirq.Gate):
     def _unitary_(self):
         size = self.dimension * self.dimension
         arr = np.zeros((size, size), dtype=np.complex64)
+        g = np.exp(1j * np.pi * self.exponent / 2)
+        coeff = -1j * g * np.sin(np.pi * self.exponent / 2)
+        diag = g * np.cos(np.pi * self.exponent / 2)
         for x in range(self.dimension):
             for y in range(self.dimension):
                 if x == y:
                     arr[x * self.dimension + y][x * self.dimension + y] = 1
                     continue
-                g = np.exp(1j * np.pi * self.exponent / 2)
-                coeff = -1j * g * np.sin(np.pi * self.exponent / 2)
-                diag = g * np.cos(np.pi * self.exponent / 2)
                 arr[x * self.dimension + y, y * self.dimension + x] = coeff
                 arr[x * self.dimension + y, x * self.dimension + y] = diag
         return arr
@@ -186,13 +185,13 @@ class QuditISwapPowGate(cirq.Gate):
     def _unitary_(self):
         size = self.dimension * self.dimension
         arr = np.zeros((size, size), dtype=np.complex64)
+        coeff = 1j * np.sin(np.pi * self.exponent / 2)
+        diag = np.cos(np.pi * self.exponent / 2)
         for x in range(self.dimension):
             for y in range(self.dimension):
                 if x == y:
                     arr[x * self.dimension + y][x * self.dimension + y] = 1
                     continue
-                coeff = 1j * np.sin(np.pi * self.exponent / 2)
-                diag = np.cos(np.pi * self.exponent / 2)
                 arr[x * self.dimension + y, y * self.dimension + x] = coeff
                 arr[x * self.dimension + y, x * self.dimension + y] = diag
 
@@ -201,4 +200,38 @@ class QuditISwapPowGate(cirq.Gate):
     def _circuit_diagram_info_(self, args):
         return cirq.CircuitDiagramInfo(
             wire_symbols=("iSwap", "iSwap"), exponent=self._diagram_exponent(args)
+        )
+
+
+class QuditHadamardGate(cirq.Gate):
+    """Performs a Hadamard opperation on the given qudit.
+
+    This is the equivalent of a H gate for qubits. When applied to a given pure state,
+    the state will be transformed to a (equal, in terms of absolute magnitude) superposition of
+    all pure states.
+
+    Args:
+        dimension: dimension of the qudits, for instance,
+          a dimension of 3 would be a qutrit.
+    """
+
+    def __init__(self, dimension: int):
+        self.dimension = dimension
+
+    def _qid_shape_(self):
+        return (self.dimension,)
+
+    def _unitary_(self):
+        arr = 1.0 / np.sqrt(self.dimension) * np.ones((self.dimension, self.dimension), dtype=np.complex64)
+        w = np.exp(1j * 2 * np.pi / self.dimension)
+        # Note: this unitary matrice always has first row and first column elements equal to one,
+        # so we only do calculation for rest of the elements.
+        for i in range(1, self.dimension):
+            for j in range(1, self.dimension):
+                arr[i, j] *= w ** (i * j)
+        return arr
+
+    def _circuit_diagram_info_(self, args):
+        return cirq.CircuitDiagramInfo(
+            wire_symbols=("H", "H"), exponent=self._diagram_exponent(args)
         )

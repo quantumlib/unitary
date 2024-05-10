@@ -43,8 +43,10 @@ from unitary.alpha.qubit_effects import (
 from unitary.alpha.qudit_effects import (
     Cycle,
     Flip,
+    Superpose,
     QuditCycle,
     QuditFlip,
+    QuditSuperpose,
 )
 
 from unitary.alpha.quantum_object import (
