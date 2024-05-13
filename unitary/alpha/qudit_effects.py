@@ -125,27 +125,3 @@ class QuditFlip(Flip):
 
     def __init__(self, dimension: int, state0: int, state1: int):
         super().__init__(state0=state0, state1=state1)
-
-
-class Superpose(QuantumEffect):
-    """Transforms each pure state to a (equal, in terms of absolute magnitude) superposition of
-    all pure states.
-    """
-
-    def effect(self, *objects):
-        for q in objects:
-            if q.qubit.dimension == 2:
-                yield cirq.H(q.qubit)
-            else:
-                yield QuditHadamardGate(dimension=q.qubit.dimension)(q.qubit)
-
-
-class QuditSuperpose(Superpose):
-    """Equivalent to Superpose.
-
-    Exists only for backwards compatibiltity.
-    Will be removed in 2024.
-    """
-
-    def __init__(self):
-        super().__init__()

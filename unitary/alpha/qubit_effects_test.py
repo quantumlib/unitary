@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+import enum
 import pytest
 
 import cirq
 
 import unitary.alpha as alpha
+
+
+class StopLight(enum.Enum):
+    RED = 0
+    YELLOW = 1
+    GREEN = 2
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
@@ -78,13 +84,24 @@ def test_partial_phase(simulator, compile_to_qubits):
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])
 @pytest.mark.parametrize("simulator", [cirq.Simulator, alpha.SparseSimulator])
-def test_superposition(simulator, compile_to_qubits):
+def test_qubit_superposition(simulator, compile_to_qubits):
     board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
     piece = alpha.QuantumObject("t", 0)
     board.add_object(piece)
     alpha.Superposition()(piece)
     assert board.circuit == cirq.Circuit(cirq.H(cirq.NamedQubit("t")))
     assert str(alpha.Superposition()) == "Superposition"
+
+
+def test_qudit_superposition():
+    board = alpha.QuantumWorld(sampler=cirq.Simulator(), compile_to_qubits=False)
+    piece = alpha.QuantumObject("t", StopLight.GREEN)
+    board.add_object(piece)
+    alpha.Superposition()(piece)
+    results = board.peek([piece], count=100)
+    assert any(result == [StopLight.RED] for result in results)
+    assert any(result == [StopLight.YELLOW] for result in results)
+    assert any(result == [StopLight.GREEN] for result in results)
 
 
 @pytest.mark.parametrize("compile_to_qubits", [False, True])

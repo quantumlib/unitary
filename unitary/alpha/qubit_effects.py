@@ -19,6 +19,7 @@ import enum
 import cirq
 
 from unitary.alpha.quantum_effect import QuantumEffect
+from unitary.alpha.qudit_gates import QuditHadamardGate
 
 
 class Phase(QuantumEffect):
@@ -67,14 +68,16 @@ class Phase(QuantumEffect):
 
 
 class Superposition(QuantumEffect):
-    """Takes a qubit in a basis state into a superposition."""
-
-    def num_dimension(self) -> Optional[int]:
-        return 2
+    """Transforms a qubit (or qudit) in a basis state into a (equal, in terms of
+    absolute magnitude) superposition of all basis states.
+    """
 
     def effect(self, *objects):
         for q in objects:
-            yield cirq.H(q.qubit)
+            if q.qubit.dimension == 2:
+                yield cirq.H(q.qubit)
+            else:
+                yield QuditHadamardGate(dimension=q.qubit.dimension)(q.qubit)
 
     def __eq__(self, other):
         return isinstance(other, Superposition) or NotImplemented
