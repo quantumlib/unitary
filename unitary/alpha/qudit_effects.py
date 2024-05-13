@@ -18,7 +18,7 @@ import enum
 
 import cirq
 
-from unitary.alpha.qudit_gates import QuditPlusGate, QuditXGate, QuditHadamardGate
+from unitary.alpha.qudit_gates import QuditPlusGate, QuditXGate
 from unitary.alpha.quantum_effect import QuantumEffect
 
 

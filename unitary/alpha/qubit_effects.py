@@ -19,7 +19,6 @@ import enum
 import cirq
 
 from unitary.alpha.quantum_effect import QuantumEffect
-from unitary.alpha.qudit_gates import QuditHadamardGate
 
 
 class Phase(QuantumEffect):

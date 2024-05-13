@@ -233,4 +233,3 @@ def test_equalis():
     eq.add_equality_group(alpha.Split(), alpha.Split())
     eq.add_equality_group(alpha.Move(), alpha.Move())
     eq.add_equality_group(alpha.PhasedMove(), alpha.PhasedMove())
-

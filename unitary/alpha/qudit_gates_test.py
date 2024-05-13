@@ -205,9 +205,6 @@ def test_control_of_0_x(dest: int):
         qudit_gates.QuditISwapPowGate(3),
         qudit_gates.QuditSwapPowGate(3, exponent=0.5),
         qudit_gates.QuditISwapPowGate(3, exponent=0.5),
-        qudit_gates.QuditHadamardGate(2),
-        qudit_gates.QuditHadamardGate(3),
-        qudit_gates.QuditHadamardGate(4),
     ],
 )
 def test_gates_are_unitary(gate: cirq.Gate):
