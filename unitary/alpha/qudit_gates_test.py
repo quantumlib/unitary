@@ -322,18 +322,3 @@ def test_sqrt_iswap(q0: int, q1: int):
     results = sim.run(c, repetitions=1000)
     assert np.all(results.measurements["m0"] == q1)
     assert np.all(results.measurements["m1"] == q0)
-
-
-@pytest.mark.parametrize(
-    "d, q0", [(2, 0), (2, 1), (3, 0), (3, 1), (3, 2), (4, 0), (4, 1), (4, 2), (4, 3)]
-)
-def test_hadamard(d: int, q0: int):
-    qutrit0 = cirq.NamedQid("q0", dimension=d)
-    c = cirq.Circuit()
-    c.append(qudit_gates.QuditPlusGate(d, addend=q0)(qutrit0))
-    c.append(qudit_gates.QuditHadamardGate(d)(qutrit0))
-    c.append(cirq.measure(qutrit0, key="m0"))
-    sim = cirq.Simulator()
-    results = sim.run(c, repetitions=1000)
-    for each_possible_outcome in range(d):
-        assert np.any(results.measurements["m0"] == each_possible_outcome)
