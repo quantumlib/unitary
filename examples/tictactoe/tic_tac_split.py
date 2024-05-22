@@ -19,7 +19,8 @@ import cirq
 
 from unitary.alpha import QuantumEffect, QuantumObject
 from unitary.alpha.qudit_gates import QuditXGate, QuditISwapPowGate
-from unitary.examples.tictactoe.enums import TicTacSquare, TicTacRules
+
+from .enums import TicTacSquare, TicTacRules
 
 
 class QuditSplitGate(cirq.Gate):

@@ -16,53 +16,54 @@ import pytest
 import io
 from unittest.mock import MagicMock
 
-import unitary.examples.tictactoe as tictactoe
+from . import enums
+from . import tic_tac_toe
 
-_E = tictactoe.TicTacSquare.EMPTY
-_O = tictactoe.TicTacSquare.O
-_X = tictactoe.TicTacSquare.X
+_E = enums.TicTacSquare.EMPTY
+_O = enums.TicTacSquare.O
+_X = enums.TicTacSquare.X
 
 
 @pytest.mark.parametrize(
     "result,expected",
     [
-        ([_E, _E, _E, _E, _E, _E, _E, _E, _E], tictactoe.TicTacResult.UNFINISHED),
-        ([_E, _E, _X, _X, _E, _E, _O, _E, _E], tictactoe.TicTacResult.UNFINISHED),
-        ([_E, _E, _X, _X, _E, _X, _O, _E, _X], tictactoe.TicTacResult.X_WINS),
-        ([_E, _X, _E, _X, _X, _O, _O, _X, _E], tictactoe.TicTacResult.X_WINS),
-        ([_X, _E, _E, _X, _O, _O, _X, _E, _E], tictactoe.TicTacResult.X_WINS),
-        ([_X, _X, _X, _X, _O, _O, _E, _E, _E], tictactoe.TicTacResult.X_WINS),
-        ([_E, _E, _E, _X, _X, _X, _E, _O, _E], tictactoe.TicTacResult.X_WINS),
-        ([_E, _E, _E, _E, _E, _E, _X, _X, _X], tictactoe.TicTacResult.X_WINS),
-        ([_X, _E, _E, _E, _X, _E, _E, _E, _X], tictactoe.TicTacResult.X_WINS),
-        ([_E, _E, _X, _E, _X, _E, _X, _E, _E], tictactoe.TicTacResult.X_WINS),
-        ([_O, _E, _E, _E, _O, _E, _E, _E, _O], tictactoe.TicTacResult.O_WINS),
-        ([_E, _E, _O, _E, _O, _E, _O, _E, _E], tictactoe.TicTacResult.O_WINS),
-        ([_O, _O, _O, _E, _E, _E, _E, _E, _E], tictactoe.TicTacResult.O_WINS),
-        ([_E, _E, _E, _O, _O, _O, _E, _E, _E], tictactoe.TicTacResult.O_WINS),
-        ([_E, _E, _E, _E, _E, _E, _O, _O, _O], tictactoe.TicTacResult.O_WINS),
-        ([_O, _E, _E, _O, _E, _E, _O, _E, _E], tictactoe.TicTacResult.O_WINS),
-        ([_E, _O, _E, _E, _O, _E, _E, _O, _E], tictactoe.TicTacResult.O_WINS),
-        ([_E, _E, _O, _E, _E, _O, _E, _E, _O], tictactoe.TicTacResult.O_WINS),
-        ([_E, _E, _O, _E, _E, _O, _E, _E, _O], tictactoe.TicTacResult.O_WINS),
-        ([_X, _E, _O, _X, _E, _O, _X, _E, _O], tictactoe.TicTacResult.BOTH_WIN),
-        ([_X, _X, _X, _O, _O, _O, _E, _E, _E], tictactoe.TicTacResult.BOTH_WIN),
-        ([_E, _E, _E, _O, _O, _O, _X, _X, _X], tictactoe.TicTacResult.BOTH_WIN),
-        ([_X, _O, _O, _O, _X, _X, _O, _X, _O], tictactoe.TicTacResult.DRAW),
-        ([_X, _O, _X, _X, _O, _X, _O, _X, _O], tictactoe.TicTacResult.DRAW),
+        ([_E, _E, _E, _E, _E, _E, _E, _E, _E], enums.TicTacResult.UNFINISHED),
+        ([_E, _E, _X, _X, _E, _E, _O, _E, _E], enums.TicTacResult.UNFINISHED),
+        ([_E, _E, _X, _X, _E, _X, _O, _E, _X], enums.TicTacResult.X_WINS),
+        ([_E, _X, _E, _X, _X, _O, _O, _X, _E], enums.TicTacResult.X_WINS),
+        ([_X, _E, _E, _X, _O, _O, _X, _E, _E], enums.TicTacResult.X_WINS),
+        ([_X, _X, _X, _X, _O, _O, _E, _E, _E], enums.TicTacResult.X_WINS),
+        ([_E, _E, _E, _X, _X, _X, _E, _O, _E], enums.TicTacResult.X_WINS),
+        ([_E, _E, _E, _E, _E, _E, _X, _X, _X], enums.TicTacResult.X_WINS),
+        ([_X, _E, _E, _E, _X, _E, _E, _E, _X], enums.TicTacResult.X_WINS),
+        ([_E, _E, _X, _E, _X, _E, _X, _E, _E], enums.TicTacResult.X_WINS),
+        ([_O, _E, _E, _E, _O, _E, _E, _E, _O], enums.TicTacResult.O_WINS),
+        ([_E, _E, _O, _E, _O, _E, _O, _E, _E], enums.TicTacResult.O_WINS),
+        ([_O, _O, _O, _E, _E, _E, _E, _E, _E], enums.TicTacResult.O_WINS),
+        ([_E, _E, _E, _O, _O, _O, _E, _E, _E], enums.TicTacResult.O_WINS),
+        ([_E, _E, _E, _E, _E, _E, _O, _O, _O], enums.TicTacResult.O_WINS),
+        ([_O, _E, _E, _O, _E, _E, _O, _E, _E], enums.TicTacResult.O_WINS),
+        ([_E, _O, _E, _E, _O, _E, _E, _O, _E], enums.TicTacResult.O_WINS),
+        ([_E, _E, _O, _E, _E, _O, _E, _E, _O], enums.TicTacResult.O_WINS),
+        ([_E, _E, _O, _E, _E, _O, _E, _E, _O], enums.TicTacResult.O_WINS),
+        ([_X, _E, _O, _X, _E, _O, _X, _E, _O], enums.TicTacResult.BOTH_WIN),
+        ([_X, _X, _X, _O, _O, _O, _E, _E, _E], enums.TicTacResult.BOTH_WIN),
+        ([_E, _E, _E, _O, _O, _O, _X, _X, _X], enums.TicTacResult.BOTH_WIN),
+        ([_X, _O, _O, _O, _X, _X, _O, _X, _O], enums.TicTacResult.DRAW),
+        ([_X, _O, _X, _X, _O, _X, _O, _X, _O], enums.TicTacResult.DRAW),
     ],
 )
 def test_eval_board(result, expected):
-    assert tictactoe.tic_tac_toe.eval_board(result) == expected
+    assert tic_tac_toe.eval_board(result) == expected
 
 
 @pytest.mark.parametrize("run_on_hardware", [False, True])
 def test_measure(run_on_hardware):
-    board = tictactoe.TicTacToe(run_on_hardware=run_on_hardware)
-    board.move("ab", tictactoe.TicTacSquare.X)
-    board.move("cd", tictactoe.TicTacSquare.O)
-    board.move("ef", tictactoe.TicTacSquare.X)
-    board.move("gh", tictactoe.TicTacSquare.O)
+    board = tic_tac_toe.TicTacToe(run_on_hardware=run_on_hardware)
+    board.move("ab", enums.TicTacSquare.X)
+    board.move("cd", enums.TicTacSquare.O)
+    board.move("ef", enums.TicTacSquare.X)
+    board.move("gh", enums.TicTacSquare.O)
     results = board.sample(count=1000)
     assert len(results) == 1000
     assert all(result.count("X") == 2 for result in results)
@@ -75,7 +76,7 @@ def test_measure(run_on_hardware):
     assert len(result_set) == 16
 
     # This should trigger a measurement
-    board.move("i", tictactoe.TicTacSquare.X)
+    board.move("i", enums.TicTacSquare.X)
     results = board.sample(count=1000)
     assert len(results) == 1000
     assert all(result.count("X") == 3 for result in results)
@@ -89,10 +90,10 @@ def test_measure(run_on_hardware):
 
     # Now try an operation after measurement
     if results[0][0] == ".":
-        board.move("a", tictactoe.TicTacSquare.O)
+        board.move("a", enums.TicTacSquare.O)
         expected = "OX" + results[0][2:]
     else:
-        board.move("b", tictactoe.TicTacSquare.O)
+        board.move("b", enums.TicTacSquare.O)
         expected = "XO" + results[0][2:]
     results = board.sample(count=1000)
     assert len(results) == 1000
@@ -101,14 +102,14 @@ def test_measure(run_on_hardware):
 
 @pytest.mark.parametrize("run_on_hardware", [False, True])
 def test_sample(run_on_hardware):
-    board = tictactoe.TicTacToe(run_on_hardware=run_on_hardware)
-    board.move("a", tictactoe.TicTacSquare.X)
-    board.move("e", tictactoe.TicTacSquare.O)
+    board = tic_tac_toe.TicTacToe(run_on_hardware=run_on_hardware)
+    board.move("a", enums.TicTacSquare.X)
+    board.move("e", enums.TicTacSquare.O)
     results = board.sample(count=100)
     assert len(results) == 100
     assert all(result == "X...O...." for result in results)
-    board.move("h", tictactoe.TicTacSquare.O)
-    board.move("i", tictactoe.TicTacSquare.X)
+    board.move("h", enums.TicTacSquare.O)
+    board.move("i", enums.TicTacSquare.X)
     results = board.sample(count=200)
     assert len(results) == 200
     assert all(result == "X...O..OX" for result in results)
@@ -116,8 +117,8 @@ def test_sample(run_on_hardware):
 
 @pytest.mark.parametrize("run_on_hardware", [False, True])
 def test_split(run_on_hardware):
-    board = tictactoe.TicTacToe(run_on_hardware=run_on_hardware)
-    board.move("ab", tictactoe.TicTacSquare.X)
+    board = tic_tac_toe.TicTacToe(run_on_hardware=run_on_hardware)
+    board.move("ab", enums.TicTacSquare.X)
     results = board.sample(count=1000)
     assert len(results) == 1000
     in_a = "X........"
@@ -130,24 +131,24 @@ def test_split(run_on_hardware):
 @pytest.mark.parametrize("run_on_hardware", [False, True])
 def test_rulesets(run_on_hardware):
     # Try to make a quantum move with classical rules
-    board = tictactoe.TicTacToe(
-        tictactoe.TicTacRules.CLASSICAL, run_on_hardware=run_on_hardware
+    board = tic_tac_toe.TicTacToe(
+        enums.TicTacRules.CLASSICAL, run_on_hardware=run_on_hardware
     )
     with pytest.raises(ValueError):
-        board.move("ab", tictactoe.TicTacSquare.X)
+        board.move("ab", enums.TicTacSquare.X)
 
     # Try to make a split move on non-empty squares at minimal quantum
-    board = tictactoe.TicTacToe(
-        tictactoe.TicTacRules.QUANTUM_V1, run_on_hardware=run_on_hardware
+    board = tic_tac_toe.TicTacToe(
+        enums.TicTacRules.QUANTUM_V1, run_on_hardware=run_on_hardware
     )
-    board.move("a", tictactoe.TicTacSquare.X)
+    board.move("a", enums.TicTacSquare.X)
     with pytest.raises(ValueError):
-        board.move("ab", tictactoe.TicTacSquare.O)
+        board.move("ab", enums.TicTacSquare.O)
 
 
 def test_welcome():
-    board = tictactoe.TicTacToe()
-    game = tictactoe.GameInterface(board)
+    board = tic_tac_toe.TicTacToe()
+    game = tic_tac_toe.GameInterface(board)
     output = game.print_welcome()
 
     assert (
@@ -155,7 +156,7 @@ def test_welcome():
         == """
         Welcome to quantum tic tac toe!
         Here is the board:
-        
+
         a | b | c
         -----------
         d | e | f
@@ -167,8 +168,8 @@ def test_welcome():
 
 def test_help():
     output = io.StringIO()
-    board = tictactoe.TicTacToe()
-    game = tictactoe.GameInterface(board, output)
+    board = tic_tac_toe.TicTacToe()
+    game = tic_tac_toe.GameInterface(board, output)
     game.get_move = MagicMock(return_value="help")
     game.player_move()
 
@@ -189,8 +190,8 @@ Still your move.
 
 def test_map():
     output = io.StringIO()
-    board = tictactoe.TicTacToe()
-    game = tictactoe.GameInterface(board, output)
+    board = tic_tac_toe.TicTacToe()
+    game = tic_tac_toe.GameInterface(board, output)
     game.get_move = MagicMock(return_value="map")
     game.player_move()
 
@@ -211,8 +212,8 @@ Still your move.
 
 def test_exit():
     output = io.StringIO()
-    board = tictactoe.TicTacToe()
-    game = tictactoe.GameInterface(board, file=output)
+    board = tic_tac_toe.TicTacToe()
+    game = tic_tac_toe.GameInterface(board, file=output)
     game.get_move = MagicMock(return_value="exit")
     game.player_move()
 
@@ -220,8 +221,8 @@ def test_exit():
 
 
 def test_player_alternates():
-    board = tictactoe.TicTacToe()
-    game = tictactoe.GameInterface(board)
+    board = tic_tac_toe.TicTacToe()
+    game = tic_tac_toe.GameInterface(board)
     game.get_move = MagicMock(return_value="a")
     game.player_move()
 
@@ -229,10 +230,10 @@ def test_player_alternates():
 
 
 def test_print_board():
-    board = tictactoe.TicTacToe()
-    game = tictactoe.GameInterface(board)
-    board.move("a", tictactoe.TicTacSquare.X)
-    board.move("e", tictactoe.TicTacSquare.O)
+    board = tic_tac_toe.TicTacToe()
+    game = tic_tac_toe.GameInterface(board)
+    board.move("a", enums.TicTacSquare.X)
+    board.move("e", enums.TicTacSquare.O)
     output = game.print_board()
 
     assert (

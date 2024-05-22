@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules
-from unitary.examples.tictactoe.tic_tac_toe import TicTacToe
-import argparse, textwrap
+from .enums import TicTacSquare, TicTacResult, TicTacRules
+from .tic_tac_toe import TicTacToe
+import argparse
+import textwrap
 
 help_str = """\
 In classical TicTacToe, players alternate in putting their token (either an

@@ -19,13 +19,9 @@ import cirq
 
 from unitary.alpha import QuantumObject, QuantumWorld
 from unitary.alpha.qudit_effects import QuditFlip
-from unitary.examples.tictactoe.enums import (
-    TicTacSquare,
-    TicTacResult,
-    TicTacRules,
-    GameMoves,
-)
-from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
+
+from .enums import TicTacSquare, TicTacResult, TicTacRules, GameMoves
+from .tic_tac_split import TicTacSplit
 
 _SQUARE_NAMES = "abcdefghi"
 _MARK_SYMBOLS = {TicTacSquare.EMPTY: ".", TicTacSquare.X: "X", TicTacSquare.O: "O"}
@@ -327,7 +323,7 @@ class GameInterface:
         message = """
         Welcome to quantum tic tac toe!
         Here is the board:
-        """
+"""
         message += _BOARD_MAP
         return message
 

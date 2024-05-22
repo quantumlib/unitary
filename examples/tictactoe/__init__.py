@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-from unitary.examples.tictactoe.enums import TicTacSquare, TicTacResult, TicTacRules
-from unitary.examples.tictactoe.tic_tac_split import TicTacSplit
-from unitary.examples.tictactoe.tic_tac_toe import TicTacToe, GameInterface
+from .tic_tac_toe import TicTacToe, GameInterface
+from .tic_tac_split import TicTacSplit
+from .enums import TicTacSquare, TicTacResult, TicTacRules
