@@ -16,7 +16,7 @@
 
 import pytest
 
-import unitary.examples.fox_in_a_hole.fox_in_a_hole as fh
+from . import fox_in_a_hole as fh
 
 
 def test_classical_game_basics():
