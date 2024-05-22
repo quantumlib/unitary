@@ -14,7 +14,7 @@
 import numpy as np
 from typing import List, Tuple
 import unitary.alpha as alpha
-from unitary.examples.quantum_chinese_chess.enums import (
+from .enums import (
     SquareState,
     Color,
     Type,
@@ -22,8 +22,8 @@ from unitary.examples.quantum_chinese_chess.enums import (
     MoveVariant,
     TerminalType,
 )
-from unitary.examples.quantum_chinese_chess.piece import Piece
-from unitary.examples.quantum_chinese_chess.move import Jump
+from .piece import Piece
+from .move import Jump
 
 
 # The default initial state of the game.

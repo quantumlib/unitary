@@ -3,5 +3,5 @@
 After cloning the Unitary library you can use command line flags to run the game:
   
 ```
-python -m examples.tic_tac_toe.tic_tac_toe
+python -m examples.quantum_chinese_chess.chess
 ```

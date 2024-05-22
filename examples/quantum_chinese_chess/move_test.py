@@ -11,20 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.examples.quantum_chinese_chess.move import *
-from unitary.examples.quantum_chinese_chess.board import Board
-from unitary.examples.quantum_chinese_chess.piece import Piece
+from typing import List
+
 import pytest
 from unitary import alpha
-from typing import List
-from unitary.examples.quantum_chinese_chess.enums import (
+
+from .move import *
+from .board import Board
+from .piece import Piece
+from .enums import (
     MoveType,
     MoveVariant,
     SquareState,
     Type,
     Color,
 )
-from unitary.examples.quantum_chinese_chess.test_utils import (
+from .test_utils import (
     locations_to_bitboard,
     assert_samples_in,
     assert_sample_distribution,

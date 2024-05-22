@@ -13,7 +13,7 @@
 # limitations under the License.
 from typing import Optional
 from unitary.alpha import QuantumObject
-from unitary.examples.quantum_chinese_chess.enums import (
+from .enums import (
     SquareState,
     Language,
     Color,

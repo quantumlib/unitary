@@ -23,7 +23,7 @@ The second part explains the rules and principles behind the Quantum RPG.
 
 In order to run the game, clone the github repo, make sure that any requirements
 are installed with a command such as `pip install -r requirements.txt`
-then run `python -m examples.quantum_rpg.main_loop`
+  * [ ] then run `python -m examples.quantum_rpg.main_loop`
 (you may need to make sure that the Unitary library is in your PYTHONPATH).
 
 If you do not have a python environment handy or are not familiar with setting

@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.examples.quantum_chinese_chess.enums import Type, Color, Language
+from .enums import Type, Color, Language
 
 
 def test_type_of():

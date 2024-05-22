@@ -11,14 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from unitary.alpha import QuantumObject, QuantumWorld
-from unitary.examples.quantum_chinese_chess.enums import SquareState, Type, Color
-from unitary.examples.quantum_chinese_chess.board import Board
-from unitary.examples.quantum_chinese_chess.piece import Piece
-from unitary import alpha
 from typing import List, Dict
 from collections import defaultdict
+
 from scipy.stats import chisquare
+from unitary import alpha
+from unitary.alpha import QuantumObject, QuantumWorld
+
+from .enums import SquareState, Type, Color
+from .board import Board
+from .piece import Piece
 
 
 _EMPTY_FEN = "9/9/9/9/9/9/9/9/9/9 w---1"

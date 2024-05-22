@@ -15,8 +15,8 @@ from typing import Optional, List, Tuple, Iterator
 import cirq
 from unitary import alpha
 from unitary.alpha.quantum_effect import QuantumEffect
-from unitary.examples.quantum_chinese_chess.piece import Piece
-from unitary.examples.quantum_chinese_chess.enums import MoveType, MoveVariant, Type
+from .piece import Piece
+from .enums import MoveType, MoveVariant, Type
 
 
 # TODO(): now the class is no longer the base class of all chess moves. Maybe convert this class

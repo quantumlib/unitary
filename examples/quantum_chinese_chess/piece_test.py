@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from unitary.examples.quantum_chinese_chess.enums import (
+from unitary.alpha import QuantumWorld
+
+from .enums import (
     SquareState,
     Language,
     Color,
     Type,
 )
-from unitary.examples.quantum_chinese_chess.piece import Piece
-from unitary.alpha import QuantumWorld
+from .piece import Piece
 
 
 def test_symbol():

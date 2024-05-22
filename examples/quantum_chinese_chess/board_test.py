@@ -12,16 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from unitary.examples.quantum_chinese_chess.enums import (
+from .enums import (
     Language,
     Color,
     Type,
     SquareState,
     TerminalType,
 )
-from unitary.examples.quantum_chinese_chess.board import Board
-from unitary.examples.quantum_chinese_chess.piece import Piece
-from unitary.examples.quantum_chinese_chess.test_utils import (
+from .board import Board
+from .piece import Piece
+from .test_utils import (
     locations_to_bitboard,
     assert_samples_in,
     assert_sample_distribution,

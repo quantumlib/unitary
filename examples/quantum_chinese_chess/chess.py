@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from typing import Tuple, List
-from unitary.examples.quantum_chinese_chess.board import Board
-from unitary.examples.quantum_chinese_chess.enums import (
+from .board import Board
+from .enums import (
     Language,
     GameState,
     Type,
@@ -22,7 +22,7 @@ from unitary.examples.quantum_chinese_chess.enums import (
     MoveVariant,
     TerminalType,
 )
-from unitary.examples.quantum_chinese_chess.move import (
+from .move import (
     Jump,
     SplitJump,
     MergeJump,
