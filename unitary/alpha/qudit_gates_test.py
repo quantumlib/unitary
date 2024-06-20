@@ -224,6 +224,20 @@ def test_iswap(q0: int, q1: int):
     assert np.all(results.measurements["m1"] == q0)
 
 
+@pytest.mark.parametrize("dimension, phase_rads", [(2, np.pi), (3, 1), (4, np.pi * 2)])
+def test_rz_unitary(dimension: float, phase_rads: float):
+    rz = qudit_gates.QuditRzGate(dimension=dimension, radians=phase_rads)
+    expected_unitary = np.identity(n=dimension, dtype=np.complex64)
+
+    # 1j = e ^ ( j * ( pi / 2 )), so we multiply phase_rads by 2 / pi.
+    expected_unitary[dimension - 1][dimension - 1] = 1j ** (phase_rads * 2 / np.pi)
+
+    assert np.isclose(phase_rads / np.pi, rz._exponent)
+    rz_unitary = cirq.unitary(rz)
+    assert np.allclose(cirq.unitary(rz), expected_unitary)
+    assert np.allclose(np.eye(len(rz_unitary)), rz_unitary.dot(rz_unitary.T.conj()))
+
+
 @pytest.mark.parametrize(
     "q0, q1", [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
 )

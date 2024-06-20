@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+
+from typing import List, Dict, Tuple
+
 import numpy as np
 import cirq
 
@@ -49,6 +53,53 @@ class QuditXGate(cirq.Gate):
 
     def _circuit_diagram_info_(self, args):
         return f"X({self.source_state}_{self.destination_state})"
+
+
+class QuditRzGate(cirq.EigenGate):
+    """Phase shifts a single state basis of the qudit.
+
+    A generalization of the phase shift gate to qudits.
+    https://en.wikipedia.org/wiki/Quantum_logic_gate#Phase_shift_gates
+
+    Implements Z_d as defined in eqn (5) of https://arxiv.org/abs/2008.00959
+
+    For a qudit of dimensionality d, shifts the phase of |d-1> by radians.
+
+    Args:
+        dimension: dimension of the qudits, for instance,
+          a dimension of 3 would be a qutrit.
+        radians: The phase shift applied to basis d-1, measured in radians.
+    """
+
+    _cached_eigencomponents: Dict[int, List[Tuple[float, np.ndarray]]] = {}
+
+    def __init__(self, dimension: int, radians: float = np.pi):
+        super().__init__(exponent=radians / np.pi, global_shift=0)
+        self.dimension = dimension
+
+    def _qid_shape_(self):
+        return (self.dimension,)
+
+    def _eigen_components(self) -> List[Tuple[float, np.ndarray]]:
+        if self.dimension not in QuditRzGate._cached_eigencomponents:
+            components = []
+            for i in range(self.dimension):
+                half_turns = 0
+                m = np.zeros((self.dimension, self.dimension))
+                m[i][i] = 1
+                if i == self.dimension - 1:
+                    half_turns = 1
+                components.append((half_turns, m))
+            QuditRzGate._cached_eigencomponents[self.dimension] = components
+        return QuditRzGate._cached_eigencomponents[self.dimension]
+
+    def _circuit_diagram_info_(self, args):
+        return cirq.CircuitDiagramInfo(
+            wire_symbols=("Z_d"), exponent=self._format_exponent_as_angle(args)
+        )
+
+    def _with_exponent(self, exponent: float) -> "QuditRzGate":
+        return QuditRzGate(rads=exponent * np.pi)
 
 
 class QuditPlusGate(cirq.Gate):
