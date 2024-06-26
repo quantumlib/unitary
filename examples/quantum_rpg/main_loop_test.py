@@ -597,7 +597,7 @@ of error-correction, the subject of many theories and discussion.
 
 A bent sign sticks out of the ground at an angle.
 
-Exits: south, north.
+Exits: north, south.
 
 """
     )
@@ -622,7 +622,7 @@ Farther north, you can see faint undulations, as if the way is blurred
 by some mirage.  To proceed, you will need to move around this strange
 occurance.
 
-Exits: south, east, west.
+Exits: east, south, west.
 
 """
     )
@@ -655,7 +655,7 @@ Farther north, you can see faint undulations, as if the way is blurred
 by some mirage.  To proceed, you will need to move around this strange
 occurance.
 
-Exits: south, east, west.
+Exits: east, south, west.
 
 """
     )

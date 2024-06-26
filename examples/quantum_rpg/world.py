@@ -66,7 +66,7 @@ class Location:
     items: Optional[List[item.Item]] = None
 
     def _exits(self) -> str:
-        return ", ".join([ex.value for ex in self.exits]) + "."
+        return ", ".join(sorted(ex.value for ex in self.exits)) + "."
 
     def _item_str(self) -> str:
         if not self.items:
