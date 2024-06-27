@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional, Sequence
 import enum
 import io
 import sys
+import textwrap
+from typing import List, Optional, Sequence
 
 from . import ascii_art
 from . import battle
@@ -23,37 +24,58 @@ from . import classes
 from . import exceptions
 from . import game_state
 from . import input_helpers
+from . import npcs
 from . import world
 from . import xp_utils
 from .final_state_preparation import final_state_world
 
 
-class Command(enum.Enum):
-    """Command parsing utility.
+class Error(Exception):
+    """Base class for locally defined exceptions."""
+    pass
 
-    Currently only supports 'quit' but future expansion planned.
-    """
+
+class AmbiguousCommandError(Error):
+    """Raised when entered command is ambiguous."""
+    pass
+
+
+class Command(enum.Enum):
+    """Enumeration of available commands."""
 
     LOAD = "load"
     LOOK = "look"
     STATUS = "status"
     SAVE = "save"
     HELP = "help"
+    QUANTOPEDIA = "quantopedia"
     QUIT = "quit"
 
     @classmethod
     def parse(cls, s: str) -> Optional["Command"]:
-        """Parses a string as a Direction.
+        """Parses a string as a command.
 
         Allows prefixes, like 'e' to be parsed as EAST.
         """
         if not s:
             return None
         lower_s = s.lower()
-        for cmd in Command:
+        candidates = []
+        for cmd in cls:
             if cmd.value.startswith(lower_s):
-                return cmd
+                candidates.append(cmd)
+        if len(candidates) == 1:
+            return candidates[0]
+        if len(candidates) > 1:
+            raise AmbiguousCommandError
         return None
+
+    @classmethod
+    def help(cls) -> str:
+        cmds = ["Available commands:"]
+        for cmd in Command:
+            cmds.append(f"  {cmd.value}")
+        return "\n".join(cmds)
 
 
 class MainLoop:
@@ -135,7 +157,14 @@ class MainLoop:
                             print(msg, file=self.file)
                     print_room_description = False
                     continue
-                input_cmd = Command.parse(current_input)
+                try:
+                    input_cmd = Command.parse(current_input)
+                except AmbiguousCommandError:
+                    print(f"Ambiguous command '{current_input}'.",
+                          Command.help(),
+                          file=self.file)
+                    print_room_description = False
+                    continue
                 if input_cmd == Command.QUIT:
                     return
                 elif input_cmd == Command.STATUS:
@@ -143,6 +172,15 @@ class MainLoop:
                     print_room_description = False
                 elif input_cmd == Command.HELP:
                     print(ascii_art.HELP, file=self.file)
+                    print_room_description = False
+                elif input_cmd == Command.QUANTOPEDIA:
+                    print(file=self.file)
+                    for npc_class in npcs.Npc.__subclasses__():
+                        print(npc_class.__name__, file=self.file)
+                        print(
+                            textwrap.indent(npc_class.quantopedia_entry(), "  "),
+                            file=self.file)
+                        print(file=self.file)
                     print_room_description = False
                 elif input_cmd == Command.LOAD:
                     print(
