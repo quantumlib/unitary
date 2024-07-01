@@ -91,7 +91,8 @@ class Npc(qaracter.Qaracter):
         """
         return 0
 
-    def quantopedia_entry(self) -> str:
+    @classmethod
+    def quantopedia_entry(cls) -> str:
         """Explanatory text to the players about the NPC."""
         return "Nothing known about this NPC."
 
@@ -112,7 +113,8 @@ class Observer(Npc):
     def quantopedia_index(self) -> int:
         return _FOAM_QUANTOPEDIA
 
-    def quantopedia_entry(self) -> str:
+    @classmethod
+    def quantopedia_entry(cls) -> str:
         return (
             "Observers are known to frequent quantum events.\n"
             "They will measure qubits in order to find out their values."
@@ -137,7 +139,8 @@ class BlueFoam(Npc):
     def quantopedia_index(self) -> int:
         return _FOAM_QUANTOPEDIA
 
-    def quantopedia_entry(self) -> str:
+    @classmethod
+    def quantopedia_entry(cls) -> str:
         return (
             "Blue foam are the simplest kind of quantum errors.  Blue foam\n"
             "are usually found in the |0> state and can be measured.\n"
@@ -165,7 +168,8 @@ class GreenFoam(Npc):
     def quantopedia_index(self) -> int:
         return _FOAM_QUANTOPEDIA
 
-    def quantopedia_entry(self) -> str:
+    @classmethod
+    def quantopedia_entry(cls) -> str:
         return (
             "Green foam are a simple kind of quantum error.  Green foam\n"
             "are usually found in the |0> state and can be measured immediately.\n"
@@ -195,7 +199,8 @@ class RedFoam(Npc):
     def quantopedia_index(self) -> int:
         return _FOAM_QUANTOPEDIA
 
-    def quantopedia_entry(self) -> str:
+    @classmethod
+    def quantopedia_entry(cls) -> str:
         return (
             "Red foam are a slightly more dangerous type of quantum error.\n"
             "They are usually found in the |1> state and must be flipped\n"
@@ -224,7 +229,8 @@ class PurpleFoam(Npc):
     def quantopedia_index(self) -> int:
         return _FOAM_QUANTOPEDIA
 
-    def quantopedia_entry(self) -> str:
+    @classmethod
+    def quantopedia_entry(cls) -> str:
         return (
             "Purple foam are a combination of red and blue form.\n"
             "They are found in a |+> state which is a combination of\n"
@@ -268,7 +274,8 @@ class SchrodingerCat(Npc):
     def quantopedia_index(self) -> int:
         return _HILLS_QUANTOPEDIA
 
-    def quantopedia_entry(self) -> str:
+    @classmethod
+    def quantopedia_entry(cls) -> str:
         return (
             "Schrödinger's cat are found in a superposition of zero and one.\n"
             "This cat contains multiple qubits that are entangled so that all\n"

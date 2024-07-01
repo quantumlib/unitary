@@ -105,8 +105,8 @@ ______                         ||              _    _
 
 def test_parse_commands() -> None:
     assert main_loop.Command.parse("x") is None
-    assert main_loop.Command.parse("q") is main_loop.Command.QUIT
-    assert main_loop.Command.parse("Q") is main_loop.Command.QUIT
+    assert main_loop.Command.parse("qui") is main_loop.Command.QUIT
+    assert main_loop.Command.parse("Qui") is main_loop.Command.QUIT
     assert main_loop.Command.parse("Quit") is main_loop.Command.QUIT
     assert main_loop.Command.parse("quit") is main_loop.Command.QUIT
 
