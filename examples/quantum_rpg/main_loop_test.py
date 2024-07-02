@@ -105,16 +105,18 @@ ______                         ||              _    _
 
 def test_parse_commands() -> None:
     assert main_loop.Command.parse("x") is None
-    assert main_loop.Command.parse("qui") is main_loop.Command.QUIT
+    assert main_loop.Command.parse("Q") is main_loop.Command.QUIT
     assert main_loop.Command.parse("Qui") is main_loop.Command.QUIT
     assert main_loop.Command.parse("Quit") is main_loop.Command.QUIT
-    assert main_loop.Command.parse("quit") is main_loop.Command.QUIT
+    assert main_loop.Command.parse("Quitt") is None
+    assert main_loop.Command.parse("quit") is None
+    assert main_loop.Command.parse("load") is main_loop.Command.LOAD
 
 
 def test_simple_main_loop() -> None:
     c = classes.Analyst("Mensing")
     state = game_state.GameState(
-        party=[c], user_input=["look", "quit"], file=io.StringIO()
+        party=[c], user_input=["look", "Quit"], file=io.StringIO()
     )
     loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
     loop.loop()
@@ -140,7 +142,7 @@ Exits: east.
 
 def test_empty_command() -> None:
     state = game_state.GameState(
-        party=[], user_input=["", "", "quit"], file=io.StringIO()
+        party=[], user_input=["", "", "Quit"], file=io.StringIO()
     )
     loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
     loop.loop()
@@ -168,10 +170,10 @@ def test_status() -> None:
     c2.add_quantum_effect(alpha.Superposition(), 1)
     c2.add_quantum_effect(alpha.Flip(effect_fraction=0.5), 2)
     state = game_state.GameState(
-        party=[c, c2], user_input=["status", "quit"], file=io.StringIO()
+        party=[c, c2], user_input=["status", "Quit"], file=io.StringIO()
     )
     loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
-    loop.loop(user_input=["quit"])
+    loop.loop(user_input=["Quit"])
     assert (
         cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
         == r"""
@@ -197,7 +199,7 @@ Maxwell_2: ───X^0.5───
 def test_do_simple_move() -> None:
     c = classes.Analyst("Mensing")
     state = game_state.GameState(
-        party=[c], user_input=["e", "read sign", "w", "quit"], file=io.StringIO()
+        party=[c], user_input=["e", "read sign", "w", "Quit"], file=io.StringIO()
     )
     loop = main_loop.MainLoop(world.World(example_world()), state)
     loop.loop()
@@ -235,7 +237,7 @@ Exits: east.
 def test_save() -> None:
     c = classes.Analyst("Mensing")
     state = game_state.GameState(
-        party=[c], user_input=["e", "save", "quit"], file=io.StringIO()
+        party=[c], user_input=["e", "save", "Quit"], file=io.StringIO()
     )
     loop = main_loop.MainLoop(world.World(example_world()), state)
     loop.loop()
@@ -267,7 +269,7 @@ def test_load() -> None:
     c = classes.Analyst("Broglie")
     state = game_state.GameState(
         party=[c],
-        user_input=["load", "2;1;Mensing#Analyst#1", "quit"],
+        user_input=["load", "2;1;Mensing#Analyst#1", "Quit"],
         file=io.StringIO(),
     )
     loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
@@ -299,7 +301,7 @@ def test_bad_load() -> None:
     c = classes.Analyst("Broglie")
     state = game_state.GameState(
         party=[c],
-        user_input=["load", "", "quit"],
+        user_input=["load", "", "Quit"],
         file=io.StringIO(),
     )
     loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
@@ -330,7 +332,7 @@ def test_battle() -> None:
     c = classes.Analyst("Mensing")
     state = game_state.GameState(
         party=[c],
-        user_input=["e", "south", "m", "1", "1", "", "quit"],
+        user_input=["e", "south", "m", "1", "1", "", "Quit"],
         file=io.StringIO(),
     )
     loop = main_loop.MainLoop(state=state, world=world.World(example_world()))
@@ -391,7 +393,7 @@ def test_lost_battle() -> None:
     c = classes.Engineer("Mensing")
     state = game_state.GameState(
         party=[c],
-        user_input=["e", "south", "x", "1", "1", "", "quit"],
+        user_input=["e", "south", "x", "1", "1", "", "Quit"],
         file=io.StringIO(),
     )
     assert state.party[0].name == "Mensing"
@@ -460,7 +462,7 @@ def test_escaped_battle():
     c.add_quantum_effect(alpha.Flip(), 1)
     state = game_state.GameState(
         party=[c],
-        user_input=["e", "south", "x", "1", "1", "", "quit"],
+        user_input=["e", "south", "x", "1", "1", "", "Quit"],
         file=io.StringIO(),
     )
     assert state.party[0].name == "Mensing"
@@ -525,7 +527,7 @@ def test_item_function():
     c = classes.Analyst("michalakis")
     state = game_state.GameState(
         party=[c],
-        user_input=["press button", "press button", "press button", "quit"],
+        user_input=["press button", "press button", "press button", "Quit"],
         file=io.StringIO(),
     )
     loop = main_loop.MainLoop(world.World(example_world()), state)
@@ -566,7 +568,7 @@ def test_main_help():
 
 def test_main_begin():
     state = game_state.GameState(
-        party=[], user_input=["1", "nova", "n", "quit"], file=io.StringIO()
+        party=[], user_input=["1", "nova", "n", "Quit"], file=io.StringIO()
     )
     loop = main_loop.main(state)
 
@@ -606,7 +608,7 @@ Exits: north, south.
 def test_main_load():
     state = game_state.GameState(
         party=[],
-        user_input=["2", "classical3;1;Doug#Analyst#1", "quit"],
+        user_input=["2", "classical3;1;Doug#Analyst#1", "Quit"],
         file=io.StringIO(),
     )
     loop = main_loop.main(state)
@@ -631,7 +633,7 @@ Exits: east, south, west.
 def test_main_bad_save_file():
     state = game_state.GameState(
         party=[],
-        user_input=["2", "", "2", "classical3;1;Doug#Analyst#1", "quit"],
+        user_input=["2", "", "2", "classical3;1;Doug#Analyst#1", "Quit"],
         file=io.StringIO(),
     )
     loop = main_loop.main(state)

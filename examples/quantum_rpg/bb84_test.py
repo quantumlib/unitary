@@ -81,7 +81,7 @@ def test_alice_bob():
             "look display",
             "look keyboard",
             "type aaaa",
-            "quit",
+            "Quit",
         ],
         file=io.StringIO(),
     )
@@ -159,7 +159,7 @@ The keypad beeps and a light flashes red.
     state.file = file = io.StringIO()
     key = bb84.solve_bb84(state.state_dict["alice"], state.state_dict["bob"])
     state.get_user_input = input_helpers.get_user_input_function(
-        [f"type {key}", "north", "south", "quit"]
+        [f"type {key}", "north", "south", "Quit"]
     )
     loop = main_loop.MainLoop(example_world, state)
     loop.loop()

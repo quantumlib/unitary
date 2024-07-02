@@ -49,7 +49,7 @@ class Command(enum.Enum):
     SAVE = "save"
     HELP = "help"
     QUANTOPEDIA = "quantopedia"
-    QUIT = "quit"
+    QUIT = "Quit"
 
     @classmethod
     def parse(cls, s: str) -> Optional["Command"]:
@@ -59,9 +59,16 @@ class Command(enum.Enum):
         """
         if not s:
             return None
+        # Quit is a special case, it's case-sensitive. It's matched first before
+        # input is lower-cased and matched against every other command.
+        if cls.QUIT.value.startswith(s):
+            return cls.QUIT
         lower_s = s.lower()
         candidates = []
         for cmd in cls:
+            # Quit has already been handled above.
+            if cmd == cls.QUIT:
+                continue
             if cmd.value.startswith(lower_s):
                 candidates.append(cmd)
         if len(candidates) == 1:
