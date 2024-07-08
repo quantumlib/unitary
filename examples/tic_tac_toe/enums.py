@@ -17,12 +17,20 @@ import enum
 
 
 class GameMoves(enum.Enum):
+    """Possible inputs for the ASCII version of tic tac toe."""
+
     EXIT = "exit"
     MAP = "map"
     HELP = "help"
 
 
 class TicTacSquare(enum.Enum):
+    """Possible states of one tic tac toe square.
+
+    For the quantum version of tic tac toe, these
+    are represented as qutrits (qubits with three states).
+    """
+
     EMPTY = 0
     X = 1
     O = 2
@@ -35,6 +43,14 @@ class TicTacSquare(enum.Enum):
 
 
 class TicTacResult(enum.Enum):
+    """End results of a tic tac toe game.
+
+    Either one side has won or it is a draw.
+    If the game has continued past the end state,
+    it is possible both sides have completed a three-in-a-row.
+    If the game is not complete, the result is UNFINISHED.
+    """
+
     UNFINISHED = 0
     X_WINS = 1
     O_WINS = 2

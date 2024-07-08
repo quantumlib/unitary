@@ -79,6 +79,13 @@ def _result_to_str(result: List[TicTacSquare]) -> str:
 
 
 def eval_board(result: List[TicTacSquare]) -> TicTacResult:
+    """Determines who has won the tic tac toe board.
+
+    This function checks all the possible three-in-a-row positions
+    (all cols, all rows, and the two diagonals.  Depending on which
+    player(s) have a three in a row (X's, O's, both, or neither)
+    returns the result of the tic tac toe board.
+    """
     x_wins = False
     o_wins = False
     still_empty = False
@@ -90,18 +97,12 @@ def eval_board(result: List[TicTacSquare]) -> TicTacResult:
         if any(result[check[idx]] == TicTacSquare.EMPTY for idx in range(3)):
             still_empty = True
     if x_wins:
-        if o_wins:
-            return TicTacResult.BOTH_WIN
-        else:
-            return TicTacResult.X_WINS
+        return TicTacResult.BOTH_WIN if o_wins else TicTacResult.X_WINS
     else:
         if o_wins:
             return TicTacResult.O_WINS
         else:
-            if still_empty:
-                return TicTacResult.UNFINISHED
-            else:
-                return TicTacResult.DRAW
+            return TicTacResult.UNFINISHED if still_empty else TicTacResult.DRAW
 
 
 class TicTacToe:
