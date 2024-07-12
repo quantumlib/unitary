@@ -67,6 +67,22 @@ def test_anti_control(simulator, compile_to_qubits):
     assert (result[0] == 1 for result in results)
 
 
+@pytest.mark.parametrize("compile_to_qubits", [False, True])
+@pytest.mark.parametrize("simulator", [cirq.Simulator, SparseSimulator])
+def test_multiple_effects_quantum_if(simulator, compile_to_qubits):
+    board = alpha.QuantumWorld(sampler=simulator(), compile_to_qubits=compile_to_qubits)
+    piece = alpha.QuantumObject("q0", 1)
+    piece2 = alpha.QuantumObject("q1", 0)
+    board.add_object(piece)
+    board.add_object(piece2)
+    alpha.quantum_if(piece).apply(
+        alpha.Flip(effect_fraction=0.5), alpha.Flip(effect_fraction=0.5)
+    )(piece2)
+
+    # Test that results are as expected
+    results = board.peek([piece, piece2], count=100)
+
+
 def test_no_world():
     piece = alpha.QuantumObject("q0", 1)
     with pytest.raises(ValueError, match="must be added to a QuantumWorld"):
