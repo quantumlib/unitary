@@ -38,7 +38,7 @@ QUANTUM_PERIMETER = [
             "A large lecture hall is filled with empty seats.  The front of\n"
             "the theatre is filled with a large stage and screen.  Light from\n"
             "a projector in the ceiling illuminates a presentation of slides\n"
-            "that periodically rotate with an echoing click that reveberates\n"
+            "that periodically rotate with an echoing click that reverberates\n"
             "through the empty hall."
         ),
         encounters=[],
