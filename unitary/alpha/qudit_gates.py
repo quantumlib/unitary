@@ -70,7 +70,7 @@ class QuditRzGate(cirq.EigenGate):
     For a qudit of dimensionality d, shifts the phase of |phased_state> by radians.
 
     Args:
-        dimension: Dimension of the qudits: for instance, a dimension of 3 
+        dimension: Dimension of the qudits: for instance, a dimension of 3
           would be a qutrit.
         radians: The phase shift applied to the |phased_state>, measured in
           radians.
@@ -80,14 +80,17 @@ class QuditRzGate(cirq.EigenGate):
 
     _cached_eigencomponents: Dict[int, List[Tuple[float, np.ndarray]]] = {}
 
-    def __init__(self, dimension: int, radians: float = np.pi,
-                 phased_state: Optional[int] = None):
+    def __init__(
+        self, dimension: int, radians: float = np.pi, phased_state: Optional[int] = None
+    ):
         super().__init__(exponent=radians / np.pi, global_shift=0)
         self.dimension = dimension
         if phased_state is not None:
             if phased_state >= dimension or phased_state < 0:
-                raise ValueError(f'state {phased_state} is not valid for a qudit of'
-                                 f' dimension {dimension}.')
+                raise ValueError(
+                    f"state {phased_state} is not valid for a qudit of"
+                    f" dimension {dimension}."
+                )
             self.phased_state = phased_state
         else:
             self.phased_state = self.dimension - 1
