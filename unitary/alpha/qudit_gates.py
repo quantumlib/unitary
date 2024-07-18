@@ -14,7 +14,7 @@
 #
 
 
-from typing import List, Dict, Tuple
+from typing import List, Dict, Optional, Tuple
 
 import numpy as np
 import cirq
@@ -66,36 +66,48 @@ class QuditRzGate(cirq.EigenGate):
     https://en.wikipedia.org/wiki/Quantum_logic_gate#Phase_shift_gates
 
     Implements Z_d as defined in eqn (5) of https://arxiv.org/abs/2008.00959
-
-    For a qudit of dimensionality d, shifts the phase of |d-1> by radians.
+    with the addition of a state parameter for convenience.
+    For a qudit of dimensionality d, shifts the phase of |phased_state> by radians.
 
     Args:
-        dimension: dimension of the qudits, for instance,
-          a dimension of 3 would be a qutrit.
-        radians: The phase shift applied to basis d-1, measured in radians.
+        dimension: Dimension of the qudits: for instance, a dimension of 3 
+          would be a qutrit.
+        radians: The phase shift applied to the |phased_state>, measured in
+          radians.
+        phased_state: Optional index of the state to be phase shifted. Defaults
+          to phase shifting the state |dimension-1>.
     """
 
     _cached_eigencomponents: Dict[int, List[Tuple[float, np.ndarray]]] = {}
 
-    def __init__(self, dimension: int, radians: float = np.pi):
+    def __init__(self, dimension: int, radians: float = np.pi,
+                 phased_state: Optional[int] = None):
         super().__init__(exponent=radians / np.pi, global_shift=0)
         self.dimension = dimension
+        if phased_state is not None:
+            if phased_state >= dimension or phased_state < 0:
+                raise ValueError(f'state {phased_state} is not valid for a qudit of'
+                                 f' dimension {dimension}.')
+            self.phased_state = phased_state
+        else:
+            self.phased_state = self.dimension - 1
 
     def _qid_shape_(self):
         return (self.dimension,)
 
     def _eigen_components(self) -> List[Tuple[float, np.ndarray]]:
-        if self.dimension not in QuditRzGate._cached_eigencomponents:
+        eigen_key = (self.dimension, self.phased_state)
+        if eigen_key not in QuditRzGate._cached_eigencomponents:
             components = []
             for i in range(self.dimension):
                 half_turns = 0
                 m = np.zeros((self.dimension, self.dimension))
                 m[i][i] = 1
-                if i == self.dimension - 1:
+                if i == self.phased_state:
                     half_turns = 1
                 components.append((half_turns, m))
-            QuditRzGate._cached_eigencomponents[self.dimension] = components
-        return QuditRzGate._cached_eigencomponents[self.dimension]
+            QuditRzGate._cached_eigencomponents[eigen_key] = components
+        return QuditRzGate._cached_eigencomponents[eigen_key]
 
     def _circuit_diagram_info_(self, args):
         return cirq.CircuitDiagramInfo(
