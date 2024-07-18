@@ -91,4 +91,4 @@ def test_no_qutrits(compile_to_qubits):
     piece = alpha.QuantumObject("q0", 2)
     board.add_object(piece)
     with pytest.raises(ValueError, match="Cannot apply effect to qids"):
-        alpha.Superposition()(piece)
+        alpha.Phase()(piece)

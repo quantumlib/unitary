@@ -23,7 +23,7 @@ from unitary.alpha.quantum_effect import QuantumEffect
 
 
 class Cycle(QuantumEffect):
-    """Cycles a qubit from |0> to |1>, |1> to |2>, etc.
+    """Cycles a qudit from |0> to |1>, |1> to |2>, etc.
 
     Essentially adds `addend` to the state, where `addend`
     is the parameter supplied at creation.
@@ -55,11 +55,11 @@ class QuditCycle(Cycle):
 
 
 class Flip(QuantumEffect):
-    """Flips two states of a qubit, leaving all other states unchanged.
+    """Flips two states of a qudit, leaving all other states unchanged.
 
-    For instance, Flip(state0 = 0, state1=2) is a qutrit effect
+    For instance, Flip(state0 = 0, state1 = 2) is a qutrit effect
     that flips |0> to |2>, |2> to |0> and leaves
-    |1> alone.  This is also sometimes referred to as the X_0_2 gate.
+    |1> alone.  This is also sometimes referred as the X_02 gate.
 
     For a partial flip, use the `effect_fraction` argument.
     Note that this is only applied so far on qubits and not yet for
