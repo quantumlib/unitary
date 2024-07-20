@@ -905,9 +905,7 @@ def test_density_matrix():
 
     testing.assert_array_equal(board.density_matrix(objects=[light1]), rho_green)
     testing.assert_array_equal(board.density_matrix(objects=[light2]), rho_red)
-    testing.assert_array_equal(
-        board.density_matrix(objects=[light3]), rho_red, rho_green
-    )
+    testing.assert_array_equal(board.density_matrix(objects=[light3]), rho_red)
 
     testing.assert_array_equal(
         board.density_matrix(objects=[light1, light2]), np.kron(rho_green, rho_red)
@@ -916,7 +914,7 @@ def test_density_matrix():
         board.density_matrix(objects=[light2, light3]), np.kron(rho_red, rho_red)
     )
     testing.assert_array_equal(
-        board.density_matrix(objects=[light1, light3]), np.kron(rho_green, rho_red)
+        board.density_matrix(objects=[light3, light1]), np.kron(rho_red, rho_green)
     )
 
     testing.assert_array_equal(
