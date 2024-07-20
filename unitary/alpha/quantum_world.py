@@ -116,9 +116,9 @@ class QuantumWorld:
         for remap in self.qubit_remapping_dict:
             new_dict = {}
             for key_obj, value_obj in remap.items():
-                new_dict[
-                    new_world.get_object_by_name(key_obj.name)
-                ] = new_world.get_object_by_name(value_obj.name)
+                new_dict[new_world.get_object_by_name(key_obj.name)] = (
+                    new_world.get_object_by_name(value_obj.name)
+                )
             new_world.qubit_remapping_dict.append(new_dict)
         new_world.qubit_remapping_dict_length = self.qubit_remapping_dict_length.copy()
         return new_world
