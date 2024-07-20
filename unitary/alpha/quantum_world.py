@@ -690,11 +690,8 @@ class QuantumWorld:
         von Neumann entropy.
         """
         density_matrix_12 = self.density_matrix([obj1, obj2]).reshape(2, 2, 2, 2)
-        print(self.density_matrix([obj1, obj2]))
         density_matrix_1 = cirq.partial_trace(density_matrix_12, [0])
-        print(density_matrix_1)
         density_matrix_2 = cirq.partial_trace(density_matrix_12, [1])
-        print(density_matrix_2)
         return (
             cirq.von_neumann_entropy(density_matrix_1, validate=False)
             + cirq.von_neumann_entropy(density_matrix_2, validate=False)
