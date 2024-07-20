@@ -116,9 +116,9 @@ class QuantumWorld:
         for remap in self.qubit_remapping_dict:
             new_dict = {}
             for key_obj, value_obj in remap.items():
-                new_dict[new_world.get_object_by_name(key_obj.name)] = (
-                    new_world.get_object_by_name(value_obj.name)
-                )
+                new_dict[
+                    new_world.get_object_by_name(key_obj.name)
+                ] = new_world.get_object_by_name(value_obj.name)
             new_world.qubit_remapping_dict.append(new_dict)
         new_world.qubit_remapping_dict_length = self.qubit_remapping_dict_length.copy()
         return new_world
@@ -635,6 +635,71 @@ class QuantumWorld:
         for one_probs in full_probs:
             binary_probs.append(1 - one_probs[0])
         return binary_probs
+
+    def density_matrix(
+        self, objects: Optional[Sequence[QuantumObject]] = None
+    ) -> np.ndarray:
+        """Simulates the density matrix of the given objects.
+
+        Parameters:
+            objects:    List of QuantumObjects (currently only qubits are supported)
+
+        Returns:
+            The density matrix of the specified objects.
+        """
+        num_all_qubits = len(self.object_name_dict.values())
+        num_shown_qubits = len(objects) if objects is not None else num_all_qubits
+
+        specified_names = (
+            [obj.qubit.name for obj in objects] if objects is not None else []
+        )
+        unspecified_names = set(self.object_name_dict.keys()) - set(specified_names)
+        # Make sure we have all objects, starting with the specified ones in the given order.
+        ordered_names = specified_names + list(unspecified_names)
+        ordered_qubits = [self.object_name_dict[name].qubit for name in ordered_names]
+
+        simulator = cirq.DensityMatrixSimulator()
+        qubit_order = cirq.QubitOrder.explicit(
+            ordered_qubits, fallback=cirq.QubitOrder.DEFAULT
+        )
+        result = simulator.simulate(self.circuit, qubit_order=qubit_order)
+
+        if num_shown_qubits == num_all_qubits:
+            return result.final_density_matrix
+        else:
+            # We trace out the unspecified qubits.
+            # The reshape is required by the partial_trace method.
+            traced_density_matrix = cirq.partial_trace(
+                result.final_density_matrix.reshape((2, 2) * num_all_qubits),
+                range(num_shown_qubits),
+            )
+            # Reshape back to a 2-d matrix.
+            return traced_density_matrix.reshape(
+                2**num_shown_qubits, 2**num_shown_qubits
+            )
+
+    def measure_entanglement(self, obj1: QuantumObject, obj2: QuantumObject) -> float:
+        """Measures the entanglement (i.e. quantum mutual information) of the two given objects.
+        See https://en.wikipedia.org/wiki/Quantum_mutual_information for the formula.
+
+        Parameters:
+            obj1, obj2:     two quantum objects (currently only qubits are supported)
+
+        Returns:
+            The quantum mutual information defined as S_1 + S_2 - S_12, where S denotes (reduced)
+        von Neumann entropy.
+        """
+        density_matrix_12 = self.density_matrix([obj1, obj2]).reshape(2, 2, 2, 2)
+        print(self.density_matrix([obj1, obj2]))
+        density_matrix_1 = cirq.partial_trace(density_matrix_12, [0])
+        print(density_matrix_1)
+        density_matrix_2 = cirq.partial_trace(density_matrix_12, [1])
+        print(density_matrix_2)
+        return (
+            cirq.von_neumann_entropy(density_matrix_1, validate=False)
+            + cirq.von_neumann_entropy(density_matrix_2, validate=False)
+            - cirq.von_neumann_entropy(density_matrix_12.reshape(4, 4), validate=False)
+        )
 
     def __getitem__(self, name: str) -> QuantumObject:
         quantum_object = self.object_name_dict.get(name, None)

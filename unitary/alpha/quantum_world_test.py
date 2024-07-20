@@ -17,6 +17,7 @@ import enum
 import pytest
 
 import numpy as np
+import numpy.testing as testing
 
 import cirq
 
@@ -892,3 +893,59 @@ def test_save_and_restore_snapshot(simulator, compile_to_qubits):
     # Further restore would return a value error.
     with pytest.raises(ValueError, match="Unable to restore any more."):
         world.restore_last_snapshot()
+
+
+def test_density_matrix():
+    rho_green = np.reshape([0, 0, 0, 1], (2, 2))
+    rho_red = np.reshape([1, 0, 0, 0], (2, 2))
+    light1 = alpha.QuantumObject("green", Light.GREEN)
+    light2 = alpha.QuantumObject("red1", Light.RED)
+    light3 = alpha.QuantumObject("red2", Light.RED)
+    board = alpha.QuantumWorld([light1, light2, light3])
+
+    testing.assert_array_equal(board.density_matrix(objects=[light1]), rho_green)
+    testing.assert_array_equal(board.density_matrix(objects=[light2]), rho_red)
+    testing.assert_array_equal(
+        board.density_matrix(objects=[light3]), rho_red, rho_green
+    )
+
+    testing.assert_array_equal(
+        board.density_matrix(objects=[light1, light2]), np.kron(rho_green, rho_red)
+    )
+    testing.assert_array_equal(
+        board.density_matrix(objects=[light2, light3]), np.kron(rho_red, rho_red)
+    )
+    testing.assert_array_equal(
+        board.density_matrix(objects=[light1, light3]), np.kron(rho_green, rho_red)
+    )
+
+    testing.assert_array_equal(
+        board.density_matrix(objects=[light1, light2, light3]),
+        np.kron(rho_green, np.kron(rho_red, rho_red)),
+    )
+
+
+def test_measure_entanglement():
+    rho_green = np.reshape([0, 0, 0, 1], (2, 2))
+    rho_red = np.reshape([1, 0, 0, 0], (2, 2))
+    light1 = alpha.QuantumObject("red1", Light.RED)
+    light2 = alpha.QuantumObject("green", Light.GREEN)
+    light3 = alpha.QuantumObject("red2", Light.RED)
+    board = alpha.QuantumWorld([light1, light2, light3])
+
+    # S_1 + S_2 - S_12 = 0 + 0 - 0 = 0 for all three cases.
+    assert round(board.measure_entanglement(light1, light2)) == 0.0
+    assert round(board.measure_entanglement(light1, light3)) == 0.0
+    assert round(board.measure_entanglement(light2, light3)) == 0.0
+
+    alpha.Superposition()(light2)
+    alpha.quantum_if(light2).apply(alpha.Flip())(light3)
+    results = board.peek([light2, light3], count=100)
+    assert not all(result[0] == 0 for result in results)
+    assert (result[0] == result[1] for result in results)
+    # S_1 + S_2 - S_12 = 0 + 1 - 1 = 0
+    assert round(board.measure_entanglement(light1, light2), 3) == 0.0
+    # S_1 + S_2 - S_12 = 0 + 1 - 1 = 0
+    assert round(board.measure_entanglement(light1, light3), 3) == 0.0
+    # S_1 + S_2 - S_12 = 1 + 1 - 0 = 2
+    assert round(board.measure_entanglement(light2, light3), 3) == 2.0
