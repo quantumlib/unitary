@@ -664,7 +664,7 @@ class QuantumWorld:
         histogram = self.get_correlated_histogram(ordered_objects, count)
 
         # Get an estimate of the state vector.
-        state_vector = np.array([0.] * (2**num_all_qubits))
+        state_vector = np.array([0.0] * (2**num_all_qubits))
         for key, val in histogram.items():
             state_vector += self.__to_state_vector__(key) * np.sqrt(val * 1.0 / count)
         density_matrix = np.outer(state_vector, state_vector)
@@ -710,11 +710,11 @@ class QuantumWorld:
         return quantum_object
 
     def __to_state_vector__(self, input: tuple) -> np.ndarray:
-        """ Converts the given tuple (of length N) to the corresponding state vector (of length 2**N).
+        """Converts the given tuple (of length N) to the corresponding state vector (of length 2**N).
         e.g. (0, 1) -> [0, 1, 0, 0]
         """
         num = len(input)
-        index = int(''.join([str(i) for i in input]),2)
-        state_vector = np.array([0.] * (2**num))
+        index = int("".join([str(i) for i in input]), 2)
+        state_vector = np.array([0.0] * (2**num))
         state_vector[index] = 1.0
         return state_vector
