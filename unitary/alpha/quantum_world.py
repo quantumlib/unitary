@@ -637,12 +637,13 @@ class QuantumWorld:
         return binary_probs
 
     def density_matrix(
-        self, objects: Optional[Sequence[QuantumObject]] = None
+        self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 1000
     ) -> np.ndarray:
         """Simulates the density matrix of the given objects.
 
         Parameters:
             objects:    List of QuantumObjects (currently only qubits are supported)
+            count:      Number of measurements
 
         Returns:
             The density matrix of the specified objects.
@@ -654,23 +655,27 @@ class QuantumWorld:
             [obj.qubit.name for obj in objects] if objects is not None else []
         )
         unspecified_names = set(self.object_name_dict.keys()) - set(specified_names)
+
         # Make sure we have all objects, starting with the specified ones in the given order.
         ordered_names = specified_names + list(unspecified_names)
-        ordered_qubits = [self.object_name_dict[name].qubit for name in ordered_names]
+        ordered_objects = [self.object_name_dict[name] for name in ordered_names]
 
-        simulator = cirq.DensityMatrixSimulator()
-        qubit_order = cirq.QubitOrder.explicit(
-            ordered_qubits, fallback=cirq.QubitOrder.DEFAULT
-        )
-        result = simulator.simulate(self.circuit, qubit_order=qubit_order)
+        # Peek the current world `count` times and get the results.
+        histogram = self.get_correlated_histogram(ordered_objects, count)
+
+        # Get an estimate of the state vector.
+        state_vector = np.array([0.] * (2**num_all_qubits))
+        for key, val in histogram.items():
+            state_vector += self.__to_state_vector__(key) * np.sqrt(val * 1.0 / count)
+        density_matrix = np.outer(state_vector, state_vector)
 
         if num_shown_qubits == num_all_qubits:
-            return result.final_density_matrix
+            return density_matrix
         else:
             # We trace out the unspecified qubits.
             # The reshape is required by the partial_trace method.
             traced_density_matrix = cirq.partial_trace(
-                result.final_density_matrix.reshape((2, 2) * num_all_qubits),
+                density_matrix.reshape((2, 2) * num_all_qubits),
                 range(num_shown_qubits),
             )
             # Reshape back to a 2-d matrix.
@@ -703,3 +708,13 @@ class QuantumWorld:
         if not quantum_object:
             raise KeyError(f"{name} did not exist in this world.")
         return quantum_object
+
+    def __to_state_vector__(self, input: tuple) -> np.ndarray:
+        """ Converts the given tuple (of length N) to the corresponding state vector (of length 2**N).
+        e.g. (0, 1) -> [0, 1, 0, 0]
+        """
+        num = len(input)
+        index = int(''.join([str(i) for i in input]),2)
+        state_vector = np.array([0.] * (2**num))
+        state_vector[index] = 1.0
+        return state_vector
