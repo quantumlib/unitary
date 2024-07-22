@@ -69,3 +69,25 @@ Other commands:
 - `undo`: to undo last move
 - `help`: to see the commands list
 - `exit`: to quit the game
+
+## Quantum Concepts
+### Superposition
+With a split move, the board state becomes a [quantum superposition](https://en.wikipedia.org/wiki/Quantum_superposition) of two board states. For example, with "b9^a7c7", the left white horse is splitted from position b9 into a7 and c7:
+
+<img width="292" alt="Screenshot 2024-07-21 at 11 09 31 PM" src="https://github.com/user-attachments/assets/a5f3bb23-3232-48fe-933d-327a597fa609">
+
+And a `peek all` would show that the current board state is an equal superpostion of the following two states:
+
+<img width="313" alt="Screenshot 2024-07-21 at 11 10 11 PM" src="https://github.com/user-attachments/assets/fb9e018d-4bec-4da4-8d68-3aa2c9048d2b">
+
+### Entanglement
+Continuing the above example, with another white move "b7e7" the left white cannon is (possibly) moved to position e7: 
+
+<img width="293" alt="Screenshot 2024-07-21 at 11 16 36 PM" src="https://github.com/user-attachments/assets/bc946fc8-d366-4c0b-ae78-ece31fb416b4">
+
+But instead of being a superposition of four states (i.e. white horse and cannon each occupy one of two possible locations), there are actually only two possbile states, as shown by `peek all`:
+
+<img width="292" alt="Screenshot 2024-07-21 at 11 17 19 PM" src="https://github.com/user-attachments/assets/459a2be8-42e6-46b4-86d6-17adbcc6d5d3">
+
+, i.e. either the horse was in `a7` and the cannon successfully moved ot `e7`, or the horse is in `c7` and the cannon did not move at all. This is an example of [quantum entanglement](https://en.wikipedia.org/wiki/Quantum_entanglement).
+
