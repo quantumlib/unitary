@@ -1,7 +1,5 @@
 Quantum Chinese Chess
 ================
-[中文版](https://github.com/madcpf/unitary/blob/read2/examples/quantum_chinese_chess/README_ZH.md)
-
 This project is inspired by the [Quantum Chess project](https://quantumai.google/cirq/experiments/unitary/quantum_chess/concepts). It aims to introduce quantum moves to Chinese Chess (also called Xiangqi) so that the basic idea of quantum physics could be introduced to the players.
 
 ## How to run the game
