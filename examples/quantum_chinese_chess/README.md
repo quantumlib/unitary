@@ -12,6 +12,8 @@ After cloning the Unitary library you can use the following command line to run 
 python -m examples.quantum_chinese_chess.chess
 ```
 
+Currently we don't have a graphical interface. Text display is supported at Linux terminal, Mac terminal, Colab, and Sublime Terminus.
+
 ## Game rules
 Game rules of Quantum Chinese Chess consist of classical and quantum rules. You may learn the classical Chinese Chess rules from the following sources:
   - [Wikipedia page](https://en.wikipedia.org/wiki/Xiangqi)
