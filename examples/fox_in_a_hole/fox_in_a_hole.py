@@ -19,6 +19,7 @@ import sys
 import enum
 import numpy as np
 import argparse
+from typing import Optional
 
 from unitary.alpha import (
     QuantumObject,
@@ -70,7 +71,7 @@ class Game(abc.ABC):
         seed: Seed for random number generator. (used for testing)
     """
 
-    def __init__(self, number_of_holes: int = 5, seed: int = None):
+    def __init__(self, number_of_holes: int = 5, seed: Optional[int] = None):
         # Initialize random number generate.
         self.rng = np.random.default_rng(seed=seed)
 
@@ -191,7 +192,7 @@ class ClassicalGame(Game):
 
     def initialize_state(self):
         # All holes start as empty
-        self.state = self.number_of_holes * [0.0]
+        self.state = [0.0] * self.number_of_holes
 
         # Pick a random hole index and put the fox in it
         index = self.rng.integers(low=0, high=self.number_of_holes)
@@ -247,7 +248,7 @@ class QuantumGame(Game):
     (QuantumWorld, [QuantumObject]) -> quantum world, list of holes
     """
 
-    def __init__(self, number_of_holes=5, iswap=False, qprob=0.5, seed=None):
+    def __init__(self, number_of_holes: int = 5, iswap: bool = False, qprob:float = 0.5, seed: Optional[int] = None):
         if iswap:
             self.move_operation = PhasedMove()
             self.split_operation = PhasedSplit()
@@ -283,7 +284,7 @@ class QuantumGame(Game):
     def take_random_move(self) -> str:
         """Applies a random move on the current state. Gives back the move in string format."""
         probs = self.state[0].get_binary_probabilities(objects=self.state[1])
-        non_empty_holes = [i for i in range(len(probs)) if probs[i] > 0]
+        non_empty_holes = [i for i, p in enumerate(probs) if p > 0]
         index = self.rng.integers(low=0, high=len(non_empty_holes))
         source = non_empty_holes[index]
 
