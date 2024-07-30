@@ -11,11 +11,23 @@ found in the `quantum_chess` directory.
 
 ## Installation and Documentation
 
+Unitary uses Python 3.12. It's recommended to use a virtual environment for installing Unitary to
+avoid interfering with other system packages:
+
+```sh
+python3.12 -v venv ~/unitary
+source ~/unitary/bin/activate
+```
+
+Unitary can then be installed within that virtual environment.
+
 Unitary is not available as a PyPI package. Please clone this repository and
 install from source:
 
-    cd unitary/
-    pip install .
+```sh
+cd unitary/
+pip install .
+```
 
 Documentation is available at https://quantumai.google/cirq/experiments.
 
@@ -30,9 +42,11 @@ upper right corner).
 You can then clone the repository into your development environment by
 using (substitute USER with your github username)
 
-    git clone https://github.com/USER/unitary.git
-	cd unitary
-    git remote add upstream https://github.com/quantumlib/unitary.git
+```sh
+git clone https://github.com/USER/unitary.git
+cd unitary
+git remote add upstream https://github.com/quantumlib/unitary.git
+```
 
 This will clone your fork so that you can work on it, while marking the
 name 'upstream' as the original repository.
@@ -40,17 +54,23 @@ name 'upstream' as the original repository.
 You can then pull from the original and update your fork, for instance,
 by doing this:
 
-    git pull upstream main
-    git push origin main
+```sh
+git pull upstream main
+git push origin main
+```
 
 In order to push changes to unitary, create a branch in your fork:
 
-    git checkout -b BRANCH_NAME
+```sh
+git checkout -b BRANCH_NAME
+```
 
 Perform your changes, then commit (i.e. `git commit -a`) then push to your
 fork:
 
-    git push origin BRANCH_NAME
+```sh
+git push origin BRANCH_NAME
+```
 
 This will give you a link to create a PR (pull request).  Create this pull request
 and pick some reviewers.  Once approved, it will be merged into the original repository.
