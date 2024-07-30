@@ -34,7 +34,7 @@ setup(
     url="http://github.com/quantumlib/unitary",
     author="Quantum AI team and collaborators",
     author_email="quantum-chess-engineering@googlegroups.com",
-    python_requires=">=3.6.0",
+    python_requires=">=3.12.0",
     install_requires=install_requires,
     license="Apache 2",
     description="",
