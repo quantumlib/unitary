@@ -639,11 +639,17 @@ class QuantumWorld:
     def density_matrix(
         self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 1000
     ) -> np.ndarray:
-        """Simulates the density matrix of the given objects.
+        """Simulates the density matrix of the given objects. We assume that the overall state of
+        the quantum world (including all quantum objects in it) could be described by one pure
+        state. To calculate the density matrix of the given quantum objects, we would always measure/
+        peek the quantum world for `count` times, deduce the (pure) state vector based on the results,
+        then the density matrix is its outer product. We will then trace out the un-needed quantum
+        objects before returning the density matrix.
 
         Parameters:
-            objects:    List of QuantumObjects (currently only qubits are supported)
-            count:      Number of measurements
+            objects:    List of QuantumObjects (currently only qubits are supported). If not specified,
+                        all quantum objects' density matrix will be returned.
+            count:      Number of measurements.
 
         Returns:
             The density matrix of the specified objects.
