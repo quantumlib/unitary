@@ -300,7 +300,6 @@ def test_X_HZH_qudit_identity(
     assert np.all(results.measurements["m"] == expected_state)
 
 
-
 @pytest.mark.parametrize(
     "q0, q1", [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]
 )
