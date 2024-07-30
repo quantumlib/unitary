@@ -300,39 +300,6 @@ def test_X_HZH_qudit_identity(
     assert np.all(results.measurements["m"] == expected_state)
 
 
-@pytest.mark.parametrize(
-    "phase_1, phase_2, addend, expected_state",
-    [
-        (0, 0, 1, 2),
-        (np.pi * 2 / 3, np.pi * 4 / 3, 0, 2),
-        (np.pi * 4 / 3, np.pi * 2 / 3, 0, 1),
-    ],
-)
-def test_X_HZH_qudit_identity(
-    phase_1: float, phase_2: float, addend: int, expected_state: int
-):
-    # For d=3, there are three identities: one for each swap.
-    # HH is equivalent to swapping |1> with |2>
-    # Applying a 1/3 turn to |1> and a 2/3 turn to |2> results in swapping
-    # |0> and |2>
-    # Applying a 2/3 turn to |1> and a 1/3 turn to |2> results in swapping
-    # |0> and |1>
-    qutrit = cirq.NamedQid("q0", dimension=3)
-    c = cirq.Circuit()
-    c.append(qudit_gates.QuditPlusGate(3, addend=addend)(qutrit))
-    c.append(qudit_gates.QuditHadamardGate(dimension=3)(qutrit))
-    c.append(
-        qudit_gates.QuditRzGate(dimension=3, radians=phase_1, phased_state=1)(qutrit)
-    )
-    c.append(
-        qudit_gates.QuditRzGate(dimension=3, radians=phase_2, phased_state=2)(qutrit)
-    )
-    c.append(qudit_gates.QuditHadamardGate(dimension=3)(qutrit))
-    c.append(cirq.measure(qutrit, key="m"))
-    sim = cirq.Simulator()
-    results = sim.run(c, repetitions=1000)
-    assert np.all(results.measurements["m"] == expected_state)
-
 
 @pytest.mark.parametrize(
     "q0, q1", [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)]

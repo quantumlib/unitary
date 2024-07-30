@@ -70,7 +70,7 @@ class QuditRzGate(cirq.EigenGate):
     For a qudit of dimensionality d, shifts the phase of |phased_state> by radians.
 
     Args:
-        dimension: Dimension of the qudits: for instance, a dimension of 3
+        dimension: Dimension of the qudits. For instance, a dimension of 3
           would be a qutrit.
         radians: The phase shift applied to the |phased_state>, measured in
           radians.
