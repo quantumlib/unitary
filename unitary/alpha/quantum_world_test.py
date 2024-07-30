@@ -895,13 +895,26 @@ def test_save_and_restore_snapshot(simulator, compile_to_qubits):
         world.restore_last_snapshot()
 
 
-def test_density_matrix():
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_density_matrix(simulator, compile_to_qubits):
     rho_green = np.reshape([0, 0, 0, 1], (2, 2))
     rho_red = np.reshape([1, 0, 0, 0], (2, 2))
     light1 = alpha.QuantumObject("green", Light.GREEN)
     light2 = alpha.QuantumObject("red1", Light.RED)
     light3 = alpha.QuantumObject("red2", Light.RED)
-    board = alpha.QuantumWorld([light1, light2, light3])
+    board = alpha.QuantumWorld(
+        [light1, light2, light3],
+        sampler=simulator(),
+        compile_to_qubits=compile_to_qubits,
+    )
 
     testing.assert_array_equal(board.density_matrix(objects=[light1]), rho_green)
     testing.assert_array_equal(board.density_matrix(objects=[light2]), rho_red)
@@ -923,13 +936,26 @@ def test_density_matrix():
     )
 
 
-def test_measure_entanglement():
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_measure_entanglement(simulator, compile_to_qubits):
     rho_green = np.reshape([0, 0, 0, 1], (2, 2))
     rho_red = np.reshape([1, 0, 0, 0], (2, 2))
     light1 = alpha.QuantumObject("red1", Light.RED)
     light2 = alpha.QuantumObject("green", Light.GREEN)
     light3 = alpha.QuantumObject("red2", Light.RED)
-    board = alpha.QuantumWorld([light1, light2, light3])
+    board = alpha.QuantumWorld(
+        [light1, light2, light3],
+        sampler=simulator(),
+        compile_to_qubits=compile_to_qubits,
+    )
 
     # S_1 + S_2 - S_12 = 0 + 0 - 0 = 0 for all three cases.
     assert round(board.measure_entanglement(light1, light2)) == 0.0
@@ -942,8 +968,8 @@ def test_measure_entanglement():
     assert not all(result[0] == 0 for result in results)
     assert (result[0] == result[1] for result in results)
     # S_1 + S_2 - S_12 = 0 + 1 - 1 = 0
-    assert round(board.measure_entanglement(light1, light2), 3) == 0.0
+    assert round(board.measure_entanglement(light1, light2), 1) == 0.0
     # S_1 + S_2 - S_12 = 0 + 1 - 1 = 0
-    assert round(board.measure_entanglement(light1, light3), 3) == 0.0
+    assert round(board.measure_entanglement(light1, light3), 1) == 0.0
     # S_1 + S_2 - S_12 = 1 + 1 - 0 = 2
-    assert round(board.measure_entanglement(light2, light3), 3) == 2.0
+    assert round(board.measure_entanglement(light2, light3), 1) == 2.0

@@ -19,6 +19,7 @@ import sys
 import enum
 import numpy as np
 import argparse
+from typing import Optional
 
 from unitary.alpha import (
     QuantumObject,
@@ -34,38 +35,90 @@ from unitary.alpha import (
 class Game(abc.ABC):
     """Abstract ancestor class for Fox-in-a-hole game.
 
-    Parameters:
-    * hole_nr: integer - Number of holes
-    * seed:    integer - Seed for random number generated (used for testing)
+    This class does the mechanical operations of the
+    Fox-in-a-hole game:  Keeping track of the history of
+    moves, running the game by looping through guesses,
+    and printing out the history.
+
+    This class has two variants.  `ClassicalGame`
+    demonstrates how to play the classical version of
+    Fox-in-a-hole, often found in riddle and puzzle books.
+    `QuantumGame` is a quantum variant, where, instead of
+    moving from one hole to the next, the fox will move
+    to a superposition of both adjacent holes by using a
+    `Split` operator.
+
+    This class has 4 abstract methods.  These methods will
+    vary depending on whether the game is the classical or
+    quantum variant:
+
+    - initialize_state(): This function will initialize the game.
+    - state_to_string(): This returns the state of the game as
+        a string so it can be printed out.
+    - check_guess(guess):  This checks whether the user's guess
+        is correct.  In the classical version, this just checks
+        whether the fox is in the hole. In the quantum version,
+        this performs a measurement to determine if the fox is in
+        this location.
+    - take_random_move():  This function should move the fox.
+        In the classical version, the fox moves to an adjacent hole.
+        In the quantum version, the fox "splits" and moves to both
+        adjacent holes.
+
+    Args:
+        number_of_holes:  The number of holes that the fox
+            can hide in.
+        seed: Seed for random number generator. (used for testing)
     """
 
-    def __init__(self, hole_nr=5, seed=None):
+    def __init__(self, number_of_holes: int = 5, seed: Optional[int] = None):
+        # Initialize random number generate.
         self.rng = np.random.default_rng(seed=seed)
 
+        # Initialize history and attributes of the object.
         self.history = []
+        self.number_of_holes = number_of_holes
 
-        self.all_hole_names = [str(i) for i in range(hole_nr)]
-
-        self.hole_nr = hole_nr
-
+        # Initialize state of the game.
         self.state = None
         self.initialize_state()
 
     @abc.abstractmethod
     def initialize_state(self):
-        """Initializes the actual state."""
+        """Initializes the actual state.
+
+        This is an abstract method and will vary depending on
+        whether the game is played classically or quantum.
+        """
 
     @abc.abstractmethod
     def state_to_string(self) -> str:
-        """Returns the string reprezentation of the state."""
+        """Returns the string reprezentation of the state.
+
+        This is an abstract method and will vary depending on
+        whether the game is played classically or quantum.
+        """
 
     @abc.abstractmethod
-    def check_guess(self, guess) -> bool:
-        """Checks if user's guess is right and returns it as a boolean value."""
+    def check_guess(self, guess: int) -> bool:
+        """Checks if user's guess is right and returns it as a boolean value.
+
+        This is an abstract method and will vary depending on
+        whether the game is played classically or quantum.
+
+        Args:
+            guess: Which number hole that the user guessed.
+        """
 
     @abc.abstractmethod
     def take_random_move(self) -> str:
-        """Applies a random move on the current state. Gives back the move in string format."""
+        """Applies a random move on the current state.
+
+        This is an abstract method and will vary depending on
+        whether the game is played classically or quantum.
+
+        Returns:  The move in string format.
+        """
 
     def history_append_state(self):
         """Append the current state into the history."""
@@ -82,30 +135,42 @@ class Game(abc.ABC):
     def run(self):
         """Handles the main game-loop of the Fox-in-a-hole game."""
         max_step_nr = 10
-        step_nr = 0
         self.history_append_state()
-        while step_nr < max_step_nr:
-            while True:
-                print("Where is the fox? (0-{} or q for quit)".format(self.hole_nr - 1))
+
+        # Ask for user guesses until the game ends
+        for step_nr in range(max_step_nr):
+            # Get the user guess for the fox's position.
+            # Ask until the user inputs a valid result.
+            guess = -1
+            while guess < 0 or guess >= self.number_of_holes:
+                print(f"Where is the fox? (0-{self.number_of_holes - 1} or q for quit)")
                 input_str = input()
-                if input_str in ("q", "Q") or input_str in self.all_hole_names:
-                    break
-            if input_str in ("q", "Q"):
-                print("\nQuitting.\n")
-                break
-            guess = int(input_str)
+                if input_str in ("q", "Q"):
+                    print("\nQuitting.\n")
+                    self.print_history()
+                try:
+                    guess = int(input_str)
+                except ValueError:
+                    print("Invalid guess.")
+
+            # Append guess to the history
             self.history_append_guess(guess)
+
+            # Check whether the guess was correct.
             result = self.check_guess(guess)
             self.history_append_state()
+
             if result:
                 print("\nCongratulations! You won in {} step(s).\n".format(step_nr + 1))
-                break
+                self.print_history()
+                return
+
+            # Move the fox and keep track of history.
             move_str = self.take_random_move()
             self.history_append_move(move_str)
             self.history_append_state()
-            step_nr += 1
-        if step_nr == max_step_nr:
-            print("\nIt seems you have lost :-(. Try again.\n")
+
+        print("\nIt seems you have lost :-(. Try again.\n")
         self.print_history()
 
     def print_history(self):
@@ -116,11 +181,21 @@ class Game(abc.ABC):
 
 
 class ClassicalGame(Game):
-    """Classical Fox-in-a-hole game."""
+    """Classical Fox-in-a-hole game.
+
+    In this version, we play the classical version of
+    Fox-in-a-Hole.
+
+    Each hole is either 0.0 (Fox not there) or 1.0 (Fox is there).
+
+    """
 
     def initialize_state(self):
-        self.state = self.hole_nr * [0.0]
-        index = self.rng.integers(low=0, high=self.hole_nr)
+        # All holes start as empty
+        self.state = [0.0] * self.number_of_holes
+
+        # Pick a random hole index and put the fox in it
+        index = self.rng.integers(low=0, high=self.number_of_holes)
         self.state[index] = 1.0
 
     def state_to_string(self) -> str:
@@ -131,21 +206,32 @@ class ClassicalGame(Game):
         return self.state[guess] == 1.0
 
     def take_random_move(self) -> str:
-        """Applies a random move on the current state. Gives back the move in string format."""
+        """Applies a random move on the current state.
+
+        Moves the fox in a random direction (either forward or backwards).
+        If the fox is on one end of the track (position 0 or self.number_of_holes -1),
+        it only has one choice.
+
+        Returns: The move in string format."""
+
+        # Get where the fox started
         source = self.state.index(1.0)
-        direction = self.rng.integers(low=0, high=2) * 2 - 1
-        if source == 0 and direction == -1:
+
+        # If the fox is on the end, it has one choice.
+        # Otherwise, it can move either direction.
+        if source == 0:
             direction = 1
-        elif source == self.hole_nr - 1 and direction == 1:
+        elif source == self.number_of_holes - 1:
             direction = -1
+        else:
+            direction = self.rng.choice([1, -1])
+
+        # Move fox.
         self.state[source] = 0.0
         self.state[source + direction] = 1.0
-        if direction == -1:
-            dir_str = "left"
-        else:
-            dir_str = "right"
-        move_str = f"Moving {dir_str} from position {source}."
-        return move_str
+
+        dir_str = "left" if direction == -1 else "right"
+        return f"Moving {dir_str} from position {source}."
 
 
 class Hole(enum.Enum):
@@ -162,18 +248,25 @@ class QuantumGame(Game):
     (QuantumWorld, [QuantumObject]) -> quantum world, list of holes
     """
 
-    def __init__(self, hole_nr=5, iswap=False, qprob=0.5, seed=None):
+    def __init__(self, number_of_holes: int = 5, iswap: bool = False, qprob:float = 0.5, seed: Optional[int] = None):
+        if iswap:
+            self.move_operation = PhasedMove()
+            self.split_operation = PhasedSplit()
+            self.swap_str = "iSWAP"
+        else:
+            self.move_operation = Move()
+            self.split_operation = Split()
+            self.swap_str = "SWAP"
+
         self.iswap = iswap
         self.qprob = qprob
-        super().__init__(hole_nr=hole_nr, seed=seed)
+        super().__init__(number_of_holes=number_of_holes, seed=seed)
 
     def initialize_state(self):
-        index = self.rng.integers(low=0, high=self.hole_nr)
+        index = self.rng.integers(low=0, high=self.number_of_holes)
         holes = []
-        for i in range(self.hole_nr):
-            hole = QuantumObject(
-                f"Hole-{i}-{i}", Hole.FOX if i == index else Hole.EMPTY
-            )
+        for i in range(self.number_of_holes):
+            hole = QuantumObject(f"Hole-{i}", Hole.FOX if i == index else Hole.EMPTY)
             holes.append(hole)
         self.state = (QuantumWorld(holes, sampler=SparseSimulator()), holes)
 
@@ -191,58 +284,44 @@ class QuantumGame(Game):
     def take_random_move(self) -> str:
         """Applies a random move on the current state. Gives back the move in string format."""
         probs = self.state[0].get_binary_probabilities(objects=self.state[1])
-        non_empty_holes = []
-        for i, prob in enumerate(probs):
-            if prob > 0:
-                non_empty_holes.append(i)
+        non_empty_holes = [i for i, p in enumerate(probs) if p > 0]
         index = self.rng.integers(low=0, high=len(non_empty_holes))
         source = non_empty_holes[index]
+
+        # Choose whether to move in one direction or both directions.
         if self.rng.random() < self.qprob:
             direction = 0  # Left & right at the same time
         else:
-            direction = self.rng.integers(low=0, high=2) * 2 - 1  # -1: left; 1:right
+            direction = self.rng.choice([1, -1])  # -1: left; 1:right
 
+        # If the fox is on the edge, it only has one choice
         if source == 0:
             direction = 1
-        elif source == self.hole_nr - 1:
+        elif source == self.number_of_holes - 1:
             direction = -1
-        if direction in (-1, 1):  # Move left or right
+
+        if direction in (-1, 1):
+            # Move left or right using a (Phased)Move operation
             target = source + direction
-            if self.iswap:
-                PhasedMove()(self.state[1][source], self.state[1][target])
-                swap_str = "iSWAP"
-            else:
-                Move()(self.state[1][source], self.state[1][target])
-                swap_str = "SWAP"
-            if direction == -1:
-                dir_str = "left"
-            else:
-                dir_str = "right"
-            move_str = f"Moving ({swap_str}-based) {dir_str} from position {source}."
-        else:  # Move left & right (split)
-            if self.iswap:
-                PhasedSplit()(
-                    self.state[1][source],
-                    self.state[1][source - 1],
-                    self.state[1][source + 1],
-                )
-                swap_str = "iSWAP"
-            else:
-                Split()(
-                    self.state[1][source],
-                    self.state[1][source - 1],
-                    self.state[1][source + 1],
-                )
-                swap_str = "SWAP"
-            move_str = (
-                "Splitting ({}-based) from position {} to positions {} and {}.".format(
-                    swap_str, source, source - 1, source + 1
-                )
+            self.move_operation(self.state[1][source], self.state[1][target])
+            dir_str = "left" if direction == -1 else "right"
+            return f"Moving ({self.swap_str}-based) {dir_str} from position {source}."
+        else:
+            # Move left & right (split) using a (Phased) operation
+            self.split_operation(
+                self.state[1][source],
+                self.state[1][source - 1],
+                self.state[1][source + 1],
             )
-        return move_str
+            return (
+                f"Splitting ({self.swap_str}-based) from position {source} "
+                f"to positions {source-1} and {source+1}."
+            )
 
 
 if __name__ == "__main__":
+    # Create command-line arguments for Fox-in-a-hole
+
     parser = argparse.ArgumentParser(description="Fox-in-a-hole game.")
 
     parser.add_argument(
@@ -270,17 +349,19 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if args.is_quantum and args.qprob is None:
-        args.qprob = 0.5
+    # Set defaults for arguments when not specified
+
     if args.qprob is not None and not 0.0 < args.qprob <= 1.0:
         print("The probability p of a quantum move has to be: 0.0<p<=1.0.")
         sys.exit()
+
+    # Initialize game object
 
     print(f"---------------------------------")
     if args.is_quantum or (args.qprob is not None and args.qprob > 0.0):
         game: Game = QuantumGame(qprob=args.qprob, iswap=args.use_iswap)
         print(f"Quantum Fox-in-a-hole game.")
-        print(f"Probability of quantum move: {args.qprob}.")
+        print(f"Probability of quantum move: {game.qprob}.")
         if args.use_iswap:
             print(f"Using iSWAP for moves.")
         else:
@@ -290,4 +371,5 @@ if __name__ == "__main__":
         print("Classical Fox-in-a-hole game.")
     print(f"---------------------------------")
 
+    # Run Fox-in-a-hole
     game.run()
