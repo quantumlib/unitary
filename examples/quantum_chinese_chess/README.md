@@ -6,7 +6,7 @@ introduced to the players.
 
 ## How to run the game
 
-After cloning the Unitary library you can use the following command line to run the game:
+After cloning the Unitary library, you can use the following command line to run the game:
   
 ```
 python -m examples.quantum_chinese_chess.chess
