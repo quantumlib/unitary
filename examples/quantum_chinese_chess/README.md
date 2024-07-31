@@ -12,7 +12,7 @@ After cloning the Unitary library, you can use the following command line to run
 python -m examples.quantum_chinese_chess.chess
 ```
 
-Currently we don't have a graphical interface. Text display is supported at Linux terminal, Mac terminal, Colab, and Sublime 
+Currently, we don't have a graphical interface. Text display is supported at Linux terminal, Mac terminal, Colab, and Sublime 
 Terminus.
 
 ## Game rules
