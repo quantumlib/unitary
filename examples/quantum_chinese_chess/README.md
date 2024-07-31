@@ -32,25 +32,25 @@ In addition to the classical rules, we introduce the quantum rules which allow p
 |Pawns|Y|
 
 For quantum moves, there are some restrictions that each piece needs to conform:
-### Kings (a.k.a. Generals)
+### Kings <sub>(a.k.a. Generals)</sub>
 All moves are restricted within the `palace`. In the first version of the implementation, we don’t allow Kings to split or merge.
 
-### Advisors (a.k.a. Guards)
+### Advisors <sub>(a.k.a. Guards)</sub>
 All (classical, quantum) moves are restricted within the `palace`.
 
-### Elephants (a.k.a. Bishops)
+### Elephants <sub>(a.k.a. Bishops)</sub>
 All moves are restricted within each player’s own side, i.e. not crossing the `river`. The condition "`elephant's eye is not blocked`" is checked for all elephants' moves.
 
-### Horses (a.k.a. Knights) 
+### Horses <sub>(a.k.a. Knights)</sub>
 The condition "`horse's leg is not hobbled`" is checked for all horses' moves.
 
-### Rooks (a.k.a. Chariots) 
+### Rooks <sub>(a.k.a. Chariots)</sub>
 No special restrictions.
 
 ### Cannons
 For a cannon to capture a target, i.e. `fire`, there should be exactly one `cannon platform` between the cannon and the target. If there are nonzero quantum pieces and less than 2 classical pieces in between, a measurement will be performed to determine if the `fire` could be made.
 
-### Pawns (a.k.a. Soldiers) 
+### Pawns <sub>(a.k.a. Soldiers)</sub> 
 No split or merge is allowed before crossing the `river`. After crossing the `river`, neither split nor merge could move backward or stay at the same location, but could only move forward or horizontally.
 
 ### Endgame rules
@@ -72,7 +72,7 @@ Other commands:
 
 ## Quantum Concepts
 ### Superposition
-With a split move, the board state becomes a [quantum superposition](https://en.wikipedia.org/wiki/Quantum_superposition) of two board states. For example, with "b9^a7c7", the left white horse is splitted from position b9 into a7 and c7:
+With a split move, the board state becomes a [quantum superposition](https://en.wikipedia.org/wiki/Quantum_superposition) of two board states. For example, with `b9^a7c7`, the left white horse is splitted from position `b9` into `a7` and `c7`:
 
 <img width="292" alt="Screenshot 2024-07-21 at 11 09 31 PM" src="https://github.com/user-attachments/assets/a5f3bb23-3232-48fe-933d-327a597fa609">
 
@@ -81,7 +81,7 @@ And a `peek all` would show that the current board state is an equal superpostio
 <img width="313" alt="Screenshot 2024-07-21 at 11 10 11 PM" src="https://github.com/user-attachments/assets/fb9e018d-4bec-4da4-8d68-3aa2c9048d2b">
 
 ### Entanglement
-Continuing the above example, with another white move "b7e7" the left white cannon is (possibly) moved to position e7: 
+Continuing the above example, with another white move `b7e7` the left white cannon is (possibly) moved to position `e7`: 
 
 <img width="293" alt="Screenshot 2024-07-21 at 11 16 36 PM" src="https://github.com/user-attachments/assets/bc946fc8-d366-4c0b-ae78-ece31fb416b4">
 
