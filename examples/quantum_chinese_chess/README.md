@@ -92,13 +92,16 @@ But instead of being a superposition of four states (i.e. white horse and cannon
 , i.e. either the horse was in `a7` and the cannon successfully moved ot `e7`, or the horse is in `c7` and the cannon did not move at all. This is an example of [quantum entanglement](https://en.wikipedia.org/wiki/Quantum_entanglement).
 
 ### Measurement
-Given the following scenario, where we have splitted red rook, white horse and white cannon. 
+Given the following scenario, where there are splitted red rook, white horse and white cannon. 
 
 <img width="287" alt="Screenshot 2024-07-31 at 1 14 49 PM" src="https://github.com/user-attachments/assets/d2b6851b-8566-4296-a55a-e78cf23ce6b7">
 
-And the white player would like to make the move `e7e3` to capture the red horse. In this case we will make a [measurement](https://en.wikipedia.org/wiki/Measurement_in_quantum_mechanics) to check if there is exactly one `cannon platform` between the cannon and the target. Depennding on the measurement result, you should see one of the two scenarios (with equal probability):
+And the white player would like to make the move `e7e3` to capture the red horse. In this case we will make a [measurement](https://en.wikipedia.org/wiki/Measurement_in_quantum_mechanics) to check if there is exactly one `cannon platform` between the cannon and the target. Depending on the measurement result, you should see one of the two scenarios (with equal probability):
 
 <img width="290" alt="Screenshot 2024-07-31 at 1 16 29 PM" src="https://github.com/user-attachments/assets/297e0134-bc00-47f1-881d-8bb484a7ff92">
 <img width="285" alt="Screenshot 2024-07-31 at 1 15 56 PM" src="https://github.com/user-attachments/assets/237f0bb1-792a-4a85-8518-cc5e59adc2f3">
 
-In the left case, In the right case. But in both cases, note that other superposition pieces (red rook and white horse) are not affected, i.e. the whole board is still in a superposition state.
+In the left case, the `platform` is not there, so the capture is not made <sup>[1]</sup>.
+In the right case, the `platform` is there, and the capture is made. But in both cases, note that other superposition pieces (red rook and white horse) are not affected, i.e. the whole board is still in a superposition state.
+
+[1] Note that in such cannon firing scenarios the player might want to have a `laser cannon`, i.e. to capture the red elephant instead, with the red horse as platform. This has not been implemented. Feel free to submit such pull requests!
