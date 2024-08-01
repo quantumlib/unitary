@@ -23,6 +23,8 @@ import cirq
 
 import unitary.alpha as alpha
 import unitary.alpha.qudit_gates as qudit_gates
+import io
+import contextlib
 
 
 class Light(enum.Enum):
@@ -979,5 +981,56 @@ def test_measure_entanglement(simulator, compile_to_qubits):
     # Test with objects=None.
     assert round(board.measure_entanglement(), 1) == 2.0
     # Supplying one object would return a value error.
-    with pytest.raises(ValueError, match="Could not calculate entanglement for 1 qubit."):
+    with pytest.raises(
+        ValueError, match="Could not calculate entanglement for 1 qubit."
+    ):
         board.measure_entanglement([light1])
+
+
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_print_entanglement_table(simulator, compile_to_qubits):
+    rho_green = np.reshape([0, 0, 0, 1], (2, 2))
+    rho_red = np.reshape([1, 0, 0, 0], (2, 2))
+    light1 = alpha.QuantumObject("red1", Light.RED)
+    light2 = alpha.QuantumObject("green", Light.GREEN)
+    light3 = alpha.QuantumObject("red2", Light.RED)
+    board = alpha.QuantumWorld(
+        [light1, light2, light3],
+        sampler=simulator(),
+        compile_to_qubits=compile_to_qubits,
+    )
+    # f = io.StringIO()
+    # with contextlib.redirect_stdout(f):
+    #     board.print_entanglement_table()
+    #     assert (
+    #         f.getvalue()
+    #         in """
+    #        red1  green  red2
+    # red1    0.0    0.0   0.0
+    # green   0.0    0.0   0.0
+    # red2    0.0    0.0   0.0
+    # """
+    #     )
+
+    alpha.Superposition()(light2)
+    alpha.quantum_if(light2).apply(alpha.Flip())(light3)
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        board.print_entanglement_table()
+    assert (
+        f.getvalue()
+        in """
+       red1  green  red2
+red1    0.0    0.0   0.0
+green   0.0    0.0   2.0
+red2    0.0    2.0   0.0
+"""
+    )
