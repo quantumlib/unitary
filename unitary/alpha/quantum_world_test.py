@@ -1007,18 +1007,18 @@ def test_print_entanglement_table(simulator, compile_to_qubits):
         sampler=simulator(),
         compile_to_qubits=compile_to_qubits,
     )
-    # f = io.StringIO()
-    # with contextlib.redirect_stdout(f):
-    #     board.print_entanglement_table()
-    #     assert (
-    #         f.getvalue()
-    #         in """
-    #        red1  green  red2
-    # red1    0.0    0.0   0.0
-    # green   0.0    0.0   0.0
-    # red2    0.0    0.0   0.0
-    # """
-    #     )
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        board.print_entanglement_table()
+        assert (
+            f.getvalue()
+            in """
+           red1  green  red2
+    red1    0.0    0.0   0.0
+    green   0.0    0.0   0.0
+    red2    0.0    0.0   0.0
+    """
+        )
 
     alpha.Superposition()(light2)
     alpha.quantum_if(light2).apply(alpha.Flip())(light3)
