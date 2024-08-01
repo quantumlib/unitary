@@ -1013,10 +1013,10 @@ def test_print_entanglement_table(simulator, compile_to_qubits):
         assert (
             f.getvalue()
             in """
-           red1  green  red2
-    red1    0.0    0.0   0.0
-    green   0.0    0.0   0.0
-    red2    0.0    0.0   0.0
+       red1  green  red2
+red1    0.0    0.0   0.0
+green   0.0    0.0   0.0
+red2    0.0    0.0   0.0
     """
         )
 
