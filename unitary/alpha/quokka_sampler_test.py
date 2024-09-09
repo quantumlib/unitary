@@ -24,11 +24,13 @@ _Q = cirq.LineQubit.range(10)
 
 
 class FakeQuokkaEndpoint:
-    def __init__(self, responses: Iterable[quokka_sampler.JSON_TYPE]):
+    def __init__(self, *responses: quokka_sampler.JSON_TYPE):
         self.responses = list(responses)
         self.requests = []
 
-    def _post(self, json_request: quokka_sampler.JSON_TYPE) -> quokka_sampler.JSON_TYPE:
+    def __call__(
+        self, json_request: quokka_sampler.JSON_TYPE
+    ) -> quokka_sampler.JSON_TYPE:
         self.requests.append(json_request)
         return self.responses.pop()
 
@@ -73,9 +75,8 @@ def test_quokka_deterministic_examples(circuit, json_result):
     sim = cirq.Simulator()
     expected_results = sim.run(circuit, repetitions=5)
     json_response = {"error": "no error", "error_code": 0, "result": json_result}
-    endpoint = FakeQuokkaEndpoint([json_response])
     quokka = quokka_sampler.QuokkaSampler(
-        name="test_mctesterface", post_function=endpoint._post
+        name="test_mctesterface", post=FakeQuokkaEndpoint(json_response)
     )
     quokka_results = quokka.run(circuit, repetitions=5)
     assert quokka_results == expected_results
@@ -100,9 +101,8 @@ def test_quokka_run_sweep():
         "error_code": 0,
         "result": {"m_m2": [[1, 0], [1, 0], [1, 0], [1, 0], [1, 0]]},
     }
-    endpoint = FakeQuokkaEndpoint([json_response, json_response2])
     quokka = quokka_sampler.QuokkaSampler(
-        name="test_mctesterface", post_function=endpoint._post
+        name="test_mctesterface", post=FakeQuokkaEndpoint(json_response, json_response2)
     )
     quokka_results = quokka.run_sweep(circuit, sweep, repetitions=5)
     assert quokka_results[0] == expected_results[0]
