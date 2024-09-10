@@ -23,6 +23,8 @@ import cirq
 
 import unitary.alpha as alpha
 import unitary.alpha.qudit_gates as qudit_gates
+import io
+import contextlib
 
 
 class Light(enum.Enum):
@@ -206,7 +208,6 @@ def test_unhook(simulator, compile_to_qubits):
     alpha.Split()(light, light2, light3)
     board.unhook(light2)
     results = board.peek([light2, light3], count=200, convert_to_enum=False)
-    print(results)
     assert all(result[0] == 0 for result in results)
     assert not all(result[1] == 0 for result in results)
     assert not all(result[1] == 1 for result in results)
@@ -662,8 +663,6 @@ def test_combine_worlds(simulator, compile_to_qubits):
 
     results = world2.peek(count=100)
     expected = [StopLight.YELLOW] + result
-    print(results)
-    print(expected)
     assert all(actual == expected for actual in results)
 
 
@@ -958,9 +957,13 @@ def test_measure_entanglement(simulator, compile_to_qubits):
     )
 
     # S_1 + S_2 - S_12 = 0 + 0 - 0 = 0 for all three cases.
-    assert round(board.measure_entanglement(light1, light2)) == 0.0
-    assert round(board.measure_entanglement(light1, light3)) == 0.0
-    assert round(board.measure_entanglement(light2, light3)) == 0.0
+    assert round(board.measure_entanglement([light1, light2]), 1) == 0.0
+    assert round(board.measure_entanglement([light1, light3]), 1) == 0.0
+    assert round(board.measure_entanglement([light2, light3]), 1) == 0.0
+    # S_12 + S_13 + S_23 - S_123 = 0 + 0 + 0 - 0 = 0
+    assert round(board.measure_entanglement([light1, light2, light3]), 1) == 0.0
+    # Test with objects=None.
+    assert round(board.measure_entanglement(), 1) == 0.0
 
     alpha.Superposition()(light2)
     alpha.quantum_if(light2).apply(alpha.Flip())(light3)
@@ -968,8 +971,66 @@ def test_measure_entanglement(simulator, compile_to_qubits):
     assert not all(result[0] == 0 for result in results)
     assert (result[0] == result[1] for result in results)
     # S_1 + S_2 - S_12 = 0 + 1 - 1 = 0
-    assert round(board.measure_entanglement(light1, light2), 1) == 0.0
-    # S_1 + S_2 - S_12 = 0 + 1 - 1 = 0
-    assert round(board.measure_entanglement(light1, light3), 1) == 0.0
-    # S_1 + S_2 - S_12 = 1 + 1 - 0 = 2
-    assert round(board.measure_entanglement(light2, light3), 1) == 2.0
+    assert round(board.measure_entanglement([light1, light2]), 1) == 0.0
+    # S_1 + S_3 - S_13 = 0 + 1 - 1 = 0
+    assert round(board.measure_entanglement([light1, light3]), 1) == 0.0
+    # S_2 + S_3 - S_23 = 1 + 1 - 0 = 2
+    assert round(board.measure_entanglement([light2, light3]), 1) == 2.0
+    # S_12 + S_13 + S_23 - S_123 = 1 + 1 + 0 - 0
+    assert round(board.measure_entanglement([light1, light2, light3]), 1) == 2.0
+    # Test with objects=None.
+    assert round(board.measure_entanglement(), 1) == 2.0
+    # Supplying one object would return a value error.
+    with pytest.raises(
+        ValueError, match="Could not calculate entanglement for 1 qubit."
+    ):
+        board.measure_entanglement([light1])
+
+
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_print_entanglement_table(simulator, compile_to_qubits):
+    rho_green = np.reshape([0, 0, 0, 1], (2, 2))
+    rho_red = np.reshape([1, 0, 0, 0], (2, 2))
+    light1 = alpha.QuantumObject("red1", Light.RED)
+    light2 = alpha.QuantumObject("green", Light.GREEN)
+    light3 = alpha.QuantumObject("red2", Light.RED)
+    board = alpha.QuantumWorld(
+        [light1, light2, light3],
+        sampler=simulator(),
+        compile_to_qubits=compile_to_qubits,
+    )
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        board.print_entanglement_table()
+        assert (
+            f.getvalue()
+            in """
+       red1  green  red2
+red1    0.0    0.0   0.0
+green   0.0    0.0   0.0
+red2    0.0    0.0   0.0
+    """
+        )
+
+    alpha.Superposition()(light2)
+    alpha.quantum_if(light2).apply(alpha.Flip())(light3)
+    f = io.StringIO()
+    with contextlib.redirect_stdout(f):
+        board.print_entanglement_table()
+    assert (
+        f.getvalue()
+        in """
+       red1  green  red2
+red1    0.0    0.0   0.0
+green   0.0    0.0   2.0
+red2    0.0    2.0   0.0
+"""
+    )
