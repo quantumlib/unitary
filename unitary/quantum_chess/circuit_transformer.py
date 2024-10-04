@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import copy
 from typing import Dict, Iterable, List, Optional, Sequence, Set
 
 import cirq
-import cirq_google as cg
 
 import unitary.quantum_chess.controlled_iswap as controlled_iswap
 import unitary.quantum_chess.initial_mapping_utils as imu

@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 from typing import Optional
 
 import numpy as np
 import cirq
 
-from unitary.alpha import QuantumEffect, QuantumObject
+from unitary.alpha import QuantumEffect
 from unitary.alpha.qudit_gates import QuditXGate, QuditISwapPowGate
 
 from .enums import TicTacSquare, TicTacRules

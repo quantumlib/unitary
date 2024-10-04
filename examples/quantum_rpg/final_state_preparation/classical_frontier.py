@@ -11,10 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unitary.alpha as alpha
 
 from ..classes import Engineer
-from ..encounter import Encounter
 from ..exceptions import UntimelyDeathException
 from ..game_state import GameState
 from .monsters import (

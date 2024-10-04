@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 from .enums import (
     Language,
     Color,
@@ -25,7 +25,6 @@ from .test_utils import (
     locations_to_bitboard,
     assert_samples_in,
     assert_sample_distribution,
-    get_board_probability_distribution,
     set_board,
 )
 from unitary import alpha

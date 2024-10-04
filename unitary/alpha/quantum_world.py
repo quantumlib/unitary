@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import copy
 import enum
 from typing import cast, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
@@ -20,7 +21,6 @@ from unitary.alpha.quantum_object import QuantumObject
 from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
 from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, num_bits
 import numpy as np
-import itertools
 
 
 class QuantumWorld:

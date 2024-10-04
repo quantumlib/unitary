@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import Sequence, Union, Optional
 
 import cirq
-import cirq_google as cg
 import numpy as np
 from cirq.transformers.analytical_decompositions.two_qubit_to_fsim import (
     _decompose_xx_yy_into_two_fsims_ignoring_single_qubit_ops,

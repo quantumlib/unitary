@@ -14,7 +14,6 @@
 
 from typing import Dict, List, Optional, Sequence, TextIO
 
-import io
 import sys
 
 from . import input_helpers

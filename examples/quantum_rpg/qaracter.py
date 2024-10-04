@@ -11,9 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import cast, Callable, Dict, List, Optional, Union
+
+from typing import cast, Dict, List, Optional, Union
 import inspect
-import random
 import sys
 
 import cirq

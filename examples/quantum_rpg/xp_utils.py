@@ -14,9 +14,7 @@
 
 from typing import List, Optional, Sequence
 
-import io
 import random
-import sys
 
 import unitary.alpha as alpha
 

@@ -16,7 +16,6 @@ import io
 
 import unitary.alpha as alpha
 
-from . import battle
 from . import classes
 from . import encounter
 from . import game_state

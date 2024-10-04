@@ -13,10 +13,8 @@
 # limitations under the License.
 
 import enum
-import io
-import sys
 import textwrap
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 
 from . import ascii_art
 from . import battle

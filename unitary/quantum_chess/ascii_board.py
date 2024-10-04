@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import math
-from typing import Optional, Sequence
+from typing import Sequence
 
 import unitary.quantum_chess.bit_utils as bu
 import unitary.quantum_chess.constants as c
