@@ -1,4 +1,4 @@
-# Copyright 2021 The Cirq Developers
+# Copyright 2024 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ class CopyrightChecker(BaseRawFileChecker):
         if not self.linter.is_message_enabled("wrong-or-nonexistent-copyright-notice"):
             return
         golden = [
-            b'# Copyright 20XX The Cirq Developers',
+            b'# Copyright 20XX The Unitary Authors',
             b'#',
             b'# Licensed under the Apache License, Version 2.0 (the "License");',
             b'# you may not use this file except in compliance with the License.',
