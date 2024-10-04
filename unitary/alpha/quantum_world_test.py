@@ -51,7 +51,7 @@ def test_get_object_by_name(compile_to_qubits):
     board = alpha.QuantumWorld([light, light2], compile_to_qubits=compile_to_qubits)
     assert board.get_object_by_name("test") == light
     assert board.get_object_by_name("test2") == light2
-    assert board.get_object_by_name("test3") == None
+    assert board.get_object_by_name("test3") is None
     assert board["test"] == light
     assert board["test2"] == light2
     with pytest.raises(KeyError):

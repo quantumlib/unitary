@@ -21,7 +21,7 @@ def test_type_of():
     assert Type.type_of("k") == Type.KING
     assert Type.type_of("K") == Type.KING
     assert Type.type_of("·") == Type.EMPTY
-    assert Type.type_of("b") == None
+    assert Type.type_of("b") is None
 
 
 def test_symbol():

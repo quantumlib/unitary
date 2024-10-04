@@ -170,16 +170,16 @@ def test_flying_general_check_classical_cases():
     board = Board.from_fen()
     # If they are in different columns, the check fails.
     board.king_locations = ["d0", "e9"]
-    assert board.flying_general_check() == False
+    assert not board.flying_general_check()
 
     # If there are classical pieces between two KINGs, the check fails.
     board.king_locations = ["e0", "e9"]
-    assert board.flying_general_check() == False
+    assert not board.flying_general_check()
 
     # If there are no pieces between two KINGs, the check successes.
     board.board["e3"].reset()
     board.board["e6"].reset()
-    assert board.flying_general_check() == True
+    assert board.flying_general_check()
 
 
 def test_flying_general_check_quantum_cases():

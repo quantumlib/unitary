@@ -386,12 +386,12 @@ def test_update_board_by_sampling(monkeypatch):
     game.update_board_by_sampling()
     assert board["a0"].type_ == Type.EMPTY
     assert board["a0"].color == Color.NA
-    assert board["a0"].is_entangled == False
+    assert not board["a0"].is_entangled
 
     board["a1"].is_entangled = True
     # Verify that the method would set a1 to classically occupied.
     game.update_board_by_sampling()
-    assert board["a1"].is_entangled == False
+    assert not board["a1"].is_entangled
 
 
 def test_undo_single_effect_per_move(monkeypatch):
