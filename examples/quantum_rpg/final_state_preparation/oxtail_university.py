@@ -36,7 +36,7 @@ from ..world import Direction, Location
 
 def _engineer_joins(state: GameState, world) -> str:
     if len(state.party) > 1:
-        return f"The engineer reminisces about his former experiment."
+        return "The engineer reminisces about his former experiment."
     print(
         "The engineer looks at the apparatus that dominates the room.", file=state.file
     )

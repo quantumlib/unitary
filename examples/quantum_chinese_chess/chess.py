@@ -138,7 +138,7 @@ class QuantumChineseChess:
         for location in sources + targets:
             if location[0].lower() not in "abcdefghi" or not location[1].isdigit():
                 raise ValueError(
-                    f"Invalid location string. Make sure they are from a0 to i9."
+                    "Invalid location string. Make sure they are from a0 to i9."
                 )
         return sources, targets
 

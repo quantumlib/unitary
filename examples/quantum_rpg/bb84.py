@@ -105,7 +105,7 @@ def _view_alice(state: GameState, world):
         return "The display reads 'Ready to TRANSMIT'"
     if state.state_dict["astatus"] == "success":
         return f"The display reads 'Transmission Successful:'\n'{state.state_dict['alice']}'"
-    return f"The display reads 'Error transmitting data.'"
+    return "The display reads 'Error transmitting data.'"
 
 
 def _view_bob(state: GameState, world):
@@ -115,7 +115,7 @@ def _view_bob(state: GameState, world):
         return "The display reads 'Ready to Receive'"
     if state.state_dict["bstatus"] == "success":
         return f"The display reads 'Received data:'\n'{state.state_dict['bob']}'"
-    return f"The display reads 'Error receiving data.'"
+    return "The display reads 'Error receiving data.'"
 
 
 def _power_on_alice(state: GameState, world):

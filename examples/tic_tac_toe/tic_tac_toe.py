@@ -202,7 +202,7 @@ class TicTacToe:
             # Check if rules allow quantum moves
             if self.rules == TicTacRules.CLASSICAL:
                 raise ValueError(
-                    f"Quantum moves are not allowed in a classical TicTacToe"
+                    "Quantum moves are not allowed in a classical TicTacToe"
                 )
 
             # Check if either square is non-empty. Splitting on top of

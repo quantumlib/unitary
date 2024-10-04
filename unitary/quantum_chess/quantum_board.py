@@ -942,7 +942,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.SPLIT_SLIDE:
             if not m.target2:
-                raise ValueError(f"Merge slide must have a second source move")
+                raise ValueError("Merge slide must have a second source move")
             tbit2 = square_to_bit(m.target2)
             tqubit2 = bit_to_qubit(tbit2)
 
@@ -1055,7 +1055,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.MERGE_SLIDE:
             if not m.source2:
-                raise ValueError(f"Merge slide must have a second source move")
+                raise ValueError("Merge slide must have a second source move")
             sbit2 = square_to_bit(m.source2)
             squbit2 = bit_to_qubit(sbit2)
 
@@ -1302,7 +1302,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.SPLIT_JUMP:
             if not m.target2:
-                raise ValueError(f"Split jumps must have a second target move")
+                raise ValueError("Split jumps must have a second target move")
             tbit2 = square_to_bit(m.target2)
             tqubit2 = bit_to_qubit(tbit2)
             is_basic_case = (
@@ -1322,7 +1322,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.MERGE_JUMP:
             if not m.source2:
-                raise ValueError(f"Merge jumps must have a second source move")
+                raise ValueError("Merge jumps must have a second source move")
             sbit2 = square_to_bit(m.source2)
             squbit2 = bit_to_qubit(sbit2)
             self.add_entangled(squbit, squbit2, tqubit)
@@ -1338,7 +1338,7 @@ class CirqBoard:
                 rook_sbit = square_to_bit("h8")
                 rook_tbit = square_to_bit("f8")
             else:
-                raise ValueError(f"Invalid kingside castling move")
+                raise ValueError("Invalid kingside castling move")
 
             return self._do_noncontrolled_castle(
                 m.move_variant, m.measurement, sbit, tbit, rook_sbit, rook_tbit
@@ -1355,7 +1355,7 @@ class CirqBoard:
                 rook_tbit = square_to_bit("d8")
                 b_bit = square_to_bit("b8")
             else:
-                raise ValueError(f"Invalid queenside castling move")
+                raise ValueError("Invalid queenside castling move")
 
             b_qubit = bit_to_qubit(b_bit)
             if b_qubit not in self.entangled_squares and not nth_bit_of(

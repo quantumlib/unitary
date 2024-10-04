@@ -77,7 +77,7 @@ def main_loop(args):
         b.load_fen(args.position)
     else:
         b.reset()
-    print(f"Applying moves to board...")
+    print("Applying moves to board...")
     apply_moves(b, moves)
     print(b)
 

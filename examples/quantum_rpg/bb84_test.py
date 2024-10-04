@@ -166,7 +166,7 @@ The keypad beeps and a light flashes red.
     loop.loop()
     assert (
         cast(io.StringIO, state.file).getvalue().replace("\t", " ").strip()
-        == f"""
+        == """
 Quantum Communication Receiving Facility
 
 
