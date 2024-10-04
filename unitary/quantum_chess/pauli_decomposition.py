@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Utility functions used for decomposing the given measurement matrix into a PauliSum.
-"""
+"""Utility functions used for decomposing the given measurement matrix into a PauliSum."""
 
 import itertools
 import functools

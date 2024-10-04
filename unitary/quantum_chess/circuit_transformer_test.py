@@ -51,8 +51,7 @@ def test_qubits_within(device):
 
 @pytest.mark.parametrize("device", (cg.Sycamore23, cg.Sycamore))
 def test_edges_within(device):
-    """
-    The circuit looks like:
+    """The circuit looks like:
 
     a1 --- a4 --- a3 --- a2      d1
            |      |      |

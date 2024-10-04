@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Runs a series of moves on a quantum chess board then displays the
-result.
+"""Runs a series of moves on a quantum chess board then displays the result.
 
 Run with:
   python -m unitary.quantum_chess.experiments.batch_moves \
@@ -32,6 +30,7 @@ noiseless simulator if none are available.
 FEN is a initial position in chess FEN notation. Optional.
 Default is the normal classical chess starting position.
 """
+
 import argparse
 from typing import List
 

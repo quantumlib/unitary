@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Quantum Circuits for common quantum chess moves."""
+
 from typing import Sequence
 
 import cirq

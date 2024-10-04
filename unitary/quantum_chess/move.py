@@ -177,8 +177,7 @@ class Move:
         return self.measurement is not None
 
     def to_string(self, include_type=False) -> str:
-        """
-        Constructs the string representation of this move object.
+        """Constructs the string representation of this move object.
 
         By default, only returns the move source(s), target(s), and measurement
         if present.

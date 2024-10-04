@@ -71,8 +71,7 @@ class QuditSplitGate(cirq.Gate):
 
 
 class TicTacSplit(QuantumEffect):
-    """
-    Flips a qubit from |0> to |1> then splits to another square.
+    """Flips a qubit from |0> to |1> then splits to another square.
     Depending on the ruleset, the split is done either using a standard
     sqrt-ISWAP gate, or using the custom QuditSplitGate.
     """

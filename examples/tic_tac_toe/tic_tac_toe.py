@@ -260,8 +260,7 @@ class TicTacToe:
 
 
 class GameInterface:
-    """
-    A class that provides a command-line interface to play Quantum Tic Tac Toe.
+    """A class that provides a command-line interface to play Quantum Tic Tac Toe.
 
     Initialize by providing an instance of a TicTacToe game, then call play()
     to run the game.
@@ -281,16 +280,14 @@ class GameInterface:
         self.player_quit = False
 
     def get_move(self) -> str:
-        """
-        Gets and returns the player's move.
+        """Gets and returns the player's move.
 
         Basically a wrapper around input to facilitate testing.
         """
         return input(f'Player {self.player} to move ("help" for help): ')
 
     def player_move(self) -> None:
-        """
-        Interprets the player's move and takes the appropriate action.
+        """Interprets the player's move and takes the appropriate action.
 
         A move can be a one or two letter string within the set [abcdefghi],
         in which case this function hands the move off to the TicTacToe instance,
@@ -318,8 +315,7 @@ class GameInterface:
         self.player = "O" if self.player == "X" else "X"
 
     def print_welcome(self) -> str:
-        """
-        Prints the welcome message for the game interface.
+        """Prints the welcome message for the game interface.
         """
         message = """
         Welcome to quantum tic tac toe!
@@ -329,8 +325,7 @@ class GameInterface:
         return message
 
     def play(self) -> None:
-        """
-        Run the game loop, requesting player moves, alternating players, until
+        """Run the game loop, requesting player moves, alternating players, until
         the TicTacToe instance reports that the game ends with a winner or a tie
         or one of the players has quit.
         """

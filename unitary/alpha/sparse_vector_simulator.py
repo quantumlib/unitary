@@ -20,6 +20,7 @@ Supports standard unitary Cirq gates, plus a post-selection operator.
 
 Does not work with 3+-state qudits.
 """
+
 import cirq
 import numpy as np
 

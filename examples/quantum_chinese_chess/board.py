@@ -64,8 +64,7 @@ class Board:
 
     @classmethod
     def from_fen(cls, fen: str = _INITIAL_FEN) -> "Board":
-        """
-        Translates FEN (Forsyth-Edwards Notation) symbols into the whole QuantumWorld board.
+        """Translates FEN (Forsyth-Edwards Notation) symbols into the whole QuantumWorld board.
         FEN rule for Chinese Chess could be found at https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
         """
         chess_board = {}
@@ -113,8 +112,7 @@ class Board:
         probabilities: List[float] = None,
         peek_result: List[int] = None,
     ) -> str:
-        """
-        Print the board into string.
+        """Print the board into string.
 
         Args:
             terminal: type of the terminal that the game is currently running on;

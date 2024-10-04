@@ -18,6 +18,7 @@ Look-Ahead Heuristic for the Qubit Mapping Problem of NISQ Computers'
 
 This transforms circuits by adding additional SWAP gates to ensure that all operations are on adjacent qubits.
 """
+
 from collections import deque
 from typing import (
     Callable,

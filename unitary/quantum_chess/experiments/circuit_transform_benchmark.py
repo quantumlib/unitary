@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Benchmarking tool for logical-to-hardware circuit transformations.
+"""Benchmarking tool for logical-to-hardware circuit transformations.
 
 To run this:
   python unitary/quantum_chess/experiments/circuit_transform_benchmark.py \

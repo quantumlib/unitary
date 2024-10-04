@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Utilities for converting to and from bit boards.
-"""
+"""Utilities for converting to and from bit boards."""
+
 from typing import List
 
 import cirq

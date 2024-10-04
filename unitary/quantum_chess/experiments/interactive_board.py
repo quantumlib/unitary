@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Interactive ascii-based quantum chess game.
+"""Interactive ascii-based quantum chess game.
 
 Run with:
 
@@ -50,6 +49,7 @@ Examples:
 
 The interactive board uses a simulator with an unconstrained device.
 """
+
 import argparse
 import sys
 
