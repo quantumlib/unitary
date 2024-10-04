@@ -15,10 +15,10 @@
 import pytest
 import cirq
 import cirq_google as cg
+import numpy as np
 
 from unitary.quantum_chess.swap_updater import SwapUpdater, generate_decomposed_swap
 import unitary.quantum_chess.quantum_moves as qm
-import numpy as np
 
 # Logical qubits q0 - q5.
 q = list(cirq.NamedQubit(f"q{i}") for i in range(6))

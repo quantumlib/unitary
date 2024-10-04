@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+
+from unitary import alpha
 from .enums import (
     Language,
     Color,
@@ -27,8 +30,6 @@ from .test_utils import (
     assert_sample_distribution,
     set_board,
 )
-from unitary import alpha
-import re
 
 
 def test_init_with_default_fen():

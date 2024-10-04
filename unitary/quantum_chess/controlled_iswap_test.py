@@ -11,9 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import cirq
-import unitary.quantum_chess.controlled_iswap as controlled_iswap
 import numpy as np
+
+import unitary.quantum_chess.controlled_iswap as controlled_iswap
 
 
 def test_controlled_iswap():

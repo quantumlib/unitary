@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Various consistency checks to make sure the world is correctly built."""
-import pytest
+
 import io
+
+import pytest
 
 from .. import classes
 from .. import exceptions

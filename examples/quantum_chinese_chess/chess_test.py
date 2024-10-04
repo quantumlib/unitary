@@ -11,16 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pytest
+
 import io
 import sys
+
+import pytest
+
+from unitary import alpha
 from .test_utils import (
     set_board,
     assert_sample_distribution,
     locations_to_bitboard,
     assert_samples_in,
 )
-from unitary import alpha
 from .chess import QuantumChineseChess
 from .piece import Piece
 from .enums import (

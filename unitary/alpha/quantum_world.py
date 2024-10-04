@@ -15,12 +15,13 @@
 import copy
 import enum
 from typing import cast, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
+
 import cirq
+import numpy as np
 
 from unitary.alpha.quantum_object import QuantumObject
 from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
 from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, num_bits
-import numpy as np
 
 
 class QuantumWorld:

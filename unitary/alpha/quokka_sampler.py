@@ -13,12 +13,12 @@
 # limitations under the License.
 """Simulation using a "Quokka" device."""
 
-from typing import Any, Callable, Dict, Optional, Sequence
+import json
 import warnings
+from typing import Any, Callable, Dict, Optional, Sequence
 
 import cirq
 import numpy as np
-import json
 
 _REQUEST_ENDPOINT = "http://{}.quokkacomputing.com/qsim/qasm"
 _DEFAULT_QUOKKA_NAME = "quokka1"

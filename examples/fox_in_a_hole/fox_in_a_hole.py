@@ -15,11 +15,12 @@
 """Classical and quantum Fox-in-a-hole game."""
 
 import abc
+import argparse
 import sys
 import enum
-import numpy as np
-import argparse
 from typing import Optional
+
+import numpy as np
 
 from unitary.alpha import (
     QuantumObject,

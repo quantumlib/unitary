@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
 import io
 from unittest.mock import MagicMock
+
+import pytest
 
 from . import enums
 from . import tic_tac_toe

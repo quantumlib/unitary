@@ -11,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pytest
+
 from collections import deque
 
 import cirq
 import cirq_google as cg
+import pytest
 
 import unitary.quantum_chess.initial_mapping_utils as imu
 

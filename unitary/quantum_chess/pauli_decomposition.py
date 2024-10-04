@@ -14,12 +14,14 @@
 """
 Utility functions used for decomposing the given measurement matrix into a PauliSum.
 """
-import cirq
+
 import itertools
 import functools
+from typing import List
+
+import cirq
 import numpy as np
 from scipy.linalg import kron
-from typing import List
 
 
 def kron_product(matrices: np.ndarray) -> np.ndarray:

@@ -43,16 +43,17 @@ contains a bug and will never terminate on some of the circuits in that
 directory (https://github.com/quantumlib/ReCirq/issues/163).
 """
 
-import cirq
-import cirq_google as cg
 import cProfile
 import pstats
 import sys
+from timeit import default_timer as timer
+from typing import List
+
+import cirq
+import cirq_google as cg
+from cirq.contrib.qasm_import import circuit_from_qasm
 
 import unitary.quantum_chess.circuit_transformer as ct
-from cirq.contrib.qasm_import import circuit_from_qasm
-from typing import List
-from timeit import default_timer as timer
 
 
 def print_stats(time_sec: float, circuit: cirq.Circuit) -> None:
