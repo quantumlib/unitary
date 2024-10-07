@@ -16,9 +16,4 @@ jobs:
           python -m pip install --upgrade pip
           pip install pylint
       - name: Pylint check
-        # TODO: #210 - convert to hard check when lint is picked up
-        run: |
-          dev_tools/pylint || (
-            echo "pylint check failed.  The error is temporarily ignored."
-            echo "See https://github.com/quantumlib/unitary/issues/210"
-          )
+        run: dev_tools/pylint
