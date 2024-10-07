@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 from unitary.alpha import QuantumWorld
 
 from .enums import (
@@ -58,7 +58,7 @@ def test_reset():
     p0.reset()
     assert p0.type_ == Type.EMPTY
     assert p0.color == Color.NA
-    assert p0.is_entangled == False
+    assert not p0.is_entangled
 
     p0.reset(p1)
     assert p0.type_ == p1.type_

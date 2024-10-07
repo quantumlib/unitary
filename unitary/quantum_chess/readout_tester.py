@@ -1,4 +1,4 @@
-# Copyright 2020 Google
+# Copyright 2020 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,14 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-"""
-  Simple sanity test to test readout for device qubits.
-  This will test P11 and P00 for each qubit on the device.
 
-  See https://www.twitch.tv/anna_chess/video/824369168
-  at 1h:17m to see how this can affect live demos.
+"""Simple sanity test to test readout for device qubits.
+
+This will test P11 and P00 for each qubit on the device.
+
+See https://www.twitch.tv/anna_chess/video/824369168
+at 1h:17m to see how this can affect live demos.
 """
+
 from typing import Dict
 
 import cirq

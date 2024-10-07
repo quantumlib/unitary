@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 from typing import Optional
 
 import numpy as np
 import cirq
 
-from unitary.alpha import QuantumEffect, QuantumObject
+from unitary.alpha import QuantumEffect
 from unitary.alpha.qudit_gates import QuditXGate, QuditISwapPowGate
 
 from .enums import TicTacSquare, TicTacRules
@@ -71,8 +71,7 @@ class QuditSplitGate(cirq.Gate):
 
 
 class TicTacSplit(QuantumEffect):
-    """
-    Flips a qubit from |0> to |1> then splits to another square.
+    """Flips a qubit from |0> to |1> then splits to another square.
     Depending on the ruleset, the split is done either using a standard
     sqrt-ISWAP gate, or using the custom QuditSplitGate.
     """

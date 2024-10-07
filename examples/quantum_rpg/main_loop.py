@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,10 +13,8 @@
 # limitations under the License.
 
 import enum
-import io
-import sys
 import textwrap
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 
 from . import ascii_art
 from . import battle

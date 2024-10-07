@@ -1,4 +1,4 @@
-# Copyright 2021 Google
+# Copyright 2021 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """Utilities related to the maximum consecutive positive effect (mcpe) heuristic
 cost function.
 
@@ -19,6 +20,7 @@ in the paper 'A Dynamic Look-Ahead Heuristic for the Qubit Mapping Problem of
 NISQ Computers'
 (https://ieeexplore.ieee.org/abstract/document/8976109).
 """
+
 from collections import defaultdict, deque
 from typing import Callable, Dict, Iterable, Set, Tuple
 

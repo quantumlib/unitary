@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Benchmarking tool for logical-to-hardware circuit transformations.
+"""Benchmarking tool for logical-to-hardware circuit transformations.
 
 To run this:
   python unitary/quantum_chess/experiments/circuit_transform_benchmark.py \
@@ -43,16 +42,17 @@ contains a bug and will never terminate on some of the circuits in that
 directory (https://github.com/quantumlib/ReCirq/issues/163).
 """
 
-import cirq
-import cirq_google as cg
 import cProfile
 import pstats
 import sys
+from timeit import default_timer as timer
+from typing import List
+
+import cirq
+import cirq_google as cg
+from cirq.contrib.qasm_import import circuit_from_qasm
 
 import unitary.quantum_chess.circuit_transformer as ct
-from cirq.contrib.qasm_import import circuit_from_qasm
-from typing import List
-from timeit import default_timer as timer
 
 
 def print_stats(time_sec: float, circuit: cirq.Circuit) -> None:

@@ -11,10 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-import pytest
+
 import io
 from unittest.mock import MagicMock
+
+import pytest
 
 from . import enums
 from . import tic_tac_toe

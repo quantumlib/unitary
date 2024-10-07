@@ -11,16 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pytest
+
 import io
 import sys
+
+import pytest
+
+from unitary import alpha
 from .test_utils import (
     set_board,
     assert_sample_distribution,
     locations_to_bitboard,
     assert_samples_in,
 )
-from unitary import alpha
 from .chess import QuantumChineseChess
 from .piece import Piece
 from .enums import (
@@ -383,12 +386,12 @@ def test_update_board_by_sampling(monkeypatch):
     game.update_board_by_sampling()
     assert board["a0"].type_ == Type.EMPTY
     assert board["a0"].color == Color.NA
-    assert board["a0"].is_entangled == False
+    assert not board["a0"].is_entangled
 
     board["a1"].is_entangled = True
     # Verify that the method would set a1 to classically occupied.
     game.update_board_by_sampling()
-    assert board["a1"].is_entangled == False
+    assert not board["a1"].is_entangled
 
 
 def test_undo_single_effect_per_move(monkeypatch):

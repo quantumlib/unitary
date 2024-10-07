@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import Tuple, List
 from .board import Board
 from .enums import (
@@ -31,7 +32,6 @@ from .move import (
     MergeSlide,
     CannonFire,
 )
-import readline
 
 # List of acceptable commands.
 _HELP_TEXT = """
@@ -138,7 +138,7 @@ class QuantumChineseChess:
         for location in sources + targets:
             if location[0].lower() not in "abcdefghi" or not location[1].isdigit():
                 raise ValueError(
-                    f"Invalid location string. Make sure they are from a0 to i9."
+                    "Invalid location string. Make sure they are from a0 to i9."
                 )
         return sources, targets
 

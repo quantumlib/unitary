@@ -11,9 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import List
 
-import pytest
 from unitary import alpha
 
 from .move import *
@@ -22,7 +20,6 @@ from .piece import Piece
 from .enums import (
     MoveType,
     MoveVariant,
-    SquareState,
     Type,
     Color,
 )
@@ -30,11 +27,8 @@ from .test_utils import (
     locations_to_bitboard,
     assert_samples_in,
     assert_sample_distribution,
-    assert_this_or_that,
-    assert_prob_about,
     assert_fifty_fifty,
     get_board_probability_distribution,
-    print_samples,
     set_board,
 )
 
@@ -86,7 +80,7 @@ def test_move_type():
         move_type=MoveType.MERGE_JUMP,
         move_variant=MoveVariant.CAPTURE,
     )
-    assert move1.is_split_move() == False
+    assert not move1.is_split_move()
     assert move1.is_merge_move()
 
     move2 = Move(
@@ -97,7 +91,7 @@ def test_move_type():
         move_variant=MoveVariant.BASIC,
     )
     assert move2.is_split_move()
-    assert move2.is_merge_move() == False
+    assert not move2.is_merge_move()
 
     move3 = Move(
         world["a1"],
@@ -105,8 +99,8 @@ def test_move_type():
         move_type=MoveType.SLIDE,
         move_variant=MoveVariant.CAPTURE,
     )
-    assert move3.is_split_move() == False
-    assert move3.is_merge_move() == False
+    assert not move3.is_split_move()
+    assert not move3.is_merge_move()
 
 
 def test_to_str():
@@ -281,10 +275,10 @@ def test_split_jump_classical_source():
     assert_fifty_fifty(board_probabilities, locations_to_bitboard(["a3"]))
     assert world["a2"].type_ == Type.ROOK
     assert world["a2"].color == Color.RED
-    assert world["a2"].is_entangled == True
+    assert world["a2"].is_entangled
     assert world["a3"].type_ == Type.ROOK
     assert world["a3"].color == Color.RED
-    assert world["a3"].is_entangled == True
+    assert world["a3"].is_entangled
 
 
 def test_split_jump_quantum_source():
@@ -301,8 +295,8 @@ def test_split_jump_quantum_source():
             locations_to_bitboard(["a5"]): 0.25,
         },
     )
-    assert world["a4"].is_entangled == True
-    assert world["a5"].is_entangled == True
+    assert world["a4"].is_entangled
+    assert world["a5"].is_entangled
 
 
 def test_merge_jump_perfect_merge():

@@ -15,11 +15,12 @@
 """Classical and quantum Fox-in-a-hole game."""
 
 import abc
+import argparse
 import sys
 import enum
-import numpy as np
-import argparse
 from typing import Optional
+
+import numpy as np
 
 from unitary.alpha import (
     QuantumObject,
@@ -357,19 +358,19 @@ if __name__ == "__main__":
 
     # Initialize game object
 
-    print(f"---------------------------------")
+    print("---------------------------------")
     if args.is_quantum or (args.qprob is not None and args.qprob > 0.0):
         game: Game = QuantumGame(qprob=args.qprob, iswap=args.use_iswap)
-        print(f"Quantum Fox-in-a-hole game.")
+        print("Quantum Fox-in-a-hole game.")
         print(f"Probability of quantum move: {game.qprob}.")
         if args.use_iswap:
-            print(f"Using iSWAP for moves.")
+            print("Using iSWAP for moves.")
         else:
-            print(f"Using SWAP for moves.")
+            print("Using SWAP for moves.")
     else:
         game = ClassicalGame()
         print("Classical Fox-in-a-hole game.")
-    print(f"---------------------------------")
+    print("---------------------------------")
 
     # Run Fox-in-a-hole
     game.run()
