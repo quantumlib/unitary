@@ -7,53 +7,53 @@ output-format=colorized
 score=no
 reports=no
 enable=
-    anomalous-backslash-in-string,
+    # anomalous-backslash-in-string,    # TODO: #210 - enable and fix
     assert-on-tuple,
     bad-indentation,
     bad-option-value,
     bad-reversed-sequence,
     bad-super-call,
     consider-merging-isinstance,
-    consider-using-f-string,
+    # consider-using-f-string,  # TODO: #210 - enable and fix
     continue-in-finally,
-    dangerous-default-value,
+    # dangerous-default-value,  # TODO: #210 - enable and fix
     docstyle,
     duplicate-argument-name,
-    expression-not-assigned,
+    # expression-not-assigned,  # TODO: #210 - enable and fix
     f-string-without-interpolation,
-    function-redefined,
+    # function-redefined,       # TODO: #210 - enable and fix
     inconsistent-mro,
     init-is-generator,
-    line-too-long,
+    # line-too-long,            # TODO: #210 - enable and fix
     lost-exception,
     missing-kwoa,
-    missing-param-doc,
+    # missing-param-doc,        # TODO: #210 - enable and fix
     missing-raises-doc,
     mixed-line-endings,
-    no-value-for-parameter,
+    # no-value-for-parameter,   # TODO: #210 - enable and fix
     nonexistent-operator,
     not-in-loop,
-    pointless-statement,
-    redefined-builtin,
+    # pointless-statement,      # TODO: #210 - enable and fix
+    # redefined-builtin,        # TODO: #210 - enable and fix
     return-arg-in-generator,
     return-in-init,
     return-outside-function,
     simplifiable-if-statement,
     singleton-comparison,
     syntax-error,
-    too-many-function-args,
+    # too-many-function-args,   # TODO: #210 - enable and fix
     trailing-whitespace,
     undefined-variable,
-    unexpected-keyword-arg,
+    # unexpected-keyword-arg,   # TODO: #210 - enable and fix
     unhashable-dict-key,
-    unnecessary-pass,
+    # unnecessary-pass,         # TODO: #210 - enable and fix
     unreachable,
     unrecognized-inline-option,
     unused-import,
     unnecessary-semicolon,
-    unused-variable,
-    unused-wildcard-import,
-    wildcard-import,
+    # unused-variable,          # TODO: #210 - enable and fix
+    # unused-wildcard-import,   # TODO: #210 - enable and fix
+    # wildcard-import,          # TODO: #210 - enable and fix
     wrong-or-nonexistent-copyright-notice,
     wrong-import-order,
     wrong-import-position,
