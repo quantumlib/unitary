@@ -34,7 +34,7 @@ enable=
     nonexistent-operator,
     not-in-loop,
     # pointless-statement,      # TODO: #210 - enable and fix
-    # redefined-builtin,        # TODO: #210 - enable and fix
+    redefined-builtin,
     return-arg-in-generator,
     return-in-init,
     return-outside-function,
