@@ -14,9 +14,17 @@
 
 from unitary import alpha
 
-from .move import *
+from .move import (
+    CannonFire,
+    Jump,
+    MergeJump,
+    MergeSlide,
+    Move,
+    Slide,
+    SplitJump,
+    SplitSlide,
+)
 from .board import Board
-from .piece import Piece
 from .enums import (
     MoveType,
     MoveVariant,
