@@ -189,7 +189,7 @@ class ZerosSampler(work.Sampler):
             ]
         else:
             assert len(meas) == 1
-            i, op, gate = meas[0]
+            _, op, gate = meas[0]
             n_qubits = len(op.qubits)
             k = gate.key
             results = [

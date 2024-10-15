@@ -141,7 +141,7 @@ class QuantumWorld:
                 self.compiled_qubits[obj.qubit] = [obj.qubit]
             else:
                 self.compiled_qubits[obj.qubit] = []
-                for qubit_num in range(num_bits(qudit_dim)):
+                for _ in range(num_bits(qudit_dim)):
                     new_obj = self._add_ancilla(obj.qubit.name)
                     self.compiled_qubits[obj.qubit].append(new_obj.qubit)
         obj.initial_effect()

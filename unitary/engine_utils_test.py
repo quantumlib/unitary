@@ -36,7 +36,7 @@ def test_get_program_id_2():
     prog_id = _get_program_id(circuit)
     assert isinstance(prog_id, str)
     with pytest.raises(ValueError):
-        val = uuid.UUID(prog_id, version=4)
+        _ = uuid.UUID(prog_id, version=4)
     assert prog_id.startswith("my_fancy_var_1_my_fancy_var_2_x-3")
 
 
@@ -50,7 +50,7 @@ def test_get_program_id_3():
     prog_id = _get_program_id(circuit)
     assert isinstance(prog_id, str)
     with pytest.raises(ValueError):
-        val = uuid.UUID(prog_id, version=4)
+        _ = uuid.UUID(prog_id, version=4)
     assert prog_id.startswith("my_far_1_my_far_2_my_far_3_my_far_4_my_far_5_my_far_6_")
 
 
@@ -61,7 +61,7 @@ def test_get_program_id_4():
     prog_id = _get_program_id(circuit)
     assert isinstance(prog_id, str)
     # too many parts, it defaults back to uuid
-    val = uuid.UUID(prog_id, version=4)
+    _ = uuid.UUID(prog_id, version=4)
 
 
 def test_zeros_sampler_one_big_measure():
@@ -83,7 +83,7 @@ def test_zeros_sampler_many_measure():
     sampler = unitary.ZerosSampler()
     result = sampler.run(circuit, repetitions=155)
     assert len(result.measurements) == 6
-    for k, v in result.measurements.items():
+    for v in result.measurements.values():
         assert v.shape == (155, 1)
 
 

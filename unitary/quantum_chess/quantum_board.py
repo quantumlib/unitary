@@ -706,7 +706,7 @@ class CirqBoard:
         self, variant, measurement, sbit, tbit, rook_sbit, rook_tbit
     ):
         """Kingside castle, or queenside castle with empty b-file."""
-        squbit = bit_to_qubit(sbit)
+        _squbit = bit_to_qubit(sbit)
         tqubit = bit_to_qubit(tbit)
         rook_squbit = bit_to_qubit(rook_sbit)
         rook_tqubit = bit_to_qubit(rook_tbit)

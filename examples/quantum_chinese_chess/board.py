@@ -76,7 +76,7 @@ class Board:
             for char in row:
                 # Add empty board pieces.
                 if "1" <= char <= "9":
-                    for i in range(int(char)):
+                    for _ in range(int(char)):
                         name = f"{chr(col)}{row_index}"
                         chess_board[name] = Piece(
                             name, SquareState.EMPTY, Type.EMPTY, Color.NA

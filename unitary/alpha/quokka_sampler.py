@@ -91,7 +91,6 @@ class QuokkaSampler(cirq.Sampler):
             Result list for this run; one for each possible parameter resolver.
         """
         rtn_results = []
-        qubits = sorted(program.all_qubits())
         measure_keys = {}
         register_names = {}
         meas_i = 0

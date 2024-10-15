@@ -51,7 +51,7 @@ enable=
     unrecognized-inline-option,
     unused-import,
     unnecessary-semicolon,
-    # unused-variable,          # TODO: #210 - enable and fix
+    unused-variable,
     unused-wildcard-import,
     wildcard-import,
     wrong-or-nonexistent-copyright-notice,

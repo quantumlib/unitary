@@ -157,7 +157,7 @@ The keypad beeps and a light flashes red.
 """.strip()
     )
     # Reset input and get the keys
-    state.file = file = io.StringIO()
+    state.file = io.StringIO()
     key = bb84.solve_bb84(state.state_dict["alice"], state.state_dict["bob"])
     state.get_user_input = input_helpers.get_user_input_function(
         [f"type {key}", "north", "south", "Quit"]
