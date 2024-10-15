@@ -30,12 +30,10 @@ from .final_state_preparation import final_state_world
 
 class Error(Exception):
     """Base class for locally defined exceptions."""
-    pass
 
 
 class AmbiguousCommandError(Error):
     """Raised when entered command is ambiguous."""
-    pass
 
 
 class Command(enum.Enum):
@@ -165,9 +163,11 @@ class MainLoop:
                 try:
                     input_cmd = Command.parse(current_input)
                 except AmbiguousCommandError:
-                    print(f"Ambiguous command '{current_input}'.",
-                          Command.help(),
-                          file=self.file)
+                    print(
+                        f"Ambiguous command '{current_input}'.",
+                        Command.help(),
+                        file=self.file,
+                    )
                     print_room_description = False
                     continue
                 if input_cmd == Command.QUIT:
@@ -184,7 +184,8 @@ class MainLoop:
                         print(npc_class.__name__, file=self.file)
                         print(
                             textwrap.indent(npc_class.quantopedia_entry(), "  "),
-                            file=self.file)
+                            file=self.file,
+                        )
                         print(file=self.file)
                     print_room_description = False
                 elif input_cmd == Command.LOAD:

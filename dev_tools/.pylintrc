@@ -46,7 +46,7 @@ enable=
     undefined-variable,
     # unexpected-keyword-arg,   # TODO: #210 - enable and fix
     unhashable-dict-key,
-    # unnecessary-pass,         # TODO: #210 - enable and fix
+    unnecessary-pass,
     unreachable,
     unrecognized-inline-option,
     unused-import,
