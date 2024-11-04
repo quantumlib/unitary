@@ -7,7 +7,7 @@ output-format=colorized
 score=no
 reports=no
 enable=
-    # anomalous-backslash-in-string,    # TODO: #210 - enable and fix
+    anomalous-backslash-in-string,
     assert-on-tuple,
     bad-indentation,
     bad-option-value,
