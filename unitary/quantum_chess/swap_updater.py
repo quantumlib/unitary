@@ -161,14 +161,14 @@ class SwapUpdater:
         self,
         circuit: cirq.Circuit,
         device_qubits: Optional[Iterable[cirq.GridQubit]],
-        initial_mapping: Dict[cirq.Qid, cirq.GridQubit] = {},
+        initial_mapping: Optional[Dict[cirq.Qid, cirq.GridQubit]] = None,
         swap_factory: Callable[
             [cirq.Qid, cirq.Qid], Iterable[cirq.Operation]
         ] = generate_decomposed_swap,
     ):
         self.device_qubits = device_qubits or []
         self.dlists = mcpe.DependencyLists(circuit)
-        self.mapping = mcpe.QubitMapping(initial_mapping)
+        self.mapping = mcpe.QubitMapping(initial_mapping or {})
         self.swap_factory = swap_factory
         self.adjacent = {q: q.neighbors(device_qubits) for q in self.device_qubits}
         self.pairwise_distances = _pairwise_shortest_distances(self.adjacent)

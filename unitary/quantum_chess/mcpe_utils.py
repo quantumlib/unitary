@@ -22,7 +22,7 @@ NISQ Computers'
 """
 
 from collections import defaultdict, deque
-from typing import Callable, Dict, Iterable, Set, Tuple
+from typing import Callable, Dict, Iterable, Optional, Set, Tuple
 
 import cirq
 
@@ -67,8 +67,10 @@ class QubitMapping:
       initial_mapping: initial logical-to-physical qubit map.
     """
 
-    def __init__(self, initial_mapping: Dict[cirq.Qid, cirq.GridQubit] = {}):
-        self.logical_to_physical = initial_mapping
+    def __init__(
+        self, initial_mapping: Optional[Dict[cirq.Qid, cirq.GridQubit]] = None
+    ):
+        self.logical_to_physical = initial_mapping or {}
         self.physical_to_logical = {v: k for k, v in initial_mapping.items()}
 
     def swap_physical(self, q1: cirq.GridQubit, q2: cirq.GridQubit) -> None:

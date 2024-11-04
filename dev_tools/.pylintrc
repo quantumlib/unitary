@@ -16,7 +16,7 @@ enable=
     consider-merging-isinstance,
     consider-using-f-string,
     continue-in-finally,
-    # dangerous-default-value,  # TODO: #210 - enable and fix
+    dangerous-default-value,
     docstyle,
     duplicate-argument-name,
     # expression-not-assigned,  # TODO: #210 - enable and fix
