@@ -463,9 +463,7 @@ class QuantumChineseChess:
             all_boards = self.board.board.get_correlated_histogram()
             sorted_boards = sorted(all_boards.items(), key=lambda x: x[1], reverse=True)
             for board, count in sorted_boards:
-                print(
-                    "\n ====== With probability ~ {:.1f} ======".format(count / 100.0)
-                )
+                print(f"\n ====== With probability ~ {(count / 100.0):.1f} ======")
                 print(self.board.to_str(self.terminal, None, list(board)))
         elif input_str.lower() == "undo":
             if self.undo():

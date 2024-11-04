@@ -185,7 +185,7 @@ class Board:
                     for i in range(row * 9, (row + 1) * 9):
                         # We only print non-zero probabilities
                         if probabilities[i] >= 1e-3:
-                            board_string.append("{:.1f} ".format(probabilities[i]))
+                            board_string.append(f"{probabilities[i]:.1f} ")
                         else:
                             board_string.append("    ")
                     board_string += "\b" + _RESET + " \n"
@@ -231,14 +231,14 @@ class Board:
                             # space + _FULL_SPACE works for mac terminal and gLinux terminal.
                             if probabilities[i] >= 1e-3:
                                 board_string.append(
-                                    "{:.1f} ".format(probabilities[i]) + _FULL_SPACE
+                                    f"{probabilities[i]:.1f} " + _FULL_SPACE
                                 )
                             else:
                                 board_string.append("    " + _FULL_SPACE)
                         else:
                             if probabilities[i] >= 1e-3:
                                 # space + space works for sublime terminus.
-                                board_string.append("{:.1f}  ".format(probabilities[i]))
+                                board_string.append(f"{probabilities[i]:.1f}  ")
                             else:
                                 board_string.append("     ")
                     board_string += "\b" + _RESET + _FULL_SPACE + "\n"
