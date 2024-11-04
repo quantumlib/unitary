@@ -42,7 +42,7 @@ def test_qutrit_x(state: int):
 def test_qutrit_plus_one(num_gates: int):
     qutrit = cirq.NamedQid("a", dimension=3)
     c = cirq.Circuit()
-    for i in range(num_gates):
+    for _ in range(num_gates):
         c.append(qudit_gates.QuditPlusGate(3)(qutrit))
     c.append(cirq.measure(qutrit, key="m"))
     sim = cirq.Simulator()

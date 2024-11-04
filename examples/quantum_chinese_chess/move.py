@@ -592,7 +592,7 @@ class CannonFire(QuantumEffect):
             # We loop over all quantum path pieces and check if it could be the only
             # occupied piece. The fire could be made if it does, otherwise not.
             # TODO(): think a more efficient way of implementing this case.
-            for index, expect_occupied_path_piece in enumerate(quantum_path_pieces_0):
+            for _, expect_occupied_path_piece in enumerate(quantum_path_pieces_0):
                 # TODO(): consider specific cases to save the ancilla.
                 # Add a new ancilla to indicate whether the fire could be made (value = 1 means it could).
                 capture_ancilla = world._add_ancilla(expect_occupied_path_piece.name)

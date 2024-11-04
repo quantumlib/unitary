@@ -196,7 +196,7 @@ def test_split_move(move_type, board):
         "c1", "d1", move_type=enums.MoveType.JUMP, move_variant=enums.MoveVariant.BASIC
     )
     assert b.do_move(m)
-    samples = b.sample(100)
+    _samples = b.sample(100)
     assert_samples_in(b, [u.squares_to_bitboard(["a3"]), u.squares_to_bitboard(["d1"])])
     probs = b.get_probability_distribution(5000)
     assert_fifty_fifty(probs, u.square_to_bit("a3"))

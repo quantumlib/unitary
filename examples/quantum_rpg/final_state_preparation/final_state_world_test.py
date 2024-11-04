@@ -52,7 +52,7 @@ def go_directions(path: str) -> World:
         cur_room = example_world.current_location.label
         direction = Direction.parse(cmd)
         assert direction is not None
-        result = example_world.move(direction)
+        _result = example_world.move(direction)
         assert cmd is not None, f"Moving {cmd} in room {cur_room} not valid"
     return example_world
 
@@ -67,7 +67,7 @@ def test_consistent_exits():
             assert nearby_room is not None, f"Missing room {room_name}"
             try:
                 return_exit = nearby_room.exits[OPPOSITE_DIR[direction]]
-            except KeyError as e:
+            except KeyError as _e:
                 raise KeyError(
                     f"{room_name} does not have a return exit in {direction} to {location.label}"
                 )

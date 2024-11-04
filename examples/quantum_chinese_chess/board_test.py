@@ -37,7 +37,7 @@ def test_init_with_default_fen():
 
     # test English print
     assert (
-        re.sub("\\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
+        re.sub(r"\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
             "\b", ""
         )
         == """
@@ -59,7 +59,7 @@ def test_init_with_default_fen():
     # test Chinese print
     board.set_language(Language.ZH)
     assert (
-        re.sub("\\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
+        re.sub(r"\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
             "\b", ""
         )
         == """
@@ -87,7 +87,7 @@ def test_init_with_specified_fen():
 
     # test English print
     assert (
-        re.sub("\\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
+        re.sub(r"\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
             "\b", ""
         )
         == """
@@ -109,7 +109,7 @@ def test_init_with_specified_fen():
     # test Chinese print
     board.set_language(Language.ZH)
     assert (
-        re.sub("\\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
+        re.sub(r"\033\[\d{1,2}m", "", board.to_str(TerminalType.MAC_OR_LINUX)).replace(
             "\b", ""
         )
         == """

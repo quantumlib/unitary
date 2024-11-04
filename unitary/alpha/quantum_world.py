@@ -141,7 +141,7 @@ class QuantumWorld:
                 self.compiled_qubits[obj.qubit] = [obj.qubit]
             else:
                 self.compiled_qubits[obj.qubit] = []
-                for qubit_num in range(num_bits(qudit_dim)):
+                for _ in range(num_bits(qudit_dim)):
                     new_obj = self._add_ancilla(obj.qubit.name)
                     self.compiled_qubits[obj.qubit].append(new_obj.qubit)
         obj.initial_effect()
@@ -385,21 +385,21 @@ class QuantumWorld:
             return result_list[0]
         return result
 
-    def unhook(self, object: QuantumObject) -> None:
-        """Replace all usages of the given `object` in the circuit with a new ancilla,
+    def unhook(self, obj: QuantumObject) -> None:
+        """Replace all usages of the given object in the circuit with a new ancilla,
         so that
-         - all former operations on `object` will be applied on the new ancilla;
-         - future operations on `object` start with its new reset value.
+         - all former operations on `obj` will be applied on the new ancilla;
+         - future operations on `obj` start with its new reset value.
 
         Note that we don't do force measurement on it, since we don't care about its
         current value but just want to reset it.
         """
         # Create a new ancilla.
-        new_ancilla = self._add_ancilla(object.name)
-        # Replace operations of the given `object` with the new ancilla.
+        new_ancilla = self._add_ancilla(obj.name)
+        # Replace operations of the given `obj` with the new ancilla.
         qubit_remapping_dict = {
-            object.qubit: new_ancilla.qubit,
-            new_ancilla.qubit: object.qubit,
+            obj.qubit: new_ancilla.qubit,
+            new_ancilla.qubit: obj.qubit,
         }
         self.qubit_remapping_dict.append(qubit_remapping_dict)
         self.circuit = self.circuit.transform_qubits(
@@ -716,12 +716,12 @@ class QuantumWorld:
             raise KeyError(f"{name} did not exist in this world.")
         return quantum_object
 
-    def __to_state_vector__(self, input: tuple) -> np.ndarray:
+    def __to_state_vector__(self, input_bits: tuple) -> np.ndarray:
         """Converts the given tuple (of length N) to the corresponding state vector (of length 2**N).
         e.g. (0, 1) -> [0, 1, 0, 0]
         """
-        num = len(input)
-        index = int("".join([str(i) for i in input]), 2)
+        num = len(input_bits)
+        index = int("".join([str(i) for i in input_bits]), 2)
         state_vector = np.array([0.0] * (2**num))
         state_vector[index] = 1.0
         return state_vector

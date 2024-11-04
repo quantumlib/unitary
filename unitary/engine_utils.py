@@ -96,7 +96,7 @@ class EngineSampler(work.Sampler):
         elif gateset == "sqrt-iswap":
             self.gate_set = cg.SQRT_ISWAP_GATESET
         else:
-            raise ValueError("Unknown gateset {}".format(gateset))
+            raise ValueError(f"Unknown gateset {gateset}")
 
     def run(
         self,
@@ -189,7 +189,7 @@ class ZerosSampler(work.Sampler):
             ]
         else:
             assert len(meas) == 1
-            i, op, gate = meas[0]
+            _, op, gate = meas[0]
             n_qubits = len(op.qubits)
             k = gate.key
             results = [
@@ -372,7 +372,7 @@ async def execute_in_queue(func, tasks, num_workers: int):
     worker_jobs = [asyncio.create_task(worker()) for _ in range(num_workers)]
     for task in tasks:
         await queue.put(task)
-    print("Added everything to the queue. Current queue size: {}".format(queue.qsize()))
+    print(f"Added everything to the queue. Current queue size: {queue.qsize()}")
     await queue.join()
     for wjob in worker_jobs:
         wjob.cancel()

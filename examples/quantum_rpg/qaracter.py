@@ -14,7 +14,6 @@
 
 from typing import cast, Dict, List, Optional, Union
 import inspect
-import sys
 
 import cirq
 from unitary import alpha
@@ -221,9 +220,7 @@ class Qaracter(alpha.QuantumWorld):
         # Avoid circular import
         from . import classes
 
-        class_tuples = inspect.getmembers(
-            sys.modules["quantum_rpg.classes"], inspect.isclass
-        )
+        class_tuples = inspect.getmembers(classes, inspect.isclass)
         new_cls = cls
         for cls_name, cls_type in class_tuples:
             if cls_name == class_name:

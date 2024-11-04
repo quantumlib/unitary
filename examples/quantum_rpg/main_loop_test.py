@@ -551,14 +551,14 @@ You've pressed the button 2 times before!
 
 def test_main_quit():
     state = game_state.GameState(party=[], user_input=["4"], file=io.StringIO())
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert state.file.getvalue() == _TITLE
 
 
 def test_main_help():
     state = game_state.GameState(party=[], user_input=["3", "4"], file=io.StringIO())
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()
@@ -570,7 +570,7 @@ def test_main_begin():
     state = game_state.GameState(
         party=[], user_input=["1", "nova", "n", "Quit"], file=io.StringIO()
     )
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()
@@ -611,7 +611,7 @@ def test_main_load():
         user_input=["2", "classical3;1;Doug#Analyst#1", "Quit"],
         file=io.StringIO(),
     )
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()
@@ -636,7 +636,7 @@ def test_main_bad_save_file():
         user_input=["2", "", "2", "classical3;1;Doug#Analyst#1", "Quit"],
         file=io.StringIO(),
     )
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()

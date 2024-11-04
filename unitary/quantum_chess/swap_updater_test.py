@@ -110,7 +110,7 @@ def test_pentagonal_split_and_merge():
         cirq.NamedQubit(f"{x}{i}") for x in ("a", "b") for i in range(3)
     )
     initial_mapping = dict(zip(logical_qubits, grid_2x3))
-    a1, a2, a3, b1, b2, b3 = logical_qubits
+    a1, a2, a3, b1, _, b3 = logical_qubits
     logical_circuit = cirq.Circuit(
         qm.normal_move(a1, b1), qm.normal_move(a2, a3), qm.merge_move(a3, b1, b3)
     )
@@ -182,7 +182,7 @@ def test_holes_in_device_graph():
         cirq.NamedQubit(f"{x}{i}") for x in ("a", "b") for i in range(3)
     )
     initial_mapping = dict(zip(logical_qubits, grid_2x3))
-    a1, a2, a3, b1, b2, b3 = logical_qubits
+    _, _, _, b1, b2, b3 = logical_qubits
     # Circuit has a gate that operate on (b1, b3) qubits.
     # The best way to add swaps would be between (b1, b2) and (b2, b3), but
     # we aren't allowed to use b2, so we're forced to route swaps around it.
@@ -203,7 +203,7 @@ def test_bad_initial_mapping():
         cirq.NamedQubit(f"{x}{i}") for x in ("a", "b") for i in range(3)
     )
     initial_mapping = dict(zip(logical_qubits, grid_2x3))
-    a1, a2, a3, b1, b2, b3 = logical_qubits
+    a1, _, a3, _, _, _ = logical_qubits
     # Initial mapping puts a1 on a qubit that we're not allowed to use, but the
     # circuit uses a1.
     # That should cause the swap updater to throw.
@@ -223,7 +223,7 @@ def test_disconnected_components():
         cirq.NamedQubit(f"{x}{i}") for x in ("a", "b") for i in range(3)
     )
     initial_mapping = dict(zip(logical_qubits, grid_2x3))
-    a1, a2, a3, b1, b2, b3 = logical_qubits
+    a1, a2, a3, _, b2, _ = logical_qubits
     # a2 and b2 are disallowed. That splits the device graph into 2 disconnected
     # components and makes a3 unreachable from a1.
     circuit = cirq.Circuit(cirq.ISWAP(a1, a3))

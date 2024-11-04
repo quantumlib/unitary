@@ -946,8 +946,6 @@ def test_density_matrix(simulator, compile_to_qubits):
     ],
 )
 def test_measure_entanglement(simulator, compile_to_qubits):
-    rho_green = np.reshape([0, 0, 0, 1], (2, 2))
-    rho_red = np.reshape([1, 0, 0, 0], (2, 2))
     light1 = alpha.QuantumObject("red1", Light.RED)
     light2 = alpha.QuantumObject("green", Light.GREEN)
     light3 = alpha.QuantumObject("red2", Light.RED)

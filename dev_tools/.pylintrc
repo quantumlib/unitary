@@ -7,16 +7,16 @@ output-format=colorized
 score=no
 reports=no
 enable=
-    # anomalous-backslash-in-string,    # TODO: #210 - enable and fix
+    anomalous-backslash-in-string,
     assert-on-tuple,
     bad-indentation,
     bad-option-value,
     bad-reversed-sequence,
     bad-super-call,
     consider-merging-isinstance,
-    # consider-using-f-string,  # TODO: #210 - enable and fix
+    consider-using-f-string,
     continue-in-finally,
-    # dangerous-default-value,  # TODO: #210 - enable and fix
+    dangerous-default-value,
     docstyle,
     duplicate-argument-name,
     # expression-not-assigned,  # TODO: #210 - enable and fix
@@ -34,7 +34,7 @@ enable=
     nonexistent-operator,
     not-in-loop,
     # pointless-statement,      # TODO: #210 - enable and fix
-    # redefined-builtin,        # TODO: #210 - enable and fix
+    redefined-builtin,
     return-arg-in-generator,
     return-in-init,
     return-outside-function,
@@ -46,14 +46,14 @@ enable=
     undefined-variable,
     # unexpected-keyword-arg,   # TODO: #210 - enable and fix
     unhashable-dict-key,
-    # unnecessary-pass,         # TODO: #210 - enable and fix
+    unnecessary-pass,
     unreachable,
     unrecognized-inline-option,
     unused-import,
     unnecessary-semicolon,
-    # unused-variable,          # TODO: #210 - enable and fix
-    # unused-wildcard-import,   # TODO: #210 - enable and fix
-    # wildcard-import,          # TODO: #210 - enable and fix
+    unused-variable,
+    unused-wildcard-import,
+    wildcard-import,
     wrong-or-nonexistent-copyright-notice,
     wrong-import-order,
     wrong-import-position,
