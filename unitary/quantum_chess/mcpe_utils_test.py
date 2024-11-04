@@ -57,7 +57,7 @@ def test_effect_of_swap():
 
 
 def test_distance_fn():
-    a1, a2, a3, _b1, b2, _b3 = cirq.GridQubit.rect(2, 3)
+    a1, a2, a3, _, b2, _ = cirq.GridQubit.rect(2, 3)
 
     # A gate operating on (a1, a3) will be improved by swapping a1 and a2, but
     # by how much depends on the distance function used.
