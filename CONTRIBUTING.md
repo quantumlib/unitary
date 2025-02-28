@@ -73,12 +73,11 @@ Do your work and `git commit` your changes to your branch as needed.
 
 We use several tools to test code and perform other activities such as checking
 formatting against the style guidelines. You can run those tools locally during
-development. Wrapper scripts are located in the [`check/`](./check/)
-subdirectory to simplify running the tools.
+development. Wrapper scripts are located in the [`dev_tools/`](./dev_tools/)
+subdirectory to simplify running the tools with the correct configurations.
 
-*   Run `check/pytest` to run the Pytest suite
-*   Run `check/mypy` to run the Mypy type checker
-*   Run `check/pylint` to run the Pylint code linter
+*   Run `dev_tools/pylint` to run the Pylint code linter
+*   Run `dev_tools/nbfmt` to run the Jupyter Notebook format checker
 
 ### Pull requests and code reviews
 
