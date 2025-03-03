@@ -53,7 +53,7 @@ def _satisfies_adjacency(gate: cirq.Operation) -> bool:
 
 
 def _pairwise_shortest_distances(
-    adjacencies: Dict[cirq.GridQubit, List[cirq.GridQubit]]
+    adjacencies: Dict[cirq.GridQubit, List[cirq.GridQubit]],
 ) -> Dict[Tuple[cirq.GridQubit, cirq.GridQubit], int]:
     """Precomputes the shortest path length between each pair of qubits.
 
