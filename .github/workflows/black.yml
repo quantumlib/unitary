@@ -1,4 +1,4 @@
-name: Lint
+name: Python formatting
 
 on: [push, pull_request]
 
