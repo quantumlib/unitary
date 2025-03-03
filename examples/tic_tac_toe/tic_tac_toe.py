@@ -315,8 +315,7 @@ class GameInterface:
         self.player = "O" if self.player == "X" else "X"
 
     def print_welcome(self) -> str:
-        """Prints the welcome message for the game interface.
-        """
+        """Prints the welcome message for the game interface."""
         message = """
         Welcome to quantum tic tac toe!
         Here is the board:
