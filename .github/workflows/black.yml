@@ -2,6 +2,9 @@ name: Python formatting
 
 on: [push, pull_request]
 
+# Declare default permissions as read only.
+permissions: read-all
+
 jobs:
   lint:
     name: Run black
