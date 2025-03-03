@@ -55,19 +55,19 @@ class CopyrightChecker(BaseRawFileChecker):
         if not self.linter.is_message_enabled("wrong-or-nonexistent-copyright-notice"):
             return
         golden = [
-            b'# Copyright 20XX The Unitary Authors',
-            b'#',
+            b"# Copyright 20XX The Unitary Authors",
+            b"#",
             b'# Licensed under the Apache License, Version 2.0 (the "License");',
-            b'# you may not use this file except in compliance with the License.',
-            b'# You may obtain a copy of the License at',
-            b'#',
-            b'#     https://www.apache.org/licenses/LICENSE-2.0',
-            b'#',
-            b'# Unless required by applicable law or agreed to in writing, software',
+            b"# you may not use this file except in compliance with the License.",
+            b"# You may obtain a copy of the License at",
+            b"#",
+            b"#     https://www.apache.org/licenses/LICENSE-2.0",
+            b"#",
+            b"# Unless required by applicable law or agreed to in writing, software",
             b'# distributed under the License is distributed on an "AS IS" BASIS,',
-            b'# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.',
-            b'# See the License for the specific language governing permissions and',
-            b'# limitations under the License.',
+            b"# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.",
+            b"# See the License for the specific language governing permissions and",
+            b"# limitations under the License.",
         ]
         with node.stream() as stream:
 
@@ -78,7 +78,7 @@ class CopyrightChecker(BaseRawFileChecker):
                     lineno, line = next(lines)
                 except StopIteration:
                     return
-                if line.startswith(b'#!'):
+                if line.startswith(b"#!"):
                     # skip shebang and blank lines
                     for lineno, line in lines:
                         if line.strip():
@@ -89,7 +89,9 @@ class CopyrightChecker(BaseRawFileChecker):
                     yield lineno, line
                 yield from lines
 
-            for expected_line, (i, (lineno, line)) in zip(golden, enumerate(skip_shebang(stream))):
+            for expected_line, (i, (lineno, line)) in zip(
+                golden, enumerate(skip_shebang(stream))
+            ):
                 for expected_char, (colno, char) in zip(expected_line, enumerate(line)):
                     # The text needs to be same as the template except for the year.
                     if expected_char != char and not (i == 0 and 14 <= colno <= 15):
@@ -100,7 +102,10 @@ class CopyrightChecker(BaseRawFileChecker):
                         )
                         return
                 # The line cannot be shorter than the template or contain extra text.
-                if len(line) < len(expected_line) or line[len(expected_line) :].strip() != b'':
+                if (
+                    len(line) < len(expected_line)
+                    or line[len(expected_line) :].strip() != b""
+                ):
                     self.add_message(
                         "wrong-or-nonexistent-copyright-notice",
                         line=lineno + 1,

@@ -95,10 +95,10 @@ class Type(enum.Enum):
     KING = ("K", "k", "将", "帥")
     # \u00B7 is a half width mid dot, and \u30FB is full width
     EMPTY = (
-        "\u00B7",
-        "\u00B7",
-        "\u30FB",
-        "\u30FB",
+        "\u00b7",
+        "\u00b7",
+        "\u30fb",
+        "\u30fb",
     )
 
     @staticmethod
@@ -111,7 +111,7 @@ class Type(enum.Enum):
             "e": Type.ELEPHANT,
             "a": Type.ADVISOR,
             "k": Type.KING,
-            "\u00B7": Type.EMPTY,
+            "\u00b7": Type.EMPTY,
         }.get(c.lower(), None)
 
     @staticmethod

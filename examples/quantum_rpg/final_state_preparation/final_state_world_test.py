@@ -35,8 +35,14 @@ OPPOSITE_DIR = {
 }
 
 # Rooms that purposely do not have a way back.
-_ONE_WAY_ROOMS = {"hadamard1", "hadamard4_0", "hadamard4_1", "hadamard5", "perimeter1",
-                  "perimeter99"}
+_ONE_WAY_ROOMS = {
+    "hadamard1",
+    "hadamard4_0",
+    "hadamard4_1",
+    "hadamard5",
+    "perimeter1",
+    "perimeter99",
+}
 
 
 def find_room(room_name: str):
