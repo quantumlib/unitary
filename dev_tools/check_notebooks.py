@@ -84,9 +84,10 @@ def check_notebook(notebook_fn: str):
     """
     notebook_id = notebook_fn.replace("/", "-")
     start = time.perf_counter()
-    with open(f"./notebook_envs/{notebook_id}.stdout", "w") as stdout, open(
-        f"./notebook_envs/{notebook_id}.stderr", "w"
-    ) as stderr:
+    with (
+        open(f"./notebook_envs/{notebook_id}.stdout", "w") as stdout,
+        open(f"./notebook_envs/{notebook_id}.stderr", "w") as stderr,
+    ):
         try:
             _check_notebook(notebook_fn, notebook_id, stdout, stderr)
         except CalledProcessError:
