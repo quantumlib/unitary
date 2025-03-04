@@ -12,6 +12,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - name: Set up problem matcher for Black output
+        run: echo '::add-matcher::.github/problem-matchers/black.json'
       - uses: psf/black@8a737e727ac5ab2f1d4cf5876720ed276dc8dc4b # stable
         with:
           src: "./unitary"
