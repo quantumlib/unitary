@@ -1,12 +1,17 @@
-name: Lint
+name: Python formatting
 
 on: [push, pull_request]
 
+# Declare default permissions as read only.
+permissions: read-all
+
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    name: Run black
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: psf/black@stable
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: psf/black@8a737e727ac5ab2f1d4cf5876720ed276dc8dc4b # stable
         with:
           src: "./unitary"
