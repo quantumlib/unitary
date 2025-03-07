@@ -15,8 +15,8 @@
 ################################################################################
 
 # Get the working directory to the repo root.
-cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$(git rev-parse --show-toplevel)"
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" || exit
+cd "$(git rev-parse --show-toplevel)" || exit
 
 # Check if cirq/check/nbformat exists, if not grab it.
 if [[ ! -f dev_tools/nbformat ]]; then
