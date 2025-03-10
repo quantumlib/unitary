@@ -18,15 +18,22 @@
 cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" || exit
 cd "$(git rev-parse --show-toplevel)" || exit
 
-# Check if cirq/check/nbformat exists, if not grab it.
+# Base URL for downloading tools from Cirq.
+declare -r cirq=https://raw.githubusercontent.com/quantumlib/Cirq/main
+
+# Check if cirq/check/nbformat exists; if not, grab it.
 if [[ ! -f dev_tools/nbformat ]]; then
-  wget https://raw.githubusercontent.com/quantumlib/Cirq/master/check/nbformat -P dev_tools/
+  wget $cirq/check/nbformat -P dev_tools/
   chmod u+x dev_tools/nbformat
 fi
 
-# Check if tensorflow-docs.txt requirements file exists, if not grab it.
+# Check if the tensorflow-docs.txt requirements file exists; if not, grab it.
 if [[ ! -f dev_tools/tensorflow-docs.txt ]]; then
-  wget https://raw.githubusercontent.com/quantumlib/Cirq/master/dev_tools/requirements/deps/tensorflow-docs.txt -P dev_tools/
+  wget $cirq/dev_tools/requirements/deps/tensorflow-docs.txt -P dev_tools/
+fi
+
+# Check if the tensorflow-docs package has been installed; if not, install it.
+if ! pip show --quiet tensorflow-docs > /dev/null 2>&1; then
   pip install -r dev_tools/tensorflow-docs.txt
 fi
 
@@ -34,7 +41,11 @@ fi
 result=$(dev_tools/nbformat "$@")
 status=$?
 
-# Make sure error message references right file.
-result=${result//"check/nbformat"/"dev_tools/nbfmt"}
+# If there is an error message, make sure it references this script.
+# Note: using vars here avoids a problem with subsituting strings containing /.
+check_path="check/"
+devtools_path="dev_tools/"
+result=${result//$check_path/$devtools_path}
+result=${result//"nbformat"/"nbfmt"}
 printf '%s\n' "${result[@]}"
 exit $status
