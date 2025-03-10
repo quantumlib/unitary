@@ -1,0 +1,33 @@
+# Summary: Dependabot config file for unitary.
+#
+# Note: the syntax of Dependabot config files is NOT the same as the syntax
+# for GitHub Actions workflows. See the GitHub help docs for more info:
+# https://docs.github.com/en/code-security/dependabot/working-with-dependabot
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    versioning-strategy: "increase-if-necessary"
+    groups:
+      python-packages:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+          - "minor"
+    labels:
+      - "dependencies"
+
+  - package-ecosystem: "github-actions"
+    # The "github-actions" code explicitly looks in /.github/workflows if the
+    # value "/" is given for the directory attribute. Yes, that's confusing.
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "dependencies"
+      - "devops"
