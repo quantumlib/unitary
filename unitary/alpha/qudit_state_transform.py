@@ -39,7 +39,7 @@ def qudit_to_qubit_state(
     qudit_dimension: int,
     num_qudits: int,
     qudit_state_vector: np.ndarray,
-    _pad_value: np.complex_ = 0,
+    _pad_value: np.complex128 = 0,
 ) -> np.ndarray:
     """Converts a qudit-space quantum state vector to m-qubit-per-qudit column vector.
 
