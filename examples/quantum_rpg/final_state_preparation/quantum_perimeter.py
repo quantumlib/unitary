@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      https://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -608,7 +608,7 @@ QUANTUM_PERIMETER = [
             "wall beside a higher step, with an arrow pointing east."
         ),
         encounters=[],
-        items=[CRUMBLING_STEP],
+        items=[],
         exits={
             Direction.DOWN: "perimeter8",
             Direction.NORTH: "perimeter12",
@@ -626,7 +626,7 @@ QUANTUM_PERIMETER = [
             "like a distant, repetitive calculation."
         ),
         encounters=[],
-        items=[SMUGED_DIAGRAM],
+        items=[SMUDGED_DIAGRAM],
         exits={
             Direction.SOUTH: "perimeter11",
             Direction.WEST: "perimeter13",
