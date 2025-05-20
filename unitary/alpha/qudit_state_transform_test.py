@@ -85,7 +85,7 @@ def test_qudit_state_and_unitary_transform_equivalence(qudit_dim, num_qudits):
         (
             3,
             2,
-            np.array([1, 0, 0, 0, 0, 0, 0, 0, 1], dtype=np.complex_),
+            np.array([1, 0, 0, 0, 0, 0, 0, 0, 1], dtype=np.complex128),
             np.array(
                 [
                     1,
