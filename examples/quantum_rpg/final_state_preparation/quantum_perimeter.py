@@ -187,7 +187,7 @@ BLACK_HOLE_SIGN = Item(
                 "A sign over the entrance reads 'Quantum Computing:'\n"
                 "'The Technology of the Future'.  Graffiti painted over\n"
                 "it reads 'BLACK HOLE SIGN WONT YOU COME AND WASH AWAY'"
-                "'MY ERROR RATE'"
+                "'MY ERROR RATE'."
             ),
         )
     ],
@@ -310,10 +310,12 @@ DUSTY_CONSOLE = Item(
             EXAMINE,
             ["console", "dusty console", "machine"],
             (
-                "A dust-covered electronic console, its screen dark. A single\n"
-                "small, red light blinks erratically, seemingly at random,\n"
-                "but then briefly settles into a rapid, rhythmic pulse,\n"
-                "followed by a distinct *click* before reverting to randomness."
+                "A dust-covered electronic console, its screen dark. A thick wire\n"
+                "connects to a dot-matrix printer, which is spooling out continous\n"
+                "form paper.  On it, faded ink can barely be discerned.  It seems\n"
+                "that the printer is writing out a log of some sort, counting out\n"
+                "the iterations of a process up to the square root of a very large\n"
+                "number."
             ),
         )
     ],
@@ -403,7 +405,7 @@ RUSTED_MACHINERY = Item(
                 "equipment state that this mill was built in 1816 by one\n"
                 "of the early settlers in the area and now houses a museum\n"
                 "dedicated to the history of the area. Graffiti on one sign\n"
-                "states 'We all rotate, round and round, closer to the end'"
+                "states 'We all rotate, round and round, closer to the end'."
             ),
         )
     ],
@@ -622,8 +624,8 @@ QUANTUM_PERIMETER = [
             "A long, desolate hallway stretches before you, lined with\n"
             "closed doors. The silence here is almost oppressive, broken\n"
             "only by the occasional creak of the decaying structure. A faint\n"
-            "resonance seems to emanate from the west, a dull thrumming,\n"
-            "like a distant, repetitive calculation."
+            "resonance seems to emanate from the west, a rhythmic, mechanical\n"
+            "buzzing of an ancient device.\n"
         ),
         encounters=[],
         items=[SMUDGED_DIAGRAM],
@@ -655,8 +657,8 @@ QUANTUM_PERIMETER = [
             "The remnants of a laboratory fill this office. Broken glass\n"
             "and overturned equipment cover the floor. A blackboard lists\n"
             "failed experiments, one marked with a bold 'G' and arrows.\n"
-            "A dusty console has a single, blinking light, seeming to pulse\n"
-            "in a specific rhythm, faster and brighter at regular intervals."
+            "A dot-matrix printer next to a dusty console regularly spits\n"
+            "out faded type on spools of white paper.\n"
         ),
         encounters=[],
         items=[DUSTY_CONSOLE],
@@ -685,8 +687,7 @@ QUANTUM_PERIMETER = [
             "and reflecting the broken sky. The water is surprisingly clear,\n"
             "and you can see glimpses of something metallic beneath the\n"
             "surface. The air here is unusually quiet, almost peaceful,\n"
-            "save for the faint, rhythmic lapping of waves against the shore,\n"
-            "like a steady, repetitive beat."
+            "save for the faint, rhythmic lapping of waves against the shore."
         ),
         encounters=[],
         items=[SILVER_WATER],
