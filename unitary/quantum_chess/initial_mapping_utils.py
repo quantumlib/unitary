@@ -205,6 +205,7 @@ def traverse(
     Args:
       g: A logical qubits graph.
       s: The source qubit from which to start breadth-first search.
+      visited: helper argument to keep track of visited nodes
     """
     order = deque()
     if visited is None:

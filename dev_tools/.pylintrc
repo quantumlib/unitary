@@ -19,21 +19,21 @@ enable=
     dangerous-default-value,
     docstyle,
     duplicate-argument-name,
-    # expression-not-assigned,  # TODO: #210 - enable and fix
+    expression-not-assigned,
     f-string-without-interpolation,
-    # function-redefined,       # TODO: #210 - enable and fix
+    function-redefined,
     inconsistent-mro,
     init-is-generator,
-    # line-too-long,            # TODO: #210 - enable and fix
+    # line-too-long,		# TODO: #210 - enable and fix
     lost-exception,
     missing-kwoa,
-    # missing-param-doc,        # TODO: #210 - enable and fix
+    missing-param-doc,
     missing-raises-doc,
     mixed-line-endings,
-    # no-value-for-parameter,   # TODO: #210 - enable and fix
+    no-value-for-parameter,
     nonexistent-operator,
     not-in-loop,
-    # pointless-statement,      # TODO: #210 - enable and fix
+    pointless-statement,
     redefined-builtin,
     return-arg-in-generator,
     return-in-init,
@@ -41,10 +41,10 @@ enable=
     simplifiable-if-statement,
     singleton-comparison,
     syntax-error,
-    # too-many-function-args,   # TODO: #210 - enable and fix
+    too-many-function-args,
     trailing-whitespace,
     undefined-variable,
-    # unexpected-keyword-arg,   # TODO: #210 - enable and fix
+    unexpected-keyword-arg,
     unhashable-dict-key,
     unnecessary-pass,
     unreachable,

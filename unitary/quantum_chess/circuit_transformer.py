@@ -170,6 +170,7 @@ class ConnectivityHeuristicCircuitTransformer:
           graph: adjacency graph of connections between qubits,
             representing by a dictionary from qubit to adjacent qubits.
           nodes_trying: this list is used as a stack containing nodes currently under trying.
+          print_debug: If true, prints out debug information.
 
         Returns:
           True if mapping was successful, False if no mapping was possible.

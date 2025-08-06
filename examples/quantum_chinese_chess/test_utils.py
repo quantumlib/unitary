@@ -178,6 +178,4 @@ def assert_prob_about(
 
 def assert_fifty_fifty(probabilities, that):
     """Checks that the probability of `that` is close to 50%."""
-    assert_prob_about(probabilities, that, 0.5), print_samples(
-        list(probabilities.keys())
-    )
+    assert_prob_about(probabilities, that, 0.5)
