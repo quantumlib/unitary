@@ -485,7 +485,7 @@ def test_slide_excluded_classical_source():
         )
 
 
-def test_slide_excluded_classical_source():
+def test_slide_excluded_quantum_source():
     """Source in quantum state."""
     board = set_board(["a1", "b1", "c1"])
     world = board.board

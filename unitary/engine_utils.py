@@ -111,8 +111,7 @@ class EngineSampler(work.Sampler):
             program_id=_get_program_id(program),
             param_resolver=param_resolver,
             repetitions=repetitions,
-            processor_ids=[self.processor_id],
-            gate_set=self.gate_set,
+            processor_id=self.processor_id,
         )
 
     def run_sweep(
@@ -127,7 +126,6 @@ class EngineSampler(work.Sampler):
             program_id=_get_program_id(program),
             repetitions=repetitions,
             processor_ids=[self.processor_id],
-            gate_set=self.gate_set,
         ).results()
 
     async def run_async(
@@ -139,7 +137,6 @@ class EngineSampler(work.Sampler):
             program_id=program_id,
             repetitions=repetitions,
             processor_ids=[self.processor_id],
-            gate_set=self.gate_set,
         )
         job = engine_job._refresh_job()
         while True:
@@ -258,7 +255,7 @@ class EngineQuantumProcessor:
     @property
     def device_obj(self):
         dspec = self.engine.get_processor(self.processor_id).get_device_specification()
-        device = cg.SerializableDevice.from_proto(proto=dspec, gate_sets=[])
+        device = cg.SerializableDevice.from_proto(proto=dspec)
         return device
 
 

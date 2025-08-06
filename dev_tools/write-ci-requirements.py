@@ -85,7 +85,7 @@ def main(
          out_fn: The output filename
          relative_cirq_version: Pin the desired cirq version to either "current", "previous",
             or "next" version.
-        all_extras: Whether to include all the extras_require dependencies.
+         all_extras: Whether to include all the extras_require dependencies.
     """
     core_reqs = _parse_requirements(REPO_DIR / "requirements.txt")
     core_reqs = _set_cirq_version(core_reqs, relative_cirq_version)
