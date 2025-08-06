@@ -215,7 +215,7 @@ class Battle:
             if i < len(self.player_side):
                 end_status = "Still up."
                 cur_player = self.player_side[i]
-                if self.cur_player.is_down():
+                if cur_player.is_down():
                     end_status = "DOWN"
                 elif cur_player.is_escaped():
                     end_status = "ESCAPED"
