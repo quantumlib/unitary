@@ -117,9 +117,10 @@ class QuditRzGate(cirq.EigenGate):
 
     def _with_exponent(self, exponent: float) -> "QuditRzGate":
         return QuditRzGate(
-                dimension=self.dimension,
-                radians=exponent * np.pi,
-                phased_state=self.phased_state)
+            dimension=self.dimension,
+            radians=exponent * np.pi,
+            phased_state=self.phased_state,
+        )
 
 
 class QuditPlusGate(cirq.Gate):

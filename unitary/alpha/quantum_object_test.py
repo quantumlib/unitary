@@ -28,9 +28,9 @@ def test_negation(simulator, compile_to_qubits):
         piece, sampler=simulator(), compile_to_qubits=compile_to_qubits
     )
     assert board.peek() == [[0]]
-    -piece # pylint: disable=pointless-statement
+    -piece  # pylint: disable=pointless-statement
     assert board.peek() == [[1]]
-    -piece # pylint: disable=pointless-statement
+    -piece  # pylint: disable=pointless-statement
     assert board.peek() == [[0]]
     piece += 1
     assert board.peek() == [[1]]
