@@ -40,7 +40,8 @@ def test_pauli_decomposition_wrong_inputs():
     with pytest.raises(
         ValueError,
         match=re.escape(
-            "pauli_decomposition: Expect that size_of_matrix==pow(2, number_of_qubits). In your case 2!=pow(2, 2)."
+            "pauli_decomposition: Expect that size_of_matrix==pow(2, number_of_qubits). "
+            "In your case 2!=pow(2, 2)."
         ),
     ):
         pauli_decomposition(H_good, [a1, a2])

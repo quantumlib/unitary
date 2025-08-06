@@ -16,7 +16,8 @@
 Look-Ahead Heuristic for the Qubit Mapping Problem of NISQ Computers'
 (https://ieeexplore.ieee.org/abstract/document/8976109).
 
-This transforms circuits by adding additional SWAP gates to ensure that all operations are on adjacent qubits.
+This transforms circuits by adding additional SWAP gates
+to ensure that all operations are on adjacent qubits.
 """
 
 from collections import deque
@@ -143,9 +144,11 @@ def generate_decomposed_swap(
 
 
 class SwapUpdater:
-    """SwapUpdater runs the swap update algorithm in order to incrementally update a circuit with SWAPs.
+    """SwapUpdater runs the swap update algorithm
+    to incrementally update a circuit with SWAPs.
 
-    The SwapUpdater's internal state is modified as the algorithm runs, so each instance is one-time use.
+    The SwapUpdater's internal state is modified as the algorithm runs,
+    so each instance is one-time use.
 
     Args:
       circuit: the circuit to be updated with additional SWAPs

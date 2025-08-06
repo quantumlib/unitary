@@ -1953,7 +1953,8 @@ def test_merge_to_fully_classical_position(board):
 
 @pytest.mark.parametrize("board", ALL_CIRQ_BOARDS)
 def test_undo_to_start_after_classical_reset(board):
-    """Splits piece on f8 to d6 and h6. Piece on f4 then captures piece on d6. Then piece on h6 captures d6
+    """Splits piece on f8 to d6 and h6.
+    Piece on f4 then captures piece on d6. Then piece on h6 captures d6.
     Then does three undo moves to return to initial position."""
     b = simulator(u.squares_to_bitboard(["f4", "f8", "f2"]))
     b.reset_starting_states = True

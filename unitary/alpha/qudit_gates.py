@@ -126,7 +126,8 @@ class QuditRzGate(cirq.EigenGate):
 class QuditPlusGate(cirq.Gate):
     """Cycles all the states by `addend` using a permutation gate.
     This gate adds a number to each state. For instance,`QuditPlusGate(dimension=3, addend=1)`
-    will cycle state vector (a, b, c) to (c, a, b), and will cycle state |0> to |1>, |1> to |2>, |2> to |0>.
+    will cycle state vector (a, b, c) to (c, a, b),
+    and will cycle state |0> to |1>, |1> to |2>, |2> to |0>.
     """
 
     def __init__(self, dimension: int, addend: int = 1):
@@ -149,16 +150,20 @@ class QuditPlusGate(cirq.Gate):
 class QuditControlledXGate(cirq.Gate):
     """A Qudit controlled-X gate.
 
-    This gate takes the dimension of the qudit as well as the control and destination states to produce a
+    This gate takes the dimension of the qudit as well as
+    the control and destination states to produce a
     controlled-X 2-qudit gate.
 
     Args:
-        dimension: dimension of the qudits, for instance, a dimension of 3 would be a qutrit.
-        control_state: the state of first qudit that when satisfied the X gate on the second qudit will be activated.
-          For instance, if `control_state` is set to 2, then the X gate will be
-          activated when the first qudit is in the |2> state.
-        state: the destination state of the second qudit. For instance, if set to 1, it will perform a
-          X_01 gate when activated by `control_state`.
+        dimension: dimension of the qudits, for instance,
+            a dimension of 3 would be a qutrit.
+        control_state: the state of first qudit that, when satisfied,
+            the X gate on the second qudit will be activated.
+            For instance, if `control_state` is set to 2, then the X gate will be
+            activated when the first qudit is in the |2> state.
+        state: the destination state of the second qudit.
+            For instance, if set to 1, it will perform a
+            X_01 gate when activated by `control_state`.
     """
 
     def __init__(self, dimension: int, control_state: int = 1, state: int = 1):

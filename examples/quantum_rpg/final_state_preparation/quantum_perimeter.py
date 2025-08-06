@@ -372,9 +372,7 @@ ERODED_RAILING = Item(
         (
             EXAMINE,
             ["railing", "eroded railing"],
-            (
-                "The metal railing of the bridge is heavily eroded by the elements."
-            ),
+            ("The metal railing of the bridge is heavily eroded by the elements."),
         )
     ],
 )

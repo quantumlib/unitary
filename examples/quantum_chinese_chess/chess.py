@@ -89,7 +89,8 @@ class QuantumChineseChess:
         self.game_state = GameState.CONTINUES
         self.current_player = self.board.current_player
         self.debug_level = 3
-        # This variable is used to save the classical properties of the whole board before each move is
+        # This variable is used to save the classical properties
+        # of the whole board before each move is
         # made, so that if we later undo we could recover the earlier classical state.
         self.classical_properties_history: List[List[List[int]]] = []
 
@@ -144,7 +145,9 @@ class QuantumChineseChess:
 
     @classmethod
     def _is_in_palace(self, color: Color, x: int, y: int) -> bool:
-        """Check if the given location is within palace. This check will be applied to all KING ans ADVISOR moves."""
+        """Check if the given location is within palace.
+
+        This check will be applied to all KING ans ADVISOR moves."""
         return (
             x <= ord("f")
             and x >= ord("d")
@@ -212,7 +215,8 @@ class QuantumChineseChess:
                 raise ValueError("CANNON cannot move like this.")
             if len(classical_path_pieces) > 0:
                 if len(classical_path_pieces) > 1:
-                    # Invalid cannon move, since there could only be at most one classical piece between
+                    # Invalid cannon move,
+                    # since there could only be at most one classical piece between
                     # the source (i.e. the cannon) and the target.
                     raise ValueError("CANNON cannot fire like this.")
                 elif source_piece.color == target_piece.color:
@@ -246,18 +250,24 @@ class QuantumChineseChess:
         classical_path_pieces_1: List[str],
         quantum_path_pieces_1: List[str],
     ) -> Tuple[MoveType, MoveVariant]:
-        """Determines and returns the MoveType and MoveVariant. This function assumes that check_classical_rule()
+        """Determines and returns the MoveType and MoveVariant.
+
+        This function assumes that check_classical_rule()
         has been called before this.
 
         Args:
             sources: the list of names of the source pieces
             targets: the list of names of the target pieces
-            classical_path_pieces_0: the list of names of classical pieces from source_0 to target_0 (excluded)
-            quantum_path_pieces_0: the list of names of quantum pieces from source_0 to target_0 (excluded)
-            classical_path_pieces_1: the list of names of classical pieces from source_0 to target_1 (for split)
+            classical_path_pieces_0: the list of names of classical pieces
+                from source_0 to target_0 (excluded)
+            quantum_path_pieces_0: the list of names of quantum pieces
+                from source_0 to target_0 (excluded)
+            classical_path_pieces_1: the list of names of classical pieces
+                from source_0 to target_1 (for split)
                                      or from source_1 to target_0 (for merge) (excluded)
-            quantum_path_pieces_1: the list of names of quantum pieces from source_0 to target_1 (for split) or
-                                     from source_1 to target_0 (for merge) (excluded)
+            quantum_path_pieces_1: the list of names of quantum pieces
+                from source_0 to target_1 (for split) or
+                from source_1 to target_0 (for merge) (excluded)
         """
         move_type = MoveType.UNSPECIFIED
         move_variant = MoveVariant.UNSPECIFIED
@@ -272,15 +282,15 @@ class QuantumChineseChess:
                     and source.type_ == Type.CANNON
                     and target.color.value == 1 - source.color.value
                 ):
-                    # CANNON is special in that there has to be a platform between itself and the target
-                    # to capture.
+                    # CANNON is special in that there has to be a platform
+                    # between itself and the target to capture.
                     raise ValueError(
                         "CANNON could not fire/capture without a cannon platform."
                     )
                 if not source.is_entangled and not target.is_entangled:
-                    # This handles all classical cases, where no quantum piece is envolved.
-                    # We don't need to further classify MoveVariant types since all classical cases
-                    # will be handled in a similar way.
+                    # This handles all classical cases, where no quantum piece
+                    # is envolved.  We don't need to further classify MoveVariant
+                    # types since all classical cases will be handled in a similar way.
                     return MoveType.CLASSICAL, MoveVariant.CLASSICAL
                 else:
                     # If any of the source or target is entangled, this move is a JUMP.
@@ -319,7 +329,8 @@ class QuantumChineseChess:
                 raise ValueError(
                     "Both sources need to be in quantum state in order to merge."
                 )
-            # TODO(): Currently we don't support merge + excluded/capture, or cannon_merge_fire + capture. Maybe add support later.
+            # TODO(): Currently we don't support merge + excluded/capture,
+            # or cannon_merge_fire + capture. Maybe add support later.
             if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
                 raise ValueError("Currently CANNON cannot merge while firing.")
             if target.type_ != Type.EMPTY:
@@ -336,7 +347,8 @@ class QuantumChineseChess:
         elif len(targets) == 2:
             # Determine types for split cases.
             target_1 = self.board.board[targets[1]]
-            # TODO(): Currently we don't support split + excluded/capture, or cannon_split_fire + capture. Maybe add support later.
+            # TODO(): Currently we don't support split + excluded/capture,
+            # or cannon_split_fire + capture. Maybe add support later.
             if len(classical_path_pieces_0) > 0 or len(classical_path_pieces_1) > 0:
                 raise ValueError("Currently CANNON cannot split while firing.")
             if target.type_ != Type.EMPTY or target_1.type_ != Type.EMPTY:
@@ -355,7 +367,9 @@ class QuantumChineseChess:
         return move_type, move_variant
 
     def apply_move(self, str_to_parse: str) -> None:
-        """Check if the input string is valid. If it is, determine the move type and variant and return the move."""
+        """Check if the input string is valid.
+
+        If it is, determine the move type and variant and return the move."""
         sources, targets = self.parse_input_string(str_to_parse)
 
         # Additional checks based on the current board.
@@ -372,7 +386,8 @@ class QuantumChineseChess:
                 raise ValueError("Two sources need to be the same type.")
         if len(targets) == 2:
             target_1 = self.board.board[targets[1]]
-            # TODO(): handle the case where a piece is split into the current piece and another piece, in which case two targets are different.
+            # TODO(): handle the case where a piece is split into the
+            # current piece and another piece, in which case two targets are different.
             if target_0.type_ != target_1.type_:
                 raise ValueError("Two targets need to be the same type.")
             if target_0.color != target_1.color:
@@ -440,8 +455,11 @@ class QuantumChineseChess:
             CannonFire(classical_pieces_0, quantum_pieces_0)(source_0, target_0)
 
     def next_move(self) -> Tuple[bool, str]:
-        """Check if the player wants to exit or needs help message. Otherwise parse and apply the move.
-        Returns True + output string if the move was made, otherwise returns False + output string.
+        """Check if the player wants to exit or needs help message.
+
+        Otherwise parse and apply the move.
+        Returns True + output string if the move was made,
+            otherwise returns False + output string.
         """
         input_str = input(
             f"\nIt is {self.players_name[self.current_player]}'s turn to move: "
@@ -492,8 +510,9 @@ class QuantumChineseChess:
             for col in "abcdefghi":
                 piece = self.board.board[f"{col}{row}"]
                 prob = probs[row * num_cols + ord(col) - ord("a")]
-                # TODO(): This threshold does not actually work right now since we have 100 sampling.
-                # Change it to be more meaningful values maybe when we do error mitigation.
+                # TODO(): This threshold does not actually work right now
+                # since we have 100 sampling.  Change it to a more meaningful value
+                # when we do error mitigation.
                 if prob < 1e-3:
                     piece.reset()
                     probs[row * num_cols + ord(col) - ord("a")] = 0
@@ -507,14 +526,16 @@ class QuantumChineseChess:
         if self.game_state != GameState.CONTINUES:
             return
         if self.board.flying_general_check():
-            # If two KINGs are directly facing each other (i.e. in the same column) without any pieces in between, then the game ends. The other player wins.
+            # If two KINGs are directly facing each other (i.e. in the same column)
+            # without any pieces in between, then the game ends. The other player wins.
             self.game_state = GameState(1 - self.current_player)
         return
         # TODO(): add the following checks
         # - If player 0 made N repeatd back-and_forth moves in a row.
 
     def save_snapshot(self) -> None:
-        """Saves the current length of the effect history, qubit_remapping_dict, and the current classical states of all pieces."""
+        """Saves the current length of the effect history,
+        qubit_remapping_dict, and the current classical states of all pieces."""
         # Save the current length of the effect history and qubit_remapping_dict.
         self.board.board.save_snapshot()
 
@@ -529,8 +550,10 @@ class QuantumChineseChess:
         self.classical_properties_history.append(snapshot)
 
     def undo(self) -> bool:
-        """Undo the last move, which includes reset quantum effects and classical properties, and remapping
-        qubits.
+        """Undo the last move.
+
+        This includes reset quantum effects and classical properties,
+        and remapping qubits.
 
         Returns True if the undo is success, and False otherwise.
         """
@@ -543,8 +566,10 @@ class QuantumChineseChess:
             # length == 1 corresponds to the initial state, and no more undo could be made.
             return False
 
-        # Recover the mapping of qubits to the last snapshot, remove any related post selection memory,
-        # and recover the effects up to the last snapshot (which was saved after the last move finished).
+        # Recover the mapping of qubits to the last snapshot,
+        # remove any related post selection memory,
+        # and recover the effects up to the last snapshot
+        # (which was saved after the last move finished).
         try:
             world.restore_last_snapshot()
         except ValueError as err:

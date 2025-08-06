@@ -70,13 +70,16 @@ class Analyst(qaracter.Qaracter):
 
     def actions(self) -> Dict[str, Callable]:
         """Callables for each player action."""
+
+        def sample_action(monster, qubit):
+            result = monster.sample(monster.quantum_object_name(qubit), False)
+            return f"Sample result {result}"
+
         action_dict = {
             "m": lambda monster, qubit: monster.sample(
                 monster.quantum_object_name(qubit), True
             ),
         }
         if self.level >= 3:
-            action_dict["s"] = (
-                lambda monster, qubit: f"Sample result {monster.sample(monster.quantum_object_name(qubit), False)}"
-            )
+            action_dict["s"] = sample_action
         return action_dict
