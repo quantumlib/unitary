@@ -306,7 +306,6 @@ class Board:
 
     def flying_general_check(self) -> bool:
         """Check and return if the two KINGs are directly facing each other
-
         (i.e. in the same column) without any pieces in between."""
         king_0 = self.king_locations[0]
         king_1 = self.king_locations[1]
