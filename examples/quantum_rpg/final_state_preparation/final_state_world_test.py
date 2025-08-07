@@ -145,7 +145,8 @@ def test_bridge():
     fix = test_world.current_location.get_action("fix bridge")
     examine = test_world.current_location.get_action("examine bridge")
 
-    # The world and the game state are at the location of the broken bridge, which can be fixed and examined.
+    # The world and the game state are at the location of the broken bridge,
+    # which can be fixed and examined.
     assert test_world.current_location.title == "At a Broken Bridge"
     assert (
         test_world.current_location.label

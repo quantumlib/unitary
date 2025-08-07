@@ -820,7 +820,8 @@ def test_merge_slide_overlapped_paths():
 
 
 def test_cannon_fire_classical_source_target():
-    """There are one classical piece and one quantum piece in path + both source and target are classical."""
+    """There are one classical piece and one quantum piece in path
+    + both source and target are classical."""
     board = set_board(["a1", "b1", "c1", "d1"])
     world = board.board
     SplitJump()(world["c1"], world["c2"], world["c3"])
@@ -837,7 +838,8 @@ def test_cannon_fire_classical_source_target():
 
 
 def test_cannon_fire_quantum_source_target():
-    # There are one classical piece and one quantum piece in path + both source and target are quantum.
+    """There are one classical piece and one quantum piece in path
+    + both source and target are quantum."""
     board = set_board(["a1", "b1", "c1", "d1"])
     world = board.board
     SplitJump()(world["a1"], world["a2"], world["a3"])

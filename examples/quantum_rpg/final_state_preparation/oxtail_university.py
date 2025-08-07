@@ -282,7 +282,8 @@ BIO_STUDENT = Item(
             ["student", "students"],
             (
                 "'I am looking for information on how to stop the quantum foam.' the student\n"
-                "explains.  'These bookshelves contain a multitude of information about quantum foam."
+                "explains.  'These bookshelves contain a multitude of information "
+                "about quantum foam."
             ),
         )
     ]

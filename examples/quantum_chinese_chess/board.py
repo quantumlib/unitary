@@ -48,14 +48,17 @@ _FULL_A = ord("\N{FULLWIDTH LATIN SMALL LETTER A}")
 
 
 class Board:
-    """Board holds the assemble of all pieces. Each piece could be either in classical or quantum state."""
+    """Board holds the ensemble of all pieces.
+
+    Each piece could be either in classical or quantum state."""
 
     def __init__(
         self, board: alpha.QuantumWorld, current_player: int, king_locations: List[str]
     ):
         self.board = board
         self.current_player = current_player
-        # This saves the locations of KINGs in the order of [RED_KING_LOCATION, BLACK_KING_LOCATION].
+        # This saves the locations of KINGs
+        # in the order of [RED_KING_LOCATION, BLACK_KING_LOCATION].
         self.king_locations = king_locations
         self.lang = Language.EN  # The default language is English.
 
@@ -64,8 +67,10 @@ class Board:
 
     @classmethod
     def from_fen(cls, fen: str = _INITIAL_FEN) -> "Board":
-        """Translates FEN (Forsyth-Edwards Notation) symbols into the whole QuantumWorld board.
-        FEN rule for Chinese Chess could be found at https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
+        """Translates FEN (Forsyth-Edwards Notation) symbols
+        into the whole QuantumWorld board.
+        FEN rule for Chinese Chess could be found at
+        https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
         """
         chess_board = {}
         row_index = 0
@@ -300,7 +305,8 @@ class Board:
         return classical_pieces, quantum_pieces
 
     def flying_general_check(self) -> bool:
-        """Check and return if the two KINGs are directly facing each other (i.e. in the same column) without any pieces in between."""
+        """Check and return if the two KINGs are directly facing each other
+        (i.e. in the same column) without any pieces in between."""
         king_0 = self.king_locations[0]
         king_1 = self.king_locations[1]
         if king_0[0] != king_1[0]:

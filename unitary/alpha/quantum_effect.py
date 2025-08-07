@@ -115,7 +115,8 @@ class QuantumThen(QuantumEffect):
             conditions = [conditions]
         if len(conditions) != len(self.control_objects):
             raise ValueError(
-                f"Not able to equate {len(self.control_objects)} qubits with {len(conditions)} conditions"
+                f"Not able to equate {len(self.control_objects)} qubits "
+                f"with {len(conditions)} conditions"
             )
         self.condition = [_to_int(cond) for cond in conditions]
         return self

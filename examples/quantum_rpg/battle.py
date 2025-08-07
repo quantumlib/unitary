@@ -214,21 +214,23 @@ class Battle:
             status = ""
             if i < len(self.player_side):
                 end_status = "Still up."
-                if self.player_side[i].is_down():
+                cur_player = self.player_side[i]
+                if cur_player.is_down():
                     end_status = "DOWN"
-                elif self.player_side[i].is_escaped():
+                elif cur_player.is_escaped():
                     end_status = "ESCAPED"
-                player_status = f"{self.player_side[i].name} {self.player_side[i].class_name}: {end_status}"
+                player_status = f"{cur_player.name} {cur_player.class_name}: {end_status}"
                 status += f"{player_status: <{_PLAYER_LEN}}"
             else:
                 status += " " * (_PLAYER_LEN)
             if i < len(self.enemy_side):
+                cur_player = self.enemy_side[i]
                 end_status = "Still up."
-                if self.enemy_side[i].is_down():
+                if cur_player.is_down():
                     end_status = "DOWN"
-                elif self.enemy_side[i].is_escaped():
+                elif cur_player.is_escaped():
                     end_status = "ESCAPED"
-                status += f"{self.enemy_side[i].name} {type(self.enemy_side[i]).__name__} {end_status}"
+                status += f"{cur_player.name} {type(cur_player).__name__} {end_status}"
             print(status, file=self.file)
 
         print(_BATTLE_SEPARATOR, file=self.file)

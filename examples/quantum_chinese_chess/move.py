@@ -112,10 +112,14 @@ class Jump(QuantumEffect):
         return 2
 
     def effect(self, *objects) -> Iterator[cirq.Operation]:
-        # TODO(): currently pawn capture is the same as jump capture, while in quantum chess it's different,
-        # i.e. pawn would move only if the target is there, i.e. CNOT(t, s), and an entanglement could be
-        # created. This could be a general game setting, i.e. we could allow players to choose if they
-        # want the source piece to move (in case of capture) if the target piece is not there.
+        # TODO(): currently pawn capture is the same as jump capture,
+        # while in quantum chess it's different,
+        # i.e. pawn would move only if the target is there,
+        # i.e. CNOT(t, s), and an entanglement could be
+        # created. This could be a general game setting,
+        # i.e. we could allow players to choose if they
+        # want the source piece to move (in case of capture)
+        # if the target piece is not there.
         source_0, target_0 = objects
         world = source_0.world
         if self.move_variant == MoveVariant.CAPTURE:
@@ -130,7 +134,8 @@ class Jump(QuantumEffect):
                 print("Jump move not applied: source turns out to be empty.")
                 return iter(())
             source_0.is_entangled = False
-            # We replace the qubit of target_0 with a new ancilla, and set its classical properties to be EMPTY.
+            # We replace the qubit of target_0 with a new ancilla,
+            # and set its classical properties to be EMPTY.
             world.unhook(target_0)
             target_0.reset()
         elif self.move_variant == MoveVariant.EXCLUDED:
@@ -253,13 +258,15 @@ class Slide(QuantumEffect):
         quantum_path_pieces_0 = [world[path] for path in self.quantum_path_pieces_0]
         if self.move_variant == MoveVariant.EXCLUDED:
             target_is_occupied = world.pop([target_0])[0].value
-            # For excluded slide, we need to measure the target piece and only make the slide when it's not there.
+            # For excluded slide, we need to measure the target piece
+            # and only make the slide when it's not there.
             if target_is_occupied:
                 print("Slide move not applied: target turns out to be occupied.")
                 # Set the target to be a classical piece.
                 target_0.is_entangled = False
                 return iter(())
-            # If the target is measured to be empty, then we reset its classical properties to be empty.
+            # If the target is measured to be empty,
+            # then we reset its classical properties to be empty.
             target_0.reset()
         elif self.move_variant == MoveVariant.CAPTURE:
             could_capture = False
@@ -288,7 +295,8 @@ class Slide(QuantumEffect):
                 could_capture = world.pop([capture_ancilla])[0]
             if not could_capture:
                 print(
-                    "Slide move not applied: either the source turns out be empty, or the path turns out to be blocked."
+                    "Slide move not applied: either the source turns out be empty, "
+                    "or the path turns out to be blocked."
                 )
                 return iter(())
             # Apply the capture.
@@ -409,20 +417,24 @@ class SplitSlide(QuantumEffect):
         # Pass the classical properties of the source piece to the target pieces.
         target_0.reset(source_0)
         target_1.reset(source_0)
-        # Note that we should not reset source_0 (to be empty) here since either slide arm could have
-        # entangled piece in the path which results in a non-zero probability that the source is not
-        # moved. We'll later use board.update_board_by_sampling() to determine if the source piece
-        # needs to be reset to be empty.
+        # Note that we should not reset source_0 (to be empty) here
+        # since either slide arm could have entangled piece in the path
+        # which results in a non-zero probability that the source is not
+        # moved. We'll later use board.update_board_by_sampling() to
+        # determine if the source piece needs to be reset to be empty.
         return iter(())
 
 
 class MergeSlide(QuantumEffect):
-    """MergeSlide from source_0 and source_1 to target_0, with quantum_path_pieces_0 being the
-    quantum path pieces from source_0 to target_0, and quantum_path_pieces_1 being the quantum
-    path pieces from source_1 to target_0. The only accepted (default) move_variant is
-    - BASIC
+    """MergeSlide from source_0 and source_1 to target_0,
 
-    Types of pieces that could make MergeSlide moves are: CANNON, ROOK, HORSE, and ELEPHANT.
+    With quantum_path_pieces_0 being the quantum path pieces
+    from source_0 to target_0, and quantum_path_pieces_1 being the quantum
+    path pieces from source_1 to target_0.
+    The only accepted (default) move_variant is BASIC.
+
+    Types of pieces that could make MergeSlide moves are:
+    CANNON, ROOK, HORSE, and ELEPHANT.
     """
 
     def __init__(
@@ -494,17 +506,21 @@ class MergeSlide(QuantumEffect):
         # TODO(): Do we need to zero-out, i.e. reverse those ancillas?
         # Pass the classical properties of the source pieces to the target piece.
         target_0.reset(source_0)
-        # Note that we should not reset source_0 or source_1 (to be empty) here since either slide arm could have
-        # entangled piece in the path which results in a non-zero probability that the source is not moved. We'll
-        # later use board.update_board_by_sampling() to determine if any source piece needs to be reset to be empty.
+        # Note that we should not reset source_0 or source_1 (to be empty) here
+        # since either slide arm could have entangled piece in the path
+        # which results in a non-zero probability that the source is not moved.
+        # We'll later use board.update_board_by_sampling() to determine
+        # if any source piece needs to be reset to be empty.
         return iter(())
 
 
 class CannonFire(QuantumEffect):
-    """CannonFire from source_0 to target_0, with classical_path_pieces_0 being the classical path pieces
-    along the path, and quantum_path_pieces_0 being the quantum path pieces along the path.
-    The only accepted (default) move_variant is
-    - CAPTURE.
+    """CannonFire from source_0 to target_0
+
+    With classical_path_pieces_0 being the classical path pieces
+    along the path, and quantum_path_pieces_0 being the quantum path
+    pieces along the path.
+    The only accepted (default) move_variant is CAPTURE.
 
     The only type of piece that could make CannonFire move is CANNON.
     """
@@ -554,11 +570,13 @@ class CannonFire(QuantumEffect):
                     quantum_path_pieces_0[0].reset()
                     could_capture = True
             else:
-                # We add a new ancilla to indicate whether the capture could happen (value 1 means it could).
+                # We add a new ancilla to indicate whether the capture could happen
+                # (value 1 means it could).
                 capture_ancilla = world._add_ancilla(f"{source_0.name}{target_0.name}")
                 control_objects = [source_0] + quantum_path_pieces_0
                 conditions = [1] + [0] * len(quantum_path_pieces_0)
-                # We flip the ancilla only if the source is there and all quantum path pieces are empty.
+                # We flip the ancilla only if the source is there
+                # and all quantum path pieces are empty.
                 alpha.quantum_if(*control_objects).equals(*conditions).apply(
                     alpha.Flip()
                 )(capture_ancilla)
@@ -579,7 +597,8 @@ class CannonFire(QuantumEffect):
             # Force measure all quantum_path_pieces_0 to be empty.
             for path_piece in quantum_path_pieces_0:
                 if path_piece.is_entangled:
-                    # We check if the piece is entangled since in the case len(quantum_path_pieces_0) == 1
+                    # We check if the piece is entangled since
+                    # in the case len(quantum_path_pieces_0) == 1
                     # the force_measurement has already been made.
                     world.force_measurement(path_piece, 0)
                     path_piece.reset()
@@ -594,7 +613,8 @@ class CannonFire(QuantumEffect):
             # TODO(): think a more efficient way of implementing this case.
             for _, expect_occupied_path_piece in enumerate(quantum_path_pieces_0):
                 # TODO(): consider specific cases to save the ancilla.
-                # Add a new ancilla to indicate whether the fire could be made (value = 1 means it could).
+                # Add a new ancilla to indicate whether the fire could be made
+                # (value = 1 means it could).
                 capture_ancilla = world._add_ancilla(expect_occupied_path_piece.name)
                 # All other path pieces are expected to be empty to make the fire happen.
                 expect_empty_pieces = [

@@ -75,8 +75,9 @@ class QuantumWorld:
         """
         self.circuit = cirq.Circuit()
         self.effect_history: List[Tuple[cirq.Circuit, Dict[QuantumObject, int]]] = []
-        # This variable is used to save the length of current effect history before each move is made,
-        # so that if we later undo we know how many effects we need to pop out, since each move could
+        # This variable is used to save the length of current effect history
+        # before each move is made, so that if we later undo we know
+        # how many effects we need to pop out, since each move could
         # consist of several effects.
         self.effect_history_length: List[int] = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
@@ -85,10 +86,11 @@ class QuantumWorld:
         # original qudits to the compiled qubits.
         self.compiled_qubits: Dict[cirq.Qid, List[cirq.Qid]] = {}
         self.post_selection: Dict[QuantumObject, int] = {}
-        # This variable is used to save the qubit remapping dictionary before each move, so that if
-        # we later undo we know how to reverse the mapping.
+        # This variable is used to save the qubit remapping dictionary
+        # before each move, so that if we later undo we know how to reverse the mapping.
         self.qubit_remapping_dict: List[Dict[cirq.Qid, cirq.Qid]] = []
-        # This variable is used to save the length of qubit_remapping_dict before each move is made,
+        # This variable is used to save the length of qubit_remapping_dict
+        # before each move is made,
         # so that if we later undo we know how to remap the qubits.
         self.qubit_remapping_dict_length: List[int] = []
 
@@ -320,9 +322,10 @@ class QuantumWorld:
             # length == 1 corresponds to the initial state, and no more restore could be made.
             raise ValueError("Unable to restore any more.")
 
-        # Recover the mapping of qubits to the last snapshot, and remove any related post selection memory.
-        # Note that this need to be done before calling `undo_last_effect()`, otherwise the remapping does not
-        # work as expected.
+        # Recover the mapping of qubits to the last snapshot,
+        # and remove any related post selection memory.
+        # Note that this need to be done before calling `undo_last_effect()`,
+        # otherwise the remapping does not work as expected.
         self.qubit_remapping_dict_length.pop()
         last_length = self.qubit_remapping_dict_length[-1]
         while len(self.qubit_remapping_dict) > last_length:
@@ -640,16 +643,20 @@ class QuantumWorld:
     def density_matrix(
         self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 1000
     ) -> np.ndarray:
-        """Simulates the density matrix of the given objects. We assume that the overall state of
-        the quantum world (including all quantum objects in it) could be described by one pure
-        state. To calculate the density matrix of the given quantum objects, we would always measure/
-        peek the quantum world for `count` times, deduce the (pure) state vector based on the results,
-        then the density matrix is its outer product. We will then trace out the un-needed quantum
+        """Simulates the density matrix of the given objects.
+
+        We assume that the overall state of the quantum world
+        (including all quantum objects in it) could be described by one pure
+        state. To calculate the density matrix of the given quantum objects,
+        we would always measure/peek the quantum world for `count` times,
+        deduce the (pure) state vector based on the results,
+        then the density matrix is its outer product.
+        We will then trace out the un-needed quantum
         objects before returning the density matrix.
 
         Parameters:
-            objects:    List of QuantumObjects (currently only qubits are supported). If not specified,
-                        all quantum objects' density matrix will be returned.
+            objects:    List of QuantumObjects (currently only qubits are supported).
+                 If not specified, all quantum objects' density matrix will be returned.
             count:      Number of measurements.
 
         Returns:
@@ -717,7 +724,8 @@ class QuantumWorld:
         return quantum_object
 
     def __to_state_vector__(self, input_bits: tuple) -> np.ndarray:
-        """Converts the given tuple (of length N) to the corresponding state vector (of length 2**N).
+        """Converts the given tuple (of length N)
+        to the corresponding state vector (of length 2**N).
         e.g. (0, 1) -> [0, 1, 0, 0]
         """
         num = len(input_bits)

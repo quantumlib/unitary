@@ -49,21 +49,30 @@ def example_world():
         world.Location(
             label="1",
             title="Lab Entrance",
-            description="You stand before the entrance to the premier quantum lab.\nDouble doors lead east.",
+            description=(
+                "You stand before the entrance to the premier quantum lab.\n"
+                "Double doors lead east."
+            ),
             items=[BUTTON],
             exits={world.Direction.EAST: "2"},
         ),
         world.Location(
             label="2",
             title="Disorganized Lab",
-            description="Tables are here with tons of electronics.\nThe lab continues to the south.",
+            description=(
+                "Tables are here with tons of electronics.\n"
+                "The lab continues to the south."
+            ),
             items=[SIGN],
             exits={world.Direction.SOUTH: "3", world.Direction.WEST: "1"},
         ),
         world.Location(
             label="3",
             title="Cryostats",
-            description="Giant aluminum cylinders hang suspended by large frames.\nRhythmic whirring of a pulse tube can be heard overhead.",
+            description=(
+                "Giant aluminum cylinders hang suspended by large frames.\n"
+                "Rhythmic whirring of a pulse tube can be heard overhead."
+            ),
             encounters=[
                 encounter.Encounter(
                     [npcs.Observer("watcher")],
