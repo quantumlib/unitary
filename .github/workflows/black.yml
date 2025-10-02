@@ -14,6 +14,6 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
       - name: Set up problem matcher for Black output
         run: echo '::add-matcher::.github/problem-matchers/black.json'
-      - uses: psf/black@8a737e727ac5ab2f1d4cf5876720ed276dc8dc4b # stable
+      - uses: psf/black@af0ba72a73598c76189d6dd1b21d8532255d5942 # stable
         with:
           src: "./unitary"
