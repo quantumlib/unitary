@@ -13,6 +13,7 @@
 # limitations under the License.
 import copy
 import enum
+import itertools
 from typing import cast, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
 import cirq
 
@@ -20,7 +21,6 @@ from unitary.alpha.quantum_object import QuantumObject
 from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
 from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, num_bits
 import numpy as np
-from itertools import combinations
 import pandas as pd
 
 
@@ -704,7 +704,10 @@ class QuantumWorld:
 
         Returns:
             The quantum mutual information. For 2 qubits it's defined as S_1 + S_2 - S_12,
-            where S denotes (reduced) von Neumann entropy.
+            where S denotes (reduced) von Neumann entropy. For N objects, this method uses a
+            multipartite extension that sums the entropy of each (N - 1)-object reduced state
+            obtained by tracing out one object, then subtracts the entropy of the full N-object
+            state.
         """
         num_involved_objects = (
             len(objects) if objects is not None else len(self.object_name_dict.values())
@@ -723,7 +726,11 @@ class QuantumWorld:
         density_matrix = self.density_matrix(involved_objects)
         reshaped_density_matrix = density_matrix.reshape((2, 2) * num_involved_objects)
         result = 0.0
-        for comb in combinations(range(num_involved_objects), num_involved_objects - 1):
+        # Each combination keeps all but one object, so partial_trace produces each
+        # (N - 1)-object reduced state exactly once.
+        for comb in itertools.combinations(
+            range(num_involved_objects), num_involved_objects - 1
+        ):
             reshaped_partial_density_matrix = cirq.partial_trace(
                 reshaped_density_matrix, list(comb)
             )
@@ -734,14 +741,21 @@ class QuantumWorld:
         result -= cirq.von_neumann_entropy(density_matrix, validate=False)
         return result
 
-    def print_entanglement_table(self, count: int = 1000) -> None:
-        """Peek the current quantum world `count` times, and calculate pair-wise entanglement
-        (i.e. quantum mutual information) for each pair of quantum objects.
-        See https://en.wikipedia.org/wiki/Quantum_mutual_information for the formula. And print
-        the results out in a table.
+    def get_entanglement_table(self, count: int = 1000) -> pd.DataFrame:
+        """Returns estimated pair-wise entanglement for the current quantum world.
+
+        The current world is peeked `count` times to estimate a state vector. For each pair
+        of objects, the pair's reduced density matrix is used to compute quantum mutual
+        information S_i + S_j - S_ij. The result is returned as a square DataFrame indexed
+        and labeled by object name so callers can display or otherwise consume it.
+
+        See https://en.wikipedia.org/wiki/Quantum_mutual_information for the formula.
 
         Parameters:
             count:      Number of measurements.
+
+        Returns:
+            A square DataFrame containing pair-wise quantum mutual information.
         """
         objects = list(self.object_name_dict.values())
         num_qubits = len(objects)
@@ -770,7 +784,8 @@ class QuantumWorld:
                     density_matrix_ij.reshape(4, 4), validate=False
                 )
                 if i == 0:
-                    # Fill in entropy [0]
+                    # Every single-object entropy is needed by multiple pairs, so compute
+                    # each one once while processing the first row of pair combinations.
                     if j == i + 1:
                         density_matrix_i = cirq.partial_trace(density_matrix_ij, [0])
                         entropy[i] = cirq.von_neumann_entropy(
@@ -784,8 +799,7 @@ class QuantumWorld:
                 entanglement[i][j] = entropy[i] + entropy[j] - entropy_pair[i][j]
                 entanglement[j][i] = entanglement[i][j]
         names = list(self.object_name_dict.keys())
-        data_frame = pd.DataFrame(entanglement, index=names, columns=names)
-        print(data_frame.round(1))
+        return pd.DataFrame(entanglement, index=names, columns=names)
 
     def __getitem__(self, name: str) -> QuantumObject:
         quantum_object = self.object_name_dict.get(name, None)

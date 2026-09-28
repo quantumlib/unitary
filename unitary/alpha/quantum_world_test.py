@@ -23,8 +23,6 @@ import cirq
 
 import unitary.alpha as alpha
 import unitary.alpha.qudit_gates as qudit_gates
-import io
-import contextlib
 
 
 class Light(enum.Enum):
@@ -996,9 +994,7 @@ def test_measure_entanglement(simulator, compile_to_qubits):
         (alpha.SparseSimulator, True),
     ],
 )
-def test_print_entanglement_table(simulator, compile_to_qubits):
-    rho_green = np.reshape([0, 0, 0, 1], (2, 2))
-    rho_red = np.reshape([1, 0, 0, 0], (2, 2))
+def test_get_entanglement_table(simulator, compile_to_qubits, monkeypatch):
     light1 = alpha.QuantumObject("red1", Light.RED)
     light2 = alpha.QuantumObject("green", Light.GREEN)
     light3 = alpha.QuantumObject("red2", Light.RED)
@@ -1007,30 +1003,28 @@ def test_print_entanglement_table(simulator, compile_to_qubits):
         sampler=simulator(),
         compile_to_qubits=compile_to_qubits,
     )
-    f = io.StringIO()
-    with contextlib.redirect_stdout(f):
-        board.print_entanglement_table()
-        assert (
-            f.getvalue()
-            in """
-       red1  green  red2
-red1    0.0    0.0   0.0
-green   0.0    0.0   0.0
-red2    0.0    0.0   0.0
-    """
-        )
+    monkeypatch.setattr(
+        "pandas.DataFrame.round",
+        lambda *args, **kwargs: pytest.fail(
+            "returned entanglement data must keep full precision"
+        ),
+    )
+    table = board.get_entanglement_table()
+    assert list(table.index) == ["red1", "green", "red2"]
+    assert list(table.columns) == ["red1", "green", "red2"]
+    testing.assert_array_equal(table.values, np.zeros((3, 3)))
 
     alpha.Superposition()(light2)
     alpha.quantum_if(light2).apply(alpha.Flip())(light3)
-    f = io.StringIO()
-    with contextlib.redirect_stdout(f):
-        board.print_entanglement_table()
-    assert (
-        f.getvalue()
-        in """
-       red1  green  red2
-red1    0.0    0.0   0.0
-green   0.0    0.0   2.0
-red2    0.0    2.0   0.0
-"""
+    table = board.get_entanglement_table()
+    testing.assert_allclose(
+        table.values,
+        np.array(
+            [
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 2.0],
+                [0.0, 2.0, 0.0],
+            ]
+        ),
+        atol=0.02,
     )
