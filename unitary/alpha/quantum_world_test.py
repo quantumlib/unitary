@@ -914,6 +914,10 @@ def test_density_matrix(simulator, compile_to_qubits):
     )
 
     testing.assert_array_equal(board.density_matrix(objects=[light1]), rho_green)
+    # count is retained for compatibility but no longer controls exact-state accuracy.
+    testing.assert_array_equal(
+        board.density_matrix(objects=[light1], count=10), rho_green
+    )
     testing.assert_array_equal(board.density_matrix(objects=[light2]), rho_red)
     testing.assert_array_equal(board.density_matrix(objects=[light3]), rho_red)
 
@@ -938,13 +942,63 @@ def test_density_matrix(simulator, compile_to_qubits):
     [
         (cirq.Simulator, False),
         (cirq.Simulator, True),
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_density_matrix_preserves_relative_phase(simulator, compile_to_qubits):
+    light = alpha.QuantumObject("light", Light.RED)
+    board = alpha.QuantumWorld(
+        [light], sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
+    alpha.Superposition()(light)
+    alpha.Phase(effect_fraction=0.5)(light)
+
+    expected = np.array(
+        [
+            [0.5, -0.5j],
+            [0.5j, 0.5],
+        ]
+    )
+    testing.assert_allclose(board.density_matrix([light]), expected, atol=1e-8)
+
+
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_density_matrix_applies_force_measurement_post_selection(
+    simulator, compile_to_qubits
+):
+    light = alpha.QuantumObject("light", Light.RED)
+    board = alpha.QuantumWorld(
+        [light], sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
+    alpha.Superposition()(light)
+    board.force_measurement(light, Light.GREEN)
+
+    selected_ancilla = next(iter(board.post_selection))
+    rho_green = np.reshape([0, 0, 0, 1], (2, 2))
+    testing.assert_allclose(
+        board.density_matrix([selected_ancilla]),
+        rho_green,
+        atol=1e-8,
+    )
+
+
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
         # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
         (alpha.SparseSimulator, True),
     ],
 )
 def test_measure_entanglement(simulator, compile_to_qubits):
-    rho_green = np.reshape([0, 0, 0, 1], (2, 2))
-    rho_red = np.reshape([1, 0, 0, 0], (2, 2))
     light1 = alpha.QuantumObject("red1", Light.RED)
     light2 = alpha.QuantumObject("green", Light.GREEN)
     light3 = alpha.QuantumObject("red2", Light.RED)
@@ -954,11 +1008,13 @@ def test_measure_entanglement(simulator, compile_to_qubits):
         compile_to_qubits=compile_to_qubits,
     )
 
-    # S_1 + S_2 - S_12 = 0 + 0 - 0 = 0 for all three cases.
+    # Historical two-object API remains supported.
+    assert round(board.measure_entanglement(light1, light2), 1) == 0.0
+    # S_1 + S_2 - S_12 = 0 + 0 - 0 = 0 for all three sequence cases.
     assert round(board.measure_entanglement([light1, light2]), 1) == 0.0
     assert round(board.measure_entanglement([light1, light3]), 1) == 0.0
     assert round(board.measure_entanglement([light2, light3]), 1) == 0.0
-    # S_12 + S_13 + S_23 - S_123 = 0 + 0 + 0 - 0 = 0
+    # D_3 = S_12 + S_13 + S_23 - 2 S_123 = 0
     assert round(board.measure_entanglement([light1, light2, light3]), 1) == 0.0
     # Test with objects=None.
     assert round(board.measure_entanglement(), 1) == 0.0
@@ -974,7 +1030,7 @@ def test_measure_entanglement(simulator, compile_to_qubits):
     assert round(board.measure_entanglement([light1, light3]), 1) == 0.0
     # S_2 + S_3 - S_23 = 1 + 1 - 0 = 2
     assert round(board.measure_entanglement([light2, light3]), 1) == 2.0
-    # S_12 + S_13 + S_23 - S_123 = 1 + 1 + 0 - 0
+    # D_3 = S_12 + S_13 + S_23 - 2 S_123 = 1 + 1 + 0 - 0
     assert round(board.measure_entanglement([light1, light2, light3]), 1) == 2.0
     # Test with objects=None.
     assert round(board.measure_entanglement(), 1) == 2.0
@@ -990,11 +1046,40 @@ def test_measure_entanglement(simulator, compile_to_qubits):
     [
         (cirq.Simulator, False),
         (cirq.Simulator, True),
+        (alpha.SparseSimulator, True),
+    ],
+)
+def test_measure_entanglement_uses_dual_total_correlation_for_mixed_subsystem(
+    simulator, compile_to_qubits
+):
+    lights = [alpha.QuantumObject(f"q{i}", Light.RED) for i in range(4)]
+    board = alpha.QuantumWorld(
+        lights, sampler=simulator(), compile_to_qubits=compile_to_qubits
+    )
+    alpha.Superposition()(lights[0])
+    for target in lights[1:]:
+        alpha.quantum_if(lights[0]).apply(alpha.Flip())(target)
+
+    # Tracing out q3 leaves 1/2 (|000><000| + |111><111|) on q0,q1,q2.
+    # Each two-qubit marginal has entropy 1 and the three-qubit state has
+    # entropy 1, so D_3 = 1 + 1 + 1 - 2 * 1 = 1.
+    testing.assert_allclose(
+        board.measure_entanglement(lights[:3]),
+        1.0,
+        atol=1e-8,
+    )
+
+
+@pytest.mark.parametrize(
+    ("simulator", "compile_to_qubits"),
+    [
+        (cirq.Simulator, False),
+        (cirq.Simulator, True),
         # Cannot use SparseSimulator without `compile_to_qubits` due to issue #78.
         (alpha.SparseSimulator, True),
     ],
 )
-def test_get_entanglement_table(simulator, compile_to_qubits, monkeypatch):
+def test_get_mutual_information_table(simulator, compile_to_qubits, monkeypatch):
     light1 = alpha.QuantumObject("red1", Light.RED)
     light2 = alpha.QuantumObject("green", Light.GREEN)
     light3 = alpha.QuantumObject("red2", Light.RED)
@@ -1009,14 +1094,14 @@ def test_get_entanglement_table(simulator, compile_to_qubits, monkeypatch):
             "returned entanglement data must keep full precision"
         ),
     )
-    table = board.get_entanglement_table()
+    table = board.get_mutual_information_table()
     assert list(table.index) == ["red1", "green", "red2"]
     assert list(table.columns) == ["red1", "green", "red2"]
     testing.assert_array_equal(table.values, np.zeros((3, 3)))
 
     alpha.Superposition()(light2)
     alpha.quantum_if(light2).apply(alpha.Flip())(light3)
-    table = board.get_entanglement_table()
+    table = board.get_mutual_information_table()
     testing.assert_allclose(
         table.values,
         np.array(

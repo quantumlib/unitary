@@ -640,41 +640,82 @@ class QuantumWorld:
     def density_matrix(
         self, objects: Optional[Sequence[QuantumObject]] = None, count: int = 1000
     ) -> np.ndarray:
-        """Simulates the density matrix of the given objects. We assume that the overall state of
-        the quantum world (including all quantum objects in it) could be described by one pure
-        state. To calculate the density matrix of the given quantum objects, we would always measure/
-        peek the quantum world for `count` times, deduce the (pure) state vector based on the results,
-        then the density matrix is its outer product. We will then trace out the un-needed quantum
-        objects before returning the density matrix.
+        """Returns the exact simulated density matrix of the given objects.
+
+        This method reads the simulator's final state vector, preserving complex
+        amplitudes and relative phase, and then traces out objects that were not
+        requested. Computational-basis measurement frequencies are insufficient
+        for this because they determine probabilities but not relative phases.
 
         Parameters:
-            objects:    List of QuantumObjects (currently only qubits are supported). If not specified,
-                        all quantum objects' density matrix will be returned.
-            count:      Number of measurements.
+            objects:    List of QuantumObjects (currently only qubits are supported).
+                        If not specified, all quantum objects' density matrix will
+                        be returned.
+            count:      Retained for backward compatibility. Exact simulator state
+                        access no longer requires measurement sampling, so this
+                        value does not affect the result.
 
         Returns:
             The density matrix of the specified objects.
+
+        Raises:
+            ValueError: if the configured sampler cannot expose a simulated final
+                        state vector or if a requested object is not a qubit.
         """
         num_all_qubits = len(self.object_name_dict.values())
         num_shown_qubits = len(objects) if objects is not None else num_all_qubits
 
-        specified_names = (
-            [obj.qubit.name for obj in objects] if objects is not None else []
-        )
-        unspecified_names = set(self.object_name_dict.keys()) - set(specified_names)
+        specified_names = [obj.name for obj in objects] if objects is not None else []
+        specified_name_set = set(specified_names)
 
-        # Make sure we have all objects, starting with the specified ones in the given order.
-        ordered_names = specified_names + list(unspecified_names)
+        # Keep requested objects first in the caller's order. Keep every other
+        # object in QuantumWorld insertion order so tensor axes remain stable.
+        ordered_names = specified_names + [
+            name for name in self.object_name_dict if name not in specified_name_set
+        ]
         ordered_objects = [self.object_name_dict[name] for name in ordered_names]
 
-        # Peek the current world `count` times and get the results.
-        histogram = self.get_correlated_histogram(ordered_objects, count)
+        if any(obj.qubit.dimension != 2 for obj in ordered_objects):
+            raise ValueError("density_matrix currently supports qubits only")
 
-        # Get an estimate of the state vector.
-        state_vector = np.array([0.0] * (2**num_all_qubits))
-        for key, val in histogram.items():
-            state_vector += self.__to_state_vector__(key) * np.sqrt(val * 1.0 / count)
-        density_matrix = np.outer(state_vector, state_vector)
+        simulate = getattr(self.sampler, "simulate", None)
+        if not callable(simulate):
+            raise ValueError(
+                "density_matrix requires a simulator with final-state access"
+            )
+
+        ordered_qubits = [obj.qubit for obj in ordered_objects]
+        simulation_result = simulate(self.circuit, qubit_order=ordered_qubits)
+        try:
+            state_vector = np.asarray(
+                simulation_result.final_state_vector, dtype=np.complex128
+            ).copy()
+        except (AttributeError, TypeError) as exc:
+            raise ValueError(
+                "density_matrix requires a simulator with final-state access"
+            ) from exc
+
+        # Non-sparse simulators implement force_measurement via post-selection
+        # metadata rather than a PostSelectOperation in the circuit. Apply the
+        # same projection exactly to the simulated state before tracing.
+        if self.post_selection:
+            state_tensor = state_vector.reshape((2,) * num_all_qubits)
+            selection = [slice(None)] * num_all_qubits
+            qubit_indices = {qubit: index for index, qubit in enumerate(ordered_qubits)}
+            for obj, value in self.post_selection.items():
+                if value not in (0, 1) or obj.qubit not in qubit_indices:
+                    raise ValueError(
+                        "density_matrix currently supports qubit post-selection only"
+                    )
+                selection[qubit_indices[obj.qubit]] = value
+            projected = np.zeros_like(state_tensor)
+            projected[tuple(selection)] = state_tensor[tuple(selection)]
+            norm = np.linalg.norm(projected)
+            if norm == 0:
+                raise ValueError("post-selection has zero probability")
+            state_vector = (projected / norm).reshape(-1)
+
+        density_matrix = np.outer(state_vector, state_vector.conjugate())
 
         if num_shown_qubits == num_all_qubits:
             return density_matrix
@@ -691,37 +732,59 @@ class QuantumWorld:
             )
 
     def measure_entanglement(
-        self, objects: Optional[Sequence[QuantumObject]] = None
+        self,
+        obj1: Optional[Union[QuantumObject, Sequence[QuantumObject]]] = None,
+        obj2: Optional[QuantumObject] = None,
     ) -> float:
-        """Measures the entanglement (i.e. quantum mutual information) of the given objects.
-        See https://en.wikipedia.org/wiki/Quantum_mutual_information for the formula.
+        """Returns a von-Neumann-entropy measure of total quantum correlation.
+
+        For two objects this is the quantum mutual information
+
+            I(A:B) = S(A) + S(B) - S(AB).
+
+        For N > 2 this method uses quantum dual total correlation (also called
+        binding information),
+
+            D_N = sum_i S(A_1...A_{i-1}A_{i+1}...A_N)
+                  - (N - 1) S(A_1...A_N).
+
+        This reduces to quantum mutual information for N = 2. See Appendix A of
+        K. Umemoto, Phys. Rev. D 100, 126021 (2019),
+        https://doi.org/10.1103/PhysRevD.100.126021.
+
+        Despite the historical method name, mutual information and dual total
+        correlation measure total correlation. For mixed states they include
+        classical as well as quantum correlations and are not entanglement
+        monotones.
 
         Parameters:
-            objects:     quantum objects among which the entanglement will be calculated
-                         (currently only qubits are supported). If not specified, all current
-                         quantum objects will be used. If specified, at least two quantum
-                         objects are expected.
+            obj1:      Either the first QuantumObject in the historical two-object
+                       API, a sequence of objects for multipartite correlation, or
+                       None to use all current objects.
+            obj2:      Optional second QuantumObject for the historical
+                       measure_entanglement(obj1, obj2) API.
 
         Returns:
-            The quantum mutual information. For 2 qubits it's defined as S_1 + S_2 - S_12,
-            where S denotes (reduced) von Neumann entropy. For N objects, this method uses a
-            multipartite extension that sums the entropy of each (N - 1)-object reduced state
-            obtained by tracing out one object, then subtracts the entropy of the full N-object
-            state.
+            Quantum mutual information for two objects, or quantum dual total
+            correlation for more than two objects.
         """
-        num_involved_objects = (
-            len(objects) if objects is not None else len(self.object_name_dict.values())
-        )
+        if obj2 is not None:
+            if not isinstance(obj1, QuantumObject):
+                raise ValueError("obj1 must be a QuantumObject when obj2 is provided")
+            involved_objects = [obj1, obj2]
+        elif obj1 is None:
+            involved_objects = list(self.object_name_dict.values())
+        elif isinstance(obj1, QuantumObject):
+            involved_objects = [obj1]
+        else:
+            involved_objects = list(obj1)
 
+        num_involved_objects = len(involved_objects)
         if num_involved_objects < 2:
             raise ValueError(
                 f"Could not calculate entanglement for {num_involved_objects} qubit. "
                 "At least 2 qubits are required."
             )
-
-        involved_objects = (
-            objects if objects is not None else list(self.object_name_dict.values())
-        )
 
         density_matrix = self.density_matrix(involved_objects)
         reshaped_density_matrix = density_matrix.reshape((2, 2) * num_involved_objects)
@@ -738,21 +801,21 @@ class QuantumWorld:
                 2 ** (num_involved_objects - 1), 2 ** (num_involved_objects - 1)
             )
             result += cirq.von_neumann_entropy(partial_density_matrix, validate=False)
-        result -= cirq.von_neumann_entropy(density_matrix, validate=False)
+        result -= (num_involved_objects - 1) * cirq.von_neumann_entropy(
+            density_matrix, validate=False
+        )
         return result
 
-    def get_entanglement_table(self, count: int = 1000) -> pd.DataFrame:
-        """Returns estimated pair-wise entanglement for the current quantum world.
+    def get_mutual_information_table(self) -> pd.DataFrame:
+        """Returns exact simulated pair-wise quantum mutual information.
 
-        The current world is peeked `count` times to estimate a state vector. For each pair
-        of objects, the pair's reduced density matrix is used to compute quantum mutual
-        information S_i + S_j - S_ij. The result is returned as a square DataFrame indexed
-        and labeled by object name so callers can display or otherwise consume it.
+        For each pair of objects, the pair's reduced density matrix is used to
+        compute I(A:B) = S(A) + S(B) - S(AB). The result is returned as a
+        square DataFrame indexed and labeled by object name.
 
-        See https://en.wikipedia.org/wiki/Quantum_mutual_information for the formula.
-
-        Parameters:
-            count:      Number of measurements.
+        Quantum mutual information measures total correlation; for mixed states
+        it includes both classical and quantum correlations and is not, by
+        itself, an entanglement monotone.
 
         Returns:
             A square DataFrame containing pair-wise quantum mutual information.
@@ -764,14 +827,7 @@ class QuantumWorld:
                 f"There is only {num_qubits} qubit in the quantum world. "
                 "At least 2 qubits are required to calculate entanglements."
             )
-        # Peek the current world `count` times and get the results.
-        histogram = self.get_correlated_histogram(objects, count)
-
-        # Get an estimate of the state vector.
-        state_vector = np.array([0.0] * (2**num_qubits))
-        for key, val in histogram.items():
-            state_vector += self.__to_state_vector__(key) * np.sqrt(val * 1.0 / count)
-        density_matrix = np.outer(state_vector, state_vector)
+        density_matrix = self.density_matrix()
         reshaped_density_matrix = density_matrix.reshape((2, 2) * num_qubits)
 
         entropy = [0.0] * num_qubits
@@ -806,13 +862,3 @@ class QuantumWorld:
         if not quantum_object:
             raise KeyError(f"{name} did not exist in this world.")
         return quantum_object
-
-    def __to_state_vector__(self, input: tuple) -> np.ndarray:
-        """Converts the given tuple (of length N) to the corresponding state vector (of length 2**N).
-        e.g. (0, 1) -> [0, 1, 0, 0]
-        """
-        num = len(input)
-        index = int("".join([str(i) for i in input]), 2)
-        state_vector = np.array([0.0] * (2**num))
-        state_vector[index] = 1.0
-        return state_vector
