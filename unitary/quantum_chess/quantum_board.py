@@ -1,4 +1,4 @@
-# Copyright 2020 Google
+# Copyright 2020 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import time
 from collections import defaultdict
 from typing import Dict, List, Optional, Sequence, Set, Tuple
@@ -124,8 +125,9 @@ class CirqBoard:
 
         Args:
             basis_state: a 64-bit bitboard representing the given position of the board
-            reset_move_history: indicates whether to reset the entire move history of the game. It will be set to false
-                if we are calling this function after the board has returned to a fully classical position.
+            reset_move_history: indicates whether to reset the entire move history
+                of the game. It will be set to false if we are calling this function
+                after the board has returned to a fully classical position.
         """
         self.board_accumulations_repetitions = _NO_CACHE_AVAILABLE
         self.state = basis_state
@@ -705,7 +707,7 @@ class CirqBoard:
         self, variant, measurement, sbit, tbit, rook_sbit, rook_tbit
     ):
         """Kingside castle, or queenside castle with empty b-file."""
-        squbit = bit_to_qubit(sbit)
+        _squbit = bit_to_qubit(sbit)
         tqubit = bit_to_qubit(tbit)
         rook_squbit = bit_to_qubit(rook_sbit)
         rook_tqubit = bit_to_qubit(rook_tbit)
@@ -941,7 +943,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.SPLIT_SLIDE:
             if not m.target2:
-                raise ValueError(f"Merge slide must have a second source move")
+                raise ValueError("Merge slide must have a second source move")
             tbit2 = square_to_bit(m.target2)
             tqubit2 = bit_to_qubit(tbit2)
 
@@ -1054,7 +1056,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.MERGE_SLIDE:
             if not m.source2:
-                raise ValueError(f"Merge slide must have a second source move")
+                raise ValueError("Merge slide must have a second source move")
             sbit2 = square_to_bit(m.source2)
             squbit2 = bit_to_qubit(sbit2)
 
@@ -1301,7 +1303,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.SPLIT_JUMP:
             if not m.target2:
-                raise ValueError(f"Split jumps must have a second target move")
+                raise ValueError("Split jumps must have a second target move")
             tbit2 = square_to_bit(m.target2)
             tqubit2 = bit_to_qubit(tbit2)
             is_basic_case = (
@@ -1321,7 +1323,7 @@ class CirqBoard:
 
         if m.move_type == enums.MoveType.MERGE_JUMP:
             if not m.source2:
-                raise ValueError(f"Merge jumps must have a second source move")
+                raise ValueError("Merge jumps must have a second source move")
             sbit2 = square_to_bit(m.source2)
             squbit2 = bit_to_qubit(sbit2)
             self.add_entangled(squbit, squbit2, tqubit)
@@ -1337,7 +1339,7 @@ class CirqBoard:
                 rook_sbit = square_to_bit("h8")
                 rook_tbit = square_to_bit("f8")
             else:
-                raise ValueError(f"Invalid kingside castling move")
+                raise ValueError("Invalid kingside castling move")
 
             return self._do_noncontrolled_castle(
                 m.move_variant, m.measurement, sbit, tbit, rook_sbit, rook_tbit
@@ -1354,7 +1356,7 @@ class CirqBoard:
                 rook_tbit = square_to_bit("d8")
                 b_bit = square_to_bit("b8")
             else:
-                raise ValueError(f"Invalid queenside castling move")
+                raise ValueError("Invalid queenside castling move")
 
             b_qubit = bit_to_qubit(b_bit)
             if b_qubit not in self.entangled_squares and not nth_bit_of(

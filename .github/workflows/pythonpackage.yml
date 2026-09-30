@@ -13,16 +13,21 @@
 # limitations under the License.
 
 name: Python package
+
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
+# Declare default permissions as read only.
+permissions: read-all
+
 jobs:
   pytest:
     name: Pytest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     strategy:
       matrix:
         cirq-version:
@@ -30,8 +35,8 @@ jobs:
           - 'next'
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v5
         with:
           python-version: '3.12'
       - name: Install dependencies
@@ -57,10 +62,11 @@ jobs:
           UNITARY_CHESS_TEST_SEED=789 UNITARY_IMPORT_FAILSAFE=y pytest -v
   nbformat:
     name: Notebook formatting
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v5
         with:
           python-version: '3.12'
       - name: Doc check

@@ -15,11 +15,12 @@
 """Classical and quantum Fox-in-a-hole game."""
 
 import abc
+import argparse
 import sys
 import enum
-import numpy as np
-import argparse
 from typing import Optional
+
+import numpy as np
 
 from unitary.alpha import (
     QuantumObject,
@@ -122,7 +123,7 @@ class Game(abc.ABC):
 
     def history_append_state(self):
         """Append the current state into the history."""
-        self.history.append("State: {}".format(self.state_to_string()))
+        self.history.append(f"State: {self.state_to_string()}")
 
     def history_append_move(self, move_str):
         """Append the given move into the history."""
@@ -130,7 +131,7 @@ class Game(abc.ABC):
 
     def history_append_guess(self, guess):
         """Append the given guess into the history."""
-        self.history.append("Guess: {}".format(guess))
+        self.history.append(f"Guess: {guess}")
 
     def run(self):
         """Handles the main game-loop of the Fox-in-a-hole game."""
@@ -161,7 +162,7 @@ class Game(abc.ABC):
             self.history_append_state()
 
             if result:
-                print("\nCongratulations! You won in {} step(s).\n".format(step_nr + 1))
+                print(f"\nCongratulations! You won in {step_nr + 1} step(s).\n")
                 self.print_history()
                 return
 
@@ -248,7 +249,13 @@ class QuantumGame(Game):
     (QuantumWorld, [QuantumObject]) -> quantum world, list of holes
     """
 
-    def __init__(self, number_of_holes: int = 5, iswap: bool = False, qprob:float = 0.5, seed: Optional[int] = None):
+    def __init__(
+        self,
+        number_of_holes: int = 5,
+        iswap: bool = False,
+        qprob: float = 0.5,
+        seed: Optional[int] = None,
+    ):
         if iswap:
             self.move_operation = PhasedMove()
             self.split_operation = PhasedSplit()
@@ -357,19 +364,19 @@ if __name__ == "__main__":
 
     # Initialize game object
 
-    print(f"---------------------------------")
+    print("---------------------------------")
     if args.is_quantum or (args.qprob is not None and args.qprob > 0.0):
         game: Game = QuantumGame(qprob=args.qprob, iswap=args.use_iswap)
-        print(f"Quantum Fox-in-a-hole game.")
+        print("Quantum Fox-in-a-hole game.")
         print(f"Probability of quantum move: {game.qprob}.")
         if args.use_iswap:
-            print(f"Using iSWAP for moves.")
+            print("Using iSWAP for moves.")
         else:
-            print(f"Using SWAP for moves.")
+            print("Using SWAP for moves.")
     else:
         game = ClassicalGame()
         print("Classical Fox-in-a-hole game.")
-    print(f"---------------------------------")
+    print("---------------------------------")
 
     # Run Fox-in-a-hole
     game.run()

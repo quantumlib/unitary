@@ -2,12 +2,16 @@ name: Pylint
 
 on: [push, pull_request]
 
+# Declare default permissions as read only.
+permissions: read-all
+
 jobs:
   pylint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v4
+      - uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v5
         with:
           python-version: '3.12'
           architecture: 'x64'
@@ -15,5 +19,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pylint
+      - name: Set up problem matcher for Pylint output
+        run: echo '::add-matcher::.github/problem-matchers/pylint.json'
       - name: Pylint check
         run: dev_tools/pylint

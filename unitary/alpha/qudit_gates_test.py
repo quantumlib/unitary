@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 import pytest
 import numpy as np
 import cirq
@@ -42,7 +42,7 @@ def test_qutrit_x(state: int):
 def test_qutrit_plus_one(num_gates: int):
     qutrit = cirq.NamedQid("a", dimension=3)
     c = cirq.Circuit()
-    for i in range(num_gates):
+    for _ in range(num_gates):
         c.append(qudit_gates.QuditPlusGate(3)(qutrit))
     c.append(cirq.measure(qutrit, key="m"))
     sim = cirq.Simulator()

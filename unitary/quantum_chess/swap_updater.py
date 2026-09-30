@@ -1,4 +1,4 @@
-# Copyright 2021 Google
+# Copyright 2021 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,12 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """Implementation of the swap update algorithm described in the paper 'A Dynamic
 Look-Ahead Heuristic for the Qubit Mapping Problem of NISQ Computers'
 (https://ieeexplore.ieee.org/abstract/document/8976109).
 
-This transforms circuits by adding additional SWAP gates to ensure that all operations are on adjacent qubits.
+This transforms circuits by adding additional SWAP gates
+to ensure that all operations are on adjacent qubits.
 """
+
 from collections import deque
 from typing import (
     Callable,
@@ -51,7 +54,7 @@ def _satisfies_adjacency(gate: cirq.Operation) -> bool:
 
 
 def _pairwise_shortest_distances(
-    adjacencies: Dict[cirq.GridQubit, List[cirq.GridQubit]]
+    adjacencies: Dict[cirq.GridQubit, List[cirq.GridQubit]],
 ) -> Dict[Tuple[cirq.GridQubit, cirq.GridQubit], int]:
     """Precomputes the shortest path length between each pair of qubits.
 
@@ -141,9 +144,11 @@ def generate_decomposed_swap(
 
 
 class SwapUpdater:
-    """SwapUpdater runs the swap update algorithm in order to incrementally update a circuit with SWAPs.
+    """SwapUpdater runs the swap update algorithm
+    to incrementally update a circuit with SWAPs.
 
-    The SwapUpdater's internal state is modified as the algorithm runs, so each instance is one-time use.
+    The SwapUpdater's internal state is modified as the algorithm runs,
+    so each instance is one-time use.
 
     Args:
       circuit: the circuit to be updated with additional SWAPs
@@ -159,14 +164,14 @@ class SwapUpdater:
         self,
         circuit: cirq.Circuit,
         device_qubits: Optional[Iterable[cirq.GridQubit]],
-        initial_mapping: Dict[cirq.Qid, cirq.GridQubit] = {},
+        initial_mapping: Optional[Dict[cirq.Qid, cirq.GridQubit]] = None,
         swap_factory: Callable[
             [cirq.Qid, cirq.Qid], Iterable[cirq.Operation]
         ] = generate_decomposed_swap,
     ):
         self.device_qubits = device_qubits or []
         self.dlists = mcpe.DependencyLists(circuit)
-        self.mapping = mcpe.QubitMapping(initial_mapping)
+        self.mapping = mcpe.QubitMapping(initial_mapping or {})
         self.swap_factory = swap_factory
         self.adjacent = {q: q.neighbors(device_qubits) for q in self.device_qubits}
         self.pairwise_distances = _pairwise_shortest_distances(self.adjacent)

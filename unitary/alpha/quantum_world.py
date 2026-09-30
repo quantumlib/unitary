@@ -11,17 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import copy
 import enum
 import itertools
 from typing import cast, Dict, Iterable, List, Optional, Sequence, Set, Tuple, Union
+
 import cirq
+import numpy as np
+import pandas as pd
 
 from unitary.alpha.quantum_object import QuantumObject
 from unitary.alpha.sparse_vector_simulator import PostSelectOperation, SparseSimulator
 from unitary.alpha.qudit_state_transform import qudit_to_qubit_unitary, num_bits
-import numpy as np
-import pandas as pd
 
 
 class QuantumWorld:
@@ -75,8 +77,9 @@ class QuantumWorld:
         """
         self.circuit = cirq.Circuit()
         self.effect_history: List[Tuple[cirq.Circuit, Dict[QuantumObject, int]]] = []
-        # This variable is used to save the length of current effect history before each move is made,
-        # so that if we later undo we know how many effects we need to pop out, since each move could
+        # This variable is used to save the length of current effect history
+        # before each move is made, so that if we later undo we know
+        # how many effects we need to pop out, since each move could
         # consist of several effects.
         self.effect_history_length: List[int] = []
         self.object_name_dict: Dict[str, QuantumObject] = {}
@@ -85,10 +88,11 @@ class QuantumWorld:
         # original qudits to the compiled qubits.
         self.compiled_qubits: Dict[cirq.Qid, List[cirq.Qid]] = {}
         self.post_selection: Dict[QuantumObject, int] = {}
-        # This variable is used to save the qubit remapping dictionary before each move, so that if
-        # we later undo we know how to reverse the mapping.
+        # This variable is used to save the qubit remapping dictionary
+        # before each move, so that if we later undo we know how to reverse the mapping.
         self.qubit_remapping_dict: List[Dict[cirq.Qid, cirq.Qid]] = []
-        # This variable is used to save the length of qubit_remapping_dict before each move is made,
+        # This variable is used to save the length of qubit_remapping_dict
+        # before each move is made,
         # so that if we later undo we know how to remap the qubits.
         self.qubit_remapping_dict_length: List[int] = []
 
@@ -141,7 +145,7 @@ class QuantumWorld:
                 self.compiled_qubits[obj.qubit] = [obj.qubit]
             else:
                 self.compiled_qubits[obj.qubit] = []
-                for qubit_num in range(num_bits(qudit_dim)):
+                for _ in range(num_bits(qudit_dim)):
                     new_obj = self._add_ancilla(obj.qubit.name)
                     self.compiled_qubits[obj.qubit].append(new_obj.qubit)
         obj.initial_effect()
@@ -320,9 +324,10 @@ class QuantumWorld:
             # length == 1 corresponds to the initial state, and no more restore could be made.
             raise ValueError("Unable to restore any more.")
 
-        # Recover the mapping of qubits to the last snapshot, and remove any related post selection memory.
-        # Note that this need to be done before calling `undo_last_effect()`, otherwise the remapping does not
-        # work as expected.
+        # Recover the mapping of qubits to the last snapshot,
+        # and remove any related post selection memory.
+        # Note that this need to be done before calling `undo_last_effect()`,
+        # otherwise the remapping does not work as expected.
         self.qubit_remapping_dict_length.pop()
         last_length = self.qubit_remapping_dict_length[-1]
         while len(self.qubit_remapping_dict) > last_length:
@@ -385,21 +390,21 @@ class QuantumWorld:
             return result_list[0]
         return result
 
-    def unhook(self, object: QuantumObject) -> None:
-        """Replace all usages of the given `object` in the circuit with a new ancilla,
+    def unhook(self, obj: QuantumObject) -> None:
+        """Replace all usages of the given object in the circuit with a new ancilla,
         so that
-         - all former operations on `object` will be applied on the new ancilla;
-         - future operations on `object` start with its new reset value.
+         - all former operations on `obj` will be applied on the new ancilla;
+         - future operations on `obj` start with its new reset value.
 
         Note that we don't do force measurement on it, since we don't care about its
         current value but just want to reset it.
         """
         # Create a new ancilla.
-        new_ancilla = self._add_ancilla(object.name)
-        # Replace operations of the given `object` with the new ancilla.
+        new_ancilla = self._add_ancilla(obj.name)
+        # Replace operations of the given `obj` with the new ancilla.
         qubit_remapping_dict = {
-            object.qubit: new_ancilla.qubit,
-            new_ancilla.qubit: object.qubit,
+            obj.qubit: new_ancilla.qubit,
+            new_ancilla.qubit: obj.qubit,
         }
         self.qubit_remapping_dict.append(qubit_remapping_dict)
         self.circuit = self.circuit.transform_qubits(

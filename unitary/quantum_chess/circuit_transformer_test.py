@@ -1,4 +1,4 @@
-# Copyright 2020 Google
+# Copyright 2020 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import pytest
 import cirq
 import cirq_google as cg
@@ -50,8 +51,7 @@ def test_qubits_within(device):
 
 @pytest.mark.parametrize("device", (cg.Sycamore23, cg.Sycamore))
 def test_edges_within(device):
-    """
-    The circuit looks like:
+    """The circuit looks like:
 
     a1 --- a4 --- a3 --- a2      d1
            |      |      |

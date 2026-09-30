@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,10 +13,8 @@
 # limitations under the License.
 
 import enum
-import io
-import sys
 import textwrap
-from typing import List, Optional, Sequence
+from typing import Optional, Sequence
 
 from . import ascii_art
 from . import battle
@@ -32,12 +30,10 @@ from .final_state_preparation import final_state_world
 
 class Error(Exception):
     """Base class for locally defined exceptions."""
-    pass
 
 
 class AmbiguousCommandError(Error):
     """Raised when entered command is ambiguous."""
-    pass
 
 
 class Command(enum.Enum):
@@ -167,9 +163,11 @@ class MainLoop:
                 try:
                     input_cmd = Command.parse(current_input)
                 except AmbiguousCommandError:
-                    print(f"Ambiguous command '{current_input}'.",
-                          Command.help(),
-                          file=self.file)
+                    print(
+                        f"Ambiguous command '{current_input}'.",
+                        Command.help(),
+                        file=self.file,
+                    )
                     print_room_description = False
                     continue
                 if input_cmd == Command.QUIT:
@@ -186,7 +184,8 @@ class MainLoop:
                         print(npc_class.__name__, file=self.file)
                         print(
                             textwrap.indent(npc_class.quantopedia_entry(), "  "),
-                            file=self.file)
+                            file=self.file,
+                        )
                         print(file=self.file)
                     print_room_description = False
                 elif input_cmd == Command.LOAD:

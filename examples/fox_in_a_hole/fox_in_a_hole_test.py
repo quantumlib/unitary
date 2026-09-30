@@ -14,8 +14,6 @@
 
 """Tests for ClassicalGame and QuantumGame classes."""
 
-import pytest
-
 from . import fox_in_a_hole as fh
 
 

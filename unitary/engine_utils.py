@@ -1,4 +1,4 @@
-# Copyright 2020 Google
+# Copyright 2020 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ class EngineSampler(work.Sampler):
         elif gateset == "sqrt-iswap":
             self.gate_set = cg.SQRT_ISWAP_GATESET
         else:
-            raise ValueError("Unknown gateset {}".format(gateset))
+            raise ValueError(f"Unknown gateset {gateset}")
 
     def run(
         self,
@@ -111,8 +111,7 @@ class EngineSampler(work.Sampler):
             program_id=_get_program_id(program),
             param_resolver=param_resolver,
             repetitions=repetitions,
-            processor_ids=[self.processor_id],
-            gate_set=self.gate_set,
+            processor_id=self.processor_id,
         )
 
     def run_sweep(
@@ -127,7 +126,6 @@ class EngineSampler(work.Sampler):
             program_id=_get_program_id(program),
             repetitions=repetitions,
             processor_ids=[self.processor_id],
-            gate_set=self.gate_set,
         ).results()
 
     async def run_async(
@@ -139,7 +137,6 @@ class EngineSampler(work.Sampler):
             program_id=program_id,
             repetitions=repetitions,
             processor_ids=[self.processor_id],
-            gate_set=self.gate_set,
         )
         job = engine_job._refresh_job()
         while True:
@@ -189,7 +186,7 @@ class ZerosSampler(work.Sampler):
             ]
         else:
             assert len(meas) == 1
-            i, op, gate = meas[0]
+            _, op, gate = meas[0]
             n_qubits = len(op.qubits)
             k = gate.key
             results = [
@@ -258,7 +255,7 @@ class EngineQuantumProcessor:
     @property
     def device_obj(self):
         dspec = self.engine.get_processor(self.processor_id).get_device_specification()
-        device = cg.SerializableDevice.from_proto(proto=dspec, gate_sets=[])
+        device = cg.SerializableDevice.from_proto(proto=dspec)
         return device
 
 
@@ -372,7 +369,7 @@ async def execute_in_queue(func, tasks, num_workers: int):
     worker_jobs = [asyncio.create_task(worker()) for _ in range(num_workers)]
     for task in tasks:
         await queue.put(task)
-    print("Added everything to the queue. Current queue size: {}".format(queue.qsize()))
+    print(f"Added everything to the queue. Current queue size: {queue.qsize()}")
     await queue.join()
     for wjob in worker_jobs:
         wjob.cancel()

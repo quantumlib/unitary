@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 import enum
 import pytest
 
@@ -28,9 +28,9 @@ def test_negation(simulator, compile_to_qubits):
         piece, sampler=simulator(), compile_to_qubits=compile_to_qubits
     )
     assert board.peek() == [[0]]
-    -piece
+    -piece  # pylint: disable=pointless-statement
     assert board.peek() == [[1]]
-    -piece
+    -piece  # pylint: disable=pointless-statement
     assert board.peek() == [[0]]
     piece += 1
     assert board.peek() == [[1]]

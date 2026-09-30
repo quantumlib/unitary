@@ -4,20 +4,21 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from typing import Tuple
 import random
 import re
 
 from .game_state import GameState
-from .item import EXAMINE, TALK, Item
-from .world import Direction, Location
+from .item import EXAMINE, Item
+from .world import Direction
 
 
 _WORDS = [
@@ -104,7 +105,7 @@ def _view_alice(state: GameState, world):
         return "The display reads 'Ready to TRANSMIT'"
     if state.state_dict["astatus"] == "success":
         return f"The display reads 'Transmission Successful:'\n'{state.state_dict['alice']}'"
-    return f"The display reads 'Error transmitting data.'"
+    return "The display reads 'Error transmitting data.'"
 
 
 def _view_bob(state: GameState, world):
@@ -114,7 +115,7 @@ def _view_bob(state: GameState, world):
         return "The display reads 'Ready to Receive'"
     if state.state_dict["bstatus"] == "success":
         return f"The display reads 'Received data:'\n'{state.state_dict['bob']}'"
-    return f"The display reads 'Error receiving data.'"
+    return "The display reads 'Error receiving data.'"
 
 
 def _power_on_alice(state: GameState, world):

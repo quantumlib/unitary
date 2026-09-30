@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,7 +57,7 @@ def test_effect_of_swap():
 
 
 def test_distance_fn():
-    a1, a2, a3, b1, b2, b3 = cirq.GridQubit.rect(2, 3)
+    a1, a2, a3, _, b2, _ = cirq.GridQubit.rect(2, 3)
 
     # A gate operating on (a1, a3) will be improved by swapping a1 and a2, but
     # by how much depends on the distance function used.

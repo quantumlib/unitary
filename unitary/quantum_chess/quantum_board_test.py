@@ -1,4 +1,4 @@
-# Copyright 2020 Google
+# Copyright 2020 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import os
 import random
 
@@ -195,7 +196,7 @@ def test_split_move(move_type, board):
         "c1", "d1", move_type=enums.MoveType.JUMP, move_variant=enums.MoveVariant.BASIC
     )
     assert b.do_move(m)
-    samples = b.sample(100)
+    _samples = b.sample(100)
     assert_samples_in(b, [u.squares_to_bitboard(["a3"]), u.squares_to_bitboard(["d1"])])
     probs = b.get_probability_distribution(5000)
     assert_fifty_fifty(probs, u.square_to_bit("a3"))
@@ -1952,7 +1953,8 @@ def test_merge_to_fully_classical_position(board):
 
 @pytest.mark.parametrize("board", ALL_CIRQ_BOARDS)
 def test_undo_to_start_after_classical_reset(board):
-    """Splits piece on f8 to d6 and h6. Piece on f4 then captures piece on d6. Then piece on h6 captures d6
+    """Splits piece on f8 to d6 and h6.
+    Piece on f4 then captures piece on d6. Then piece on h6 captures d6.
     Then does three undo moves to return to initial position."""
     b = simulator(u.squares_to_bitboard(["f4", "f8", "f2"]))
     b.reset_starting_states = True

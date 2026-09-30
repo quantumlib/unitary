@@ -4,16 +4,19 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 """Various consistency checks to make sure the world is correctly built."""
-import pytest
+
 import io
+
+import pytest
 
 from .. import classes
 from .. import exceptions
@@ -32,8 +35,14 @@ OPPOSITE_DIR = {
 }
 
 # Rooms that purposely do not have a way back.
-_ONE_WAY_ROOMS = {"hadamard1", "hadamard4_0", "hadamard4_1", "hadamard5", "perimeter1",
-                  "perimeter99"}
+_ONE_WAY_ROOMS = {
+    "hadamard1",
+    "hadamard4_0",
+    "hadamard4_1",
+    "hadamard5",
+    "perimeter1",
+    "perimeter99",
+}
 
 
 def find_room(room_name: str):
@@ -49,7 +58,7 @@ def go_directions(path: str) -> World:
         cur_room = example_world.current_location.label
         direction = Direction.parse(cmd)
         assert direction is not None
-        result = example_world.move(direction)
+        _result = example_world.move(direction)
         assert cmd is not None, f"Moving {cmd} in room {cur_room} not valid"
     return example_world
 
@@ -64,7 +73,7 @@ def test_consistent_exits():
             assert nearby_room is not None, f"Missing room {room_name}"
             try:
                 return_exit = nearby_room.exits[OPPOSITE_DIR[direction]]
-            except KeyError as e:
+            except KeyError as _e:
                 raise KeyError(
                     f"{room_name} does not have a return exit in {direction} to {location.label}"
                 )
@@ -136,7 +145,8 @@ def test_bridge():
     fix = test_world.current_location.get_action("fix bridge")
     examine = test_world.current_location.get_action("examine bridge")
 
-    # The world and the game state are at the location of the broken bridge, which can be fixed and examined.
+    # The world and the game state are at the location of the broken bridge,
+    # which can be fixed and examined.
     assert test_world.current_location.title == "At a Broken Bridge"
     assert (
         test_world.current_location.label

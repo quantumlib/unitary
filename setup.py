@@ -1,4 +1,4 @@
-# Copyright 2020 Google
+# Copyright 2020 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ setup(
     url="http://github.com/quantumlib/unitary",
     author="Quantum AI team and collaborators",
     author_email="quantum-chess-engineering@googlegroups.com",
-    python_requires=">=3.12.0",
+    python_requires=">=3.10.0",
     install_requires=install_requires,
     license="Apache 2",
     description="",

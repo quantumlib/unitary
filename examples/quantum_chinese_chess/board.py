@@ -11,8 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import numpy as np
+
 from typing import List, Tuple
+
+import numpy as np
+
 import unitary.alpha as alpha
 from .enums import (
     SquareState,
@@ -45,14 +48,17 @@ _FULL_A = ord("\N{FULLWIDTH LATIN SMALL LETTER A}")
 
 
 class Board:
-    """Board holds the assemble of all pieces. Each piece could be either in classical or quantum state."""
+    """Board holds the ensemble of all pieces.
+
+    Each piece could be either in classical or quantum state."""
 
     def __init__(
         self, board: alpha.QuantumWorld, current_player: int, king_locations: List[str]
     ):
         self.board = board
         self.current_player = current_player
-        # This saves the locations of KINGs in the order of [RED_KING_LOCATION, BLACK_KING_LOCATION].
+        # This saves the locations of KINGs
+        # in the order of [RED_KING_LOCATION, BLACK_KING_LOCATION].
         self.king_locations = king_locations
         self.lang = Language.EN  # The default language is English.
 
@@ -61,9 +67,10 @@ class Board:
 
     @classmethod
     def from_fen(cls, fen: str = _INITIAL_FEN) -> "Board":
-        """
-        Translates FEN (Forsyth-Edwards Notation) symbols into the whole QuantumWorld board.
-        FEN rule for Chinese Chess could be found at https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
+        """Translates FEN (Forsyth-Edwards Notation) symbols
+        into the whole QuantumWorld board.
+        FEN rule for Chinese Chess could be found at
+        https://www.wxf-xiangqi.org/images/computer-xiangqi/fen-for-xiangqi-chinese-chess.pdf
         """
         chess_board = {}
         row_index = 0
@@ -74,7 +81,7 @@ class Board:
             for char in row:
                 # Add empty board pieces.
                 if "1" <= char <= "9":
-                    for i in range(int(char)):
+                    for _ in range(int(char)):
                         name = f"{chr(col)}{row_index}"
                         chess_board[name] = Piece(
                             name, SquareState.EMPTY, Type.EMPTY, Color.NA
@@ -110,8 +117,7 @@ class Board:
         probabilities: List[float] = None,
         peek_result: List[int] = None,
     ) -> str:
-        """
-        Print the board into string.
+        """Print the board into string.
 
         Args:
             terminal: type of the terminal that the game is currently running on;
@@ -184,7 +190,7 @@ class Board:
                     for i in range(row * 9, (row + 1) * 9):
                         # We only print non-zero probabilities
                         if probabilities[i] >= 1e-3:
-                            board_string.append("{:.1f} ".format(probabilities[i]))
+                            board_string.append(f"{probabilities[i]:.1f} ")
                         else:
                             board_string.append("    ")
                     board_string += "\b" + _RESET + " \n"
@@ -230,14 +236,14 @@ class Board:
                             # space + _FULL_SPACE works for mac terminal and gLinux terminal.
                             if probabilities[i] >= 1e-3:
                                 board_string.append(
-                                    "{:.1f} ".format(probabilities[i]) + _FULL_SPACE
+                                    f"{probabilities[i]:.1f} " + _FULL_SPACE
                                 )
                             else:
                                 board_string.append("    " + _FULL_SPACE)
                         else:
                             if probabilities[i] >= 1e-3:
                                 # space + space works for sublime terminus.
-                                board_string.append("{:.1f}  ".format(probabilities[i]))
+                                board_string.append(f"{probabilities[i]:.1f}  ")
                             else:
                                 board_string.append("     ")
                     board_string += "\b" + _RESET + _FULL_SPACE + "\n"
@@ -299,7 +305,8 @@ class Board:
         return classical_pieces, quantum_pieces
 
     def flying_general_check(self) -> bool:
-        """Check and return if the two KINGs are directly facing each other (i.e. in the same column) without any pieces in between."""
+        """Check and return if the two KINGs are directly facing each other
+        (i.e. in the same column) without any pieces in between."""
         king_0 = self.king_locations[0]
         king_1 = self.king_locations[1]
         if king_0[0] != king_1[0]:

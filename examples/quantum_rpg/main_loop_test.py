@@ -4,14 +4,14 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#     https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import copy
+
 import io
 from typing import cast
 
@@ -49,21 +49,30 @@ def example_world():
         world.Location(
             label="1",
             title="Lab Entrance",
-            description="You stand before the entrance to the premier quantum lab.\nDouble doors lead east.",
+            description=(
+                "You stand before the entrance to the premier quantum lab.\n"
+                "Double doors lead east."
+            ),
             items=[BUTTON],
             exits={world.Direction.EAST: "2"},
         ),
         world.Location(
             label="2",
             title="Disorganized Lab",
-            description="Tables are here with tons of electronics.\nThe lab continues to the south.",
+            description=(
+                "Tables are here with tons of electronics.\n"
+                "The lab continues to the south."
+            ),
             items=[SIGN],
             exits={world.Direction.SOUTH: "3", world.Direction.WEST: "1"},
         ),
         world.Location(
             label="3",
             title="Cryostats",
-            description="Giant aluminum cylinders hang suspended by large frames.\nRhythmic whirring of a pulse tube can be heard overhead.",
+            description=(
+                "Giant aluminum cylinders hang suspended by large frames.\n"
+                "Rhythmic whirring of a pulse tube can be heard overhead."
+            ),
             encounters=[
                 encounter.Encounter(
                     [npcs.Observer("watcher")],
@@ -551,14 +560,14 @@ You've pressed the button 2 times before!
 
 def test_main_quit():
     state = game_state.GameState(party=[], user_input=["4"], file=io.StringIO())
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert state.file.getvalue() == _TITLE
 
 
 def test_main_help():
     state = game_state.GameState(party=[], user_input=["3", "4"], file=io.StringIO())
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()
@@ -570,7 +579,7 @@ def test_main_begin():
     state = game_state.GameState(
         party=[], user_input=["1", "nova", "n", "Quit"], file=io.StringIO()
     )
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()
@@ -611,7 +620,7 @@ def test_main_load():
         user_input=["2", "classical3;1;Doug#Analyst#1", "Quit"],
         file=io.StringIO(),
     )
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()
@@ -636,7 +645,7 @@ def test_main_bad_save_file():
         user_input=["2", "", "2", "classical3;1;Doug#Analyst#1", "Quit"],
         file=io.StringIO(),
     )
-    loop = main_loop.main(state)
+    _loop = main_loop.main(state)
 
     assert (
         state.file.getvalue()

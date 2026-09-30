@@ -1,4 +1,4 @@
-# Copyright 2020 Google
+# Copyright 2020 The Unitary Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,9 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from typing import Optional
+
 from unitary.quantum_chess import constants
 import unitary.quantum_chess.enums as enums
-from typing import Optional
 
 _ORD_A = ord("a")
 
@@ -175,8 +177,7 @@ class Move:
         return self.measurement is not None
 
     def to_string(self, include_type=False) -> str:
-        """
-        Constructs the string representation of this move object.
+        """Constructs the string representation of this move object.
 
         By default, only returns the move source(s), target(s), and measurement
         if present.
