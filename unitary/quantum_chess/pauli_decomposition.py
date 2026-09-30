@@ -20,7 +20,6 @@ from typing import List
 
 import cirq
 import numpy as np
-from scipy.linalg import kron
 
 
 def kron_product(matrices: np.ndarray) -> np.ndarray:
@@ -29,7 +28,7 @@ def kron_product(matrices: np.ndarray) -> np.ndarray:
         raise ValueError(
             "kron_product expects a list of matrices to compute Kronecker product."
         )
-    return functools.reduce(lambda a, b: kron(a, b), matrices)
+    return functools.reduce(np.kron, matrices)
 
 
 def pauli_decomposition(measurement: list, qubits: List[cirq.Qid]) -> cirq.PauliSum:

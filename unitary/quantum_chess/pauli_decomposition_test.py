@@ -18,7 +18,13 @@ import cirq
 import numpy as np
 import pytest
 
-from unitary.quantum_chess.pauli_decomposition import pauli_decomposition
+from unitary.quantum_chess.pauli_decomposition import kron_product, pauli_decomposition
+
+
+def test_kron_product_matches_numpy():
+    matrices = [np.array([[1, 2], [3, 4]]), np.array([[0, 5], [6, 7]])]
+
+    np.testing.assert_array_equal(kron_product(matrices), np.kron(*matrices))
 
 
 def test_pauli_decomposition_wrong_inputs():
