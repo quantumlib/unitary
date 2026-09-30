@@ -42,10 +42,6 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Cirq 0.15 imports pkg_resources, which setuptools removed in v82.
-          if [ "${{ matrix.cirq-version }}" = "current" ]; then
-            python -m pip install 'setuptools<82'
-          fi
           python dev_tools/write-ci-requirements.py --relative-cirq-version=${{ matrix.cirq-version }} --all-extras
           pip install -r ci-requirements.txt
           pip install --no-deps -e .
