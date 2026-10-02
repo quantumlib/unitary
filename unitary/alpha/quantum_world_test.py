@@ -962,6 +962,27 @@ def test_density_matrix_preserves_relative_phase(simulator, compile_to_qubits):
     testing.assert_allclose(board.density_matrix([light]), expected, atol=1e-8)
 
 
+def test_sparse_density_matrix_preserves_complex_phase_with_reversed_object_order():
+    left = alpha.QuantumObject("left", Light.RED)
+    right = alpha.QuantumObject("right", Light.RED)
+    board = alpha.QuantumWorld(
+        [left, right], sampler=alpha.SparseSimulator(), compile_to_qubits=True
+    )
+    alpha.Superposition()(left)
+    alpha.Phase(effect_fraction=0.5)(left)
+    alpha.Flip()(right)
+
+    # Requested order is [right, left], not the world's insertion order. In
+    # that order the pure state is (|10> + i|11>) / sqrt(2).
+    state = np.array([0.0, 0.0, 1 / np.sqrt(2), 1j / np.sqrt(2)])
+    expected = np.outer(state, state.conjugate())
+    testing.assert_allclose(
+        board.density_matrix([right, left]),
+        expected,
+        atol=1e-8,
+    )
+
+
 @pytest.mark.parametrize(
     ("simulator", "compile_to_qubits"),
     [
@@ -973,17 +994,27 @@ def test_density_matrix_preserves_relative_phase(simulator, compile_to_qubits):
 def test_density_matrix_applies_force_measurement_post_selection(
     simulator, compile_to_qubits
 ):
-    light = alpha.QuantumObject("light", Light.RED)
+    control = alpha.QuantumObject("control", Light.RED)
+    target = alpha.QuantumObject("target", Light.RED)
     board = alpha.QuantumWorld(
-        [light], sampler=simulator(), compile_to_qubits=compile_to_qubits
+        [control, target], sampler=simulator(), compile_to_qubits=compile_to_qubits
     )
-    alpha.Superposition()(light)
-    board.force_measurement(light, Light.GREEN)
+    alpha.Superposition()(control)
+    alpha.quantum_if(control).apply(alpha.Flip())(target)
+    board.force_measurement(control, Light.GREEN)
 
     selected_ancilla = next(iter(board.post_selection))
     rho_green = np.reshape([0, 0, 0, 1], (2, 2))
     testing.assert_allclose(
         board.density_matrix([selected_ancilla]),
+        rho_green,
+        atol=1e-8,
+    )
+    # Conditioning the Bell-like state on control=1 must also collapse the
+    # correlated target to |1>; checking only the selected ancilla would not
+    # detect a projection applied to the wrong subsystem.
+    testing.assert_allclose(
+        board.density_matrix([target]),
         rho_green,
         atol=1e-8,
     )
@@ -1023,7 +1054,7 @@ def test_measure_entanglement(simulator, compile_to_qubits):
     alpha.quantum_if(light2).apply(alpha.Flip())(light3)
     results = board.peek([light2, light3], count=100)
     assert not all(result[0] == 0 for result in results)
-    assert (result[0] == result[1] for result in results)
+    assert all(result[0] == result[1] for result in results)
     # S_1 + S_2 - S_12 = 0 + 1 - 1 = 0
     assert round(board.measure_entanglement([light1, light2]), 1) == 0.0
     # S_1 + S_3 - S_13 = 0 + 1 - 1 = 0
