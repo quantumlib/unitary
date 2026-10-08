@@ -98,6 +98,7 @@ class SparseSimulationState(cirq.SimulationState):
     # abstract method of OperationTarget
     def sample(self, qubits, repetitions, prng):
         probs = abs(self._amplitudes) ** 2
+        probs = probs / np.sum(probs)
         samples = prng.choice(self._states, size=repetitions, p=probs)
         out = np.empty((repetitions, len(qubits)), dtype=np.uint8)
         for j, q in enumerate(qubits):
