@@ -57,6 +57,16 @@ def _set_cirq_version(core_reqs: List[str], relative_cirq_version: str) -> List[
     return new_reqs
 
 
+def _set_legacy_cirq_compatibility(
+    core_reqs: List[str], relative_cirq_version: str
+) -> List[str]:
+    """Keep pkg_resources available for the legacy Cirq CI matrix."""
+    if relative_cirq_version != "current":
+        return core_reqs
+
+    return ["setuptools<82" if req == "setuptools" else req for req in core_reqs]
+
+
 def _set_qaoa_hacks(qaoa_reqs: List[str], relative_cirq_version: str) -> List[str]:
     """Pytket pins to a specific cirq version and doesn't work with cirq "next"."""
     if relative_cirq_version != "next":
@@ -89,6 +99,7 @@ def main(
     """
     core_reqs = _parse_requirements(REPO_DIR / "requirements.txt")
     core_reqs = _set_cirq_version(core_reqs, relative_cirq_version)
+    core_reqs = _set_legacy_cirq_compatibility(core_reqs, relative_cirq_version)
 
     lines = ["# Core requirements"] + core_reqs
     lines += [""]

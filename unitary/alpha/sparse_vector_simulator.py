@@ -24,7 +24,6 @@ Does not work with 3+-state qudits.
 import cirq
 import numpy as np
 
-
 # TODO: Is this a good number?
 _EPSILON = 1e-14
 
@@ -43,6 +42,26 @@ class SparseSimulationState(cirq.SimulationState):
 
     def copy(self):
         raise NotImplementedError
+
+    @property
+    def target_tensor(self) -> np.ndarray:
+        """Returns a dense state tensor in Cirq's big-endian qubit order.
+
+        SparseSimulationState stores each qubit in the bit position given by
+        qubit_map, where position 0 is the least-significant internal bit.
+        Cirq state vectors use qubit_map position 0 as the most-significant
+        computational-basis bit, so reverse those positions when materializing
+        the dense vector.
+        """
+        num_qubits = len(self.qubit_map)
+        state_vector = np.zeros(1 << num_qubits, dtype=np.complex128)
+        for state, amplitude in zip(self._states, self._amplitudes):
+            dense_index = 0
+            for internal_index in range(num_qubits):
+                bit = (int(state) >> internal_index) & 1
+                dense_index |= bit << (num_qubits - internal_index - 1)
+            state_vector[dense_index] = amplitude
+        return state_vector.reshape((2,) * num_qubits)
 
     def _act_on_fallback_(self, action, qubits, allow_decompose):
         if action.gate is cirq.X:

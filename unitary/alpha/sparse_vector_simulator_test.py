@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import numpy as np
 import pytest
 
 import cirq
@@ -54,6 +55,17 @@ def test_simulation_fidelity():
         test_ones_fraction = test_data[q.name].sum() / repetitions
         validation_ones_fraction = validation_data[q.name].sum() / repetitions
         assert abs(test_ones_fraction - validation_ones_fraction) < 0.1
+
+
+def test_simulate_exposes_phase_preserving_final_state_vector():
+    q0 = cirq.NamedQubit("q0")
+    q1 = cirq.NamedQubit("q1")
+    circuit = cirq.Circuit(cirq.H(q0), cirq.Z(q0), cirq.X(q1))
+
+    result = SparseSimulator().simulate(circuit, qubit_order=[q0, q1])
+
+    expected = np.array([0, 1 / np.sqrt(2), 0, -1 / np.sqrt(2)])
+    np.testing.assert_allclose(result.final_state_vector, expected, atol=1e-8)
 
 
 def test_simulation_fidelity_qudits_fails():
