@@ -100,7 +100,7 @@ class QuantumThen(QuantumEffect):
     def __init__(self, *objects: "QuantumObject"):
         self.control_objects = list(objects)
         self.condition = [1] * len(self.control_objects)
-        self.then_effect = None
+        self.then_effects = None
 
     def equals(
         self, *conditions: Union[enum.Enum, int, Sequence[Union[enum.Enum, int]]]
@@ -125,9 +125,13 @@ class QuantumThen(QuantumEffect):
         """Use `apply(effect)` instead."""
         return self.apply(effect)
 
-    def apply(self, effect: "QuantumEffect"):
-        """Applies a QuantumEffect conditionally to the specified qubits."""
-        self.then_effect = effect
+    def apply(self, *effects: "QuantumEffect"):
+        """Applies a QuantumEffect conditionally to the specified qubits.
+
+        If multiple effects are specified, they will all be applied
+        (to the same qubits).
+        """
+        self.then_effects = list(effects)
         return self
 
     def effect(self, *objects: "QuantumObject"):
@@ -137,8 +141,9 @@ class QuantumThen(QuantumEffect):
             if cond == 0 and self.control_objects[idx].num_states == 2:
                 yield cirq.X(self.control_objects[idx].qubit)
 
-        for op in self.then_effect.effect(*objects):
-            yield op.controlled_by(*[q.qubit for q in self.control_objects])
+        for effect in self.then_effects:
+            for op in effect.effect(*objects):
+                yield op.controlled_by(*[q.qubit for q in self.control_objects])
 
         # For anti-controls, add an X after the controlled operation
         # to revert its state back to what it was.
